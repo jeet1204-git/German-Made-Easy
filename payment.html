@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment - German Made Easy</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=EUR,INR"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
@@ -105,6 +106,93 @@
             outline: none;
             border-color: #FF6B35;
             box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+        }
+        
+        /* Payment Method Selection */
+        .payment-methods {
+            margin-bottom: 30px;
+        }
+
+        .payment-methods h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1A1A2E;
+        }
+
+        .method-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .method-card {
+            border: 3px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            position: relative;
+        }
+
+        .method-card:hover {
+            border-color: #FF6B35;
+            transform: translateY(-2px);
+        }
+
+        .method-card.selected {
+            border-color: #FF6B35;
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        .method-card.selected::before {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #10b981;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .method-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .method-name {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .method-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .method-tags {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .method-tag {
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
         }
         
         .btn-pay {
@@ -233,6 +321,33 @@
             </div>
         </div>
 
+        <!-- Payment Method Selection -->
+        <div class="payment-methods">
+            <h3>Select Payment Method</h3>
+            <div class="method-options">
+                <div class="method-card selected" id="methodRazorpay" onclick="selectPaymentMethod('razorpay')">
+                    <div class="method-icon">🇮🇳</div>
+                    <div class="method-name">Razorpay</div>
+                    <div class="method-desc">For Indian Students</div>
+                    <div class="method-tags">
+                        <span class="method-tag">UPI</span>
+                        <span class="method-tag">Cards</span>
+                        <span class="method-tag">NetBanking</span>
+                    </div>
+                </div>
+                <div class="method-card" id="methodPaypal" onclick="selectPaymentMethod('paypal')">
+                    <div class="method-icon">🌍</div>
+                    <div class="method-name">PayPal</div>
+                    <div class="method-desc">International Students</div>
+                    <div class="method-tags">
+                        <span class="method-tag">EUR</span>
+                        <span class="method-tag">USD</span>
+                        <span class="method-tag">Cards</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <form id="paymentForm">
             <div class="form-group">
                 <label>Full Name *</label>
@@ -250,20 +365,13 @@
             </div>
 
             <button type="submit" class="btn-pay" id="payBtn">
-                Proceed to Payment
+                <span id="payBtnText">Proceed with Razorpay</span>
             </button>
         </form>
 
-        <div class="payment-methods">
-            <div class="payment-method">💳 Cards</div>
-            <div class="payment-method">📱 UPI</div>
-            <div class="payment-method">🏦 Net Banking</div>
-            <div class="payment-method">💼 Wallets</div>
-        </div>
-
-        <div class="security-badge">
+        <div class="security-badge" id="securityBadge">
             <svg viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z"/></svg>
-            Secure payment powered by Razorpay
+            <span id="securityText">Secure payment powered by Razorpay</span>
         </div>
 
         <div class="back-link">
@@ -295,6 +403,37 @@
         let courseAmount = 0;
         let gstAmount = 0;
         let totalAmount = 0;
+        let selectedPaymentMethod = 'razorpay'; // Default to Razorpay
+
+        // Payment Method Selection
+        window.selectPaymentMethod = function(method) {
+            selectedPaymentMethod = method;
+            
+            // Update UI
+            document.getElementById('methodRazorpay').classList.remove('selected');
+            document.getElementById('methodPaypal').classList.remove('selected');
+            
+            if (method === 'razorpay') {
+                document.getElementById('methodRazorpay').classList.add('selected');
+                document.getElementById('payBtnText').textContent = 'Proceed with Razorpay';
+                document.getElementById('securityText').textContent = 'Secure payment powered by Razorpay';
+                
+                // Show Indian pricing
+                document.getElementById('coursePrice').textContent = '₹' + courseAmount.toLocaleString('en-IN');
+                document.getElementById('gstAmount').textContent = '₹' + gstAmount.toLocaleString('en-IN');
+                document.getElementById('totalAmount').textContent = '₹' + totalAmount.toLocaleString('en-IN');
+            } else {
+                document.getElementById('methodPaypal').classList.add('selected');
+                document.getElementById('payBtnText').textContent = 'Proceed with PayPal';
+                document.getElementById('securityText').textContent = 'Secure payment powered by PayPal';
+                
+                // Convert to EUR (approximate - 1 INR = 0.011 EUR)
+                const eurAmount = Math.round(totalAmount * 0.011);
+                document.getElementById('coursePrice').textContent = '€' + (courseAmount * 0.011).toFixed(2);
+                document.getElementById('gstAmount').textContent = '€' + (gstAmount * 0.011).toFixed(2);
+                document.getElementById('totalAmount').textContent = '€' + eurAmount.toFixed(2);
+            }
+        };
 
         function showAlert(message) {
             const alertBox = document.getElementById('alertBox');
@@ -341,7 +480,7 @@
             document.getElementById('totalAmount').textContent = '₹' + totalAmount.toLocaleString('en-IN');
         });
 
-        // Razorpay Payment Handler
+        // Payment Handler
         document.getElementById('paymentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -349,6 +488,27 @@
             const email = document.getElementById('email').value;
             const phone = document.getElementById('phone').value;
             const payBtn = document.getElementById('payBtn');
+
+            if (!name || !email || !phone) {
+                showAlert('Please fill in all fields');
+                return;
+            }
+
+            if (!/^[0-9]{10}$/.test(phone)) {
+                showAlert('Please enter a valid 10-digit phone number');
+                return;
+            }
+
+            // Route to correct payment gateway
+            if (selectedPaymentMethod === 'razorpay') {
+                processRazorpayPayment(name, email, phone, payBtn);
+            } else {
+                processPayPalPayment(name, email, phone, payBtn);
+            }
+        });
+
+        // Razorpay Payment Handler
+        async function processRazorpayPayment(name, email, phone, payBtn) {
 
             if (!name || !email || !phone) {
                 showAlert('Please fill in all fields');
@@ -451,10 +611,104 @@
             } catch (error) {
                 console.error('Payment error:', error);
                 showAlert('Error initializing payment. Please try again.');
-                payBtn.innerHTML = 'Proceed to Payment';
+                payBtn.innerHTML = '<span id="payBtnText">Proceed with Razorpay</span>';
                 payBtn.disabled = false;
             }
-        });
+        }
+
+        // PayPal Payment Handler
+        async function processPayPalPayment(name, email, phone, payBtn) {
+            payBtn.innerHTML = '<div class="loading"></div> Initializing PayPal...';
+            payBtn.disabled = true;
+
+            try {
+                // Create payment record in Firebase
+                const paymentId = 'PAY' + Date.now();
+                const eurAmount = (totalAmount * 0.011).toFixed(2); // Convert INR to EUR
+
+                await setDoc(doc(db, 'payments', paymentId), {
+                    userId: currentUser.uid,
+                    userEmail: email,
+                    userName: name,
+                    userPhone: phone,
+                    courseName: courseName,
+                    courseAmount: courseAmount,
+                    gstAmount: gstAmount,
+                    totalAmountINR: totalAmount,
+                    totalAmountEUR: parseFloat(eurAmount),
+                    paymentMethod: 'paypal',
+                    status: 'initiated',
+                    createdAt: serverTimestamp()
+                });
+
+                // Initialize PayPal
+                paypal.Buttons({
+                    createOrder: function(data, actions) {
+                        return actions.order.create({
+                            purchase_units: [{
+                                description: courseName,
+                                amount: {
+                                    currency_code: 'EUR',
+                                    value: eurAmount
+                                }
+                            }]
+                        });
+                    },
+                    onApprove: async function(data, actions) {
+                        return actions.order.capture().then(async function(details) {
+                            try {
+                                // Update payment status
+                                await updateDoc(doc(db, 'payments', paymentId), {
+                                    paypal_order_id: data.orderID,
+                                    paypal_payer_id: details.payer.payer_id,
+                                    paypal_email: details.payer.email_address,
+                                    status: 'completed',
+                                    completedAt: serverTimestamp()
+                                });
+
+                                // Add course to user's enrolled courses
+                                await updateDoc(doc(db, 'users', currentUser.uid), {
+                                    enrolledCourses: arrayUnion(courseName)
+                                });
+
+                                alert('🎉 Payment Successful!\n\nOrder ID: ' + data.orderID + '\n\nYou now have access to ' + courseName + '!\n\nWe\'ll send course access details to your email shortly.');
+                                
+                                // Clear session
+                                sessionStorage.removeItem('enrollCourse');
+                                sessionStorage.removeItem('enrollAmount');
+
+                                // Redirect to dashboard
+                                window.location.href = 'dashboard.html';
+                            } catch (error) {
+                                console.error('Error updating payment:', error);
+                                alert('Payment successful but error updating records. Please contact support.');
+                            }
+                        });
+                    },
+                    onError: async function(err) {
+                        await updateDoc(doc(db, 'payments', paymentId), {
+                            status: 'failed',
+                            errorDescription: err.message,
+                            failedAt: serverTimestamp()
+                        });
+
+                        showAlert('PayPal payment failed. Please try again.');
+                        payBtn.innerHTML = '<span id="payBtnText">Proceed with PayPal</span>';
+                        payBtn.disabled = false;
+                    },
+                    onCancel: function(data) {
+                        payBtn.innerHTML = '<span id="payBtnText">Proceed with PayPal</span>';
+                        payBtn.disabled = false;
+                    }
+                }).render('#paymentForm');
+
+            } catch (error) {
+                console.error('PayPal error:', error);
+                showAlert('Error initializing PayPal. Please try again.');
+                payBtn.innerHTML = '<span id="payBtnText">Proceed with PayPal</span>';
+                payBtn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>

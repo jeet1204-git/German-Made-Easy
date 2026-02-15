@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - German Made Easy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        nav {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FF6B35, #004E89);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .user-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .user-email {
+            font-weight: 600;
+            color: #1A1A2E;
+        }
+        
+        .btn-logout {
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: #004E89;
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        
+        h1 {
+            font-size: 48px;
+            margin-bottom: 40px;
+            color: #1A1A2E;
+        }
+        
+        .courses-section {
+            margin-bottom: 60px;
+        }
+        
+        h2 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #1A1A2E;
+        }
+        
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .course-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .course-level {
+            font-size: 36px;
+            font-weight: 900;
+            color: #FF6B35;
+        }
+        
+        .access-badge {
+            background: #10b981;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .course-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #1A1A2E;
+        }
+        
+        .course-description {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .course-progress {
+            margin-bottom: 20px;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B35, #004E89);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .btn-access {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #FF6B35, #004E89);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-access:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 20px;
+        }
+        
+        .empty-state h3 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #1A1A2E;
+        }
+        
+        .empty-state p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .btn-browse {
+            padding: 16px 40px;
+            background: #FF6B35;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .btn-browse:hover {
+            background: #004E89;
+            transform: translateY(-2px);
+        }
+
+        .loading-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #FF6B35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 20px;
+            }
+
+            .dashboard-container {
+                padding: 0 20px;
+            }
+
+            h1 {
+                font-size: 36px;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">German Made Easy</div>
+            <div class="user-info">
+                <span class="user-email" id="userEmail">Loading...</span>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <h1>Welcome back! 👋</h1>
+
+        <div class="courses-section">
+            <h2>My Courses</h2>
+            <div id="coursesContainer">
+                <div class="loading-screen">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
+            authDomain: "german-made-easy.firebaseapp.com",
+            projectId: "german-made-easy",
+            storageBucket: "german-made-easy.firebasestorage.app",
+            messagingSenderId: "259276936055",
+            appId: "1:259276936055:web:5c9b4916734d0271100772",
+            measurementId: "G-B7JMB0G85L"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            } catch (error) {
+                alert('Error logging out: ' + error.message);
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Display user email
+            document.getElementById('userEmail').textContent = user.email;
+
+            try {
+                // Get user's enrolled courses
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                const userData = userDoc.data();
+                const enrolledCourses = userData?.enrolledCourses || [];
+
+                const coursesContainer = document.getElementById('coursesContainer');
+
+                if (enrolledCourses.length === 0) {
+                    coursesContainer.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No courses yet</h3>
+                            <p>Start your German learning journey by enrolling in a course!</p>
+                            <a href="index.html#courses" class="btn-browse">Browse Courses</a>
+                        </div>
+                    `;
+                } else {
+                    const coursesHTML = enrolledCourses.map(courseName => {
+                        const progress = Math.floor(Math.random() * 50); // Placeholder - will be real once videos are added
+                        
+                        return `
+                            <div class="course-card">
+                                <div class="course-header">
+                                    <div class="course-level">${courseName.split(' ')[0]}</div>
+                                    <div class="access-badge">Active</div>
+                                </div>
+                                <div class="course-title">${courseName}</div>
+                                <div class="course-description">
+                                    Access all video lessons, practice materials, and exam preparation resources.
+                                </div>
+                                <div class="course-progress">
+                                    <div class="progress-label">
+                                        <span>Progress</span>
+                                        <span>${progress}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${progress}%"></div>
+                                    </div>
+                                </div>
+                                <button class="btn-access" onclick="alert('Course videos will be available soon! We\\'re preparing high-quality content for you.')">
+                                    Access Course →
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+
+                    coursesContainer.innerHTML = `<div class="courses-grid">${coursesHTML}</div>`;
+                }
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                document.getElementById('coursesContainer').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Error loading courses</h3>
+                        <p>Please refresh the page or contact support.</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

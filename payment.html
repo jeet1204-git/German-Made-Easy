@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - German Made Easy</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .payment-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .logo {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FF6B35, #004E89);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #1A1A2E;
+        }
+        
+        .course-details {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .course-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 20px;
+        }
+        
+        .price-breakdown {
+            margin-bottom: 20px;
+        }
+        
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .price-row.total {
+            padding-top: 15px;
+            border-top: 2px solid #ddd;
+            font-size: 24px;
+            font-weight: 700;
+            color: #FF6B35;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1A1A2E;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+        }
+        
+        .btn-pay {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #FF6B35, #004E89);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-pay:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .security-badge {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .security-badge svg {
+            width: 16px;
+            height: 16px;
+            fill: #10b981;
+            vertical-align: middle;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-link a {
+            color: #004E89;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-error {
+            background: #fee;
+            color: #c00;
+            border: 1px solid #fcc;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .payment-method {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="logo">German Made Easy</div>
+        <h2>Complete Your Purchase</h2>
+        
+        <div class="alert alert-error" id="alertBox"></div>
+        
+        <div class="course-details">
+            <div class="course-name" id="courseName">Loading...</div>
+            <div class="price-breakdown">
+                <div class="price-row">
+                    <span>Course Price:</span>
+                    <span id="coursePrice">₹0</span>
+                </div>
+                <div class="price-row">
+                    <span>GST (18%):</span>
+                    <span id="gstAmount">₹0</span>
+                </div>
+                <div class="price-row total">
+                    <span>Total Amount:</span>
+                    <span id="totalAmount">₹0</span>
+                </div>
+            </div>
+        </div>
+
+        <form id="paymentForm">
+            <div class="form-group">
+                <label>Full Name *</label>
+                <input type="text" id="name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address *</label>
+                <input type="email" id="email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number *</label>
+                <input type="tel" id="phone" pattern="[0-9]{10}" required placeholder="10 digit mobile number">
+            </div>
+
+            <button type="submit" class="btn-pay" id="payBtn">
+                Proceed to Payment
+            </button>
+        </form>
+
+        <div class="payment-methods">
+            <div class="payment-method">💳 Cards</div>
+            <div class="payment-method">📱 UPI</div>
+            <div class="payment-method">🏦 Net Banking</div>
+            <div class="payment-method">💼 Wallets</div>
+        </div>
+
+        <div class="security-badge">
+            <svg viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z"/></svg>
+            Secure payment powered by Razorpay
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Courses</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, setDoc, serverTimestamp, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
+            authDomain: "german-made-easy.firebaseapp.com",
+            projectId: "german-made-easy",
+            storageBucket: "german-made-easy.firebasestorage.app",
+            messagingSenderId: "259276936055",
+            appId: "1:259276936055:web:5c9b4916734d0271100772",
+            measurementId: "G-B7JMB0G85L"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let courseName = '';
+        let courseAmount = 0;
+        let gstAmount = 0;
+        let totalAmount = 0;
+
+        function showAlert(message) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.classList.add('show');
+            
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 5000);
+        }
+
+        // Check authentication and load course details
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                alert('Please login first to purchase courses.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            currentUser = user;
+
+            // Pre-fill user details
+            document.getElementById('name').value = user.displayName || '';
+            document.getElementById('email').value = user.email || '';
+
+            // Load course details from session
+            courseName = sessionStorage.getItem('enrollCourse');
+            courseAmount = parseInt(sessionStorage.getItem('enrollAmount')) || 0;
+
+            if (!courseName || !courseAmount) {
+                alert('No course selected. Please select a course first.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Calculate GST (18%)
+            gstAmount = Math.round(courseAmount * 0.18);
+            totalAmount = courseAmount + gstAmount;
+
+            // Update UI
+            document.getElementById('courseName').textContent = courseName;
+            document.getElementById('coursePrice').textContent = '₹' + courseAmount.toLocaleString('en-IN');
+            document.getElementById('gstAmount').textContent = '₹' + gstAmount.toLocaleString('en-IN');
+            document.getElementById('totalAmount').textContent = '₹' + totalAmount.toLocaleString('en-IN');
+        });
+
+        // Razorpay Payment Handler
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const payBtn = document.getElementById('payBtn');
+
+            if (!name || !email || !phone) {
+                showAlert('Please fill in all fields');
+                return;
+            }
+
+            if (!/^[0-9]{10}$/.test(phone)) {
+                showAlert('Please enter a valid 10-digit phone number');
+                return;
+            }
+
+            payBtn.innerHTML = '<div class="loading"></div> Initializing payment...';
+            payBtn.disabled = true;
+
+            try {
+                // Create payment order in Firebase first
+                const paymentId = 'PAY' + Date.now();
+                await setDoc(doc(db, 'payments', paymentId), {
+                    userId: currentUser.uid,
+                    userEmail: email,
+                    userName: name,
+                    userPhone: phone,
+                    courseName: courseName,
+                    courseAmount: courseAmount,
+                    gstAmount: gstAmount,
+                    totalAmount: totalAmount,
+                    status: 'initiated',
+                    createdAt: serverTimestamp()
+                });
+
+                // Razorpay options
+                const options = {
+                    key: 'rzp_test_SGPQO4RhvkKDke', // Your Razorpay key
+                    amount: totalAmount * 100, // Amount in paise
+                    currency: 'INR',
+                    name: 'German Made Easy',
+                    description: courseName,
+                    image: '', // Add your logo URL
+                    prefill: {
+                        name: name,
+                        email: email,
+                        contact: phone
+                    },
+                    theme: {
+                        color: '#FF6B35'
+                    },
+                    handler: async function (response) {
+                        try {
+                            // Update payment status
+                            await updateDoc(doc(db, 'payments', paymentId), {
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id || '',
+                                razorpay_signature: response.razorpay_signature || '',
+                                status: 'completed',
+                                completedAt: serverTimestamp()
+                            });
+
+                            // Add course to user's enrolled courses
+                            await updateDoc(doc(db, 'users', currentUser.uid), {
+                                enrolledCourses: arrayUnion(courseName)
+                            });
+
+                            alert('🎉 Payment Successful!\n\nPayment ID: ' + response.razorpay_payment_id + '\n\nYou now have access to ' + courseName + '!\n\nWe\'ll send course access details to your email shortly.');
+                            
+                            // Clear session
+                            sessionStorage.removeItem('enrollCourse');
+                            sessionStorage.removeItem('enrollAmount');
+
+                            // Redirect to dashboard
+                            window.location.href = 'dashboard.html';
+                        } catch (error) {
+                            console.error('Error updating payment:', error);
+                            alert('Payment successful but error updating records. Please contact support.');
+                        }
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            payBtn.innerHTML = 'Proceed to Payment';
+                            payBtn.disabled = false;
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.on('payment.failed', async function (response) {
+                    await updateDoc(doc(db, 'payments', paymentId), {
+                        status: 'failed',
+                        errorCode: response.error.code,
+                        errorDescription: response.error.description,
+                        failedAt: serverTimestamp()
+                    });
+
+                    showAlert('Payment failed: ' + response.error.description);
+                    payBtn.innerHTML = 'Proceed to Payment';
+                    payBtn.disabled = false;
+                });
+
+                rzp.open();
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                showAlert('Error initializing payment. Please try again.');
+                payBtn.innerHTML = 'Proceed to Payment';
+                payBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

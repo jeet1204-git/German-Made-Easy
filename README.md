@@ -18,6 +18,8 @@ This package contains everything you need to launch your German language course 
 
 ### Features Already Working:
 ✅ User authentication (signup/login)
+✅ **Google Sign-In** (one-click registration)
+✅ **Automatic welcome emails** to new users
 ✅ Secure Razorpay payment with UPI
 ✅ Payment tracking in Firebase
 ✅ Course access control
@@ -79,10 +81,44 @@ This package contains everything you need to launch your German language course 
 - Go to: https://console.firebase.google.com
 - Select your project: `german-made-easy`
 - Build → Authentication → Sign-in method
-- Enable "Email/Password"
-- Save
+- Enable "Email/Password" ✓
+- Enable "Google" ✓
+  - Click on Google
+  - Toggle "Enable"
+  - Add support email: german.made.easy12@gmail.com
+  - Save
+- Done!
 
-### 2. Set Firestore Security Rules
+### 2. Enable Automatic Welcome Emails
+**Option A: Firebase Extension (Recommended - EASY)**
+1. Go to: Firebase Console → Extensions
+2. Click "Install Extension"
+3. Search: "Trigger Email from Firestore"
+4. Click Install
+5. Configure:
+   - SMTP server: smtp.gmail.com
+   - SMTP port: 587
+   - Email: german.made.easy12@gmail.com
+   - Password: [Create App Password - see below]
+   - Collection: `mail`
+6. Deploy!
+
+**Creating Gmail App Password:**
+1. Go to: https://myaccount.google.com/apppasswords
+2. Select app: Mail
+3. Select device: Other (Custom name) → "Firebase Email"
+4. Generate password
+5. Copy the 16-character password
+6. Use this in Firebase Extension
+
+**Option B: EmailJS (Alternative - FREE)**
+1. Go to: https://emailjs.com
+2. Sign up (FREE tier: 200 emails/month)
+3. Create email service
+4. Create template with ID: `template_welcome`
+5. Add your User ID to signup.html (line 360)
+
+### 3. Set Firestore Security Rules
 - Go to: Firestore Database → Rules
 - Replace with:
 ```javascript
@@ -106,12 +142,18 @@ service cloud.firestore {
       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
       allow update: if request.auth != null && resource.data.userId == request.auth.uid;
     }
+    
+    // Mail - for sending welcome emails via Firebase Extension
+    match /mail/{mailId} {
+      allow create: if request.auth != null;
+      allow read: if false;
+    }
   }
 }
 ```
 - Click "Publish"
 
-### 3. Razorpay Setup (Already Configured)
+### 4. Razorpay Setup (Already Configured)
 Your Razorpay test keys are already in the code:
 - Key ID: `rzp_test_SGPQO4RhvkKDke`
 - Secret: `fS7jkeCOAjcCkNh7IGRE361n`

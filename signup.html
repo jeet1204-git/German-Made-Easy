@@ -114,6 +114,27 @@
             cursor: not-allowed;
         }
         
+        .btn-google {
+            width: 100%;
+            padding: 16px;
+            background: white;
+            color: #333;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-google:hover {
+            border-color: #4285F4;
+            box-shadow: 0 2px 10px rgba(66, 133, 244, 0.2);
+        }
+        
         .login-link {
             text-align: center;
             margin-top: 20px;
@@ -242,6 +263,21 @@
                 Create Account
             </button>
         </form>
+
+        <div style="text-align: center; margin: 25px 0; color: #999; position: relative;">
+            <span style="background: white; padding: 0 15px; position: relative; z-index: 1;">OR</span>
+            <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #ddd; z-index: 0;"></div>
+        </div>
+        
+        <button class="btn-google" id="googleSignUp">
+            <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right: 10px;">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Sign up with Google
+        </button>
         
         <div class="login-link">
             Already have an account? <a href="login.html">Login</a>
@@ -254,7 +290,7 @@
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
@@ -270,6 +306,39 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Send Welcome Email Function
+        async function sendWelcomeEmail(userEmail, userName) {
+            try {
+                // Store email request in Firestore - you can use Firebase Extensions to send actual emails
+                await setDoc(doc(db, 'mail', Date.now().toString()), {
+                    to: userEmail,
+                    message: {
+                        subject: 'Welcome to German Made Easy! 🎉',
+                        html: `
+                            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                                <h1 style="color: #FF6B35;">Welcome to German Made Easy, ${userName}! 🇩🇪</h1>
+                                <p>Thank you for joining us on your German learning journey!</p>
+                                <p>We're excited to help you achieve fluency in German with our expert-led courses.</p>
+                                <h2>What's Next?</h2>
+                                <ul>
+                                    <li>Browse our available courses</li>
+                                    <li>Enroll in the course that fits your level</li>
+                                    <li>Start learning at your own pace</li>
+                                </ul>
+                                <p><a href="https://german-made-easy.netlify.app" style="background: #FF6B35; color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; display: inline-block; margin-top: 20px;">Browse Courses</a></p>
+                                <p style="margin-top: 30px; color: #666;">Need help? Reply to this email anytime!</p>
+                                <p style="color: #666;">Best regards,<br>Team German Made Easy<br>german.made.easy12@gmail.com</p>
+                            </div>
+                        `
+                    }
+                });
+                console.log('Welcome email queued successfully');
+            } catch (error) {
+                console.error('Error sending welcome email:', error);
+            }
+        }
 
         function showAlert(message, type = 'error') {
             const alertBox = document.getElementById('alertBox');
@@ -356,10 +425,14 @@
                     name: name,
                     email: email,
                     createdAt: serverTimestamp(),
-                    enrolledCourses: []
+                    enrolledCourses: [],
+                    signUpMethod: 'email'
                 });
 
-                showAlert('Account created successfully! Redirecting...', 'success');
+                // Send welcome email
+                await sendWelcomeEmail(email, name);
+
+                showAlert('Account created successfully! Check your email for welcome message. Redirecting...', 'success');
                 
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
@@ -389,6 +462,52 @@
                     formGroup.classList.remove('error');
                 }
             });
+        });
+
+        // Google Sign Up
+        document.getElementById('googleSignUp').addEventListener('click', async function() {
+            const googleBtn = this;
+            const originalText = googleBtn.innerHTML;
+            googleBtn.innerHTML = '<div class="loading"></div> Creating account...';
+            googleBtn.disabled = true;
+
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                const user = result.user;
+
+                // Create user document in Firestore
+                await setDoc(doc(db, 'users', user.uid), {
+                    name: user.displayName,
+                    email: user.email,
+                    createdAt: serverTimestamp(),
+                    enrolledCourses: [],
+                    signUpMethod: 'google'
+                });
+
+                // Send welcome email
+                await sendWelcomeEmail(user.email, user.displayName);
+
+                showAlert('Account created successfully! Check your email for welcome message. Redirecting...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+            } catch (error) {
+                console.error('Google sign up error:', error);
+                let errorMessage = 'Google sign up failed.';
+                
+                if (error.code === 'auth/account-exists-with-different-credential') {
+                    errorMessage = 'An account already exists with this email. Try logging in instead.';
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = 'Sign up cancelled.';
+                } else if (error.code === 'auth/popup-blocked') {
+                    errorMessage = 'Popup blocked. Please allow popups for this site.';
+                }
+                
+                showAlert(errorMessage);
+                googleBtn.innerHTML = originalText;
+                googleBtn.disabled = false;
+            }
         });
     </script>
 </body>

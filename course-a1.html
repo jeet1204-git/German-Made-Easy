@@ -608,6 +608,162 @@
             color: var(--primary);
         }
 
+        /* Gift Button */
+        .btn-gift {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            color: var(--dark);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn-gift:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(255, 107, 53, 0.04);
+        }
+
+        .gift-icon {
+            font-size: 20px;
+        }
+
+        /* Gift Modal */
+        .gift-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .gift-modal.active {
+            display: flex;
+        }
+
+        .gift-modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 480px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .gift-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .gift-modal-close:hover {
+            background: #f0f0f0;
+            color: var(--dark);
+        }
+
+        .gift-modal-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .gift-modal-header .gift-emoji {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .gift-modal-header h3 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .gift-modal-header p {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .gift-form-group {
+            margin-bottom: 20px;
+        }
+
+        .gift-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .gift-form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Outfit', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .gift-form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn-gift-proceed {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-gift-proceed:hover {
+            background: #ff5722;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
         .video-wrapper {
             padding: 56.25% 0 0 0;
             position: relative;
@@ -1085,6 +1241,11 @@
                     ✓ First 2 Chapters FREE
                 </p>
 
+                <button class="btn-gift" onclick="openGiftModal()">
+                    <span class="gift-icon">🎁</span>
+                    Gift this course
+                </button>
+
                 <div class="sidebar-includes">
                     <h4>This course includes:</h4>
                     <div class="sidebar-include">
@@ -1122,6 +1283,31 @@
                 </div>
             </div>
         </aside>
+    </div>
+
+    <!-- Gift Modal -->
+    <div class="gift-modal" id="giftModal">
+        <div class="gift-modal-content">
+            <button class="gift-modal-close" onclick="closeGiftModal()">×</button>
+            <div class="gift-modal-header">
+                <div class="gift-emoji">🎁</div>
+                <h3>Gift this course</h3>
+                <p>Send this course as a gift for a birthday, celebration, or just because!</p>
+            </div>
+            <form id="giftForm" onsubmit="submitGiftForm(event)">
+                <div class="gift-form-group">
+                    <label>Recipient's Name *</label>
+                    <input type="text" id="giftRecipientName" placeholder="Enter their name" required>
+                </div>
+                <div class="gift-form-group">
+                    <label>Recipient's Email *</label>
+                    <input type="email" id="giftRecipientEmail" placeholder="Enter their email" required>
+                </div>
+                <button type="submit" class="btn-gift-proceed">
+                    <span>🎁</span> Proceed to Gift Payment
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- Video Modal -->
@@ -1204,6 +1390,48 @@
         document.getElementById('videoModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeVideoModal();
+            }
+        });
+
+        // Gift Modal
+        window.openGiftModal = function() {
+            document.getElementById('giftModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeGiftModal = function() {
+            document.getElementById('giftModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        };
+
+        window.submitGiftForm = function(e) {
+            e.preventDefault();
+            const recipientName = document.getElementById('giftRecipientName').value;
+            const recipientEmail = document.getElementById('giftRecipientEmail').value;
+
+            if (!recipientName || !recipientEmail) return;
+
+            // Store gift details and course info in sessionStorage
+            sessionStorage.setItem('giftMode', 'true');
+            sessionStorage.setItem('giftRecipientName', recipientName);
+            sessionStorage.setItem('giftRecipientEmail', recipientEmail);
+            sessionStorage.setItem('enrollCourse', 'A1 Course - Complete German for Beginners');
+            sessionStorage.setItem('enrollAmount', '6000');
+
+            window.location.href = 'payment.html';
+        };
+
+        // Close gift modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeGiftModal();
+            }
+        });
+
+        // Close gift modal on background click
+        document.getElementById('giftModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeGiftModal();
             }
         });
     </script>

@@ -663,7 +663,7 @@
                 
                 // --- Weekly score tracking with Monday reset ---
                 var lastMonday = getLastMonday();
-                var weeklyResetDate = userData.weeklyResetDate || null;
+                var weeklyResetDate = userData.weeklyResetDate;
                 var currentWeeklyScore = userData.weeklyScore || 0;
                 
                 var needsReset = false;

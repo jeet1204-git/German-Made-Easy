@@ -1396,7 +1396,7 @@
                     <p class="price-note">One-time payment • Lifetime access</p>
                 </div>
 
-                <button class="btn-enroll" onclick="window.location.href='payment.html'">
+                <button class="btn-enroll" onclick="enrollA1()">
                     Enroll in A1 Course
                 </button>
 
@@ -1579,17 +1579,21 @@
         window.openVideoModal = function(videoId) {
             const modal = document.getElementById('videoModal');
             const container = document.getElementById('videoContainer');
-            
+
+            // Sanitize videoId to only allow numeric Vimeo IDs
+            const safeVideoId = String(videoId).replace(/[^0-9]/g, '');
+            if (!safeVideoId) return;
+
             // Create video embed
-            container.innerHTML = `
-                <iframe src="https://player.vimeo.com/video/${videoId}?h=&badge=0&autopause=0" 
-                        frameborder="0" 
-                        allow="autoplay; fullscreen; picture-in-picture" 
-                        allowfullscreen
-                        style="position:absolute;top:0;left:0;width:100%;height:100%;" 
-                        title="Lesson Video">
-                </iframe>
-            `;
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://player.vimeo.com/video/' + safeVideoId + '?h=&badge=0&autopause=0';
+            iframe.frameBorder = '0';
+            iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+            iframe.allowFullscreen = true;
+            iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
+            iframe.title = 'Lesson Video';
+            container.innerHTML = '';
+            container.appendChild(iframe);
             
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1619,6 +1623,19 @@
                 closeVideoModal();
             }
         });
+
+        // Enroll in A1 course
+        window.enrollA1 = function() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('Please login or sign up first to enroll in courses.');
+                window.location.href = 'login.html';
+                return;
+            }
+            sessionStorage.setItem('enrollCourse', 'A1 Course - Complete German for Beginners');
+            sessionStorage.setItem('enrollAmount', '6000');
+            window.location.href = 'payment.html';
+        };
 
         // Gift Modal
         window.openGiftModal = function() {

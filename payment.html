@@ -797,17 +797,6 @@
 
         // Razorpay Payment Handler
         async function processRazorpayPayment(name, email, phone, payBtn) {
-
-            if (!name || !email || !phone) {
-                showAlert('Please fill in all fields');
-                return;
-            }
-
-            if (!/^[0-9]{10}$/.test(phone)) {
-                showAlert('Please enter a valid 10-digit phone number');
-                return;
-            }
-
             payBtn.innerHTML = '<div class="loading"></div> Initializing payment...';
             payBtn.disabled = true;
 

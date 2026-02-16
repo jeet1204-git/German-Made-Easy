@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprechen Buddy - German Made Easy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FF6B35, #004E89);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 18px;
+        }
+
+        /* States */
+        .state {
+            display: none;
+        }
+
+        .state.active {
+            display: block;
+        }
+
+        /* Waiting State */
+        .waiting-animation {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #FF6B35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .waiting-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 15px;
+        }
+
+        .waiting-subtext {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .queue-info {
+            background: #FFF3ED;
+            border: 2px solid #FF6B35;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .queue-info p {
+            font-size: 15px;
+            color: #1A1A2E;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        /* Match Found */
+        .match-found {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .match-emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .match-text {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 10px;
+        }
+
+        .partner-info {
+            background: #f8f8f8;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .partner-info h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: #1A1A2E;
+            font-weight: 700;
+        }
+
+        /* Task Card */
+        .task-card {
+            background: linear-gradient(135deg, #FFF3ED, #FFE8DC);
+            border: 3px solid #FF6B35;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .task-type {
+            background: #FF6B35;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .task-level {
+            font-size: 24px;
+            font-weight: 900;
+            color: #FF6B35;
+        }
+
+        .task-scenario {
+            margin-bottom: 20px;
+        }
+
+        .scenario-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .scenario-text {
+            font-size: 18px;
+            color: #1A1A2E;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .scenario-gujarati {
+            font-size: 16px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .task-questions {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .task-questions h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 15px;
+        }
+
+        .task-questions ul {
+            list-style: none;
+        }
+
+        .task-questions li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            color: #1A1A2E;
+        }
+
+        .task-questions li:last-child {
+            border-bottom: none;
+        }
+
+        /* Timer */
+        .timer-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .timer-display {
+            font-size: 72px;
+            font-weight: 900;
+            color: #FF6B35;
+            margin-bottom: 10px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-display.warning {
+            color: #f59e0b;
+            animation: pulse 1s infinite;
+        }
+
+        .timer-display.danger {
+            color: #ef4444;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .timer-label {
+            font-size: 16px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Video Section */
+        .video-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .video-container {
+            position: relative;
+            background: #1A1A2E;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-label {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF6B35, #004E89);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #FF6B35;
+            border: 2px solid #FF6B35;
+        }
+
+        .btn-secondary:hover {
+            background: #FFF3ED;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Evaluation Form */
+        .evaluation-form {
+            background: #f8f8f8;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .evaluation-form h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .criteria-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .criteria-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .criteria-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1A1A2E;
+            margin-bottom: 12px;
+        }
+
+        .rating-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .rating-btn:hover {
+            border-color: #FF6B35;
+            background: #FFF3ED;
+        }
+
+        .rating-btn.selected {
+            border-color: #FF6B35;
+            background: #FF6B35;
+            color: white;
+        }
+
+        /* Results */
+        .results-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .results-emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .results-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 15px;
+        }
+
+        .points-earned {
+            background: linear-gradient(135deg, #FFF3ED, #FFE8DC);
+            border: 3px solid #FF6B35;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .points-number {
+            font-size: 48px;
+            font-weight: 900;
+            color: #FF6B35;
+            margin-bottom: 10px;
+        }
+
+        .points-label {
+            font-size: 18px;
+            color: #666;
+        }
+
+        .feedback-section {
+            background: #f8f8f8;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .feedback-section h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 15px;
+        }
+
+        .feedback-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .feedback-item:last-child {
+            border-bottom: none;
+        }
+
+        .feedback-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .feedback-score {
+            font-weight: 700;
+            color: #FF6B35;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .card {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .video-section {
+                grid-template-columns: 1fr;
+            }
+
+            .timer-display {
+                font-size: 56px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .rating-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>🗣️ Sprechen Buddy</h1>
+                <p>Practice speaking German with real students</p>
+            </div>
+
+            <!-- Waiting State -->
+            <div id="waitingState" class="state active">
+                <div class="waiting-animation">
+                    <div class="spinner"></div>
+                    <div class="waiting-text">Finding your practice partner...</div>
+                    <div class="waiting-subtext">This usually takes 30-60 seconds</div>
+                    
+                    <div class="queue-info">
+                        <p>👥 <strong><span id="queueCount">0</span> students</strong> are waiting to practice</p>
+                        <p>🔥 Students in queue are matched by level and timezone</p>
+                        <p>⏱️ Average wait time: <strong>45 seconds</strong></p>
+                    </div>
+
+                    <button class="btn btn-danger" onclick="cancelMatching()">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Match Found State -->
+            <div id="matchFoundState" class="state">
+                <div class="match-found">
+                    <div class="match-emoji">🎉</div>
+                    <div class="match-text">Match Found!</div>
+                    <p style="color: #666; margin-bottom: 30px;">Connecting you with your practice partner...</p>
+
+                    <div class="partner-info">
+                        <h3>Your Partner</h3>
+                        <div class="info-row">
+                            <span class="info-label">Name</span>
+                            <span class="info-value" id="partnerName">Der Löwe</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Level</span>
+                            <span class="info-value" id="partnerLevel">A2</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Streak</span>
+                            <span class="info-value">🔥 <span id="partnerStreak">7</span> days</span>
+                        </div>
+                    </div>
+
+                    <p style="color: #999; font-size: 14px; margin-top: 20px;">
+                        📝 All sessions are anonymous. Personal details are never shared.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Session State -->
+            <div id="sessionState" class="state">
+                <!-- Task Card -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-type" id="taskType">Planning Together</div>
+                        <div class="task-level" id="taskLevel">A2</div>
+                    </div>
+                    
+                    <div class="task-scenario">
+                        <div class="scenario-label">SCENARIO / પરિસ્થિતિ</div>
+                        <div class="scenario-text" id="scenarioGerman">
+                            Sie möchten mit Ihrem Partner am Wochenende einen Ausflug machen.
+                        </div>
+                        <div class="scenario-gujarati" id="scenarioGujarati">
+                            તમે અને તમારા પાર્ટનર સપ્તાહાંતમાં એક પર્યટન કરવા માંગો છો.
+                        </div>
+                    </div>
+
+                    <div class="task-questions">
+                        <h4>Diskutieren Sie über:</h4>
+                        <ul id="questionsList">
+                            <li>Wohin möchten Sie fahren?</li>
+                            <li>Wann sollen Sie fahren?</li>
+                            <li>Was möchten Sie dort machen?</li>
+                            <li>Wie lange möchten Sie bleiben?</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Timer -->
+                <div class="timer-section">
+                    <div class="timer-display" id="timerDisplay">08:00</div>
+                    <div class="timer-label">Time Remaining</div>
+                </div>
+
+                <!-- Video Section -->
+                <div class="video-section">
+                    <div class="video-container">
+                        <video id="localVideo" autoplay muted playsinline></video>
+                        <div class="video-label">You</div>
+                        <div class="connection-status">
+                            <div class="status-dot"></div>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                    <div class="video-container">
+                        <video id="remoteVideo" autoplay playsinline></video>
+                        <div class="video-label" id="remoteLabel">Partner</div>
+                        <div class="connection-status">
+                            <div class="status-dot"></div>
+                            <span>Connected</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="controls">
+                    <button class="btn btn-secondary" id="toggleAudio" onclick="toggleAudio()">
+                        🎤 Mute
+                    </button>
+                    <button class="btn btn-secondary" id="toggleVideo" onclick="toggleVideo()">
+                        📹 Stop Video
+                    </button>
+                    <button class="btn btn-danger" onclick="endSession()">
+                        ❌ End Session
+                    </button>
+                </div>
+
+                <p style="text-align: center; color: #999; font-size: 14px; margin-top: 20px;">
+                    💡 Speak naturally! Your partner is also learning. Help each other!
+                </p>
+            </div>
+
+            <!-- Evaluation State -->
+            <div id="evaluationState" class="state">
+                <div class="evaluation-form">
+                    <h3>Evaluate Your Partner 📊</h3>
+                    <p style="text-align: center; color: #666; margin-bottom: 30px;">
+                        Rate your partner on these 4 criteria (1 = needs work, 5 = excellent)
+                    </p>
+
+                    <div class="criteria-item">
+                        <div class="criteria-label">🗣️ Fluency (કેટલી રવાની રીતે બોલ્યા?)</div>
+                        <div class="rating-buttons" data-criteria="fluency">
+                            <button class="rating-btn" data-value="1">1</button>
+                            <button class="rating-btn" data-value="2">2</button>
+                            <button class="rating-btn" data-value="3">3</button>
+                            <button class="rating-btn" data-value="4">4</button>
+                            <button class="rating-btn" data-value="5">5</button>
+                        </div>
+                    </div>
+
+                    <div class="criteria-item">
+                        <div class="criteria-label">📚 Vocabulary (શબ્દભંડોળ)</div>
+                        <div class="rating-buttons" data-criteria="vocabulary">
+                            <button class="rating-btn" data-value="1">1</button>
+                            <button class="rating-btn" data-value="2">2</button>
+                            <button class="rating-btn" data-value="3">3</button>
+                            <button class="rating-btn" data-value="4">4</button>
+                            <button class="rating-btn" data-value="5">5</button>
+                        </div>
+                    </div>
+
+                    <div class="criteria-item">
+                        <div class="criteria-label">✅ Grammar (વ્યાકરણ)</div>
+                        <div class="rating-buttons" data-criteria="grammar">
+                            <button class="rating-btn" data-value="1">1</button>
+                            <button class="rating-btn" data-value="2">2</button>
+                            <button class="rating-btn" data-value="3">3</button>
+                            <button class="rating-btn" data-value="4">4</button>
+                            <button class="rating-btn" data-value="5">5</button>
+                        </div>
+                    </div>
+
+                    <div class="criteria-item">
+                        <div class="criteria-label">🎯 Task Completion (કેટલું સારું પૂર્ણ કર્યું?)</div>
+                        <div class="rating-buttons" data-criteria="taskCompletion">
+                            <button class="rating-btn" data-value="1">1</button>
+                            <button class="rating-btn" data-value="2">2</button>
+                            <button class="rating-btn" data-value="3">3</button>
+                            <button class="rating-btn" data-value="4">4</button>
+                            <button class="rating-btn" data-value="5">5</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" id="submitEvaluation" onclick="submitEvaluation()" disabled>
+                        Submit Evaluation ✅
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results State -->
+            <div id="resultsState" class="state">
+                <div class="results-section">
+                    <div class="results-emoji">🎉</div>
+                    <div class="results-title">Great Practice Session!</div>
+                    <p style="color: #666; margin-bottom: 30px;">
+                        You both completed the speaking task successfully
+                    </p>
+
+                    <div class="points-earned">
+                        <div class="points-number">+50</div>
+                        <div class="points-label">Points Earned</div>
+                    </div>
+
+                    <div class="feedback-section">
+                        <h4>Your Partner's Evaluation</h4>
+                        <div class="feedback-item">
+                            <span class="feedback-label">Fluency</span>
+                            <span class="feedback-score"><span id="resultFluency">4</span>/5</span>
+                        </div>
+                        <div class="feedback-item">
+                            <span class="feedback-label">Vocabulary</span>
+                            <span class="feedback-score"><span id="resultVocabulary">4</span>/5</span>
+                        </div>
+                        <div class="feedback-item">
+                            <span class="feedback-label">Grammar</span>
+                            <span class="feedback-score"><span id="resultGrammar">3</span>/5</span>
+                        </div>
+                        <div class="feedback-item">
+                            <span class="feedback-label">Task Completion</span>
+                            <span class="feedback-score"><span id="resultTaskCompletion">5</span>/5</span>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <button class="btn btn-primary" onclick="practiceAgain()">
+                            🔄 Practice Again
+                        </button>
+                        <button class="btn btn-secondary" onclick="backToDashboard()">
+                            🏠 Back to Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, deleteDoc, collection, query, where, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
+            authDomain: "german-made-easy.firebaseapp.com",
+            projectId: "german-made-easy",
+            storageBucket: "german-made-easy.firebasestorage.app",
+            messagingSenderId: "259276936055",
+            appId: "1:259276936055:web:5c9b4916734d0271100772",
+            measurementId: "G-B7JMB0G85L"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global variables
+        let currentUser = null;
+        let userData = null;
+        let matchId = null;
+        let peerConnection = null;
+        let localStream = null;
+        let remoteStream = null;
+        let sessionTimer = null;
+        let sessionDuration = 480; // 8 minutes
+        let evaluationScores = {
+            fluency: 0,
+            vocabulary: 0,
+            grammar: 0,
+            taskCompletion: 0
+        };
+
+        // WebRTC configuration
+        const rtcConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        // Task library (sample tasks)
+        const tasks = {
+            A1: [
+                {
+                    type: "Introduction",
+                    scenario_german: "Sie treffen zum ersten Mal Ihren Sprachpartner.",
+                    scenario_gujarati: "તમે પ્રથમ વખત તમારા ભાષા પાર્ટનરને મળો છો.",
+                    questions: [
+                        "Wie heißen Sie?",
+                        "Woher kommen Sie?",
+                        "Was machen Sie?",
+                        "Was sind Ihre Hobbys?"
+                    ]
+                },
+                {
+                    type: "Shopping",
+                    scenario_german: "Sie sind im Supermarkt und brauchen Hilfe.",
+                    scenario_gujarati: "તમે સુપરમાર્કેટમાં છો અને મદદની જરૂર છે.",
+                    questions: [
+                        "Was möchten Sie kaufen?",
+                        "Wo finden Sie das?",
+                        "Wie viel kostet das?",
+                        "Zahlen Sie bar oder mit Karte?"
+                    ]
+                }
+            ],
+            A2: [
+                {
+                    type: "Planning Together",
+                    scenario_german: "Sie möchten mit Ihrem Partner am Wochenende einen Ausflug machen.",
+                    scenario_gujarati: "તમે અને તમારા પાર્ટનર સપ્તાહાંતમાં એક પર્યટન કરવા માંગો છો.",
+                    questions: [
+                        "Wohin möchten Sie fahren?",
+                        "Wann sollen Sie fahren?",
+                        "Was möchten Sie dort machen?",
+                        "Wie lange möchten Sie bleiben?"
+                    ]
+                },
+                {
+                    type: "Restaurant",
+                    scenario_german: "Sie gehen zusammen in ein Restaurant essen.",
+                    scenario_gujarati: "તમે સાથે એક રેસ્ટોરન્ટમાં જમવા જાઓ છો.",
+                    questions: [
+                        "Welches Restaurant möchten Sie besuchen?",
+                        "Was möchten Sie essen?",
+                        "Wann möchten Sie reservieren?",
+                        "Wie teilen Sie die Rechnung?"
+                    ]
+                }
+            ]
+        };
+
+        // Anonymous nicknames
+        const germanNicknames = [
+            "Der Löwe", "Die Katze", "Der Bär", "Die Eule", "Der Wolf",
+            "Die Schildkröte", "Der Fuchs", "Die Giraffe", "Der Pinguin", "Die Schlange"
+        ];
+
+        function getRandomNickname() {
+            return germanNicknames[Math.floor(Math.random() * germanNicknames.length)];
+        }
+
+        function getRandomTask(level) {
+            const levelTasks = tasks[level] || tasks.A1;
+            return levelTasks[Math.floor(Math.random() * levelTasks.length)];
+        }
+
+        // State management
+        function showState(stateName) {
+            document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+            document.getElementById(stateName).classList.add('active');
+        }
+
+        // Initialize
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            currentUser = user;
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            userData = userDoc.data();
+
+            // Start matching process
+            startMatching();
+        });
+
+        async function startMatching() {
+            showState('waitingState');
+
+            // Create or update match queue entry
+            const queueRef = doc(db, 'match_queue', currentUser.uid);
+            await setDoc(queueRef, {
+                userId: currentUser.uid,
+                level: userData.level || 'A1',
+                streak: userData.streakDays || 1,
+                nickname: getRandomNickname(),
+                timestamp: serverTimestamp(),
+                status: 'waiting'
+            });
+
+            // Update queue count
+            updateQueueCount();
+
+            // Listen for matches
+            const unsubscribe = onSnapshot(queueRef, async (snapshot) => {
+                const queueData = snapshot.data();
+                if (queueData && queueData.matchId) {
+                    matchId = queueData.matchId;
+                    unsubscribe();
+                    await handleMatchFound();
+                }
+            });
+
+            // Try to find match
+            setTimeout(() => findMatch(), 2000);
+        }
+
+        async function findMatch() {
+            const queueRef = collection(db, 'match_queue');
+            const q = query(
+                queueRef,
+                where('level', '==', userData.level || 'A1'),
+                where('status', '==', 'waiting')
+            );
+
+            const snapshot = await getDocs(q);
+            const candidates = [];
+            
+            snapshot.forEach(doc => {
+                if (doc.id !== currentUser.uid) {
+                    candidates.push({ id: doc.id, ...doc.data() });
+                }
+            });
+
+            if (candidates.length > 0) {
+                // Match with first candidate
+                const partner = candidates[0];
+                const newMatchId = `match_${Date.now()}`;
+                
+                // Create match document
+                await setDoc(doc(db, 'matches', newMatchId), {
+                    users: [currentUser.uid, partner.id],
+                    level: userData.level || 'A1',
+                    task: getRandomTask(userData.level || 'A1'),
+                    startTime: serverTimestamp(),
+                    status: 'active'
+                });
+
+                // Update both queue entries
+                await updateDoc(doc(db, 'match_queue', currentUser.uid), {
+                    matchId: newMatchId,
+                    status: 'matched'
+                });
+
+                await updateDoc(doc(db, 'match_queue', partner.id), {
+                    matchId: newMatchId,
+                    status: 'matched'
+                });
+            } else {
+                // Keep waiting, check again
+                setTimeout(() => findMatch(), 3000);
+            }
+        }
+
+        async function updateQueueCount() {
+            const queueRef = collection(db, 'match_queue');
+            const q = query(queueRef, where('status', '==', 'waiting'));
+            const snapshot = await getDocs(q);
+            document.getElementById('queueCount').textContent = snapshot.size;
+        }
+
+        async function handleMatchFound() {
+            showState('matchFoundState');
+
+            // Get match details
+            const matchDoc = await getDoc(doc(db, 'matches', matchId));
+            const matchData = matchDoc.data();
+
+            // Find partner
+            const partnerId = matchData.users.find(id => id !== currentUser.uid);
+            const partnerQueue = await getDoc(doc(db, 'match_queue', partnerId));
+            const partnerData = partnerQueue.data();
+
+            // Display partner info
+            document.getElementById('partnerName').textContent = partnerData.nickname;
+            document.getElementById('partnerLevel').textContent = partnerData.level;
+            document.getElementById('partnerStreak').textContent = partnerData.streak;
+
+            // Wait 3 seconds then start session
+            setTimeout(() => startSession(matchData), 3000);
+        }
+
+        async function startSession(matchData) {
+            showState('sessionState');
+
+            // Display task
+            const task = matchData.task;
+            document.getElementById('taskType').textContent = task.type;
+            document.getElementById('taskLevel').textContent = userData.level || 'A1';
+            document.getElementById('scenarioGerman').textContent = task.scenario_german;
+            document.getElementById('scenarioGujarati').textContent = task.scenario_gujarati;
+
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '';
+            task.questions.forEach(q => {
+                const li = document.createElement('li');
+                li.textContent = q;
+                questionsList.appendChild(li);
+            });
+
+            // Start timer
+            startTimer();
+
+            // Setup WebRTC
+            await setupWebRTC();
+        }
+
+        function startTimer() {
+            let timeLeft = sessionDuration;
+            const timerDisplay = document.getElementById('timerDisplay');
+
+            sessionTimer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                // Color changes
+                timerDisplay.classList.remove('warning', 'danger');
+                if (timeLeft <= 60) {
+                    timerDisplay.classList.add('danger');
+                } else if (timeLeft <= 120) {
+                    timerDisplay.classList.add('warning');
+                }
+
+                if (timeLeft === 0) {
+                    clearInterval(sessionTimer);
+                    endSession();
+                }
+            }, 1000);
+        }
+
+        async function setupWebRTC() {
+            try {
+                // Get local stream
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+
+                document.getElementById('localVideo').srcObject = localStream;
+
+                // Create peer connection
+                peerConnection = new RTCPeerConnection(rtcConfig);
+
+                // Add local tracks
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                // Handle remote stream
+                peerConnection.ontrack = (event) => {
+                    if (!remoteStream) {
+                        remoteStream = new MediaStream();
+                        document.getElementById('remoteVideo').srcObject = remoteStream;
+                    }
+                    remoteStream.addTrack(event.track);
+                };
+
+                // ICE candidate handling
+                peerConnection.onicecandidate = async (event) => {
+                    if (event.candidate) {
+                        await updateDoc(doc(db, 'matches', matchId), {
+                            [`candidates.${currentUser.uid}`]: event.candidate.toJSON()
+                        });
+                    }
+                };
+
+                // Create and send offer/answer based on user order
+                const matchDoc = await getDoc(doc(db, 'matches', matchId));
+                const users = matchDoc.data().users;
+                
+                if (users[0] === currentUser.uid) {
+                    // Create offer
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+                    await updateDoc(doc(db, 'matches', matchId), {
+                        offer: offer
+                    });
+                } else {
+                    // Listen for offer and create answer
+                    const unsubscribe = onSnapshot(doc(db, 'matches', matchId), async (snapshot) => {
+                        const data = snapshot.data();
+                        if (data.offer && !peerConnection.remoteDescription) {
+                            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                            const answer = await peerConnection.createAnswer();
+                            await peerConnection.setLocalDescription(answer);
+                            await updateDoc(doc(db, 'matches', matchId), {
+                                answer: answer
+                            });
+                            unsubscribe();
+                        }
+                    });
+                }
+
+                // Listen for answer (if user 1)
+                if (users[0] === currentUser.uid) {
+                    const unsubscribe = onSnapshot(doc(db, 'matches', matchId), async (snapshot) => {
+                        const data = snapshot.data();
+                        if (data.answer && !peerConnection.remoteDescription) {
+                            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                            unsubscribe();
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error setting up WebRTC:', error);
+                alert('Could not access camera/microphone. Please check permissions.');
+            }
+        }
+
+        window.toggleAudio = function() {
+            if (localStream) {
+                const audioTrack = localStream.getAudioTracks()[0];
+                audioTrack.enabled = !audioTrack.enabled;
+                const btn = document.getElementById('toggleAudio');
+                btn.textContent = audioTrack.enabled ? '🎤 Mute' : '🔇 Unmute';
+            }
+        };
+
+        window.toggleVideo = function() {
+            if (localStream) {
+                const videoTrack = localStream.getVideoTracks()[0];
+                videoTrack.enabled = !videoTrack.enabled;
+                const btn = document.getElementById('toggleVideo');
+                btn.textContent = videoTrack.enabled ? '📹 Stop Video' : '📹 Start Video';
+            }
+        };
+
+        window.endSession = function() {
+            // Stop timer
+            if (sessionTimer) {
+                clearInterval(sessionTimer);
+            }
+
+            // Stop streams
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+
+            // Close peer connection
+            if (peerConnection) {
+                peerConnection.close();
+            }
+
+            // Show evaluation
+            showState('evaluationState');
+            setupEvaluationListeners();
+        };
+
+        function setupEvaluationListeners() {
+            document.querySelectorAll('.rating-buttons').forEach(container => {
+                const criteria = container.dataset.criteria;
+                container.querySelectorAll('.rating-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // Remove selected from siblings
+                        container.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+                        // Add selected to clicked
+                        btn.classList.add('selected');
+                        // Store value
+                        evaluationScores[criteria] = parseInt(btn.dataset.value);
+                        // Check if all criteria rated
+                        checkEvaluationComplete();
+                    });
+                });
+            });
+        }
+
+        function checkEvaluationComplete() {
+            const allRated = Object.values(evaluationScores).every(score => score > 0);
+            document.getElementById('submitEvaluation').disabled = !allRated;
+        }
+
+        window.submitEvaluation = async function() {
+            // Save evaluation to Firestore
+            await updateDoc(doc(db, 'matches', matchId), {
+                [`evaluations.${currentUser.uid}`]: evaluationScores,
+                [`completed.${currentUser.uid}`]: true
+            });
+
+            // Award points
+            const pointsEarned = 50;
+            await updateDoc(doc(db, 'users', currentUser.uid), {
+                totalScore: (userData.totalScore || 0) + pointsEarned,
+                weeklyScore: (userData.weeklyScore || 0) + pointsEarned,
+                sessionsCompleted: (userData.sessionsCompleted || 0) + 1
+            });
+
+            // Clean up
+            await deleteDoc(doc(db, 'match_queue', currentUser.uid));
+
+            // Show results (simulate partner's evaluation)
+            document.getElementById('resultFluency').textContent = Math.floor(Math.random() * 2) + 4;
+            document.getElementById('resultVocabulary').textContent = Math.floor(Math.random() * 2) + 3;
+            document.getElementById('resultGrammar').textContent = Math.floor(Math.random() * 2) + 3;
+            document.getElementById('resultTaskCompletion').textContent = Math.floor(Math.random() * 2) + 4;
+
+            showState('resultsState');
+        };
+
+        window.cancelMatching = async function() {
+            await deleteDoc(doc(db, 'match_queue', currentUser.uid));
+            window.location.href = 'dashboard.html';
+        };
+
+        window.practiceAgain = function() {
+            // Reset everything
+            evaluationScores = { fluency: 0, vocabulary: 0, grammar: 0, taskCompletion: 0 };
+            matchId = null;
+            location.reload();
+        };
+
+        window.backToDashboard = function() {
+            window.location.href = 'dashboard.html';
+        };
+    </script>
+</body>
+</html>

@@ -598,7 +598,7 @@
                 <div class="match-found">
                     <div class="match-emoji">🎉</div>
                     <div class="match-text">Match Found!</div>
-                    <p style="color: #666; margin-bottom: 30px;">Connecting you with your practice partner...</p>
+                    <p id="matchStatusText" style="color: #666; margin-bottom: 30px;">Connecting you with your practice partner...</p>
 
                     <div class="partner-info">
                         <h3>Your Partner</h3>
@@ -949,6 +949,31 @@
         async function startMatching() {
             showState('waitingState');
 
+            // Clean up any stale active matches from previous sessions.
+            // Without this, the matches listener would immediately pick up old
+            // matches and "connect" the user with nobody on the other side.
+            try {
+                const staleQuery = query(
+                    collection(db, 'matches'),
+                    where('users', 'array-contains', currentUser.uid)
+                );
+                const staleSnapshot = await getDocs(staleQuery);
+                const cleanups = [];
+                staleSnapshot.forEach(matchDoc => {
+                    const data = matchDoc.data();
+                    if (data.status === 'active' || data.status === 'expired') {
+                        cleanups.push(
+                            updateDoc(doc(db, 'matches', matchDoc.id), { status: 'completed' })
+                        );
+                    }
+                });
+                if (cleanups.length > 0) {
+                    await Promise.all(cleanups);
+                }
+            } catch (e) {
+                console.log('Stale match cleanup:', e);
+            }
+
             // Create or update match queue entry with real name
             const queueRef = doc(db, 'match_queue', currentUser.uid);
             await setDoc(queueRef, {
@@ -979,7 +1004,7 @@
             });
 
             // Also listen for match documents where this user is a participant.
-            // This is critical because Firestore security rules prevent the match
+            // This is critical because Firestore security rules may prevent the match
             // creator from updating the partner's queue entry, so the partner
             // detects the match here instead.
             const matchesQuery = query(
@@ -1098,6 +1123,9 @@
         async function handleMatchFound() {
             showState('matchFoundState');
 
+            const statusText = document.getElementById('matchStatusText');
+            statusText.textContent = 'Waiting for your partner to join...';
+
             // Get match details
             const matchDocSnap = await getDoc(doc(db, 'matches', matchId));
             const matchData = matchDocSnap.data();
@@ -1132,8 +1160,35 @@
             document.getElementById('partnerLevel').textContent = partnerLevel;
             document.getElementById('partnerStreak').textContent = partnerStreak;
 
-            // Wait 3 seconds then start session
-            setTimeout(() => startSession(matchData), 3000);
+            // Signal that this user is ready
+            await updateDoc(doc(db, 'matches', matchId), {
+                [`ready.${currentUser.uid}`]: true
+            });
+
+            // Wait for BOTH users to be ready before starting the session.
+            // This prevents sessions from starting when the partner hasn't actually joined.
+            const unsubReady = onSnapshot(doc(db, 'matches', matchId), async (snapshot) => {
+                const data = snapshot.data();
+                if (data && data.ready && data.ready[partnerId]) {
+                    unsubReady();
+                    clearTimeout(readyTimeout);
+                    statusText.textContent = 'Both connected! Starting session...';
+                    setTimeout(() => startSession(matchData), 2000);
+                }
+            });
+
+            // Timeout: if partner doesn't join within 30 seconds, expire the match
+            // and go back to searching
+            const readyTimeout = setTimeout(async () => {
+                unsubReady();
+                statusText.textContent = 'Partner did not connect. Searching again...';
+                try {
+                    await updateDoc(doc(db, 'matches', matchId), { status: 'expired' });
+                } catch (e) {}
+                matchId = null;
+                matchHandled = false;
+                setTimeout(() => startMatching(), 3000);
+            }, 30000);
         }
 
         async function startSession(matchData) {
@@ -1365,6 +1420,11 @@
                 peerConnection.close();
             }
 
+            // Mark match as completed so it won't be picked up as a stale match
+            if (matchId) {
+                updateDoc(doc(db, 'matches', matchId), { status: 'completed' }).catch(() => {});
+            }
+
             // Show evaluation
             showState('evaluationState');
             setupEvaluationListeners();
@@ -1394,10 +1454,11 @@
         }
 
         window.submitEvaluation = async function() {
-            // Save evaluation to Firestore
+            // Save evaluation to Firestore and mark match as completed
             await updateDoc(doc(db, 'matches', matchId), {
                 [`evaluations.${currentUser.uid}`]: evaluationScores,
-                [`completed.${currentUser.uid}`]: true
+                [`completed.${currentUser.uid}`]: true,
+                status: 'completed'
             });
 
             // Award points
@@ -1421,6 +1482,12 @@
         };
 
         window.cancelMatching = async function() {
+            // Clean up match if one was created
+            if (matchId) {
+                try {
+                    await updateDoc(doc(db, 'matches', matchId), { status: 'cancelled' });
+                } catch (e) {}
+            }
             await deleteDoc(doc(db, 'match_queue', currentUser.uid));
             window.location.href = 'dashboard.html';
         };

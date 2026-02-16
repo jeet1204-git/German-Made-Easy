@@ -475,14 +475,14 @@
                 const result = await signInWithPopup(auth, googleProvider);
                 const user = result.user;
 
-                // Create user document in Firestore
+                // Create user document in Firestore (merge to avoid overwriting existing data)
                 await setDoc(doc(db, 'users', user.uid), {
                     name: user.displayName,
                     email: user.email,
                     createdAt: serverTimestamp(),
                     enrolledCourses: [],
                     signUpMethod: 'google'
-                });
+                }, { merge: true });
 
                 // Send welcome email
                 await sendWelcomeEmail(user.email, user.displayName);

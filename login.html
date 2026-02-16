@@ -279,7 +279,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, setDoc, getDoc, serverTimestamp, collection } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
@@ -370,21 +370,14 @@
                         signUpMethod: 'google'
                     });
 
-                    // Send welcome email
-                    await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            service_id: 'service_gmail',
-                            template_id: 'template_welcome',
-                            user_id: 'YOUR_EMAILJS_USER_ID',
-                            template_params: {
-                                to_email: user.email,
-                                to_name: user.displayName,
-                                from_name: 'German Made Easy'
-                            }
-                        })
-                    }).catch(err => console.log('Email service not configured yet'));
+                    // Queue welcome email via Firebase mail collection
+                    await setDoc(doc(collection(db, 'mail'), Date.now().toString()), {
+                        to: user.email,
+                        message: {
+                            subject: 'Welcome to German Made Easy!',
+                            html: '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;"><h1 style="color: #FF6B35;">Welcome to German Made Easy, ' + (user.displayName || 'Student') + '!</h1><p>Thank you for joining us on your German learning journey!</p><p>Browse our courses and start learning at your own pace.</p><p style="color: #666;">Best regards,<br>Team German Made Easy</p></div>'
+                        }
+                    }).catch(err => console.log('Welcome email queue error:', err));
                 }
 
                 showAlert('Login successful! Redirecting...', 'success');

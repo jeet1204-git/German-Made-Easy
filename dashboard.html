@@ -572,9 +572,11 @@
             if (streakDays >= 7) return '⚡ Consistent';
             if (totalScore >= 200) return '🚀 Rising Star';
             
-            var joinedDate = joinedAt && joinedAt.toDate ? joinedAt.toDate() : new Date(joinedAt);
-            var daysSinceJoined = (new Date() - joinedDate) / (1000 * 60 * 60 * 24);
-            if (daysSinceJoined <= 7) return '🌱 New Learner';
+            if (joinedAt) {
+                var joinedDate = joinedAt && joinedAt.toDate ? joinedAt.toDate() : new Date(joinedAt);
+                var daysSinceJoined = (new Date() - joinedDate) / (1000 * 60 * 60 * 24);
+                if (daysSinceJoined <= 7) return '🌱 New Learner';
+            }
             
             return '📚 Learning';
         }
@@ -662,9 +664,19 @@
                 // --- Weekly score tracking with Monday reset ---
                 var lastMonday = getLastMonday();
                 var weeklyResetDate = userData.weeklyResetDate;
-                var currentWeeklyScore = userData.weeklyScore;
+                var currentWeeklyScore = userData.weeklyScore || 0;
                 
-                if (!weeklyResetDate || (weeklyResetDate.toDate && weeklyResetDate.toDate() < lastMonday) || (new Date(weeklyResetDate) < lastMonday)) {
+                var needsReset = false;
+                if (!weeklyResetDate) {
+                    needsReset = true;
+                } else {
+                    var resetDate = weeklyResetDate.toDate ? weeklyResetDate.toDate() : new Date(weeklyResetDate);
+                    if (resetDate < lastMonday) {
+                        needsReset = true;
+                    }
+                }
+                
+                if (needsReset) {
                     currentWeeklyScore = currentStreakDays * 10 + 50;
                     await updateDoc(userDocRef, {
                         totalScore: currentTotalScore,

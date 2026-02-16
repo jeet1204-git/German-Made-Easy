@@ -43,10 +43,15 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
-    // Match queue: authenticated users can read all entries and manage their own
+    // Match queue: authenticated users can read all entries, manage their own,
+    // and update others' entries when creating a match (setting matchId and status)
     match /match_queue/{userId} {
       allow read: if request.auth != null;
-      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && (
+        request.auth.uid == userId ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['matchId', 'status']))
+      );
       allow delete: if request.auth != null && request.auth.uid == userId;
     }
 

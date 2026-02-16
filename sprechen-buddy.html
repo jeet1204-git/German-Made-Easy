@@ -604,7 +604,7 @@
                         <h3>Your Partner</h3>
                         <div class="info-row">
                             <span class="info-label">Name</span>
-                            <span class="info-value" id="partnerName">Der Löwe</span>
+                            <span class="info-value" id="partnerName">Loading...</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">Level</span>
@@ -617,7 +617,7 @@
                     </div>
 
                     <p style="color: #999; font-size: 14px; margin-top: 20px;">
-                        📝 All sessions are anonymous. Personal details are never shared.
+                        📝 Your partner's account name is shown above. Happy practicing!
                     </p>
                 </div>
             </div>
@@ -826,6 +826,8 @@
         let currentUser = null;
         let userData = null;
         let matchId = null;
+        let matchHandled = false;
+        let partnerDisplayName = 'Partner';
         let peerConnection = null;
         let localStream = null;
         let remoteStream = null;
@@ -913,14 +915,9 @@
             ]
         };
 
-        // Anonymous nicknames
-        const germanNicknames = [
-            "Der Löwe", "Die Katze", "Der Bär", "Die Eule", "Der Wolf",
-            "Die Schildkröte", "Der Fuchs", "Die Giraffe", "Der Pinguin", "Die Schlange"
-        ];
-
-        function getRandomNickname() {
-            return germanNicknames[Math.floor(Math.random() * germanNicknames.length)];
+        // Get user's real display name from their account
+        function getUserDisplayName() {
+            return userData.name || currentUser.displayName || currentUser.email.split('@')[0];
         }
 
         function getRandomTask(level) {
@@ -952,13 +949,13 @@
         async function startMatching() {
             showState('waitingState');
 
-            // Create or update match queue entry
+            // Create or update match queue entry with real name
             const queueRef = doc(db, 'match_queue', currentUser.uid);
             await setDoc(queueRef, {
                 userId: currentUser.uid,
                 level: userData.level || 'A1',
                 streak: userData.streakDays || 1,
-                nickname: getRandomNickname(),
+                displayName: getUserDisplayName(),
                 timestamp: serverTimestamp(),
                 status: 'waiting'
             });
@@ -966,63 +963,128 @@
             // Update queue count
             updateQueueCount();
 
-            // Listen for matches
-            const unsubscribe = onSnapshot(queueRef, async (snapshot) => {
+            let unsubQueue = null;
+            let unsubMatches = null;
+
+            // Listen for changes to own queue entry (fires when match creator updates it)
+            unsubQueue = onSnapshot(queueRef, async (snapshot) => {
                 const queueData = snapshot.data();
-                if (queueData && queueData.matchId) {
+                if (queueData && queueData.matchId && !matchHandled) {
+                    matchHandled = true;
                     matchId = queueData.matchId;
-                    unsubscribe();
+                    if (unsubQueue) unsubQueue();
+                    if (unsubMatches) unsubMatches();
                     await handleMatchFound();
                 }
             });
 
-            // Try to find match
+            // Also listen for match documents where this user is a participant.
+            // This is critical because Firestore security rules prevent the match
+            // creator from updating the partner's queue entry, so the partner
+            // detects the match here instead.
+            const matchesQuery = query(
+                collection(db, 'matches'),
+                where('users', 'array-contains', currentUser.uid)
+            );
+
+            unsubMatches = onSnapshot(matchesQuery, async (snapshot) => {
+                snapshot.docChanges().forEach(async (change) => {
+                    if (change.type === 'added') {
+                        const matchData = change.doc.data();
+                        if (matchData.status === 'active' && !matchHandled) {
+                            matchHandled = true;
+                            matchId = change.doc.id;
+                            // Update own queue entry
+                            try {
+                                await updateDoc(queueRef, {
+                                    matchId: matchId,
+                                    status: 'matched'
+                                });
+                            } catch (e) {
+                                console.log('Queue entry update skipped:', e);
+                            }
+                            if (unsubQueue) unsubQueue();
+                            if (unsubMatches) unsubMatches();
+                            await handleMatchFound();
+                        }
+                    }
+                });
+            });
+
+            // Clean up listeners on page unload
+            window.addEventListener('beforeunload', () => {
+                if (unsubQueue) unsubQueue();
+                if (unsubMatches) unsubMatches();
+            });
+
+            // Try to find match after a short delay
             setTimeout(() => findMatch(), 2000);
         }
 
         async function findMatch() {
-            const queueRef = collection(db, 'match_queue');
-            const q = query(
-                queueRef,
-                where('status', '==', 'waiting')
-            );
+            // Don't search if already matched
+            if (matchId || matchHandled) return;
 
-            const snapshot = await getDocs(q);
-            const candidates = [];
-            
-            snapshot.forEach(doc => {
-                if (doc.id !== currentUser.uid) {
-                    candidates.push({ id: doc.id, ...doc.data() });
+            try {
+                const queueRef = collection(db, 'match_queue');
+                const q = query(
+                    queueRef,
+                    where('status', '==', 'waiting')
+                );
+
+                const snapshot = await getDocs(q);
+                const candidates = [];
+
+                snapshot.forEach(docSnap => {
+                    if (docSnap.id !== currentUser.uid) {
+                        candidates.push({ id: docSnap.id, ...docSnap.data() });
+                    }
+                });
+
+                if (candidates.length > 0 && !matchId && !matchHandled) {
+                    // Match with first available candidate
+                    const partner = candidates[0];
+                    const newMatchId = `match_${Date.now()}_${currentUser.uid.substring(0, 6)}`;
+
+                    // Create match document with both users' display names
+                    await setDoc(doc(db, 'matches', newMatchId), {
+                        users: [currentUser.uid, partner.id],
+                        userNames: {
+                            [currentUser.uid]: getUserDisplayName(),
+                            [partner.id]: partner.displayName || 'Student'
+                        },
+                        level: userData.level || 'A1',
+                        task: getRandomTask(userData.level || 'A1'),
+                        startTime: serverTimestamp(),
+                        status: 'active'
+                    });
+
+                    // Update own queue entry (always succeeds)
+                    await updateDoc(doc(db, 'match_queue', currentUser.uid), {
+                        matchId: newMatchId,
+                        status: 'matched'
+                    });
+
+                    // Try to update partner's queue entry
+                    // This may fail due to Firestore security rules (only owner can write)
+                    // but the partner will detect the match via their matches collection listener
+                    try {
+                        await updateDoc(doc(db, 'match_queue', partner.id), {
+                            matchId: newMatchId,
+                            status: 'matched'
+                        });
+                    } catch (e) {
+                        console.log('Partner will detect match via matches listener');
+                    }
+                } else if (!matchId && !matchHandled) {
+                    // Keep waiting, check again
+                    setTimeout(() => findMatch(), 3000);
                 }
-            });
-
-            if (candidates.length > 0) {
-                // Match with first candidate
-                const partner = candidates[0];
-                const newMatchId = `match_${Date.now()}`;
-                
-                // Create match document
-                await setDoc(doc(db, 'matches', newMatchId), {
-                    users: [currentUser.uid, partner.id],
-                    level: userData.level || 'A1',
-                    task: getRandomTask(userData.level || 'A1'),
-                    startTime: serverTimestamp(),
-                    status: 'active'
-                });
-
-                // Update both queue entries
-                await updateDoc(doc(db, 'match_queue', currentUser.uid), {
-                    matchId: newMatchId,
-                    status: 'matched'
-                });
-
-                await updateDoc(doc(db, 'match_queue', partner.id), {
-                    matchId: newMatchId,
-                    status: 'matched'
-                });
-            } else {
-                // Keep waiting, check again
-                setTimeout(() => findMatch(), 3000);
+            } catch (error) {
+                console.error('Error in findMatch:', error);
+                if (!matchId && !matchHandled) {
+                    setTimeout(() => findMatch(), 3000);
+                }
             }
         }
 
@@ -1037,18 +1099,38 @@
             showState('matchFoundState');
 
             // Get match details
-            const matchDoc = await getDoc(doc(db, 'matches', matchId));
-            const matchData = matchDoc.data();
+            const matchDocSnap = await getDoc(doc(db, 'matches', matchId));
+            const matchData = matchDocSnap.data();
 
             // Find partner
             const partnerId = matchData.users.find(id => id !== currentUser.uid);
-            const partnerQueue = await getDoc(doc(db, 'match_queue', partnerId));
-            const partnerData = partnerQueue.data();
 
-            // Display partner info
-            document.getElementById('partnerName').textContent = partnerData.nickname;
-            document.getElementById('partnerLevel').textContent = partnerData.level;
-            document.getElementById('partnerStreak').textContent = partnerData.streak;
+            // Get partner's display name from match document
+            partnerDisplayName = 'Student';
+            let partnerLevel = matchData.level || 'A1';
+            let partnerStreak = 1;
+
+            if (matchData.userNames && matchData.userNames[partnerId]) {
+                partnerDisplayName = matchData.userNames[partnerId];
+            }
+
+            // Try to get additional info from partner's queue entry
+            try {
+                const partnerQueue = await getDoc(doc(db, 'match_queue', partnerId));
+                if (partnerQueue.exists()) {
+                    const partnerData = partnerQueue.data();
+                    if (partnerData.displayName) partnerDisplayName = partnerData.displayName;
+                    if (partnerData.level) partnerLevel = partnerData.level;
+                    if (partnerData.streak) partnerStreak = partnerData.streak;
+                }
+            } catch (e) {
+                console.log('Using name from match document');
+            }
+
+            // Display partner info with real name
+            document.getElementById('partnerName').textContent = partnerDisplayName;
+            document.getElementById('partnerLevel').textContent = partnerLevel;
+            document.getElementById('partnerStreak').textContent = partnerStreak;
 
             // Wait 3 seconds then start session
             setTimeout(() => startSession(matchData), 3000);
@@ -1134,23 +1216,54 @@
                 // ICE candidate handling - store as individual docs in a subcollection
                 peerConnection.onicecandidate = async (event) => {
                     if (event.candidate) {
-                        await addDoc(collection(db, 'matches', matchId, 'candidates_' + currentUser.uid), event.candidate.toJSON());
+                        try {
+                            await addDoc(collection(db, 'matches', matchId, 'candidates_' + currentUser.uid), event.candidate.toJSON());
+                        } catch (e) {
+                            console.error('Error sending ICE candidate:', e);
+                        }
                     }
                 };
 
                 // Monitor connection state
                 peerConnection.oniceconnectionstatechange = () => {
                     console.log('ICE connection state:', peerConnection.iceConnectionState);
+                    const state = peerConnection.iceConnectionState;
+                    if (state === 'connected' || state === 'completed') {
+                        console.log('WebRTC connection established successfully');
+                    } else if (state === 'failed') {
+                        console.error('WebRTC connection failed - attempting ICE restart');
+                        peerConnection.restartIce();
+                    }
                 };
 
-                // Create and send offer/answer based on user order
-                const matchDoc = await getDoc(doc(db, 'matches', matchId));
-                const matchData = matchDoc.data();
+                // Buffer for ICE candidates that arrive before remote description is set.
+                // Without buffering, candidates are silently lost and video never connects.
+                let iceCandidateBuffer = [];
+                let isRemoteDescriptionSet = false;
+
+                async function flushIceCandidateBuffer() {
+                    isRemoteDescriptionSet = true;
+                    for (const candidateData of iceCandidateBuffer) {
+                        try {
+                            await peerConnection.addIceCandidate(new RTCIceCandidate(candidateData));
+                        } catch (e) {
+                            console.error('Error adding buffered ICE candidate:', e);
+                        }
+                    }
+                    iceCandidateBuffer = [];
+                }
+
+                // Get match details for signaling
+                const matchDocSnap = await getDoc(doc(db, 'matches', matchId));
+                const matchData = matchDocSnap.data();
                 const users = matchData.users;
                 const partnerId = users.find(id => id !== currentUser.uid);
 
+                // Update remote video label with partner name
+                document.getElementById('remoteLabel').textContent = partnerDisplayName || 'Partner';
+
                 if (users[0] === currentUser.uid) {
-                    // User 1: Create and send offer
+                    // User 1 (offerer): Create and send offer
                     const offer = await peerConnection.createOffer();
                     await peerConnection.setLocalDescription(offer);
                     await updateDoc(doc(db, 'matches', matchId), {
@@ -1160,23 +1273,33 @@
                     // Listen for answer from partner
                     const unsubAnswer = onSnapshot(doc(db, 'matches', matchId), async (snapshot) => {
                         const data = snapshot.data();
-                        if (data.answer && !peerConnection.remoteDescription) {
-                            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                            unsubAnswer();
+                        if (data && data.answer && !peerConnection.remoteDescription) {
+                            try {
+                                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                                await flushIceCandidateBuffer();
+                                unsubAnswer();
+                            } catch (e) {
+                                console.error('Error setting remote description (answer):', e);
+                            }
                         }
                     });
                 } else {
-                    // User 2: Listen for offer and create answer
+                    // User 2 (answerer): Listen for offer and create answer
                     const unsubOffer = onSnapshot(doc(db, 'matches', matchId), async (snapshot) => {
                         const data = snapshot.data();
-                        if (data.offer && !peerConnection.remoteDescription) {
-                            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-                            const answer = await peerConnection.createAnswer();
-                            await peerConnection.setLocalDescription(answer);
-                            await updateDoc(doc(db, 'matches', matchId), {
-                                answer: { type: answer.type, sdp: answer.sdp }
-                            });
-                            unsubOffer();
+                        if (data && data.offer && !peerConnection.remoteDescription) {
+                            try {
+                                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                                const answer = await peerConnection.createAnswer();
+                                await peerConnection.setLocalDescription(answer);
+                                await updateDoc(doc(db, 'matches', matchId), {
+                                    answer: { type: answer.type, sdp: answer.sdp }
+                                });
+                                await flushIceCandidateBuffer();
+                                unsubOffer();
+                            } catch (e) {
+                                console.error('Error handling offer/creating answer:', e);
+                            }
                         }
                     });
                 }
@@ -1186,10 +1309,17 @@
                 onSnapshot(query(candidatesRef), (snapshot) => {
                     snapshot.docChanges().forEach(async (change) => {
                         if (change.type === 'added') {
-                            try {
-                                await peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
-                            } catch (e) {
-                                console.error('Error adding ICE candidate:', e);
+                            const candidateData = change.doc.data();
+                            if (isRemoteDescriptionSet) {
+                                // Remote description already set, add immediately
+                                try {
+                                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidateData));
+                                } catch (e) {
+                                    console.error('Error adding ICE candidate:', e);
+                                }
+                            } else {
+                                // Buffer until remote description is set
+                                iceCandidateBuffer.push(candidateData);
                             }
                         }
                     });
@@ -1299,12 +1429,33 @@
             // Reset everything
             evaluationScores = { fluency: 0, vocabulary: 0, grammar: 0, taskCompletion: 0 };
             matchId = null;
+            matchHandled = false;
+            partnerDisplayName = 'Partner';
             location.reload();
         };
 
         window.backToDashboard = function() {
             window.location.href = 'dashboard.html';
         };
+
+        // Clean up queue entry and connections when leaving the page
+        window.addEventListener('beforeunload', () => {
+            if (currentUser) {
+                // Use navigator.sendBeacon for reliability during page unload
+                // Also attempt direct delete
+                try {
+                    deleteDoc(doc(db, 'match_queue', currentUser.uid));
+                } catch (e) {
+                    // Best effort cleanup
+                }
+            }
+            if (peerConnection) {
+                peerConnection.close();
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+        });
     </script>
 </body>
 </html>

@@ -67,6 +67,24 @@
             background: #004E89;
         }
 
+        .btn-nav-link {
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            background: white;
+            color: #FF6B35;
+            border: 2px solid #FF6B35;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-nav-link:hover {
+            background: #FF6B35;
+            color: white;
+        }
+
         .leaderboard-container {
             max-width: 1000px;
             margin: 40px auto;
@@ -417,9 +435,11 @@
 <body>
     <nav>
         <div class="nav-container">
-            <div class="logo">German Made Easy</div>
+            <a href="index.html" class="logo" style="text-decoration:none;">German Made Easy</a>
             <div class="user-info">
                 <span class="user-email" id="userEmail">Loading...</span>
+                <a href="index.html" class="btn-nav-link" aria-label="Home">🏠 Home</a>
+                <a href="dashboard.html" class="btn-nav-link" aria-label="Dashboard">📊 Dashboard</a>
                 <button class="btn-logout" onclick="logout()">Logout</button>
             </div>
         </div>

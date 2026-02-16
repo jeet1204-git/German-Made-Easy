@@ -769,7 +769,7 @@
                 var userBadge = calculateBadge(currentStreakDays, currentTotalScore, userData.joinedAt);
                 var firstName = getFirstName(userData.name || user.displayName);
 
-                renderDashboard({
+                await renderDashboard({
                     firstName: firstName,
                     streakDays: currentStreakDays,
                     totalScore: currentTotalScore,

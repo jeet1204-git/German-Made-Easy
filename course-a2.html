@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A1 Course - Beginner German | German Made Easy</title>
+    <title>A2 Course - Elementary German | German Made Easy</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Gujarati:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -960,16 +960,16 @@
                 <div class="breadcrumb">
                     <a href="index.html">Home</a> › 
                     <a href="index.html#courses">Courses</a> › 
-                    <span>A1 Beginner</span>
+                    <span>A2 Elementary</span>
                 </div>
 
-                <h1>A1 Course - Complete German for Beginners</h1>
+                <h1>A2 Course - Elementary German</h1>
                 
                 <p class="hero-description">Master German basics with 12 comprehensive chapters. Learn to speak, read, and write German confidently in everyday situations.</p>
 
                 <div class="course-badges">
                     <span class="badge badge-available">Available Now</span>
-                    <span class="badge badge-level">Level A1</span>
+                    <span class="badge badge-level">Level A2</span>
                 </div>
 
                 <div class="course-meta">
@@ -998,7 +998,7 @@
                     allow="autoplay; fullscreen; picture-in-picture" 
                     allowfullscreen
                     style="position:absolute;top:0;left:0;width:100%;height:100%;" 
-                    title="A1 Course Preview"
+                    title="A2 Course Preview"
                     loading="lazy">
                 </iframe>
             </div>
@@ -1014,7 +1014,7 @@
                 <div class="learn-grid">
                     <div class="learn-item">
                         <span class="checkmark">✓</span>
-                        <span>Speak and write German at A1 beginner level confidently</span>
+                        <span>Speak and write German at A2 elementary level confidently</span>
                     </div>
                     <div class="learn-item">
                         <span class="checkmark">✓</span>
@@ -1034,7 +1034,7 @@
                     </div>
                     <div class="learn-item">
                         <span class="checkmark">✓</span>
-                        <span>Prepare for Goethe-Zertifikat A1 exam</span>
+                        <span>Prepare for Goethe-Zertifikat A2 exam</span>
                     </div>
                     <div class="learn-item">
                         <span class="checkmark">✓</span>
@@ -1396,8 +1396,8 @@
                     <p class="price-note">One-time payment • Lifetime access</p>
                 </div>
 
-                <button class="btn-enroll" onclick="enrollA1()">
-                    Enroll in A1 Course
+                <button class="btn-enroll" onclick="window.location.href='payment.html'">
+                    Enroll in A2 Course
                 </button>
 
                 <p class="guarantee">
@@ -1457,13 +1457,13 @@
             <div class="courses-slider" id="coursesSlider">
                 <div class="slider-card">
                     <div class="slider-card-header">
-                        <div class="slider-card-level">A2</div>
-                        <div class="slider-card-name">Elementary</div>
+                        <div class="slider-card-level">A1</div>
+                        <div class="slider-card-name">Beginner</div>
                     </div>
                     <div class="slider-card-body">
-                        <span class="slider-card-badge coming">Coming Soon</span>
-                        <p>Expand your skills to handle routine tasks and describe your background effectively.</p>
-                        <a href="course-a2.html" class="slider-card-btn primary">View Course →</a>
+                        <span class="slider-card-badge available">Available Now</span>
+                        <p>Build a strong foundation in German. Master basic conversations and everyday situations.</p>
+                        <a href="course-a1.html" class="slider-card-btn primary">View Course →</a>
                     </div>
                 </div>
                 <div class="slider-card">
@@ -1579,21 +1579,17 @@
         window.openVideoModal = function(videoId) {
             const modal = document.getElementById('videoModal');
             const container = document.getElementById('videoContainer');
-
-            // Sanitize videoId to only allow numeric Vimeo IDs
-            const safeVideoId = String(videoId).replace(/[^0-9]/g, '');
-            if (!safeVideoId) return;
-
+            
             // Create video embed
-            const iframe = document.createElement('iframe');
-            iframe.src = 'https://player.vimeo.com/video/' + safeVideoId + '?h=&badge=0&autopause=0';
-            iframe.frameBorder = '0';
-            iframe.allow = 'autoplay; fullscreen; picture-in-picture';
-            iframe.allowFullscreen = true;
-            iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
-            iframe.title = 'Lesson Video';
-            container.innerHTML = '';
-            container.appendChild(iframe);
+            container.innerHTML = `
+                <iframe src="https://player.vimeo.com/video/${videoId}?h=&badge=0&autopause=0" 
+                        frameborder="0" 
+                        allow="autoplay; fullscreen; picture-in-picture" 
+                        allowfullscreen
+                        style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+                        title="Lesson Video">
+                </iframe>
+            `;
             
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1624,19 +1620,6 @@
             }
         });
 
-        // Enroll in A1 course
-        window.enrollA1 = function() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert('Please login or sign up first to enroll in courses.');
-                window.location.href = 'login.html';
-                return;
-            }
-            sessionStorage.setItem('enrollCourse', 'A1 Course - Complete German for Beginners');
-            sessionStorage.setItem('enrollAmount', '6000');
-            window.location.href = 'payment.html';
-        };
-
         // Gift Modal
         window.openGiftModal = function() {
             document.getElementById('giftModal').classList.add('active');
@@ -1659,7 +1642,7 @@
             sessionStorage.setItem('giftMode', 'true');
             sessionStorage.setItem('giftRecipientName', recipientName);
             sessionStorage.setItem('giftRecipientEmail', recipientEmail);
-            sessionStorage.setItem('enrollCourse', 'A1 Course - Complete German for Beginners');
+            sessionStorage.setItem('enrollCourse', 'A2 Course - Elementary German');
             sessionStorage.setItem('enrollAmount', '6000');
 
             window.location.href = 'payment.html';

@@ -350,6 +350,133 @@
         .gift-recipient-row span:last-child {
             font-weight: 600;
         }
+
+        /* Navigation Confirmation Modal */
+        .nav-confirmation-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .nav-confirmation-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .nav-confirmation-modal {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { 
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .nav-confirmation-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .nav-confirmation-modal h3 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 12px;
+        }
+
+        .nav-confirmation-modal p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .nav-confirmation-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nav-confirm-btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .nav-confirm-leave {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            flex: 1;
+            max-width: 160px;
+        }
+
+        .nav-confirm-leave:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .nav-confirm-stay {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            flex: 1.4;
+            max-width: 220px;
+            padding: 18px 32px;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .nav-confirm-stay:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5);
+        }
+
+        @media (max-width: 600px) {
+            .nav-confirmation-modal {
+                padding: 30px 20px;
+            }
+
+            .nav-confirmation-buttons {
+                flex-direction: column-reverse;
+                gap: 12px;
+            }
+
+            .nav-confirm-leave,
+            .nav-confirm-stay {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -524,6 +651,72 @@
             }, 5000);
         }
 
+        // Navigation Confirmation System
+        let pendingNavigation = null;
+        let allowNavigation = false;
+
+        // Show confirmation modal
+        function showNavigationConfirmation(targetUrl) {
+            if (allowNavigation) {
+                return true;
+            }
+
+            pendingNavigation = targetUrl;
+            const modal = document.getElementById('navConfirmationModal');
+            modal.classList.add('show');
+            return false;
+        }
+
+        // Handle confirmation buttons
+        document.getElementById('confirmLeave').addEventListener('click', () => {
+            const modal = document.getElementById('navConfirmationModal');
+            modal.classList.remove('show');
+            allowNavigation = true;
+            
+            if (pendingNavigation) {
+                window.location.href = pendingNavigation;
+            }
+        });
+
+        document.getElementById('confirmStay').addEventListener('click', () => {
+            const modal = document.getElementById('navConfirmationModal');
+            modal.classList.remove('show');
+            pendingNavigation = null;
+        });
+
+        // Handle browser back/close/refresh
+        // Note: Browser security prevents custom modals in beforeunload events
+        // The browser will show its own confirmation dialog
+        window.addEventListener('beforeunload', (e) => {
+            if (!allowNavigation) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+
+        // Intercept all link clicks on the page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get all links on the page
+            const allLinks = document.querySelectorAll('a[href]');
+            
+            allLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                
+                // Skip anchors and javascript: links
+                // Note: We intentionally show confirmation for all other links (including external ones)
+                // because users should not leave the payment page without completing or cancelling
+                if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                    link.addEventListener('click', (e) => {
+                        if (!allowNavigation) {
+                            e.preventDefault();
+                            showNavigationConfirmation(href);
+                        }
+                    });
+                }
+            });
+        });
+
         // Check authentication and load course details
         onAuthStateChanged(auth, (user) => {
             if (!user) {
@@ -658,6 +851,9 @@
                     },
                     handler: async function (response) {
                         try {
+                            // Allow navigation after successful payment
+                            allowNavigation = true;
+                            
                             // Update payment status
                             await updateDoc(doc(db, 'payments', paymentId), {
                                 razorpay_payment_id: response.razorpay_payment_id,
@@ -771,6 +967,9 @@
                     onApprove: async function(data, actions) {
                         return actions.order.capture().then(async function(details) {
                             try {
+                                // Allow navigation after successful payment
+                                allowNavigation = true;
+                                
                                 // Update payment status
                                 await updateDoc(doc(db, 'payments', paymentId), {
                                     paypal_order_id: data.orderID,
@@ -831,5 +1030,18 @@
             }
         }
     </script>
+
+    <!-- Navigation Confirmation Modal -->
+    <div class="nav-confirmation-overlay" id="navConfirmationModal">
+        <div class="nav-confirmation-modal">
+            <div class="nav-confirmation-icon">⚠️</div>
+            <h3>Are you sure you want to leave?</h3>
+            <p>You are currently on a payment page. If you leave now, your payment process will be cancelled and you'll need to start over.</p>
+            <div class="nav-confirmation-buttons">
+                <button class="nav-confirm-btn nav-confirm-leave" id="confirmLeave">Yes, Leave</button>
+                <button class="nav-confirm-btn nav-confirm-stay" id="confirmStay">No, Stay on Page</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

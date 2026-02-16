@@ -685,6 +685,8 @@
         });
 
         // Handle browser back/close/refresh
+        // Note: Browser security prevents custom modals in beforeunload events
+        // The browser will show its own confirmation dialog
         window.addEventListener('beforeunload', (e) => {
             if (!allowNavigation) {
                 e.preventDefault();
@@ -701,7 +703,9 @@
             allLinks.forEach(link => {
                 const href = link.getAttribute('href');
                 
-                // Skip external links and anchors
+                // Skip anchors and javascript: links
+                // Note: We intentionally show confirmation for all other links (including external ones)
+                // because users should not leave the payment page without completing or cancelling
                 if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
                     link.addEventListener('click', (e) => {
                         if (!allowNavigation) {

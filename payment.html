@@ -294,6 +294,62 @@
             font-weight: 600;
             color: #666;
         }
+
+        .gift-banner {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border: 2px solid #ffb74d;
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .gift-banner-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .gift-banner h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #e65100;
+            margin-bottom: 4px;
+        }
+
+        .gift-banner p {
+            font-size: 14px;
+            color: #bf360c;
+        }
+
+        .gift-recipient-details {
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .gift-recipient-details h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #166534;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .gift-recipient-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #15803d;
+        }
+
+        .gift-recipient-row span:last-child {
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -302,7 +358,27 @@
         <h2>Complete Your Purchase</h2>
         
         <div class="alert alert-error" id="alertBox"></div>
-        
+
+        <!-- Gift Mode Banner (hidden by default) -->
+        <div class="gift-banner" id="giftBanner" style="display: none;">
+            <div class="gift-banner-icon">🎁</div>
+            <h3>You're gifting this course!</h3>
+            <p>This course will be sent as a gift</p>
+        </div>
+
+        <!-- Gift Recipient Details (hidden by default) -->
+        <div class="gift-recipient-details" id="giftRecipientDetails" style="display: none;">
+            <h4>🎁 Gift Recipient</h4>
+            <div class="gift-recipient-row">
+                <span>Name:</span>
+                <span id="giftNameDisplay"></span>
+            </div>
+            <div class="gift-recipient-row">
+                <span>Email:</span>
+                <span id="giftEmailDisplay"></span>
+            </div>
+        </div>
+
         <div class="course-details">
             <div class="course-name" id="courseName">Loading...</div>
             <div class="price-breakdown">
@@ -404,6 +480,9 @@
         let gstAmount = 0;
         let totalAmount = 0;
         let selectedPaymentMethod = 'razorpay'; // Default to Razorpay
+        let isGiftMode = false;
+        let giftRecipientName = '';
+        let giftRecipientEmail = '';
 
         // Payment Method Selection
         window.selectPaymentMethod = function(method) {
@@ -415,7 +494,7 @@
             
             if (method === 'razorpay') {
                 document.getElementById('methodRazorpay').classList.add('selected');
-                document.getElementById('payBtnText').textContent = 'Proceed with Razorpay';
+                document.getElementById('payBtnText').textContent = isGiftMode ? 'Purchase as Gift with Razorpay' : 'Proceed with Razorpay';
                 document.getElementById('securityText').textContent = 'Secure payment powered by Razorpay';
                 
                 // Show Indian pricing
@@ -424,7 +503,7 @@
                 document.getElementById('totalAmount').textContent = '₹' + totalAmount.toLocaleString('en-IN');
             } else {
                 document.getElementById('methodPaypal').classList.add('selected');
-                document.getElementById('payBtnText').textContent = 'Proceed with PayPal';
+                document.getElementById('payBtnText').textContent = isGiftMode ? 'Purchase as Gift with PayPal' : 'Proceed with PayPal';
                 document.getElementById('securityText').textContent = 'Secure payment powered by PayPal';
                 
                 // Convert to EUR (approximate - 1 INR = 0.011 EUR)
@@ -478,6 +557,22 @@
             document.getElementById('coursePrice').textContent = '₹' + courseAmount.toLocaleString('en-IN');
             document.getElementById('gstAmount').textContent = '₹' + gstAmount.toLocaleString('en-IN');
             document.getElementById('totalAmount').textContent = '₹' + totalAmount.toLocaleString('en-IN');
+
+            // Check for gift mode
+            isGiftMode = sessionStorage.getItem('giftMode') === 'true';
+            if (isGiftMode) {
+                giftRecipientName = sessionStorage.getItem('giftRecipientName') || '';
+                giftRecipientEmail = sessionStorage.getItem('giftRecipientEmail') || '';
+
+                document.getElementById('giftBanner').style.display = 'block';
+                document.getElementById('giftRecipientDetails').style.display = 'block';
+                document.getElementById('giftNameDisplay').textContent = giftRecipientName;
+                document.getElementById('giftEmailDisplay').textContent = giftRecipientEmail;
+
+                // Update page title and button text
+                document.querySelector('h2').textContent = 'Gift This Course';
+                document.getElementById('payBtnText').textContent = 'Purchase as Gift with Razorpay';
+            }
         });
 
         // Payment Handler
@@ -526,7 +621,7 @@
             try {
                 // Create payment order in Firebase first
                 const paymentId = 'PAY' + Date.now();
-                await setDoc(doc(db, 'payments', paymentId), {
+                const paymentData = {
                     userId: currentUser.uid,
                     userEmail: email,
                     userName: name,
@@ -536,8 +631,14 @@
                     gstAmount: gstAmount,
                     totalAmount: totalAmount,
                     status: 'initiated',
+                    isGift: isGiftMode,
                     createdAt: serverTimestamp()
-                });
+                };
+                if (isGiftMode) {
+                    paymentData.giftRecipientName = giftRecipientName;
+                    paymentData.giftRecipientEmail = giftRecipientEmail;
+                }
+                await setDoc(doc(db, 'payments', paymentId), paymentData);
 
                 // Razorpay options
                 const options = {
@@ -571,11 +672,18 @@
                                 enrolledCourses: arrayUnion(courseName)
                             });
 
-                            alert('🎉 Payment Successful!\n\nPayment ID: ' + response.razorpay_payment_id + '\n\nYou now have access to ' + courseName + '!\n\nWe\'ll send course access details to your email shortly.');
-                            
+                            if (isGiftMode) {
+                                alert('🎉 Gift Purchase Successful!\n\nPayment ID: ' + response.razorpay_payment_id + '\n\nA gift of ' + courseName + ' will be sent to ' + giftRecipientName + ' at ' + giftRecipientEmail + '!\n\nWe\'ll send the gift details shortly.');
+                            } else {
+                                alert('🎉 Payment Successful!\n\nPayment ID: ' + response.razorpay_payment_id + '\n\nYou now have access to ' + courseName + '!\n\nWe\'ll send course access details to your email shortly.');
+                            }
+
                             // Clear session
                             sessionStorage.removeItem('enrollCourse');
                             sessionStorage.removeItem('enrollAmount');
+                            sessionStorage.removeItem('giftMode');
+                            sessionStorage.removeItem('giftRecipientName');
+                            sessionStorage.removeItem('giftRecipientEmail');
 
                             // Redirect to dashboard
                             window.location.href = 'dashboard.html';
@@ -626,7 +734,7 @@
                 const paymentId = 'PAY' + Date.now();
                 const eurAmount = (totalAmount * 0.011).toFixed(2); // Convert INR to EUR
 
-                await setDoc(doc(db, 'payments', paymentId), {
+                const paypalPaymentData = {
                     userId: currentUser.uid,
                     userEmail: email,
                     userName: name,
@@ -637,9 +745,15 @@
                     totalAmountINR: totalAmount,
                     totalAmountEUR: parseFloat(eurAmount),
                     paymentMethod: 'paypal',
+                    isGift: isGiftMode,
                     status: 'initiated',
                     createdAt: serverTimestamp()
-                });
+                };
+                if (isGiftMode) {
+                    paypalPaymentData.giftRecipientName = giftRecipientName;
+                    paypalPaymentData.giftRecipientEmail = giftRecipientEmail;
+                }
+                await setDoc(doc(db, 'payments', paymentId), paypalPaymentData);
 
                 // Initialize PayPal
                 paypal.Buttons({
@@ -671,11 +785,18 @@
                                     enrolledCourses: arrayUnion(courseName)
                                 });
 
-                                alert('🎉 Payment Successful!\n\nOrder ID: ' + data.orderID + '\n\nYou now have access to ' + courseName + '!\n\nWe\'ll send course access details to your email shortly.');
-                                
+                                if (isGiftMode) {
+                                    alert('🎉 Gift Purchase Successful!\n\nOrder ID: ' + data.orderID + '\n\nA gift of ' + courseName + ' will be sent to ' + giftRecipientName + ' at ' + giftRecipientEmail + '!\n\nWe\'ll send the gift details shortly.');
+                                } else {
+                                    alert('🎉 Payment Successful!\n\nOrder ID: ' + data.orderID + '\n\nYou now have access to ' + courseName + '!\n\nWe\'ll send course access details to your email shortly.');
+                                }
+
                                 // Clear session
                                 sessionStorage.removeItem('enrollCourse');
                                 sessionStorage.removeItem('enrollAmount');
+                                sessionStorage.removeItem('giftMode');
+                                sessionStorage.removeItem('giftRecipientName');
+                                sessionStorage.removeItem('giftRecipientEmail');
 
                                 // Redirect to dashboard
                                 window.location.href = 'dashboard.html';

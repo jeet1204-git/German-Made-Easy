@@ -11,19 +11,19 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Outfit', sans-serif;
             background: #f5f5f5;
             min-height: 100vh;
         }
-        
+
         nav {
             background: white;
             padding: 20px 40px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
-        
+
         .nav-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -31,7 +31,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .logo {
             font-size: 24px;
             font-weight: 900;
@@ -40,18 +40,18 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .user-info {
             display: flex;
             gap: 20px;
             align-items: center;
         }
-        
+
         .user-email {
             font-weight: 600;
             color: #1A1A2E;
         }
-        
+
         .btn-logout {
             padding: 10px 25px;
             border-radius: 25px;
@@ -62,39 +62,66 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         .btn-logout:hover {
             background: #004E89;
         }
-        
+
         .dashboard-container {
             max-width: 1400px;
             margin: 40px auto;
             padding: 0 40px;
         }
-        
-        h1 {
-            font-size: 48px;
-            margin-bottom: 40px;
-            color: #1A1A2E;
+
+        /* Welcome Header */
+        .welcome-header {
+            margin-bottom: 36px;
         }
-        
+
+        .welcome-header h1 {
+            font-size: 36px;
+            color: #1A1A2E;
+            margin-bottom: 16px;
+        }
+
+        .stat-chips {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #FFF3ED;
+            color: #FF6B35;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        /* Section headings */
+        .section-heading {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 20px;
+        }
+
+        /* Courses */
         .courses-section {
-            margin-bottom: 60px;
+            margin-bottom: 40px;
         }
-        
-        h2 {
-            font-size: 32px;
-            margin-bottom: 30px;
-            color: #1A1A2E;
-        }
-        
+
         .courses-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 30px;
         }
-        
+
         .course-card {
             background: white;
             border-radius: 20px;
@@ -102,25 +129,25 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
             transition: all 0.3s;
         }
-        
+
         .course-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
         }
-        
+
         .course-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-        
+
         .course-level {
             font-size: 36px;
             font-weight: 900;
             color: #FF6B35;
         }
-        
+
         .access-badge {
             background: #10b981;
             color: white;
@@ -130,24 +157,42 @@
             font-weight: 700;
             text-transform: uppercase;
         }
-        
+
         .course-title {
             font-size: 24px;
             font-weight: 700;
             margin-bottom: 15px;
             color: #1A1A2E;
         }
-        
+
         .course-description {
             color: #666;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             line-height: 1.6;
         }
-        
+
+        .course-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .course-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1A1A2E;
+            background: #f8f8f8;
+            padding: 8px 14px;
+            border-radius: 10px;
+        }
+
         .course-progress {
             margin-bottom: 20px;
         }
-        
+
         .progress-label {
             display: flex;
             justify-content: space-between;
@@ -155,21 +200,21 @@
             font-size: 14px;
             color: #666;
         }
-        
+
         .progress-bar {
             height: 8px;
             background: #e0e0e0;
             border-radius: 10px;
             overflow: hidden;
         }
-        
+
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #FF6B35, #004E89);
             border-radius: 10px;
             transition: width 0.5s ease;
         }
-        
+
         .btn-access {
             width: 100%;
             padding: 14px;
@@ -177,35 +222,38 @@
             color: white;
             border: none;
             border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Outfit', sans-serif;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         .btn-access:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
             box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
         }
-        
+
+        /* Empty state */
         .empty-state {
             text-align: center;
             padding: 80px 20px;
             background: white;
             border-radius: 20px;
         }
-        
+
         .empty-state h3 {
             font-size: 28px;
             margin-bottom: 15px;
             color: #1A1A2E;
         }
-        
+
         .empty-state p {
             font-size: 18px;
             color: #666;
             margin-bottom: 30px;
         }
-        
+
         .btn-browse {
             padding: 16px 40px;
             background: #FF6B35;
@@ -216,12 +264,130 @@
             display: inline-block;
             transition: all 0.3s;
         }
-        
+
         .btn-browse:hover {
             background: #004E89;
             transform: translateY(-2px);
         }
 
+        /* Leaderboard */
+        .leaderboard-section {
+            margin-bottom: 40px;
+        }
+
+        .leaderboard-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .leaderboard-list {
+            list-style: none;
+        }
+
+        .leaderboard-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .leaderboard-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .leaderboard-row:nth-child(odd) {
+            background: #fafafa;
+        }
+
+        .leaderboard-row.current-user {
+            background: #FFF3ED;
+            border: 2px solid #FF6B35;
+        }
+
+        .lb-rank {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1A1A2E;
+            width: 36px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .lb-rank.gold { color: #f59e0b; }
+        .lb-rank.silver { color: #9ca3af; }
+        .lb-rank.bronze { color: #cd7f32; }
+
+        .lb-name {
+            flex: 1;
+            font-weight: 600;
+            color: #1A1A2E;
+            margin-left: 12px;
+        }
+
+        .lb-score {
+            font-weight: 700;
+            color: #FF6B35;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .lb-streak {
+            font-size: 13px;
+            color: #666;
+            flex-shrink: 0;
+        }
+
+        .leaderboard-note {
+            font-size: 13px;
+            color: #999;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .leaderboard-empty {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 16px;
+        }
+
+        /* Sprechen Buddy */
+        .sprechen-section {
+            margin-bottom: 40px;
+        }
+
+        .sprechen-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            border: 3px dashed rgba(255, 107, 53, 0.4);
+            text-align: center;
+        }
+
+        .sprechen-emoji {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .sprechen-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 12px;
+        }
+
+        .sprechen-card p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Loading */
         .loading-screen {
             display: flex;
             align-items: center;
@@ -250,19 +416,46 @@
 
             .dashboard-container {
                 padding: 0 20px;
+                margin: 24px auto;
             }
 
-            h1 {
-                font-size: 36px;
+            .welcome-header h1 {
+                font-size: 28px;
+            }
+
+            .stat-chips {
+                gap: 8px;
+            }
+
+            .stat-chip {
+                font-size: 13px;
+                padding: 6px 14px;
             }
 
             .courses-grid {
                 grid-template-columns: 1fr;
             }
 
+            .course-stats {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
             .user-info {
                 flex-direction: column;
                 gap: 10px;
+            }
+
+            .leaderboard-row {
+                padding: 12px;
+            }
+
+            .lb-score {
+                margin-right: 8px;
+            }
+
+            .sprechen-card {
+                padding: 30px 20px;
             }
         }
     </style>
@@ -278,23 +471,16 @@
         </div>
     </nav>
 
-    <div class="dashboard-container">
-        <h1>Welcome back! 👋</h1>
-
-        <div class="courses-section">
-            <h2>My Courses</h2>
-            <div id="coursesContainer">
-                <div class="loading-screen">
-                    <div class="loading-spinner"></div>
-                </div>
-            </div>
+    <div class="dashboard-container" id="dashboardContent">
+        <div class="loading-screen">
+            <div class="loading-spinner"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, updateDoc, setDoc, serverTimestamp, collection, query, where, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
@@ -315,9 +501,34 @@
                 await signOut(auth);
                 window.location.href = 'index.html';
             } catch (error) {
-                alert('Error logging out: ' + error.message);
+                alert('Error logging out. Please try again.');
             }
         };
+
+        function getFirstName(fullName) {
+            return (fullName || '').split(' ')[0] || 'Student';
+        }
+
+        function deriveLevel(enrolledCourses) {
+            if (!enrolledCourses || enrolledCourses.length === 0) return 'unknown';
+            for (const course of enrolledCourses) {
+                if (course.includes('A2')) return 'A2';
+                if (course.includes('A1')) return 'A1';
+            }
+            return 'unknown';
+        }
+
+        function getCourseUrl(courseName) {
+            if (courseName.includes('A2')) return 'course-a2.html';
+            if (courseName.includes('A1')) return 'course-a1.html';
+            return '#';
+        }
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
 
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
@@ -325,67 +536,256 @@
                 return;
             }
 
-            // Display user email
             document.getElementById('userEmail').textContent = user.email;
 
             try {
-                // Get user's enrolled courses
-                const userDoc = await getDoc(doc(db, 'users', user.uid));
-                const userData = userDoc.data();
-                const enrolledCourses = userData?.enrolledCourses || [];
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+                var userData = userDocSnap.exists() ? userDocSnap.data() : {};
+                var enrolledCourses = userData.enrolledCourses || [];
 
-                const coursesContainer = document.getElementById('coursesContainer');
+                // --- Part A: Add missing fields without overwriting existing data ---
+                var missingFields = {};
 
-                if (enrolledCourses.length === 0) {
-                    coursesContainer.innerHTML = `
-                        <div class="empty-state">
-                            <h3>No courses yet</h3>
-                            <p>Start your German learning journey by enrolling in a course!</p>
-                            <a href="index.html#courses" class="btn-browse">Browse Courses</a>
-                        </div>
-                    `;
-                } else {
-                    const coursesHTML = enrolledCourses.map(courseName => {
-                        const progress = Math.floor(Math.random() * 50); // Placeholder - will be real once videos are added
-                        
-                        return `
-                            <div class="course-card">
-                                <div class="course-header">
-                                    <div class="course-level">${courseName.split(' ')[0]}</div>
-                                    <div class="access-badge">Active</div>
-                                </div>
-                                <div class="course-title">${courseName}</div>
-                                <div class="course-description">
-                                    Access all video lessons, practice materials, and exam preparation resources.
-                                </div>
-                                <div class="course-progress">
-                                    <div class="progress-label">
-                                        <span>Progress</span>
-                                        <span>${progress}%</span>
-                                    </div>
-                                    <div class="progress-bar">
-                                        <div class="progress-fill" style="width: ${progress}%"></div>
-                                    </div>
-                                </div>
-                                <button class="btn-access" onclick="alert('Course videos will be available soon! We\\'re preparing high-quality content for you.')">
-                                    Access Course →
-                                </button>
-                            </div>
-                        `;
-                    }).join('');
-
-                    coursesContainer.innerHTML = `<div class="courses-grid">${coursesHTML}</div>`;
+                if (!userData.level) {
+                    missingFields.level = deriveLevel(enrolledCourses);
                 }
+                if (userData.streakDays === undefined || userData.streakDays === null) {
+                    missingFields.streakDays = 1;
+                }
+                if (!userData.lastActive) {
+                    missingFields.lastActive = serverTimestamp();
+                }
+                if (!userData.joinedAt && userData.createdAt) {
+                    missingFields.joinedAt = userData.createdAt;
+                } else if (!userData.joinedAt) {
+                    missingFields.joinedAt = serverTimestamp();
+                }
+                if (userData.totalScore === undefined || userData.totalScore === null) {
+                    missingFields.totalScore = 0;
+                }
+
+                if (Object.keys(missingFields).length > 0) {
+                    await updateDoc(userDocRef, missingFields);
+                    for (var key in missingFields) {
+                        userData[key] = missingFields[key];
+                    }
+                }
+
+                var currentStreakDays = userData.streakDays || 1;
+                var userLevel = userData.level || deriveLevel(enrolledCourses);
+
+                // --- Part B: Streak logic (runs every dashboard load) ---
+                // Skip streak calculation if lastActive was just set (first login)
+                if (!missingFields.lastActive && userData.lastActive) {
+                    var lastActiveDate = userData.lastActive.toDate
+                        ? userData.lastActive.toDate()
+                        : new Date(userData.lastActive);
+                    var now = new Date();
+                    var diffMs = now.getTime() - lastActiveDate.getTime();
+                    var diffHours = diffMs / (1000 * 60 * 60);
+
+                    if (diffHours >= 24 && diffHours < 48) {
+                        // Yesterday — increment streak
+                        currentStreakDays = (userData.streakDays || 1) + 1;
+                        await updateDoc(userDocRef, {
+                            streakDays: currentStreakDays,
+                            lastActive: serverTimestamp()
+                        });
+                    } else if (diffHours < 24) {
+                        // Today — do nothing to streak, update lastActive silently
+                        await updateDoc(userDocRef, {
+                            lastActive: serverTimestamp()
+                        });
+                    } else {
+                        // Older than 48 hours — reset streak
+                        currentStreakDays = 1;
+                        await updateDoc(userDocRef, {
+                            streakDays: 1,
+                            lastActive: serverTimestamp()
+                        });
+                    }
+                }
+
+                // Recalculate totalScore: streakDays * 10 + 50 (join bonus)
+                var currentTotalScore = currentStreakDays * 10 + 50;
+                await updateDoc(userDocRef, { totalScore: currentTotalScore });
+
+                // --- Part C: Write to leaderboard collection ---
+                var firstName = getFirstName(userData.name || user.displayName);
+                await setDoc(doc(db, 'leaderboard', user.uid), {
+                    name: firstName,
+                    level: userLevel,
+                    totalScore: currentTotalScore,
+                    streakDays: currentStreakDays,
+                    lastUpdated: serverTimestamp()
+                }, { merge: true });
+
+                // --- Part D: Render dashboard UI ---
+                renderDashboard({
+                    firstName: firstName,
+                    streakDays: currentStreakDays,
+                    totalScore: currentTotalScore,
+                    level: userLevel,
+                    enrolledCourses: enrolledCourses,
+                    userId: user.uid
+                });
+
             } catch (error) {
-                console.error('Error loading courses:', error);
-                document.getElementById('coursesContainer').innerHTML = `
-                    <div class="empty-state">
-                        <h3>Error loading courses</h3>
-                        <p>Please refresh the page or contact support.</p>
-                    </div>
-                `;
+                document.getElementById('dashboardContent').innerHTML =
+                    '<div class="empty-state">' +
+                        '<h3>Something went wrong</h3>' +
+                        '<p>We couldn\'t load your dashboard. Please refresh the page or try again later.</p>' +
+                    '</div>';
             }
         });
+
+        async function renderDashboard(data) {
+            var container = document.getElementById('dashboardContent');
+            var safeName = escapeHtml(data.firstName);
+            var safeLevel = escapeHtml(data.level);
+
+            // Section 1: Welcome header with stat chips
+            var html =
+                '<div class="welcome-header">' +
+                    '<h1>Welcome back, ' + safeName + '! \uD83D\uDC4B</h1>' +
+                    '<div class="stat-chips">' +
+                        '<span class="stat-chip">\uD83D\uDD25 ' + data.streakDays + ' day streak</span>' +
+                        '<span class="stat-chip">\u2B50 ' + data.totalScore + ' points</span>' +
+                        '<span class="stat-chip">\uD83C\uDFC5 Level ' + safeLevel + '</span>' +
+                    '</div>' +
+                '</div>';
+
+            // Section 2: My Courses
+            html += '<div class="courses-section">' +
+                '<h2 class="section-heading">My Courses</h2>';
+
+            if (data.enrolledCourses.length === 0) {
+                html +=
+                    '<div class="empty-state">' +
+                        '<h3>No courses yet</h3>' +
+                        '<p>Start your German learning journey by enrolling in a course!</p>' +
+                        '<a href="index.html#courses" class="btn-browse">Browse Courses</a>' +
+                    '</div>';
+            } else {
+                html += '<div class="courses-grid">';
+                for (var i = 0; i < data.enrolledCourses.length; i++) {
+                    var courseName = data.enrolledCourses[i];
+                    var safeCourseName = escapeHtml(courseName);
+                    var courseUrl = getCourseUrl(courseName);
+                    var courseLevel = courseName.includes('A2') ? 'A2' : courseName.includes('A1') ? 'A1' : '';
+
+                    html +=
+                        '<div class="course-card">' +
+                            '<div class="course-header">' +
+                                '<div class="course-level">' + escapeHtml(courseLevel) + '</div>' +
+                                '<div class="access-badge">Active</div>' +
+                            '</div>' +
+                            '<div class="course-title">' + safeCourseName + '</div>' +
+                            '<div class="course-description">' +
+                                'Access all video lessons, practice materials, and exam preparation resources.' +
+                            '</div>' +
+                            '<div class="course-stats">' +
+                                '<div class="course-stat">\uD83D\uDD25 ' + data.streakDays + ' day streak</div>' +
+                                '<div class="course-stat">\u2B50 ' + data.totalScore + ' pts</div>' +
+                            '</div>' +
+                            '<div class="course-progress">' +
+                                '<div class="progress-label">' +
+                                    '<span>Progress</span>' +
+                                    '<span>Videos coming soon</span>' +
+                                '</div>' +
+                                '<div class="progress-bar">' +
+                                    '<div class="progress-fill" style="width: 0%"></div>' +
+                                '</div>' +
+                            '</div>' +
+                            '<button class="btn-access" onclick="window.location.href=\'' + courseUrl + '\'">' +
+                                'Access Course \u2192' +
+                            '</button>' +
+                        '</div>';
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+
+            // Section 3: Leaderboard preview
+            html +=
+                '<div class="leaderboard-section">' +
+                    '<h2 class="section-heading">\uD83C\uDFC6 Leaderboard \u2014 ' + safeLevel + ' Students</h2>' +
+                    '<div class="leaderboard-card">' +
+                        '<div id="leaderboardContent">' +
+                            '<div style="text-align:center;padding:20px;color:#999;">Loading leaderboard...</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+
+            // Section 4: Sprechen Buddy placeholder
+            html +=
+                '<div class="sprechen-section">' +
+                    '<h2 class="section-heading">\uD83D\uDDE3\uFE0F Sprechen Buddy</h2>' +
+                    '<div class="sprechen-card">' +
+                        '<div class="sprechen-emoji">\uD83D\uDC65</div>' +
+                        '<h3>Coming Soon</h3>' +
+                        '<p>Your practice buddy will appear here once we launch peer matching. Stay tuned!</p>' +
+                    '</div>' +
+                '</div>';
+
+            container.innerHTML = html;
+
+            // Load leaderboard data
+            await loadLeaderboard(data.level, data.userId);
+        }
+
+        async function loadLeaderboard(level, userId) {
+            var leaderboardEl = document.getElementById('leaderboardContent');
+
+            try {
+                var q = query(
+                    collection(db, 'leaderboard'),
+                    where('level', '==', level),
+                    orderBy('totalScore', 'desc'),
+                    limit(5)
+                );
+                var snapshot = await getDocs(q);
+
+                if (snapshot.size < 3) {
+                    leaderboardEl.innerHTML =
+                        '<div class="leaderboard-empty">' +
+                            'Be one of the first to claim the top spot! \uD83D\uDE80' +
+                        '</div>' +
+                        '<p class="leaderboard-note">Rankings update every time students log in</p>';
+                    return;
+                }
+
+                var listHtml = '<ul class="leaderboard-list">';
+                var rank = 0;
+
+                snapshot.forEach(function(docSnap) {
+                    rank++;
+                    var entry = docSnap.data();
+                    var isCurrentUser = docSnap.id === userId;
+                    var rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+                    var rowClass = isCurrentUser ? 'leaderboard-row current-user' : 'leaderboard-row';
+
+                    listHtml +=
+                        '<li class="' + rowClass + '">' +
+                            '<span class="lb-rank ' + rankClass + '">#' + rank + '</span>' +
+                            '<span class="lb-name">' + escapeHtml(entry.name || 'Student') + (isCurrentUser ? ' (You)' : '') + '</span>' +
+                            '<span class="lb-score">\u2B50 ' + (entry.totalScore || 0) + '</span>' +
+                            '<span class="lb-streak">\uD83D\uDD25 ' + (entry.streakDays || 0) + 'd</span>' +
+                        '</li>';
+                });
+
+                listHtml += '</ul>';
+                listHtml += '<p class="leaderboard-note">Rankings update every time students log in</p>';
+                leaderboardEl.innerHTML = listHtml;
+
+            } catch (error) {
+                leaderboardEl.innerHTML =
+                    '<div class="leaderboard-empty">' +
+                        'Leaderboard is loading. Check back soon!' +
+                    '</div>';
+            }
+        }
     </script>
 </body>
 </html>

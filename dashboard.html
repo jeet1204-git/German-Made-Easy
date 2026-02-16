@@ -499,7 +499,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc, updateDoc, setDoc, serverTimestamp, collection, query, where, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, updateDoc, setDoc, serverTimestamp, collection, query, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
@@ -835,13 +835,17 @@
             var leaderboardEl = document.getElementById('leaderboardContent');
 
             try {
-                var q = query(
-                    collection(db, 'leaderboard'),
-                    where('level', '==', level),
-                    orderBy('totalScore', 'desc'),
-                    limit(5)
-                );
-                var snapshot = await getDocs(q);
+                // No composite query — filter by level in JS instead
+var snapshot = await getDocs(query(
+    collection(db, 'leaderboard'),
+    orderBy('totalScore', 'desc'),
+    limit(10)
+));
+var rows = [];
+snapshot.forEach(function(d) {
+    if (d.data().level === level) rows.push({ id: d.id, ...d.data() });
+});
+// Now use rows instead of snapshot below
 
                 if (snapshot.size < 3) {
                     leaderboardEl.innerHTML =

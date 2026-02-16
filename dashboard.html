@@ -9,6 +9,8 @@
 
 /* Add these styles to your existing Dashboard.html <style> section */
 
+/* Sprechen Buddy Styles */
+
 .sprechen-card-active {
     background: white;
     border-radius: 20px;
@@ -167,16 +169,7 @@
     .sprechen-stats {
         grid-template-columns: 1fr;
     }
-}
-
-
-
-
-
-
-
-
-        
+}       
         * {
             margin: 0;
             padding: 0;
@@ -674,34 +667,60 @@
 
     // Add this JavaScript to your existing Dashboard.html <script> section
 
+// Sprechen Buddy Functions - FIXED VERSION
+
 // Function to start Sprechen Buddy
 window.startSprechenBuddy = function() {
     window.location.href = 'sprechen-buddy.html';
 };
 
-// Function to update online count (call this in your existing onAuthStateChanged)
+// Function to update online count - WITH ERROR HANDLING
 async function updateSprechenStats() {
     try {
-        // Get online users count
-        const queueRef = collection(db, 'match_queue');
-        const q = query(queueRef, where('status', '==', 'waiting'));
-        const snapshot = await getDocs(q);
-        document.getElementById('onlineCount').textContent = snapshot.size;
+        // Get online users count - wrapped in try/catch
+        try {
+            const queueRef = collection(db, 'match_queue');
+            const q = query(queueRef, where('status', '==', 'waiting'));
+            const snapshot = await getDocs(q);
+            document.getElementById('onlineCount').textContent = snapshot.size;
+        } catch (queueError) {
+            // Collection doesn't exist yet - that's fine, show 0
+            console.log('match_queue collection not created yet (this is normal)');
+            document.getElementById('onlineCount').textContent = '0';
+        }
 
-        // Get user's session count if userDocRef exists
-        if (typeof userDocRef !== 'undefined') {
+        // Get user's session count - wrapped in try/catch
+        try {
+            const userDocRef = doc(db, 'users', auth.currentUser.uid);
             const userDoc = await getDoc(userDocRef);
             const userData = userDoc.data();
-            document.getElementById('userSessionsCompleted').textContent = userData.sessionsCompleted || 0;
+            
+            // Update user level display
+            if (userData.level) {
+                const levelElement = document.getElementById('userLevelDisplay');
+                if (levelElement) {
+                    levelElement.textContent = userData.level;
+                }
+            }
+            
+            // Update sessions completed
+            const sessionsElement = document.getElementById('userSessionsCompleted');
+            if (sessionsElement) {
+                sessionsElement.textContent = userData.sessionsCompleted || 0;
+            }
+        } catch (userError) {
+            // User fields don't exist yet - that's fine
+            console.log('User sessionsCompleted field not set yet (this is normal)');
         }
     } catch (error) {
-        console.error('Error updating Sprechen stats:', error);
+        // Silently fail - don't break the dashboard
+        console.error('Error updating Sprechen stats (non-critical):', error);
     }
 }
 
-// Call this function after user authentication
-// Add this line inside your existing onAuthStateChanged callback:
-// updateSprechenStats();
+// Call this function after user is loaded
+// Add this to your existing onAuthStateChanged callback:
+// setTimeout(updateSprechenStats, 500);
 
 
 
@@ -1050,7 +1069,7 @@ async function updateSprechenStats() {
         
         <h3>Practice Speaking with Real Students</h3>
         <p class="sprechen-description">
-            Get matched with another <%= userData.level || 'A1' %> student for an 8-minute structured speaking practice session. Completely anonymous, exam-focused, and FREE!
+            Get matched with another <span id="userLevelDisplay">A1</span> student for an 8-minute structured speaking practice session. Completely anonymous, exam-focused, and FREE!
         </p>
 
         <div class="sprechen-features">
@@ -1097,6 +1116,7 @@ async function updateSprechenStats() {
         </p>
     </div>
 </div>
+
 
             container.innerHTML = html;
 

@@ -67,6 +67,24 @@
             background: #004E89;
         }
 
+        .btn-leaderboard {
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            background: white;
+            color: #FF6B35;
+            border: 2px solid #FF6B35;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-leaderboard:hover {
+            background: #FF6B35;
+            color: white;
+        }
+
         .dashboard-container {
             max-width: 1400px;
             margin: 40px auto;
@@ -466,6 +484,7 @@
             <div class="logo">German Made Easy</div>
             <div class="user-info">
                 <span class="user-email" id="userEmail">Loading...</span>
+                <a href="leaderboard.html" class="btn-leaderboard">🏆 Leaderboard</a>
                 <button class="btn-logout" onclick="logout()">Logout</button>
             </div>
         </div>
@@ -528,6 +547,36 @@
             var div = document.createElement('div');
             div.appendChild(document.createTextNode(str));
             return div.innerHTML;
+        }
+
+        function getWeekId() {
+            var now = new Date();
+            var startOfYear = new Date(now.getFullYear(), 0, 1);
+            var days = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
+            var weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+            return now.getFullYear() + '-W' + String(weekNumber).padStart(2, '0');
+        }
+
+        function getLastMonday() {
+            var now = new Date();
+            var day = now.getDay();
+            var diff = day === 0 ? 6 : day - 1;
+            var monday = new Date(now);
+            monday.setDate(now.getDate() - diff);
+            monday.setHours(0, 0, 0, 0);
+            return monday;
+        }
+
+        function calculateBadge(streakDays, totalScore, joinedAt) {
+            if (streakDays >= 14) return '🔥 On Fire';
+            if (streakDays >= 7) return '⚡ Consistent';
+            if (totalScore >= 200) return '🚀 Rising Star';
+            
+            var joinedDate = joinedAt && joinedAt.toDate ? joinedAt.toDate() : new Date(joinedAt);
+            var daysSinceJoined = (new Date() - joinedDate) / (1000 * 60 * 60 * 24);
+            if (daysSinceJoined <= 7) return '🌱 New Learner';
+            
+            return '📚 Learning';
         }
 
         onAuthStateChanged(auth, async (user) => {
@@ -609,15 +658,49 @@
 
                 // Recalculate totalScore: streakDays * 10 + 50 (join bonus)
                 var currentTotalScore = currentStreakDays * 10 + 50;
-                await updateDoc(userDocRef, { totalScore: currentTotalScore });
+                
+                // --- Weekly score tracking with Monday reset ---
+                var lastMonday = getLastMonday();
+                var weeklyResetDate = userData.weeklyResetDate;
+                var currentWeeklyScore = userData.weeklyScore;
+                
+                if (!weeklyResetDate || (weeklyResetDate.toDate && weeklyResetDate.toDate() < lastMonday) || (new Date(weeklyResetDate) < lastMonday)) {
+                    currentWeeklyScore = currentStreakDays * 10 + 50;
+                    await updateDoc(userDocRef, {
+                        totalScore: currentTotalScore,
+                        weeklyScore: currentWeeklyScore,
+                        weeklyResetDate: serverTimestamp()
+                    });
+                } else {
+                    currentWeeklyScore = currentStreakDays * 10 + 50;
+                    await updateDoc(userDocRef, {
+                        totalScore: currentTotalScore,
+                        weeklyScore: currentWeeklyScore
+                    });
+                }
 
-                // --- Part C: Write to leaderboard collection ---
+                // --- Calculate badge ---
+                var userBadge = calculateBadge(currentStreakDays, currentTotalScore, userData.joinedAt);
+
+                // --- Part C: Write to leaderboard collection (all-time) ---
                 var firstName = getFirstName(userData.name || user.displayName);
                 await setDoc(doc(db, 'leaderboard', user.uid), {
                     name: firstName,
                     level: userLevel,
                     totalScore: currentTotalScore,
                     streakDays: currentStreakDays,
+                    badge: userBadge,
+                    lastUpdated: serverTimestamp()
+                }, { merge: true });
+
+                // --- Write to leaderboard_weekly collection ---
+                var weekId = getWeekId();
+                await setDoc(doc(db, 'leaderboard_weekly', weekId, user.uid), {
+                    name: firstName,
+                    level: userLevel,
+                    totalScore: currentWeeklyScore,
+                    streakDays: currentStreakDays,
+                    badge: userBadge,
                     lastUpdated: serverTimestamp()
                 }, { merge: true });
 

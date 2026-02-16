@@ -1001,7 +1001,7 @@
             <div class="logo">German Made Easy</div>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#home">Home</a></li>
-                <li><a href="#features">Why Us</a></li>
+                <li id="dashboardNav" style="display: none;"><a href="dashboard.html">Dashboard</a></li>
                 <li><a href="#courses">Courses</a></li>
                 <li><a href="#testimonials">Success Stories</a></li>
                 <li><a href="#contact">Contact</a></li>
@@ -1316,7 +1316,6 @@
             <p style="color: rgba(255,255,255,0.7); margin-top: 10px;">Your pathway to German fluency</p>
             <div class="footer-links">
                 <a href="#home">Home</a>
-                <a href="#features">Why Us</a>
                 <a href="#courses">Courses</a>
                 <a href="#testimonials">Success Stories</a>
                 <a href="#contact">Contact</a>
@@ -1372,14 +1371,17 @@
             const navAuth = document.getElementById('navAuth');
             const userMenu = document.getElementById('userMenu');
             const userEmail = document.getElementById('userEmail');
+            const dashboardNav = document.getElementById('dashboardNav');
 
             if (user) {
                 navAuth.style.display = 'none';
                 userMenu.classList.add('active');
                 userEmail.textContent = user.email;
+                if (dashboardNav) dashboardNav.style.display = 'block';
             } else {
                 navAuth.style.display = 'flex';
                 userMenu.classList.remove('active');
+                if (dashboardNav) dashboardNav.style.display = 'none';
             }
         });
 

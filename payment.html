@@ -654,11 +654,10 @@
         // Navigation Confirmation System
         let pendingNavigation = null;
         let allowNavigation = false;
-        let paymentInProgress = false;
 
         // Show confirmation modal
         function showNavigationConfirmation(targetUrl) {
-            if (allowNavigation || paymentInProgress) {
+            if (allowNavigation) {
                 return true;
             }
 
@@ -687,7 +686,7 @@
 
         // Handle browser back/close/refresh
         window.addEventListener('beforeunload', (e) => {
-            if (!allowNavigation && !paymentInProgress) {
+            if (!allowNavigation) {
                 e.preventDefault();
                 e.returnValue = '';
                 return '';
@@ -705,7 +704,7 @@
                 // Skip external links and anchors
                 if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
                     link.addEventListener('click', (e) => {
-                        if (!allowNavigation && !paymentInProgress) {
+                        if (!allowNavigation) {
                             e.preventDefault();
                             showNavigationConfirmation(href);
                         }
@@ -713,11 +712,6 @@
                 }
             });
         });
-
-        // Mark payment as in progress during payment processing
-        function setPaymentInProgress(inProgress) {
-            paymentInProgress = inProgress;
-        }
 
         // Check authentication and load course details
         onAuthStateChanged(auth, (user) => {

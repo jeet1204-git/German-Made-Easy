@@ -527,6 +527,168 @@
             font-size: 14px;
         }
 
+        /* Explore Other Courses Slider */
+        .explore-courses {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 24px 40px;
+        }
+
+        .explore-courses h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 24px;
+        }
+
+        .courses-slider-wrapper {
+            position: relative;
+        }
+
+        .courses-slider {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 8px 0;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .courses-slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .slider-card {
+            min-width: 280px;
+            max-width: 280px;
+            background: white;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            flex-shrink: 0;
+        }
+
+        .slider-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .slider-card-header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--secondary), #003366);
+            color: white;
+            text-align: center;
+        }
+
+        .slider-card-level {
+            font-size: 32px;
+            font-weight: 900;
+        }
+
+        .slider-card-name {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .slider-card-body {
+            padding: 20px;
+        }
+
+        .slider-card-body p {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .slider-card-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .slider-card-badge.available {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .slider-card-badge.coming {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .slider-card-badge.combo {
+            background: #fde68a;
+            color: #78350f;
+        }
+
+        .slider-card-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .slider-card-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .slider-card-btn.primary:hover {
+            background: var(--secondary);
+        }
+
+        .slider-card-btn.disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .slider-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--border);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .slider-arrow:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .slider-arrow.left {
+            left: -16px;
+        }
+
+        .slider-arrow.right {
+            right: -16px;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .hero-container,
@@ -785,6 +947,8 @@
             <a href="index.html" class="logo">German Made Easy</a>
             <div class="nav-actions">
                 <a href="index.html#courses" class="btn-back">← All Courses</a>
+                <a href="dashboard.html" class="btn-back">📊 Dashboard</a>
+                <a href="leaderboard.html" class="btn-back">🏆 Leaderboard</a>
             </div>
         </div>
     </nav>
@@ -1285,6 +1449,61 @@
         </aside>
     </div>
 
+    <!-- Explore Other Courses -->
+    <div class="explore-courses">
+        <h2>Explore Other Courses</h2>
+        <div class="courses-slider-wrapper">
+            <button class="slider-arrow left" onclick="slideLeft()">❮</button>
+            <div class="courses-slider" id="coursesSlider">
+                <div class="slider-card">
+                    <div class="slider-card-header">
+                        <div class="slider-card-level">A1</div>
+                        <div class="slider-card-name">Beginner</div>
+                    </div>
+                    <div class="slider-card-body">
+                        <span class="slider-card-badge available">Available Now</span>
+                        <p>Build a strong foundation in German. Master basic conversations and everyday situations.</p>
+                        <a href="course-a1.html" class="slider-card-btn primary">View Course →</a>
+                    </div>
+                </div>
+                <div class="slider-card">
+                    <div class="slider-card-header">
+                        <div class="slider-card-level">B1</div>
+                        <div class="slider-card-name">Intermediate</div>
+                    </div>
+                    <div class="slider-card-body">
+                        <span class="slider-card-badge coming">Coming Soon</span>
+                        <p>Navigate complex situations and express opinions on familiar topics with confidence.</p>
+                        <span class="slider-card-btn disabled">Coming Soon</span>
+                    </div>
+                </div>
+                <div class="slider-card">
+                    <div class="slider-card-header">
+                        <div class="slider-card-level">B2</div>
+                        <div class="slider-card-name">Upper-Intermediate</div>
+                    </div>
+                    <div class="slider-card-body">
+                        <span class="slider-card-badge coming">Coming Soon</span>
+                        <p>Master complex texts and interact fluently with native German speakers.</p>
+                        <span class="slider-card-btn disabled">Coming Soon</span>
+                    </div>
+                </div>
+                <div class="slider-card">
+                    <div class="slider-card-header" style="background: linear-gradient(135deg, #FF6B35, #FF8C61);">
+                        <div class="slider-card-level">A1+A2</div>
+                        <div class="slider-card-name">Bundle Offer</div>
+                    </div>
+                    <div class="slider-card-body">
+                        <span class="slider-card-badge combo">🎉 Save ₹2,000</span>
+                        <p>Get A1 + A2 Bundle and save big! Complete beginner to elementary package.</p>
+                        <a href="index.html#courses" class="slider-card-btn primary">View Bundle →</a>
+                    </div>
+                </div>
+            </div>
+            <button class="slider-arrow right" onclick="slideRight()">❯</button>
+        </div>
+    </div>
+
     <!-- Gift Modal -->
     <div class="gift-modal" id="giftModal">
         <div class="gift-modal-content">
@@ -1346,6 +1565,14 @@
             document.querySelectorAll('.chapter').forEach(chapter => {
                 chapter.classList.add('expanded');
             });
+        };
+
+        // Courses Slider
+        window.slideLeft = function() {
+            document.getElementById('coursesSlider').scrollBy({ left: -300, behavior: 'smooth' });
+        };
+        window.slideRight = function() {
+            document.getElementById('coursesSlider').scrollBy({ left: 300, behavior: 'smooth' });
         };
 
         // Video Modal

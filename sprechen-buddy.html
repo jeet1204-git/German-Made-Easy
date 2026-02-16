@@ -806,7 +806,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, deleteDoc, collection, query, where, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, onSnapshot, deleteDoc, collection, query, where, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
@@ -1131,11 +1131,10 @@
                     remoteStream.addTrack(event.track);
                 };
 
-                // ICE candidate handling - store as array entries in a subcollection
+                // ICE candidate handling - store as individual docs in a subcollection
                 peerConnection.onicecandidate = async (event) => {
                     if (event.candidate) {
-                        const candidateDoc = doc(collection(db, 'matches', matchId, 'candidates_' + currentUser.uid));
-                        await setDoc(candidateDoc, event.candidate.toJSON());
+                        await addDoc(collection(db, 'matches', matchId, 'candidates_' + currentUser.uid), event.candidate.toJSON());
                     }
                 };
 

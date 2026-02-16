@@ -50,11 +50,12 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Matches collection: authenticated users involved in the match can read/write
+    // Matches collection: only authenticated users involved in the match can read/write
     match /matches/{matchId} {
-      allow read, write: if request.auth != null;
+      allow create: if request.auth != null;
+      allow read, update: if request.auth != null && request.auth.uid in resource.data.users;
 
-      // ICE candidates subcollections
+      // ICE candidates subcollections: authenticated match participants can read/write
       match /{subcollection}/{candidateId} {
         allow read, write: if request.auth != null;
       }

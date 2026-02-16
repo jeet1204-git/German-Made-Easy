@@ -585,7 +585,7 @@
                     
                     <div class="queue-info">
                         <p>👥 <strong><span id="queueCount">0</span> students</strong> are waiting to practice</p>
-                        <p>🔥 Students in queue are matched by level and timezone</p>
+                        <p>🔥 You'll be matched with the next available student</p>
                         <p>⏱️ Average wait time: <strong>45 seconds</strong></p>
                     </div>
 
@@ -806,7 +806,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, deleteDoc, collection, query, where, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, onSnapshot, deleteDoc, collection, query, where, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
@@ -842,7 +842,22 @@
         const rtcConfig = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
+                { urls: 'stun:stun1.l.google.com:19302' },
+                {
+                    urls: 'turn:openrelay.metered.ca:80',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
+                },
+                {
+                    urls: 'turn:openrelay.metered.ca:443',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
+                },
+                {
+                    urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
+                }
             ]
         };
 
@@ -969,7 +984,6 @@
             const queueRef = collection(db, 'match_queue');
             const q = query(
                 queueRef,
-                where('level', '==', userData.level || 'A1'),
                 where('status', '==', 'waiting')
             );
 
@@ -1117,52 +1131,69 @@
                     remoteStream.addTrack(event.track);
                 };
 
-                // ICE candidate handling
+                // ICE candidate handling - store as individual docs in a subcollection
                 peerConnection.onicecandidate = async (event) => {
                     if (event.candidate) {
-                        await updateDoc(doc(db, 'matches', matchId), {
-                            [`candidates.${currentUser.uid}`]: event.candidate.toJSON()
-                        });
+                        await addDoc(collection(db, 'matches', matchId, 'candidates_' + currentUser.uid), event.candidate.toJSON());
                     }
+                };
+
+                // Monitor connection state
+                peerConnection.oniceconnectionstatechange = () => {
+                    console.log('ICE connection state:', peerConnection.iceConnectionState);
                 };
 
                 // Create and send offer/answer based on user order
                 const matchDoc = await getDoc(doc(db, 'matches', matchId));
-                const users = matchDoc.data().users;
-                
+                const matchData = matchDoc.data();
+                const users = matchData.users;
+                const partnerId = users.find(id => id !== currentUser.uid);
+
                 if (users[0] === currentUser.uid) {
-                    // Create offer
+                    // User 1: Create and send offer
                     const offer = await peerConnection.createOffer();
                     await peerConnection.setLocalDescription(offer);
                     await updateDoc(doc(db, 'matches', matchId), {
-                        offer: offer
+                        offer: { type: offer.type, sdp: offer.sdp }
+                    });
+
+                    // Listen for answer from partner
+                    const unsubAnswer = onSnapshot(doc(db, 'matches', matchId), async (snapshot) => {
+                        const data = snapshot.data();
+                        if (data.answer && !peerConnection.remoteDescription) {
+                            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                            unsubAnswer();
+                        }
                     });
                 } else {
-                    // Listen for offer and create answer
-                    const unsubscribe = onSnapshot(doc(db, 'matches', matchId), async (snapshot) => {
+                    // User 2: Listen for offer and create answer
+                    const unsubOffer = onSnapshot(doc(db, 'matches', matchId), async (snapshot) => {
                         const data = snapshot.data();
                         if (data.offer && !peerConnection.remoteDescription) {
                             await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
                             const answer = await peerConnection.createAnswer();
                             await peerConnection.setLocalDescription(answer);
                             await updateDoc(doc(db, 'matches', matchId), {
-                                answer: answer
+                                answer: { type: answer.type, sdp: answer.sdp }
                             });
-                            unsubscribe();
+                            unsubOffer();
                         }
                     });
                 }
 
-                // Listen for answer (if user 1)
-                if (users[0] === currentUser.uid) {
-                    const unsubscribe = onSnapshot(doc(db, 'matches', matchId), async (snapshot) => {
-                        const data = snapshot.data();
-                        if (data.answer && !peerConnection.remoteDescription) {
-                            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                            unsubscribe();
+                // Listen for remote ICE candidates from partner
+                const candidatesRef = collection(db, 'matches', matchId, 'candidates_' + partnerId);
+                onSnapshot(query(candidatesRef), (snapshot) => {
+                    snapshot.docChanges().forEach(async (change) => {
+                        if (change.type === 'added') {
+                            try {
+                                await peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                            } catch (e) {
+                                console.error('Error adding ICE candidate:', e);
+                            }
                         }
                     });
-                }
+                });
 
             } catch (error) {
                 console.error('Error setting up WebRTC:', error);

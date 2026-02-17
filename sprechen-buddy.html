@@ -665,15 +665,15 @@
                         <div class="video-label">You</div>
                         <div class="connection-status">
                             <div class="status-dot"></div>
-                            <span>Connected</span>
+                            <span>Local</span>
                         </div>
                     </div>
                     <div class="video-container">
                         <video id="remoteVideo" autoplay playsinline></video>
                         <div class="video-label" id="remoteLabel">Partner</div>
-                        <div class="connection-status">
-                            <div class="status-dot"></div>
-                            <span>Connected</span>
+                        <div class="connection-status" id="remoteConnectionStatus">
+                            <div class="status-dot" id="remoteStatusDot" style="background: #f59e0b;"></div>
+                            <span id="remoteStatusText">Connecting...</span>
                         </div>
                     </div>
                 </div>
@@ -840,27 +840,20 @@
             taskCompletion: 0
         };
 
-        // WebRTC configuration
+        // WebRTC configuration - STUN servers for NAT traversal (P2P only)
+        // Note: Without TURN servers, calls may fail when both users are
+        // behind symmetric NATs or restrictive firewalls (~15-30% of cases).
+        // For reliable cross-network calls, add a free TURN service like
+        // Metered.ca (50GB/month free, no credit card): https://www.metered.ca/signup
         const rtcConfig = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
-                {
-                    urls: 'turn:openrelay.metered.ca:80',
-                    username: 'openrelayproject',
-                    credential: 'openrelayproject'
-                },
-                {
-                    urls: 'turn:openrelay.metered.ca:443',
-                    username: 'openrelayproject',
-                    credential: 'openrelayproject'
-                },
-                {
-                    urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-                    username: 'openrelayproject',
-                    credential: 'openrelayproject'
-                }
-            ]
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' }
+            ],
+            iceCandidatePoolSize: 10
         };
 
         // Task library (sample tasks)
@@ -1241,53 +1234,116 @@
             }, 1000);
         }
 
+        function updateRemoteStatus(state) {
+            const dot = document.getElementById('remoteStatusDot');
+            const text = document.getElementById('remoteStatusText');
+            if (!dot || !text) return;
+
+            if (state === 'connected' || state === 'completed') {
+                dot.style.background = '#10b981';
+                text.textContent = 'Connected';
+            } else if (state === 'checking' || state === 'new') {
+                dot.style.background = '#f59e0b';
+                text.textContent = 'Connecting...';
+            } else if (state === 'disconnected') {
+                dot.style.background = '#f59e0b';
+                text.textContent = 'Reconnecting...';
+            } else if (state === 'failed') {
+                dot.style.background = '#ef4444';
+                text.textContent = 'Failed';
+            } else if (state === 'closed') {
+                dot.style.background = '#6b7280';
+                text.textContent = 'Closed';
+            }
+        }
+
         async function setupWebRTC() {
             try {
                 // Get local stream
                 localStream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
+                    video: { width: { ideal: 640 }, height: { ideal: 480 } },
                     audio: true
                 });
 
-                document.getElementById('localVideo').srcObject = localStream;
+                const localVideo = document.getElementById('localVideo');
+                localVideo.srcObject = localStream;
+                localVideo.play().catch(() => {});
 
                 // Create peer connection
                 peerConnection = new RTCPeerConnection(rtcConfig);
 
-                // Add local tracks
+                // Add local tracks to the connection
                 localStream.getTracks().forEach(track => {
                     peerConnection.addTrack(track, localStream);
                 });
 
-                // Handle remote stream
+                // Handle remote stream - use event.streams[0] for reliability
+                const remoteVideo = document.getElementById('remoteVideo');
                 peerConnection.ontrack = (event) => {
-                    if (!remoteStream) {
-                        remoteStream = new MediaStream();
-                        document.getElementById('remoteVideo').srcObject = remoteStream;
+                    console.log('ontrack fired:', event.track.kind, 'streams:', event.streams.length);
+                    if (event.streams && event.streams[0]) {
+                        // Use the stream directly from the event (most reliable)
+                        remoteVideo.srcObject = event.streams[0];
+                        remoteStream = event.streams[0];
+                    } else {
+                        // Fallback: create our own MediaStream
+                        if (!remoteStream) {
+                            remoteStream = new MediaStream();
+                            remoteVideo.srcObject = remoteStream;
+                        }
+                        remoteStream.addTrack(event.track);
                     }
-                    remoteStream.addTrack(event.track);
+                    // Explicitly play to handle autoplay restrictions on mobile
+                    remoteVideo.play().catch(e => {
+                        console.log('Remote video autoplay blocked, will retry on interaction:', e);
+                        // Add a one-time click handler to start playback
+                        document.addEventListener('click', function playOnClick() {
+                            remoteVideo.play().catch(() => {});
+                            document.removeEventListener('click', playOnClick);
+                        }, { once: true });
+                    });
                 };
 
                 // ICE candidate handling - store as individual docs in a subcollection
                 peerConnection.onicecandidate = async (event) => {
                     if (event.candidate) {
                         try {
-                            await addDoc(collection(db, 'matches', matchId, 'candidates_' + currentUser.uid), event.candidate.toJSON());
+                            await addDoc(
+                                collection(db, 'matches', matchId, 'candidates_' + currentUser.uid),
+                                event.candidate.toJSON()
+                            );
                         } catch (e) {
                             console.error('Error sending ICE candidate:', e);
                         }
                     }
                 };
 
-                // Monitor connection state
+                // Monitor ICE connection state and update UI
                 peerConnection.oniceconnectionstatechange = () => {
-                    console.log('ICE connection state:', peerConnection.iceConnectionState);
                     const state = peerConnection.iceConnectionState;
+                    console.log('ICE connection state:', state);
+                    updateRemoteStatus(state);
+
                     if (state === 'connected' || state === 'completed') {
-                        console.log('WebRTC connection established successfully');
+                        console.log('WebRTC: ICE connected, remote video should be visible');
                     } else if (state === 'failed') {
-                        console.error('WebRTC connection failed - attempting ICE restart');
+                        console.error('WebRTC: ICE failed, attempting restart');
                         peerConnection.restartIce();
+                    }
+                };
+
+                // Also monitor the overall connection state
+                peerConnection.onconnectionstatechange = () => {
+                    const state = peerConnection.connectionState;
+                    console.log('Connection state:', state);
+                    if (state === 'connected') {
+                        updateRemoteStatus('connected');
+                        // Double-check remote video is playing
+                        if (remoteVideo.srcObject) {
+                            remoteVideo.play().catch(() => {});
+                        }
+                    } else if (state === 'failed') {
+                        updateRemoteStatus('failed');
                     }
                 };
 
@@ -1298,6 +1354,7 @@
 
                 async function flushIceCandidateBuffer() {
                     isRemoteDescriptionSet = true;
+                    console.log('Flushing', iceCandidateBuffer.length, 'buffered ICE candidates');
                     for (const candidateData of iceCandidateBuffer) {
                         try {
                             await peerConnection.addIceCandidate(new RTCIceCandidate(candidateData));
@@ -1317,9 +1374,34 @@
                 // Update remote video label with partner name
                 document.getElementById('remoteLabel').textContent = partnerDisplayName || 'Partner';
 
+                // Listen for remote ICE candidates from partner FIRST
+                // so we don't miss any that arrive during offer/answer exchange
+                const candidatesRef = collection(db, 'matches', matchId, 'candidates_' + partnerId);
+                onSnapshot(query(candidatesRef), (snapshot) => {
+                    snapshot.docChanges().forEach(async (change) => {
+                        if (change.type === 'added') {
+                            const candidateData = change.doc.data();
+                            if (isRemoteDescriptionSet) {
+                                try {
+                                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidateData));
+                                } catch (e) {
+                                    console.error('Error adding ICE candidate:', e);
+                                }
+                            } else {
+                                iceCandidateBuffer.push(candidateData);
+                            }
+                        }
+                    });
+                });
+
+                // Now do the offer/answer exchange
                 if (users[0] === currentUser.uid) {
                     // User 1 (offerer): Create and send offer
-                    const offer = await peerConnection.createOffer();
+                    console.log('WebRTC: I am the offerer');
+                    const offer = await peerConnection.createOffer({
+                        offerToReceiveAudio: true,
+                        offerToReceiveVideo: true
+                    });
                     await peerConnection.setLocalDescription(offer);
                     await updateDoc(doc(db, 'matches', matchId), {
                         offer: { type: offer.type, sdp: offer.sdp }
@@ -1330,6 +1412,7 @@
                         const data = snapshot.data();
                         if (data && data.answer && !peerConnection.remoteDescription) {
                             try {
+                                console.log('WebRTC: Received answer, setting remote description');
                                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
                                 await flushIceCandidateBuffer();
                                 unsubAnswer();
@@ -1340,10 +1423,12 @@
                     });
                 } else {
                     // User 2 (answerer): Listen for offer and create answer
+                    console.log('WebRTC: I am the answerer');
                     const unsubOffer = onSnapshot(doc(db, 'matches', matchId), async (snapshot) => {
                         const data = snapshot.data();
                         if (data && data.offer && !peerConnection.remoteDescription) {
                             try {
+                                console.log('WebRTC: Received offer, setting remote description and creating answer');
                                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
                                 const answer = await peerConnection.createAnswer();
                                 await peerConnection.setLocalDescription(answer);
@@ -1358,27 +1443,6 @@
                         }
                     });
                 }
-
-                // Listen for remote ICE candidates from partner
-                const candidatesRef = collection(db, 'matches', matchId, 'candidates_' + partnerId);
-                onSnapshot(query(candidatesRef), (snapshot) => {
-                    snapshot.docChanges().forEach(async (change) => {
-                        if (change.type === 'added') {
-                            const candidateData = change.doc.data();
-                            if (isRemoteDescriptionSet) {
-                                // Remote description already set, add immediately
-                                try {
-                                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidateData));
-                                } catch (e) {
-                                    console.error('Error adding ICE candidate:', e);
-                                }
-                            } else {
-                                // Buffer until remote description is set
-                                iceCandidateBuffer.push(candidateData);
-                            }
-                        }
-                    });
-                });
 
             } catch (error) {
                 console.error('Error setting up WebRTC:', error);

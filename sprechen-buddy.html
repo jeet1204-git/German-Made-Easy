@@ -1311,7 +1311,7 @@
                     if (JSON.stringify(newTask) !== JSON.stringify(currentTask)) {
                         currentTask = newTask;
                         displayTask(newTask);
-                        alert('🔄 Partner changed the task!');
+                        showNotification('🔄 Partner changed task', 'important');
                     }
                 }
                 
@@ -1321,7 +1321,7 @@
                     sessionDuration += 600;
                     document.getElementById('btnAddTime').disabled = true;
                     document.getElementById('btnAddTime').textContent = '⏰ Time Added';
-                    alert('⏰ Partner added 10 minutes!');
+                    showNotification('⏰ Partner added time', 'important');
                 }
             });
 
@@ -1396,6 +1396,125 @@
             }
         }
 
+
+        let lastNotification = '';
+        let notificationTimeout = null;
+        
+        function showNotification(message, type = 'info') {
+            // Prevent duplicate notifications
+            if (message === lastNotification) return;
+            lastNotification = message;
+            
+            // Clear previous timeout
+            if (notificationTimeout) clearTimeout(notificationTimeout);
+            
+            // Reset after 3 seconds
+            notificationTimeout = setTimeout(() => {
+                lastNotification = '';
+            }, 3000);
+            
+            // Show alert only if important
+            if (type === 'important') {
+                alert(message);
+            } else {
+                console.log('📢', message);
+            }
+        }
+
+        async function requestMediaWithRetry(maxRetries = 3) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    console.log(`📹 Requesting camera/mic (attempt ${i + 1})...`);
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'user'
+                        },
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+                    console.log('✅ Camera/mic access granted');
+                    return stream;
+                } catch (error) {
+                    console.error(`❌ Media error (attempt ${i + 1}):`, error);
+                    
+                    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                        throw new Error('Camera/microphone permission denied. Please allow access in your browser settings and refresh the page.');
+                    } else if (error.name === 'NotFoundError') {
+                        throw new Error('No camera or microphone found. Please connect a device and try again.');
+                    } else if (error.name === 'NotReadableError') {
+                        if (i < maxRetries - 1) {
+                            console.log('⏳ Waiting before retry...');
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            continue;
+                        }
+                        throw new Error('Camera is being used by another application. Please close other apps and try again.');
+                    }
+                    
+                    if (i === maxRetries - 1) {
+                        throw error;
+                    }
+                }
+            }
+        }
+
+        // Robust WebRTC connection monitoring
+        function setupRobustConnectionMonitoring() {
+            if (!peerConnection) return;
+            
+            let connectionTimeout = null;
+            let iceGatheringTimeout = null;
+            
+            // Monitor ICE connection state
+            peerConnection.oniceconnectionstatechange = () => {
+                const state = peerConnection.iceConnectionState;
+                console.log('🔗 ICE State:', state);
+                updateRemoteStatus(state);
+                
+                if (state === 'connected' || state === 'completed') {
+                    console.log('✅ WebRTC Connected!');
+                    clearTimeout(connectionTimeout);
+                    document.getElementById('reconnectingOverlay')?.classList.remove('active');
+                } else if (state === 'disconnected') {
+                    console.log('⚠️ Partner disconnected');
+                    connectionTimeout = setTimeout(() => {
+                        console.log('🔄 Attempting reconnection...');
+                        if (peerConnection && peerConnection.iceConnectionState === 'disconnected') {
+                            handlePartnerDisconnection();
+                        }
+                    }, 3000);
+                } else if (state === 'failed') {
+                    console.log('❌ Connection failed');
+                    handlePartnerDisconnection();
+                }
+            };
+            
+            // Monitor overall connection state
+            peerConnection.onconnectionstatechange = () => {
+                const state = peerConnection.connectionState;
+                console.log('🔗 Connection State:', state);
+                
+                if (state === 'connected') {
+                    console.log('✅ Peer Connected');
+                    // Force remote video to play
+                    const remoteVideo = document.getElementById('remoteVideo');
+                    if (remoteVideo && remoteVideo.srcObject) {
+                        remoteVideo.play().catch(e => console.log('Video play error:', e));
+                    }
+                } else if (state === 'failed' || state === 'closed') {
+                    handlePartnerDisconnection();
+                }
+            };
+            
+            // Monitor ICE gathering
+            peerConnection.onicegatheringstatechange = () => {
+                console.log('🧊 ICE Gathering:', peerConnection.iceGatheringState);
+            };
+        }
         async function setupWebRTC() {
             try {
                 // Get local stream
@@ -1457,8 +1576,11 @@
                     }
                 };
 
-                // Monitor ICE connection state and update UI
-                peerConnection.oniceconnectionstatechange = () => {
+                // Setup robust monitoring
+                setupRobustConnectionMonitoring();
+                
+                // DEPRECATED: Old monitoring kept for compatibility
+                peerConnection.oniceconnectionstatechange_old = () => {
                     const state = peerConnection.iceConnectionState;
                     console.log('ICE connection state:', state);
                     updateRemoteStatus(state);
@@ -1610,10 +1732,10 @@
                 });
                 
                 displayTask(newTask);
-                alert('✅ Task changed! New topic: ' + newTask.type);
+                showNotification('✅ Task changed: ' + newTask.type, 'important');
             } catch (error) {
                 console.error('Error changing task:', error);
-                alert('Failed to change task.');
+                showNotification('❌ Failed to change task', 'important');
             }
         };
 
@@ -1621,7 +1743,7 @@
             console.log('⏰ Add Time button clicked!');
             console.log('timeExtensionUsed:', timeExtensionUsed);
             if (timeExtensionUsed) {
-                alert('⏰ You can only add time once!');
+                showNotification('⏰ Time already added', 'important');
                 return;
             }
             
@@ -1632,7 +1754,7 @@
             document.getElementById('btnAddTime').disabled = true;
             document.getElementById('btnAddTime').textContent = '⏰ Time Added';
             
-            alert('✅ Added 10 extra minutes!');
+            showNotification('✅ Added 10 minutes!', 'important');
             
             if (matchId) {
                 updateDoc(doc(db, 'matches', matchId), {
@@ -1740,7 +1862,7 @@
                     
                     resumeTimer();
                     document.getElementById('reconnectingOverlay').classList.remove('active');
-                    alert('✅ New partner connected!');
+                    showNotification('✅ New partner joined!', 'important');
                     
                 } else {
                     document.getElementById('reconnectingMessage').textContent = 'Waiting for partners...';

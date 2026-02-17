@@ -1221,7 +1221,7 @@ let evaluationScores = {
             const matchData = matchDocSnap.data();
 
             // Find partner
-            partnerId = matchData.users.find(id => id !== currentUser.uid);
+            const partnerId = matchData.users.find(id => id !== currentUser.uid);
 
             // Get partner's display name from match document
             partnerDisplayName = 'Student';
@@ -1505,7 +1505,7 @@ function resumeTimer() {
                 const matchDocSnap = await getDoc(doc(db, 'matches', matchId));
                 const matchData = matchDocSnap.data();
                 const users = matchData.users;
-                const partnerId = users.find(id => id !== currentUser.uid);
+              partnerId = users.find(id => id !== currentUser.uid);
 
                 // Update remote video label with partner name
                 document.getElementById('remoteLabel').textContent = partnerDisplayName || 'Partner';

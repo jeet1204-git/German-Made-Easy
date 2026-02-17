@@ -400,78 +400,6 @@
             cursor: not-allowed;
         }
 
-
-    .btn-change-task {
-    padding: 12px 24px;
-    background: #10b981;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-change-task:hover {
-    background: #059669;
-}
-
-.btn-add-time {
-    padding: 12px 24px;
-    background: #f59e0b;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-add-time:hover {
-    background: #d97706;
-}
-
-.btn-add-time:disabled {
-    background: #9ca3af;
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.reconnecting-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-.reconnecting-overlay.active {
-    display: flex;
-}
-
-.reconnecting-card {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    text-align: center;
-    max-width: 400px;
-}
-
-.reconnecting-card h3 {
-    font-size: 24px;
-    color: #1A1A2E;
-    margin-bottom: 15px;
-}
-
         /* Evaluation Form */
         .evaluation-form {
             background: #f8f8f8;
@@ -638,35 +566,93 @@
                 flex-direction: column;
             }
         }
+    
+        
+        /* Advanced Feature Buttons */
+        .btn-change-task {
+            padding: 12px 24px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-change-task:hover {
+            background: #059669;
+        }
+
+        .btn-add-time {
+            padding: 12px 24px;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add-time:hover {
+            background: #d97706;
+        }
+
+        .btn-add-time:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .reconnecting-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .reconnecting-overlay.active {
+            display: flex;
+        }
+
+        .reconnecting-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .reconnecting-card h3 {
+            font-size: 24px;
+            color: #1A1A2E;
+            margin-bottom: 15px;
+        }
+
+        .reconnecting-card p {
+            color: #666;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-   <div class="controls">
-    <button class="btn btn-secondary" id="toggleAudio" onclick="toggleAudio()">
-        🎤 Mute
-    </button>
-    <button class="btn btn-secondary" id="toggleVideo" onclick="toggleVideo()">
-        📹 Stop Video
-    </button>
-    <button class="btn-change-task" onclick="changeTask()">
-        🔄 Change Task
-    </button>
-    <button class="btn-add-time" id="btnAddTime" onclick="addExtraTime()">
-        ⏰ +10 Minutes
-    </button>
-    <button class="btn btn-danger" onclick="endSession()">
-        ❌ End Session
-    </button>
-</div>
-
-<!-- Add this RIGHT AFTER the </div> above -->
-<div class="reconnecting-overlay" id="reconnectingOverlay">
-    <div class="reconnecting-card">
-        <div class="spinner"></div>
-        <h3>Partner Left</h3>
-        <p id="reconnectingMessage">Finding new partner...</p>
-    </div>
-</div>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>🗣️ Sprechen Buddy</h1>
+                <p>Practice speaking German with real students</p>
+            </div>
 
             <!-- Waiting State -->
             <div id="waitingState" class="state active">
@@ -778,9 +764,23 @@
                     <button class="btn btn-secondary" id="toggleVideo" onclick="toggleVideo()">
                         📹 Stop Video
                     </button>
+                    <button class="btn-change-task" onclick="changeTask()">
+                        🔄 Change Task
+                    </button>
+                    <button class="btn-add-time" id="btnAddTime" onclick="addExtraTime()">
+                        ⏰ +10 Minutes
+                    </button>
                     <button class="btn btn-danger" onclick="endSession()">
                         ❌ End Session
                     </button>
+                </div>
+
+                <div class="reconnecting-overlay" id="reconnectingOverlay">
+                    <div class="reconnecting-card">
+                        <div class="spinner"></div>
+                        <h3>Partner Left</h3>
+                        <p id="reconnectingMessage">Finding new partner...</p>
+                    </div>
                 </div>
 
                 <p style="text-align: center; color: #999; font-size: 14px; margin-top: 20px;">
@@ -924,13 +924,13 @@
         let localStream = null;
         let remoteStream = null;
         let sessionTimer = null;
-        let sessionDuration = 1200; // 20 minutes  
-let timeRemaining = 1200;
-let timerPaused = false;
-let timeExtensionUsed = false;
-let currentTask = null;
-let partnerId = null;
-let evaluationScores = {
+        let sessionDuration = 1200; // 20 minutes
+        let timeRemaining = 1200;
+        let timerPaused = false;
+        let timeExtensionUsed = false;
+        let currentTask = null;
+        let partnerId = null; // 8 minutes
+        let evaluationScores = {
             fluency: 0,
             vocabulary: 0,
             grammar: 0,
@@ -1287,7 +1287,6 @@ let evaluationScores = {
             // Display task
             const task = matchData.task;
             currentTask = task;
-
             document.getElementById('taskType').textContent = task.type;
             document.getElementById('taskLevel').textContent = userData.level || 'A1';
             document.getElementById('scenarioGerman').textContent = task.scenario_german;
@@ -1301,75 +1300,79 @@ let evaluationScores = {
                 questionsList.appendChild(li);
             });
 
-            // Start timer
+            // Monitor partner connection
             monitorPartnerConnection();
+
+            // Listen for task changes
+            onSnapshot(doc(db, 'matches', matchId), (snapshot) => {
+                const data = snapshot.data();
+                if (data && data.task && data.taskChangedAt) {
+                    const newTask = data.task;
+                    if (JSON.stringify(newTask) !== JSON.stringify(currentTask)) {
+                        currentTask = newTask;
+                        displayTask(newTask);
+                        alert('🔄 Partner changed the task!');
+                    }
+                }
+                
+                if (data && data.timeExtended && !timeExtensionUsed) {
+                    timeExtensionUsed = true;
+                    timeRemaining += 600;
+                    sessionDuration += 600;
+                    document.getElementById('btnAddTime').disabled = true;
+                    document.getElementById('btnAddTime').textContent = '⏰ Time Added';
+                    alert('⏰ Partner added 10 minutes!');
+                }
+            });
+
+            // Start timer
             startTimer();
 
             // Setup WebRTC
             await setupWebRTC();
         }
-onSnapshot(doc(db, 'matches', matchId), (snapshot) => {
-    const data = snapshot.data();
-    if (data && data.task && data.taskChangedAt) {
-        const newTask = data.task;
-        if (JSON.stringify(newTask) !== JSON.stringify(currentTask)) {
-            currentTask = newTask;
-            displayTask(newTask);
-            alert('🔄 Partner changed the task!');
-        }
-    }
-    
-    if (data && data.timeExtended && !timeExtensionUsed) {
-        timeExtensionUsed = true;
-        timeRemaining += 600;
-        sessionDuration += 600;
-        document.getElementById('btnAddTime').disabled = true;
-        document.getElementById('btnAddTime').textContent = '⏰ Time Added';
-        alert('⏰ Partner added 10 minutes!');
-    }
-});
 
-        
         function startTimer() {
-    timeRemaining = sessionDuration;
-    timerPaused = false;
-    const timerDisplay = document.getElementById('timerDisplay');
+            timeRemaining = sessionDuration;
+            timerPaused = false;
+            const timerDisplay = document.getElementById('timerDisplay');
 
-    if (sessionTimer) {
-        clearInterval(sessionTimer);
-    }
+            if (sessionTimer) {
+                clearInterval(sessionTimer);
+            }
 
-    sessionTimer = setInterval(() => {
-        if (timerPaused) {
-            return;
+            sessionTimer = setInterval(() => {
+                if (timerPaused) {
+                    return;
+                }
+
+                timeRemaining--;
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                timerDisplay.classList.remove('warning', 'danger');
+                if (timeRemaining <= 60) {
+                    timerDisplay.classList.add('danger');
+                } else if (timeRemaining <= 120) {
+                    timerDisplay.classList.add('warning');
+                }
+
+                if (timeRemaining === 0) {
+                    clearInterval(sessionTimer);
+                    endSession();
+                }
+            }, 1000);
         }
 
-        timeRemaining--;
-        const minutes = Math.floor(timeRemaining / 60);
-        const seconds = timeRemaining % 60;
-        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-        timerDisplay.classList.remove('warning', 'danger');
-        if (timeRemaining <= 60) {
-            timerDisplay.classList.add('danger');
-        } else if (timeRemaining <= 120) {
-            timerDisplay.classList.add('warning');
+        function pauseTimer() {
+            timerPaused = true;
         }
 
-        if (timeRemaining === 0) {
-            clearInterval(sessionTimer);
-            endSession();
+        function resumeTimer() {
+            timerPaused = false;
         }
-    }, 1000);
-}
 
-function pauseTimer() {
-    timerPaused = true;
-}
-
-function resumeTimer() {
-    timerPaused = false;
-}
         function updateRemoteStatus(state) {
             const dot = document.getElementById('remoteStatusDot');
             const text = document.getElementById('remoteStatusText');
@@ -1505,7 +1508,7 @@ function resumeTimer() {
                 const matchDocSnap = await getDoc(doc(db, 'matches', matchId));
                 const matchData = matchDocSnap.data();
                 const users = matchData.users;
-              partnerId = users.find(id => id !== currentUser.uid);
+                partnerId = users.find(id => id !== currentUser.uid);
 
                 // Update remote video label with partner name
                 document.getElementById('remoteLabel').textContent = partnerDisplayName || 'Partner';
@@ -1586,7 +1589,166 @@ function resumeTimer() {
             }
         }
 
-        window.toggleAudio = function() {
+
+        // Advanced Features Functions
+        window.changeTask = async function() {
+            if (!matchId || !userData) return;
+            
+            try {
+                const newTask = getRandomTask(userData.level || 'A1');
+                currentTask = newTask;
+                
+                await updateDoc(doc(db, 'matches', matchId), {
+                    task: newTask,
+                    taskChangedAt: serverTimestamp()
+                });
+                
+                displayTask(newTask);
+                alert('✅ Task changed! New topic: ' + newTask.type);
+            } catch (error) {
+                console.error('Error changing task:', error);
+                alert('Failed to change task.');
+            }
+        };
+
+        window.addExtraTime = function() {
+            if (timeExtensionUsed) {
+                alert('⏰ You can only add time once!');
+                return;
+            }
+            
+            timeRemaining += 600;
+            sessionDuration += 600;
+            timeExtensionUsed = true;
+            
+            document.getElementById('btnAddTime').disabled = true;
+            document.getElementById('btnAddTime').textContent = '⏰ Time Added';
+            
+            alert('✅ Added 10 extra minutes!');
+            
+            if (matchId) {
+                updateDoc(doc(db, 'matches', matchId), {
+                    timeExtended: true,
+                    extendedAt: serverTimestamp()
+                }).catch(console.error);
+            }
+        };
+
+        function displayTask(task) {
+            document.getElementById('taskType').textContent = task.type;
+            document.getElementById('scenarioGerman').textContent = task.scenario_german;
+            document.getElementById('scenarioGujarati').textContent = task.scenario_gujarati;
+            
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '';
+            task.questions.forEach(q => {
+                const li = document.createElement('li');
+                li.textContent = q;
+                questionsList.appendChild(li);
+            });
+        }
+
+        function monitorPartnerConnection() {
+            if (!peerConnection) return;
+            
+            peerConnection.oniceconnectionstatechange = async () => {
+                const state = peerConnection.iceConnectionState;
+                console.log('ICE state:', state);
+                
+                if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+                    console.log('Partner disconnected!');
+                    await handlePartnerDisconnection();
+                }
+            };
+        }
+
+        async function handlePartnerDisconnection() {
+            try {
+                pauseTimer();
+                
+                document.getElementById('reconnectingOverlay').classList.add('active');
+                document.getElementById('reconnectingMessage').textContent = 'Finding new partner...';
+                
+                if (peerConnection) {
+                    peerConnection.close();
+                    peerConnection = null;
+                }
+                
+                if (remoteStream) {
+                    remoteStream.getTracks().forEach(track => track.stop());
+                    document.getElementById('remoteVideo').srcObject = null;
+                }
+                
+                await updateDoc(doc(db, 'matches', matchId), {
+                    [`disconnected.${partnerId}`]: true,
+                    lookingForReplacement: true
+                });
+                
+                await findReplacementPartner();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                setTimeout(() => {
+                    document.getElementById('reconnectingOverlay').classList.remove('active');
+                    endSession();
+                }, 2000);
+            }
+        }
+
+        async function findReplacementPartner() {
+            try {
+                const queueRef = collection(db, 'match_queue');
+                const q = query(
+                    queueRef,
+                    where('level', '==', userData.level || 'A1'),
+                    where('status', '==', 'waiting')
+                );
+                
+                const snapshot = await getDocs(q);
+                const candidates = [];
+                
+                snapshot.forEach(doc => {
+                    if (doc.id !== currentUser.uid) {
+                        candidates.push({ id: doc.id, ...doc.data() });
+                    }
+                });
+                
+                if (candidates.length > 0) {
+                    const newPartner = candidates[0];
+                    partnerId = newPartner.id;
+                    
+                    await updateDoc(doc(db, 'matches', matchId), {
+                        users: [currentUser.uid, partnerId],
+                        lookingForReplacement: false,
+                        replacementAt: serverTimestamp()
+                    });
+                    
+                    await updateDoc(doc(db, 'match_queue', partnerId), {
+                        matchId: matchId,
+                        status: 'matched'
+                    });
+                    
+                    await setupWebRTC();
+                    
+                    resumeTimer();
+                    document.getElementById('reconnectingOverlay').classList.remove('active');
+                    alert('✅ New partner connected!');
+                    
+                } else {
+                    document.getElementById('reconnectingMessage').textContent = 'Waiting for partners...';
+                    setTimeout(() => {
+                        if (document.getElementById('reconnectingOverlay').classList.contains('active')) {
+                            findReplacementPartner();
+                        }
+                    }, 3000);
+                }
+                
+            } catch (error) {
+                console.error('Error finding replacement:', error);
+            }
+        }
+
+                window.toggleAudio = function() {
             if (localStream) {
                 const audioTrack = localStream.getAudioTracks()[0];
                 audioTrack.enabled = !audioTrack.enabled;
@@ -1603,163 +1765,6 @@ function resumeTimer() {
                 btn.textContent = videoTrack.enabled ? '📹 Stop Video' : '📹 Start Video';
             }
         };
-
-        window.changeTask = async function() {
-    if (!matchId || !userData) return;
-    
-    try {
-        const newTask = getRandomTask(userData.level || 'A1');
-        currentTask = newTask;
-        
-        await updateDoc(doc(db, 'matches', matchId), {
-            task: newTask,
-            taskChangedAt: serverTimestamp()
-        });
-        
-        displayTask(newTask);
-        alert('✅ Task changed! New topic: ' + newTask.type);
-    } catch (error) {
-        console.error('Error changing task:', error);
-        alert('Failed to change task.');
-    }
-};
-
-window.addExtraTime = function() {
-    if (timeExtensionUsed) {
-        alert('⏰ You can only add time once!');
-        return;
-    }
-    
-    timeRemaining += 600;
-    sessionDuration += 600;
-    timeExtensionUsed = true;
-    
-    document.getElementById('btnAddTime').disabled = true;
-    document.getElementById('btnAddTime').textContent = '⏰ Time Added';
-    
-    alert('✅ Added 10 extra minutes!');
-    
-    if (matchId) {
-        updateDoc(doc(db, 'matches', matchId), {
-            timeExtended: true,
-            extendedAt: serverTimestamp()
-        }).catch(console.error);
-    }
-};
-
-function displayTask(task) {
-    document.getElementById('taskType').textContent = task.type;
-    document.getElementById('scenarioGerman').textContent = task.scenario_german;
-    document.getElementById('scenarioGujarati').textContent = task.scenario_gujarati;
-    
-    const questionsList = document.getElementById('questionsList');
-    questionsList.innerHTML = '';
-    task.questions.forEach(q => {
-        const li = document.createElement('li');
-        li.textContent = q;
-        questionsList.appendChild(li);
-    });
-}
-
-function monitorPartnerConnection() {
-    if (!peerConnection) return;
-    
-    peerConnection.oniceconnectionstatechange = async () => {
-        const state = peerConnection.iceConnectionState;
-        console.log('ICE state:', state);
-        
-        if (state === 'disconnected' || state === 'failed' || state === 'closed') {
-            console.log('Partner disconnected!');
-            await handlePartnerDisconnection();
-        }
-    };
-}
-
-async function handlePartnerDisconnection() {
-    try {
-        pauseTimer();
-        
-        document.getElementById('reconnectingOverlay').classList.add('active');
-        document.getElementById('reconnectingMessage').textContent = 'Finding new partner...';
-        
-        if (peerConnection) {
-            peerConnection.close();
-            peerConnection = null;
-        }
-        
-        if (remoteStream) {
-            remoteStream.getTracks().forEach(track => track.stop());
-            document.getElementById('remoteVideo').srcObject = null;
-        }
-        
-        await updateDoc(doc(db, 'matches', matchId), {
-            [`disconnected.${partnerId}`]: true,
-            lookingForReplacement: true
-        });
-        
-        await findReplacementPartner();
-        
-    } catch (error) {
-        console.error('Error:', error);
-        setTimeout(() => {
-            document.getElementById('reconnectingOverlay').classList.remove('active');
-            endSession();
-        }, 2000);
-    }
-}
-
-async function findReplacementPartner() {
-    try {
-        const queueRef = collection(db, 'match_queue');
-        const q = query(
-            queueRef,
-            where('level', '==', userData.level || 'A1'),
-            where('status', '==', 'waiting')
-        );
-        
-        const snapshot = await getDocs(q);
-        const candidates = [];
-        
-        snapshot.forEach(doc => {
-            if (doc.id !== currentUser.uid) {
-                candidates.push({ id: doc.id, ...doc.data() });
-            }
-        });
-        
-        if (candidates.length > 0) {
-            const newPartner = candidates[0];
-            partnerId = newPartner.id;
-            
-            await updateDoc(doc(db, 'matches', matchId), {
-                users: [currentUser.uid, partnerId],
-                lookingForReplacement: false,
-                replacementAt: serverTimestamp()
-            });
-            
-            await updateDoc(doc(db, 'match_queue', partnerId), {
-                matchId: matchId,
-                status: 'matched'
-            });
-            
-            await setupWebRTC();
-            
-            resumeTimer();
-            document.getElementById('reconnectingOverlay').classList.remove('active');
-            alert('✅ New partner connected!');
-            
-        } else {
-            document.getElementById('reconnectingMessage').textContent = 'Waiting for partners...';
-            setTimeout(() => {
-                if (document.getElementById('reconnectingOverlay').classList.contains('active')) {
-                    findReplacementPartner();
-                }
-            }, 3000);
-        }
-        
-    } catch (error) {
-        console.error('Error finding replacement:', error);
-    }
-}
 
         window.endSession = function() {
             // Stop timer

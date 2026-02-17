@@ -1592,7 +1592,13 @@
 
         // Advanced Features Functions
         window.changeTask = async function() {
-            if (!matchId || !userData) return;
+            console.log('🔄 Change Task button clicked!');
+            console.log('matchId:', matchId);
+            console.log('userData:', userData);
+            if (!matchId || !userData) {
+                alert('❌ Not in a session yet!');
+                return;
+            }
             
             try {
                 const newTask = getRandomTask(userData.level || 'A1');
@@ -1612,6 +1618,8 @@
         };
 
         window.addExtraTime = function() {
+            console.log('⏰ Add Time button clicked!');
+            console.log('timeExtensionUsed:', timeExtensionUsed);
             if (timeExtensionUsed) {
                 alert('⏰ You can only add time once!');
                 return;
@@ -1885,6 +1893,14 @@
                 localStream.getTracks().forEach(track => track.stop());
             }
         });
+
+        // Debug: Check if functions are properly registered
+        console.log('🔍 Sprechen Buddy Loaded - Function Check:');
+        console.log('  ✓ changeTask:', typeof window.changeTask);
+        console.log('  ✓ addExtraTime:', typeof window.addExtraTime);
+        console.log('  ✓ toggleAudio:', typeof window.toggleAudio);
+        console.log('  ✓ toggleVideo:', typeof window.toggleVideo);
+        console.log('  ✓ endSession:', typeof window.endSession);
     </script>
 </body>
 </html>

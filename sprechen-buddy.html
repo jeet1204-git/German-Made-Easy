@@ -840,50 +840,21 @@
             taskCompletion: 0
         };
 
-        // ============================================================
-        // TURN SERVER CONFIGURATION (Required for cross-network calls)
-        // ============================================================
-        // Free Metered.ca TURN service (50GB/month free, no credit card)
-        // Setup steps:
-        //   1. Go to https://www.metered.ca/signup and create a free account
-        //   2. In dashboard, go to "TURN Server" > create an app
-        //   3. Copy your App Name (e.g. "german-made-easy")
-        //   4. Go to "Developers" > copy your API Key
-        //   5. Paste both values below
-        // ============================================================
-        const METERED_APP_NAME = '';  // e.g. 'german-made-easy'
-        const METERED_API_KEY  = '';  // e.g. 'abc123...'
-
-        // Fetch TURN server credentials from Metered API
-        async function fetchIceServers() {
-            // Fallback: STUN-only (works on same network, fails across networks)
-            const stunOnly = [
+        // WebRTC configuration - STUN servers for NAT traversal (P2P only)
+        // Note: Without TURN servers, calls may fail when both users are
+        // behind symmetric NATs or restrictive firewalls (~15-30% of cases).
+        // For reliable cross-network calls, add a free TURN service like
+        // Metered.ca (50GB/month free, no credit card): https://www.metered.ca/signup
+        const rtcConfig = {
+            iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' },
                 { urls: 'stun:stun3.l.google.com:19302' },
                 { urls: 'stun:stun4.l.google.com:19302' }
-            ];
-
-            if (!METERED_APP_NAME || !METERED_API_KEY) {
-                console.warn('TURN server not configured. Video calls will only work on the same network.');
-                console.warn('Set METERED_APP_NAME and METERED_API_KEY for cross-network calls.');
-                return stunOnly;
-            }
-
-            try {
-                const resp = await fetch(
-                    `https://${METERED_APP_NAME}.metered.live/api/v1/turn/credentials?apiKey=${METERED_API_KEY}`
-                );
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                const iceServers = await resp.json();
-                console.log('TURN credentials fetched:', iceServers.length, 'servers');
-                return iceServers;
-            } catch (e) {
-                console.error('Failed to fetch TURN credentials, falling back to STUN:', e);
-                return stunOnly;
-            }
-        }
+            ],
+            iceCandidatePoolSize: 10
+        };
 
         // Task library (sample tasks)
         const tasks = {
@@ -1297,10 +1268,6 @@
                 const localVideo = document.getElementById('localVideo');
                 localVideo.srcObject = localStream;
                 localVideo.play().catch(() => {});
-
-                // Fetch TURN server credentials for cross-network connectivity
-                const iceServers = await fetchIceServers();
-                const rtcConfig = { iceServers, iceCandidatePoolSize: 10 };
 
                 // Create peer connection
                 peerConnection = new RTCPeerConnection(rtcConfig);

@@ -983,15 +983,16 @@
 
         async function handleMatchFound() {
             showState('matchFoundState');
-            const st = document.getElementById('matchStatusText'); st.textContent = 'Waiting for your partner to join...';
+            const st = document.getElementById('matchStatusText'); st.textContent = 'Connecting to your partner...';
             const ms = await getDoc(doc(db, 'matches', matchId)); const md = ms.data();
             partnerId = md.users.find(id => id !== currentUser.uid);
             partnerDisplayName = md.userNames?.[partnerId] || 'Student';
             try { const pq = await getDoc(doc(db, 'match_queue', partnerId)); if (pq.exists()) { const pd = pq.data(); if (pd.displayName) partnerDisplayName = pd.displayName; document.getElementById('partnerLevel').textContent = pd.level || 'A1'; document.getElementById('partnerStreak').textContent = pd.streak || 1; } } catch(e) {}
             document.getElementById('partnerName').textContent = partnerDisplayName;
-            await updateDoc(doc(db, 'matches', matchId), { [`ready.${currentUser.uid}`]: true });
-            const unsub = onSnapshot(doc(db, 'matches', matchId), async (snap) => { const d = snap.data(); if (d?.ready?.[partnerId]) { unsub(); clearTimeout(rt); st.textContent = 'Both connected!'; const f = await getDoc(doc(db, 'matches', matchId)); setTimeout(() => startSession(f.data()), 1500); } });
-            const rt = setTimeout(async () => { unsub(); st.textContent = 'Partner did not connect...'; try { await updateDoc(doc(db, 'matches', matchId), { status: 'expired' }); } catch(e) {} matchId = null; matchHandled = false; setTimeout(() => startMatching(), 2000); }, 30000);
+            st.textContent = 'Match found! Starting session...';
+            // Skip ready-check — go straight to session after brief delay.
+            // WebRTC has its own 30s timeout if the partner never actually connects.
+            setTimeout(() => startSession(md), 2000);
         }
 
         async function startSession(md) {

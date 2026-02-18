@@ -1520,6 +1520,14 @@
                     console.log('✅ WebRTC Connected!');
                     clearTimeout(connectionTimeout);
                     document.getElementById('reconnectingOverlay')?.classList.remove('active');
+                    
+                    // Clear any replacement flags
+                    if (matchId) {
+                        updateDoc(doc(db, 'matches', matchId), {
+                            isReplacement: false,
+                            replacementJoined: false
+                        }).catch(e => console.error('Flag clear error:', e));
+                    }
                 } else if (state === 'disconnected') {
                     console.log('⚠️ Partner disconnected');
                     connectionTimeout = setTimeout(() => {
@@ -1890,6 +1898,42 @@
 
         let replacementAttempts = 0;
         const MAX_REPLACEMENT_ATTEMPTS = 12; // 12 attempts × 5 seconds = 60 seconds max
+
+        // Listen for replacement being fulfilled
+        function listenForReplacement() {
+            if (!matchId) return;
+            
+            const matchRef = doc(db, 'matches', matchId);
+            const unsubscribe = onSnapshot(matchRef, async (snapshot) => {
+                const data = snapshot.data();
+                if (!data) return;
+                
+                // Check if replacement was completed
+                if (data.replacementComplete && data.users && data.users.length === 2) {
+                    const newPartnerId = data.users.find(id => id !== currentUser.uid);
+                    
+                    if (newPartnerId !== partnerId) {
+                        console.log('✅ Replacement partner joined!');
+                        partnerId = newPartnerId;
+                        
+                        // Close reconnecting overlay
+                        const overlay = document.getElementById('reconnectingOverlay');
+                        if (overlay) overlay.classList.remove('active');
+                        
+                        // Setup new WebRTC connection
+                        await setupWebRTC();
+                        
+                        // Resume timer
+                        if (typeof resumeTimer === 'function') resumeTimer();
+                        
+                        showNotification('✅ New partner connected!', 'important');
+                        
+                        // Stop listening
+                        unsubscribe();
+                    }
+                }
+            });
+        }
         async function findReplacementPartner() {
             try {
                 const queueRef = collection(db, 'match_queue');
@@ -2085,7 +2129,9 @@
                     if (matchId) {
                         await updateDoc(doc(db, 'matches', matchId), {
                             [`disconnected.${currentUser.uid}`]: true,
-                            [`leftAt.${currentUser.uid}`]: serverTimestamp()
+                            [`leftAt.${currentUser.uid}`]: serverTimestamp(),
+                            // Mark as needing replacement
+                            needsReplacement: true
                         });
                     }
                 } catch (e) {

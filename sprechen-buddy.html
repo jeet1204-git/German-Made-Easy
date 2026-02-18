@@ -1052,6 +1052,95 @@
                 console.error('Stale cleanup error:', error);
             }
         }
+
+        let queueHeartbeat = null;
+        
+        function startQueueHeartbeat() {
+            if (queueHeartbeat) clearInterval(queueHeartbeat);
+            
+            queueHeartbeat = setInterval(async () => {
+                if (currentUser && matchId === null) { // Only if still waiting
+                    try {
+                        const queueRef = doc(db, 'match_queue', currentUser.uid);
+                        const queueDoc = await getDoc(queueRef);
+                        
+                        if (queueDoc.exists()) {
+                            await updateDoc(queueRef, {
+                                lastSeen: serverTimestamp()
+                            });
+                            console.log('💓 Queue heartbeat sent');
+                        } else {
+                            // Queue entry doesn't exist, stop heartbeat
+                            clearInterval(queueHeartbeat);
+                        }
+                    } catch (error) {
+                        console.error('Heartbeat error:', error);
+                    }
+                }
+            }, 10000); // Every 10 seconds
+        }
+        
+        function stopQueueHeartbeat() {
+            if (queueHeartbeat) {
+                clearInterval(queueHeartbeat);
+                queueHeartbeat = null;
+                console.log('💔 Queue heartbeat stopped');
+            }
+        }
+
+        async function verifyPartnerOnline(partnerId) {
+            try {
+                const partnerQueue = await getDoc(doc(db, 'match_queue', partnerId));
+                
+                if (!partnerQueue.exists()) {
+                    console.log('⚠️ Partner not in queue anymore');
+                    return false;
+                }
+                
+                const data = partnerQueue.data();
+                const lastSeen = data.lastSeen?.toMillis() || data.timestamp?.toMillis() || 0;
+                const age = Date.now() - lastSeen;
+                
+                // Partner must have been seen in last 30 seconds
+                if (age > 30000) {
+                    console.log(`⚠️ Partner inactive (${Math.floor(age/1000)}s ago)`);
+                    return false;
+                }
+                
+                console.log(`✅ Partner verified (active ${Math.floor(age/1000)}s ago)`);
+                return true;
+            } catch (error) {
+                console.error('Partner verification error:', error);
+                return false;
+            }
+        }
+
+        let matchFoundTimeout = null;
+        
+        function startMatchFoundTimeout() {
+            matchFoundTimeout = setTimeout(() => {
+                console.log('⏱️ Match found timeout - partner never joined');
+                showNotification('Partner did not join. Searching again...', 'important');
+                
+                // Clean up and restart matching
+                if (matchId) {
+                    updateDoc(doc(db, 'matches', matchId), {
+                        status: 'cancelled',
+                        reason: 'Partner did not join'
+                    }).catch(e => {});
+                }
+                
+                matchId = null;
+                location.reload(); // Refresh to restart
+            }, 15000); // 15 seconds
+        }
+        
+        function clearMatchFoundTimeout() {
+            if (matchFoundTimeout) {
+                clearTimeout(matchFoundTimeout);
+                matchFoundTimeout = null;
+            }
+        }
         async function startMatching() {
             showState('waitingState');
             
@@ -1309,7 +1398,7 @@
 
 
         async function showMatchFoundState(partnerName, partnerLevel, partnerStreak) {
-            console.log('🎉 Showing match found state');
+            console.log('🎉 Showing match found state'); startMatchFoundTimeout();
             showState('matchFoundState');
             
             // Display partner info
@@ -1323,7 +1412,7 @@
             console.log('⏭️ Transitioning to session...');
         }
         async function startSession(matchData) {
-            console.log('🎬 Showing session state'); showState('sessionState');
+            clearMatchFoundTimeout(); console.log('🎬 Showing session state'); showState('sessionState');
 
             // Display task
             const task = matchData.task;
@@ -1945,11 +2034,23 @@
                 
                 const snapshot = await getDocs(q);
                 const candidates = [];
+                const now = Date.now();
+                const STALE_THRESHOLD = 120000; // 2 minutes
                 
                 snapshot.forEach(doc => {
                     // Don't match with yourself OR anyone already in this match
                     if (doc.id !== currentUser.uid && doc.data().matchId !== matchId) {
-                        candidates.push({ id: doc.id, ...doc.data() });
+                        const data = doc.data();
+                        const timestamp = data.timestamp?.toMillis() || 0;
+                        const age = now - timestamp;
+                        
+                        // Only include fresh entries
+                        if (age < STALE_THRESHOLD) {
+                            candidates.push({ id: doc.id, ...data });
+                        } else {
+                            console.log(`🗑️ Skipping stale candidate: ${doc.id}`);
+                            deleteDoc(doc.ref).catch(e => {});
+                        }
                     }
                 });
                 

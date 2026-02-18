@@ -944,7 +944,8 @@ function initSpeechRecognition() {
   recognition = new SR();
   recognition.lang = 'de-DE';
   recognition.interimResults = true;
-  recognition.continuous = false;
+  recognition.continuous = true;
+
 
   recognition.onstart = () => {
     isListening = true;
@@ -953,6 +954,19 @@ function initSpeechRecognition() {
     const vt = document.getElementById('voice-transcript');
     vt.style.display = 'block';
     vt.textContent = '🎙️ Listening...';
+
+    recognition.onend = () => {
+  // Only auto-send if we actually got something
+  isListening = false;
+  document.getElementById('mic-btn').classList.remove('listening');
+  document.getElementById('mic-btn').textContent = '🎙️';
+  const vt = document.getElementById('voice-transcript');
+  const transcript = (vt.textContent || '').replace('🎙️ ', '').trim();
+  vt.style.display = 'none';
+  if (transcript && transcript !== 'Listening...') {
+    document.getElementById('text-input').value = transcript;
+    sendMessage();
+  }
   };
 
   recognition.onresult = (e) => {

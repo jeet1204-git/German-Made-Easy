@@ -962,21 +962,13 @@ function initSpeechRecognition() {
   };
 
   recognition.onend = () => {
-    const transcript = document.getElementById('text-input').value.trim();
-    if (!isListening) {
-      // User clicked stop button
-      document.getElementById('mic-btn').classList.remove('listening');
-      document.getElementById('mic-btn').textContent = '🎙️';
-      document.getElementById('voice-transcript').style.display = 'none';
-      if (transcript) sendMessage();
-    } else {
-      // Chrome auto-killed due to silence — restart
-      setTimeout(() => {
-        try { recognition.start(); } catch(e) {}
-      }, 100);
-    }
-  };
-
+  const transcript = document.getElementById('text-input').value.trim();
+  document.getElementById('mic-btn').classList.remove('listening');
+  document.getElementById('mic-btn').textContent = '🎙️';
+  document.getElementById('voice-transcript').style.display = 'none';
+  isListening = false;
+  if (transcript) sendMessage();
+};
   recognition.onerror = (e) => {
     if (e.error === 'no-speech' && isListening) {
       setTimeout(() => {
@@ -993,14 +985,18 @@ function initSpeechRecognition() {
 
 window.toggleMic = () => {
   if (!recognition) initSpeechRecognition();
+  
   if (isListening) {
-    isListening = false;  // triggers onend → sends message
+    isListening = false;
     recognition.stop();
   } else {
     isListening = true;
     document.getElementById('text-input').value = '';
-    try { recognition.start(); }
-    catch(e) { recognition = null; initSpeechRecognition(); isListening = true; recognition.start(); }
+    document.getElementById('mic-btn').classList.add('listening');
+    document.getElementById('mic-btn').textContent = '⏹️';
+    document.getElementById('voice-transcript').style.display = 'block';
+    document.getElementById('voice-transcript').textContent = '🎙️ Start speaking...';
+    recognition.start();
   }
 };
 // ─── SEND AI MESSAGE (calls Cloud Function proxy) ──────────────────

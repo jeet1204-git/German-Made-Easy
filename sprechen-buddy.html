@@ -1042,12 +1042,49 @@
             if (!currentUser) return;
             
             try {
-                // Remove any existing queue entry for this user
+                // 1. Clean up from previous dirty session (if beforeunload didn't complete)
+                const dirtyUid = sessionStorage.getItem('sprechen_dirty_uid');
+                const dirtyMatch = sessionStorage.getItem('sprechen_dirty_match');
+                if (dirtyUid) {
+                    sessionStorage.removeItem('sprechen_dirty_uid');
+                    sessionStorage.removeItem('sprechen_dirty_match');
+                    console.log('🧹 Cleaning up dirty session from previous page');
+                    try { await deleteDoc(doc(db, 'match_queue', dirtyUid)); } catch(e) {}
+                    if (dirtyMatch) {
+                        try { await updateDoc(doc(db, 'matches', dirtyMatch), { status: 'completed' }); } catch(e) {}
+                    }
+                }
+                
+                // 2. Remove any existing queue entry for this user
                 const queueDoc = await getDoc(doc(db, 'match_queue', currentUser.uid));
                 if (queueDoc.exists()) {
                     console.log('🧹 Removing stale queue entry');
                     await deleteDoc(doc(db, 'match_queue', currentUser.uid));
                 }
+
+                // 3. Mark ALL old matches involving this user as completed
+                // This is critical — wait for this before attaching listeners
+                const staleQuery = query(
+                    collection(db, 'matches'),
+                    where('users', 'array-contains', currentUser.uid)
+                );
+                const staleSnapshot = await getDocs(staleQuery);
+                const cleanups = [];
+                staleSnapshot.forEach(matchDoc => {
+                    const data = matchDoc.data();
+                    if (data.status !== 'completed' && data.status !== 'cancelled') {
+                        console.log(`🧹 Marking stale match ${matchDoc.id} as completed (was: ${data.status})`);
+                        cleanups.push(
+                            updateDoc(doc(db, 'matches', matchDoc.id), { status: 'completed' })
+                        );
+                    }
+                });
+                if (cleanups.length > 0) {
+                    await Promise.all(cleanups);
+                    // Give Firestore a moment to propagate so listeners don't pick them up
+                    await new Promise(r => setTimeout(r, 500));
+                }
+                console.log(`🧹 Cleanup complete (${cleanups.length} stale matches cleared)`);
             } catch (error) {
                 console.error('Stale cleanup error:', error);
             }
@@ -1144,33 +1181,9 @@
         async function startMatching() {
             showState('waitingState');
             
-            // Clean up any stale entries first
+            // Clean up any stale entries FIRST — this now handles everything
+            // including old matches, so we removed the duplicate cleanup below.
             await cleanupStaleEntries();
-
-            // Clean up any stale active matches from previous sessions.
-            // Without this, the matches listener would immediately pick up old
-            // matches and "connect" the user with nobody on the other side.
-            try {
-                const staleQuery = query(
-                    collection(db, 'matches'),
-                    where('users', 'array-contains', currentUser.uid)
-                );
-                const staleSnapshot = await getDocs(staleQuery);
-                const cleanups = [];
-                staleSnapshot.forEach(matchDoc => {
-                    const data = matchDoc.data();
-                    if (data.status === 'active' || data.status === 'expired') {
-                        cleanups.push(
-                            updateDoc(doc(db, 'matches', matchDoc.id), { status: 'completed' })
-                        );
-                    }
-                });
-                if (cleanups.length > 0) {
-                    await Promise.all(cleanups);
-                }
-            } catch (e) {
-                console.log('Stale match cleanup:', e);
-            }
 
             // Prevent rejoining active session
             if (matchId) {
@@ -1187,8 +1200,12 @@
                 streak: userData.streakDays || 1,
                 displayName: getUserDisplayName(),
                 timestamp: serverTimestamp(),
+                lastSeen: serverTimestamp(),
                 status: 'waiting'
             });
+
+            // Start heartbeat so others know we're alive
+            startQueueHeartbeat();
 
             // Update queue count
             updateQueueCount();
@@ -1202,6 +1219,7 @@
                 if (queueData && queueData.matchId && !matchHandled) {
                     matchHandled = true;
                     matchId = queueData.matchId;
+                    stopQueueHeartbeat();
                     if (unsubQueue) unsubQueue();
                     if (unsubMatches) unsubMatches();
                     await handleMatchFound();
@@ -1209,22 +1227,28 @@
             });
 
             // Also listen for match documents where this user is a participant.
-            // This is critical because Firestore security rules may prevent the match
-            // creator from updating the partner's queue entry, so the partner
-            // detects the match here instead.
+            // IMPORTANT: We track which match IDs we've already seen so we only
+            // react to genuinely NEW matches, not leftover ones from cleanup.
+            const seenMatchIds = new Set();
+
             const matchesQuery = query(
                 collection(db, 'matches'),
                 where('users', 'array-contains', currentUser.uid)
             );
 
+            // Get current matches to mark as "already seen"
+            const existingMatches = await getDocs(matchesQuery);
+            existingMatches.forEach(d => seenMatchIds.add(d.id));
+
             unsubMatches = onSnapshot(matchesQuery, async (snapshot) => {
                 snapshot.docChanges().forEach(async (change) => {
-                    if (change.type === 'added') {
+                    if (change.type === 'added' && !seenMatchIds.has(change.doc.id)) {
+                        seenMatchIds.add(change.doc.id);
                         const matchData = change.doc.data();
                         if (matchData.status === 'active' && !matchHandled) {
                             matchHandled = true;
                             matchId = change.doc.id;
-                            // Update own queue entry
+                            stopQueueHeartbeat();
                             try {
                                 await updateDoc(queueRef, {
                                     matchId: matchId,
@@ -1264,16 +1288,40 @@
 
                 const snapshot = await getDocs(q);
                 const candidates = [];
+                const now = Date.now();
+                const STALE_THRESHOLD = 30000; // 30 seconds — must have heartbeat within this
 
                 snapshot.forEach(docSnap => {
                     if (docSnap.id !== currentUser.uid) {
-                        candidates.push({ id: docSnap.id, ...docSnap.data() });
+                        const data = docSnap.data();
+                        const lastSeen = data.lastSeen?.toMillis() || data.timestamp?.toMillis() || 0;
+                        const age = now - lastSeen;
+                        
+                        if (age < STALE_THRESHOLD) {
+                            candidates.push({ id: docSnap.id, ...data, age });
+                        } else {
+                            // Clean up stale entry
+                            console.log(`🗑️ Removing stale queue entry: ${docSnap.id} (${Math.floor(age/1000)}s old)`);
+                            deleteDoc(docSnap.ref).catch(() => {});
+                        }
                     }
                 });
 
                 if (candidates.length > 0 && !matchId && !matchHandled) {
-                    // Match with first available candidate
+                    // Sort by freshness — match with most recently active user
+                    candidates.sort((a, b) => a.age - b.age);
                     const partner = candidates[0];
+                    
+                    // Double-check partner is still alive before creating match
+                    const isOnline = await verifyPartnerOnline(partner.id);
+                    if (!isOnline) {
+                        console.log('⚠️ Best candidate was stale, retrying...');
+                        if (!matchId && !matchHandled) {
+                            setTimeout(() => findMatch(), 2000);
+                        }
+                        return;
+                    }
+
                     const newMatchId = `match_${Date.now()}_${currentUser.uid.substring(0, 6)}`;
 
                     // Create match document with both users' display names
@@ -1296,8 +1344,6 @@
                     });
 
                     // Try to update partner's queue entry
-                    // This may fail due to Firestore security rules (only owner can write)
-                    // but the partner will detect the match via their matches collection listener
                     try {
                         await updateDoc(doc(db, 'match_queue', partner.id), {
                             matchId: newMatchId,
@@ -2209,10 +2255,13 @@
         };
 
         // Clean up queue entry and connections when leaving the page
-        window.addEventListener('beforeunload', async () => {
+        // IMPORTANT: beforeunload CANNOT reliably do async Firestore writes.
+        // The browser kills the page before they complete. Instead we use
+        // synchronous cleanup + mark dirty so the NEXT load cleans up.
+        window.addEventListener('beforeunload', () => {
             console.log('🧹 Cleaning up on page unload...');
             
-            // Stop all streams immediately
+            // Stop all streams immediately (synchronous)
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
             }
@@ -2220,36 +2269,56 @@
                 peerConnection.close();
             }
             
-            // Clean up queue and match
+            // Mark in sessionStorage that we need cleanup on next load
+            // (since async Firestore writes in beforeunload are unreliable)
             if (currentUser) {
                 try {
-                    // Remove from queue
-                    await deleteDoc(doc(db, 'match_queue', currentUser.uid));
-                    
-                    // Mark as disconnected in active match
+                    sessionStorage.setItem('sprechen_dirty_uid', currentUser.uid);
                     if (matchId) {
-                        await updateDoc(doc(db, 'matches', matchId), {
-                            [`disconnected.${currentUser.uid}`]: true,
-                            [`leftAt.${currentUser.uid}`]: serverTimestamp(),
-                            // Mark as needing replacement
-                            needsReplacement: true
-                        });
+                        sessionStorage.setItem('sprechen_dirty_match', matchId);
                     }
-                } catch (e) {
-                    console.error('Cleanup error:', e);
+                } catch (e) {}
+            }
+
+            // Fire-and-forget: these MAY or MAY NOT complete
+            if (currentUser) {
+                deleteDoc(doc(db, 'match_queue', currentUser.uid)).catch(() => {});
+                if (matchId) {
+                    updateDoc(doc(db, 'matches', matchId), {
+                        [`disconnected.${currentUser.uid}`]: true,
+                        needsReplacement: true,
+                        status: 'completed'
+                    }).catch(() => {});
                 }
             }
         });
 
-        // Also cleanup on visibility change (browser tab close, minimize)
-        document.addEventListener('visibilitychange', async () => {
-            if (document.hidden && currentUser && matchId) {
-                try {
-                    await updateDoc(doc(db, 'matches', matchId), {
-                        [`disconnected.${currentUser.uid}`]: true,
-                        [`hiddenAt.${currentUser.uid}`]: serverTimestamp()
-                    });
-                } catch (e) {}
+        // Also use pagehide (more reliable on mobile than beforeunload)
+        window.addEventListener('pagehide', () => {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            if (peerConnection) {
+                peerConnection.close();
+            }
+        });
+
+        // DO NOT mark disconnection on visibilitychange — switching tabs
+        // is normal behavior and shouldn't disconnect the session.
+        // Only track extended absence (> 60 seconds hidden).
+        let hiddenTimestamp = null;
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                hiddenTimestamp = Date.now();
+            } else if (hiddenTimestamp && currentUser && matchId) {
+                const hiddenDuration = Date.now() - hiddenTimestamp;
+                hiddenTimestamp = null;
+                // Only mark disconnected if tab was hidden for > 60 seconds
+                if (hiddenDuration > 60000) {
+                    updateDoc(doc(db, 'matches', matchId), {
+                        [`disconnected.${currentUser.uid}`]: true
+                    }).catch(() => {});
+                }
             }
         });
 

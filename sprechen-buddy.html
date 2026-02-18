@@ -1096,23 +1096,31 @@
             if (queueHeartbeat) clearInterval(queueHeartbeat);
             
             queueHeartbeat = setInterval(async () => {
-                if (currentUser && matchId === null) { // Only if still waiting
-                    try {
-                        const queueRef = doc(db, 'match_queue', currentUser.uid);
-                        const queueDoc = await getDoc(queueRef);
-                        
-                        if (queueDoc.exists()) {
+                if (!currentUser) return;
+                
+                try {
+                    const queueRef = doc(db, 'match_queue', currentUser.uid);
+                    const queueDoc = await getDoc(queueRef);
+                    
+                    if (queueDoc.exists()) {
+                        const status = queueDoc.data().status;
+                        // Send heartbeat if waiting OR looking for replacement
+                        if (status === 'waiting' || status === 'needs_replacement' || status === 'available_for_replacement') {
                             await updateDoc(queueRef, {
                                 lastSeen: serverTimestamp()
                             });
-                            console.log('💓 Queue heartbeat sent');
+                            console.log('💓 Queue heartbeat sent (status: ' + status + ')');
                         } else {
-                            // Queue entry doesn't exist, stop heartbeat
+                            // Already matched, stop heartbeat
                             clearInterval(queueHeartbeat);
+                            queueHeartbeat = null;
                         }
-                    } catch (error) {
-                        console.error('Heartbeat error:', error);
+                    } else {
+                        clearInterval(queueHeartbeat);
+                        queueHeartbeat = null;
                     }
+                } catch (error) {
+                    console.error('Heartbeat error:', error);
                 }
             }, 10000); // Every 10 seconds
         }
@@ -1281,17 +1289,23 @@
 
             try {
                 const queueRef = collection(db, 'match_queue');
-                const q = query(
-                    queueRef,
-                    where('status', '==', 'waiting')
-                );
+                
+                // Search for BOTH normal waiting users AND users needing replacement
+                const waitingQuery = query(queueRef, where('status', '==', 'waiting'));
+                const replacementQuery = query(queueRef, where('status', '==', 'needs_replacement'));
+                
+                const [waitingSnapshot, replacementSnapshot] = await Promise.all([
+                    getDocs(waitingQuery),
+                    getDocs(replacementQuery)
+                ]);
 
-                const snapshot = await getDocs(q);
                 const candidates = [];
+                const replacementCandidates = [];
                 const now = Date.now();
-                const STALE_THRESHOLD = 30000; // 30 seconds — must have heartbeat within this
+                const STALE_THRESHOLD = 30000;
 
-                snapshot.forEach(docSnap => {
+                // Normal waiting users
+                waitingSnapshot.forEach(docSnap => {
                     if (docSnap.id !== currentUser.uid) {
                         const data = docSnap.data();
                         const lastSeen = data.lastSeen?.toMillis() || data.timestamp?.toMillis() || 0;
@@ -1300,19 +1314,77 @@
                         if (age < STALE_THRESHOLD) {
                             candidates.push({ id: docSnap.id, ...data, age });
                         } else {
-                            // Clean up stale entry
                             console.log(`🗑️ Removing stale queue entry: ${docSnap.id} (${Math.floor(age/1000)}s old)`);
                             deleteDoc(docSnap.ref).catch(() => {});
                         }
                     }
                 });
 
+                // Users who need a replacement partner (priority — they're already in a session)
+                replacementSnapshot.forEach(docSnap => {
+                    if (docSnap.id !== currentUser.uid) {
+                        const data = docSnap.data();
+                        const lastSeen = data.lastSeen?.toMillis() || data.timestamp?.toMillis() || 0;
+                        const age = now - lastSeen;
+                        
+                        if (age < STALE_THRESHOLD && data.existingMatchId) {
+                            replacementCandidates.push({ id: docSnap.id, ...data, age });
+                        } else if (age >= STALE_THRESHOLD) {
+                            console.log(`🗑️ Removing stale replacement entry: ${docSnap.id}`);
+                            deleteDoc(docSnap.ref).catch(() => {});
+                        }
+                    }
+                });
+
+                // PRIORITY: Match with someone who needs replacement first
+                // (they're already in a session waiting, faster connection)
+                if (replacementCandidates.length > 0 && !matchId && !matchHandled) {
+                    replacementCandidates.sort((a, b) => a.age - b.age);
+                    const partner = replacementCandidates[0];
+                    
+                    console.log('🔄 Found a user needing replacement partner:', partner.id);
+                    
+                    // Verify they're still online
+                    const isOnline = await verifyPartnerOnline(partner.id);
+                    if (!isOnline) {
+                        console.log('⚠️ Replacement user was stale, trying normal match...');
+                        // Fall through to normal matching below
+                    } else {
+                        // We can't directly join their match (security rules: we're not in users[]).
+                        // Instead, signal to B by updating B's queue entry with our info.
+                        // B is listening on their queue entry for this signal.
+                        // 
+                        // We CAN update B's queue entry because we'll add a rule for it,
+                        // OR B can detect us via their active polling in findReplacementPartner.
+                        //
+                        // Safest approach: update OUR OWN queue entry to signal availability
+                        // for this specific match, and let B's next poll pick us up.
+                        // B polls every 3 seconds, so this is fast enough.
+                        
+                        await updateDoc(doc(db, 'match_queue', currentUser.uid), {
+                            status: 'available_for_replacement',
+                            targetMatchId: partner.existingMatchId,
+                            targetUserId: partner.id,
+                            lastSeen: serverTimestamp()
+                        });
+                        
+                        console.log('📡 Signaled availability for replacement, waiting for B to pick us up...');
+                        
+                        // Don't set matchHandled — let the normal listeners handle it
+                        // when B picks us up and updates the match doc / our queue entry.
+                        // Keep polling in case B doesn't pick us up in time.
+                        if (!matchId && !matchHandled) {
+                            setTimeout(() => findMatch(), 3000);
+                        }
+                        return;
+                    }
+                }
+
+                // Normal matching: find another waiting user
                 if (candidates.length > 0 && !matchId && !matchHandled) {
-                    // Sort by freshness — match with most recently active user
                     candidates.sort((a, b) => a.age - b.age);
                     const partner = candidates[0];
                     
-                    // Double-check partner is still alive before creating match
                     const isOnline = await verifyPartnerOnline(partner.id);
                     if (!isOnline) {
                         console.log('⚠️ Best candidate was stale, retrying...');
@@ -1324,7 +1396,6 @@
 
                     const newMatchId = `match_${Date.now()}_${currentUser.uid.substring(0, 6)}`;
 
-                    // Create match document with both users' display names
                     await setDoc(doc(db, 'matches', newMatchId), {
                         users: [currentUser.uid, partner.id],
                         userNames: {
@@ -1337,13 +1408,11 @@
                         status: 'active'
                     });
 
-                    // Update own queue entry (always succeeds)
                     await updateDoc(doc(db, 'match_queue', currentUser.uid), {
                         matchId: newMatchId,
                         status: 'matched'
                     });
 
-                    // Try to update partner's queue entry
                     try {
                         await updateDoc(doc(db, 'match_queue', partner.id), {
                             matchId: newMatchId,
@@ -1353,7 +1422,6 @@
                         console.log('Partner will detect match via matches listener');
                     }
                 } else if (!matchId && !matchHandled) {
-                    // Keep waiting, check again
                     setTimeout(() => findMatch(), 3000);
                 }
             } catch (error) {
@@ -2089,25 +2157,65 @@
         }
         async function findReplacementPartner() {
             try {
-                const queueRef = collection(db, 'match_queue');
-                const q = query(
-                    queueRef,
-                    where('status', '==', 'waiting')
-                );
+                // STRATEGY: Instead of only polling the queue, we ALSO put ourselves 
+                // back in the queue with a special status so that Device C's normal
+                // findMatch() can discover us. This is bidirectional discovery.
                 
-                const snapshot = await getDocs(q);
+                // Step 1: Put ourselves back in queue as 'needs_replacement'
+                // so new joiners can find us through their normal findMatch flow
+                const myQueueRef = doc(db, 'match_queue', currentUser.uid);
+                await setDoc(myQueueRef, {
+                    userId: currentUser.uid,
+                    level: userData.level || 'A1',
+                    streak: userData.streakDays || 1,
+                    displayName: getUserDisplayName(),
+                    timestamp: serverTimestamp(),
+                    lastSeen: serverTimestamp(),
+                    status: 'needs_replacement',
+                    existingMatchId: matchId  // So the new partner knows which match to join
+                });
+                
+                // Restart heartbeat for this queue entry
+                startQueueHeartbeat();
+                
+                // Step 2: Search for available users — both normal 'waiting' AND 
+                // those who specifically signaled 'available_for_replacement' for us
+                const queueRef = collection(db, 'match_queue');
+                const waitingQ = query(queueRef, where('status', '==', 'waiting'));
+                const availableQ = query(queueRef, where('status', '==', 'available_for_replacement'));
+                
+                const [waitingSnap, availableSnap] = await Promise.all([
+                    getDocs(waitingQ),
+                    getDocs(availableQ)
+                ]);
+                
                 const candidates = [];
                 const now = Date.now();
-                const STALE_THRESHOLD = 30000; // 30 seconds — must match heartbeat
+                const STALE_THRESHOLD = 30000;
                 
-                snapshot.forEach(docSnap => {
-                    // Don't match with yourself OR the disconnected partner
+                // Check users who specifically want to join our match (highest priority)
+                availableSnap.forEach(docSnap => {
                     if (docSnap.id !== currentUser.uid && docSnap.id !== partnerId) {
                         const data = docSnap.data();
                         const lastSeen = data.lastSeen?.toMillis() || data.timestamp?.toMillis() || 0;
                         const age = now - lastSeen;
                         
-                        // Only include fresh entries (heartbeat within threshold)
+                        if (age < STALE_THRESHOLD && data.targetUserId === currentUser.uid) {
+                            // This user specifically wants to replace in OUR match!
+                            candidates.unshift({ id: docSnap.id, ...data, age, priority: true });
+                        } else if (age < STALE_THRESHOLD) {
+                            candidates.push({ id: docSnap.id, ...data, age });
+                        }
+                    }
+                });
+                
+                // Also check normal waiting users
+                waitingSnap.forEach(docSnap => {
+                    if (docSnap.id !== currentUser.uid && docSnap.id !== partnerId) {
+                        const data = docSnap.data();
+                        const lastSeen = data.lastSeen?.toMillis() || data.timestamp?.toMillis() || 0;
+                        const age = now - lastSeen;
+                        
                         if (age < STALE_THRESHOLD) {
                             candidates.push({ id: docSnap.id, ...data, age });
                         } else {
@@ -2118,109 +2226,48 @@
                 });
                 
                 if (candidates.length > 0) {
-                    // Sort by freshness
-                    candidates.sort((a, b) => a.age - b.age);
+                    // Priority candidates first (targeted at our match), then by freshness
+                    candidates.sort((a, b) => {
+                        if (a.priority && !b.priority) return -1;
+                        if (!a.priority && b.priority) return 1;
+                        return a.age - b.age;
+                    });
                     const newPartner = candidates[0];
                     
-                    // Verify partner is actually online
                     const isOnline = await verifyPartnerOnline(newPartner.id);
                     if (!isOnline) {
                         console.log('⚠️ Replacement candidate was stale, retrying...');
-                        setTimeout(() => {
-                            if (document.getElementById('reconnectingOverlay').classList.contains('active')) {
-                                findReplacementPartner();
-                            }
-                        }, 3000);
+                        retryReplacement();
                         return;
                     }
                     
-                    const oldPartnerId = partnerId;
-                    partnerId = newPartner.id;
+                    await completeReplacement(newPartner);
                     
-                    // CRITICAL: Clear ALL stale WebRTC signaling data from the match doc.
-                    // Without this, the new partner picks up the old offer/answer and
-                    // the WebRTC connection silently fails because SDP doesn't match.
-                    // Also clear old ready flags so the new handshake works properly.
+                } else {
+                    // No candidates found yet — keep polling, but also listen for 
+                    // our queue entry being updated by a new joiner's findMatch
+                    console.log('⏳ No replacement candidates, waiting (also discoverable in queue)...');
+                    document.getElementById('reconnectingMessage').textContent = 'Waiting for partners...';
                     
-                    // First, delete old ICE candidate subcollections
-                    try {
-                        const oldCandidatesRef = collection(db, 'matches', matchId, 'candidates_' + oldPartnerId);
-                        const oldCandidates = await getDocs(oldCandidatesRef);
-                        const deletions = [];
-                        oldCandidates.forEach(d => deletions.push(deleteDoc(d.ref)));
-                        await Promise.all(deletions);
-                        
-                        const myCandidatesRef = collection(db, 'matches', matchId, 'candidates_' + currentUser.uid);
-                        const myCandidates = await getDocs(myCandidatesRef);
-                        const myDeletions = [];
-                        myCandidates.forEach(d => myDeletions.push(deleteDoc(d.ref)));
-                        await Promise.all(myDeletions);
-                    } catch (e) {
-                        console.log('ICE candidate cleanup:', e);
-                    }
-                    
-                    // Update match doc: new users, clear signaling, clear ready flags
-                    await updateDoc(doc(db, 'matches', matchId), {
-                        users: [currentUser.uid, partnerId],
-                        userNames: {
-                            [currentUser.uid]: getUserDisplayName(),
-                            [partnerId]: newPartner.displayName || 'Student'
-                        },
-                        // Clear stale WebRTC signaling
-                        offer: null,
-                        answer: null,
-                        // Clear ready flags so handleMatchFound works for new partner
-                        ready: { [currentUser.uid]: true },
-                        // Clear disconnection flags
-                        disconnected: {},
-                        lookingForReplacement: false,
-                        replacementAt: serverTimestamp()
-                    });
-                    
-                    // Update new partner's queue entry so their listener picks it up
-                    try {
-                        await updateDoc(doc(db, 'match_queue', partnerId), {
-                            matchId: matchId,
-                            status: 'matched'
-                        });
-                    } catch (e) {
-                        console.log('Partner will detect match via matches listener');
-                    }
-                    
-                    // DON'T call setupWebRTC here! Wait for the new partner to go
-                    // through handleMatchFound, set their ready flag, and THEN both
-                    // sides set up WebRTC through the normal startSession flow.
-                    // Device B (us) will detect partner's ready flag and proceed.
-                    
-                    // Listen for new partner's ready signal
-                    const unsubReady = onSnapshot(doc(db, 'matches', matchId), async (snap) => {
+                    // Listen for our queue entry being matched by someone else's findMatch
+                    const unsubQueueMatch = onSnapshot(myQueueRef, async (snap) => {
                         const data = snap.data();
-                        if (data && data.ready && data.ready[partnerId]) {
-                            unsubReady();
-                            clearTimeout(replacementReadyTimeout);
-                            console.log('✅ Replacement partner is ready, starting WebRTC');
+                        if (data && data.status === 'replacement_matched' && data.newPartnerId) {
+                            unsubQueueMatch();
+                            console.log('✅ A new partner found us via their findMatch!');
                             
-                            // Now both are ready — set up WebRTC
-                            await setupWebRTC();
-                            
-                            resumeTimer();
-                            document.getElementById('reconnectingOverlay').classList.remove('active');
-                            showNotification('✅ New partner joined!', 'important');
+                            const newPartner = {
+                                id: data.newPartnerId,
+                                displayName: data.newPartnerName || 'Student'
+                            };
+                            await completeReplacement(newPartner);
                         }
                     });
                     
-                    // Timeout if new partner doesn't respond
-                    const replacementReadyTimeout = setTimeout(() => {
-                        unsubReady();
-                        console.log('⏱️ Replacement partner did not respond');
-                        // Try finding another partner
-                        findReplacementPartner();
-                    }, 20000);
-                    
-                } else {
-                    document.getElementById('reconnectingMessage').textContent = 'Waiting for partners...';
+                    // Also keep polling actively
                     setTimeout(() => {
                         if (document.getElementById('reconnectingOverlay').classList.contains('active')) {
+                            unsubQueueMatch(); // Clean up listener before retry
                             findReplacementPartner();
                         }
                     }, 3000);
@@ -2228,11 +2275,101 @@
                 
             } catch (error) {
                 console.error('Error finding replacement:', error);
-                setTimeout(() => {
-                    if (document.getElementById('reconnectingOverlay').classList.contains('active')) {
-                        findReplacementPartner();
+                retryReplacement();
+            }
+        }
+        
+        function retryReplacement() {
+            setTimeout(() => {
+                if (document.getElementById('reconnectingOverlay').classList.contains('active')) {
+                    findReplacementPartner();
+                }
+            }, 3000);
+        }
+        
+        async function completeReplacement(newPartner) {
+            try {
+                const oldPartnerId = partnerId;
+                partnerId = newPartner.id;
+                
+                // Clean up old ICE candidates
+                try {
+                    const oldCandidatesRef = collection(db, 'matches', matchId, 'candidates_' + oldPartnerId);
+                    const oldCandidates = await getDocs(oldCandidatesRef);
+                    const deletions = [];
+                    oldCandidates.forEach(d => deletions.push(deleteDoc(d.ref)));
+                    await Promise.all(deletions);
+                    
+                    const myCandidatesRef = collection(db, 'matches', matchId, 'candidates_' + currentUser.uid);
+                    const myCandidates = await getDocs(myCandidatesRef);
+                    const myDeletions = [];
+                    myCandidates.forEach(d => myDeletions.push(deleteDoc(d.ref)));
+                    await Promise.all(myDeletions);
+                } catch (e) {
+                    console.log('ICE candidate cleanup:', e);
+                }
+                
+                // Update match doc: new users, clear stale signaling data
+                await updateDoc(doc(db, 'matches', matchId), {
+                    users: [currentUser.uid, partnerId],
+                    userNames: {
+                        [currentUser.uid]: getUserDisplayName(),
+                        [partnerId]: newPartner.displayName || 'Student'
+                    },
+                    offer: null,
+                    answer: null,
+                    ready: { [currentUser.uid]: true },
+                    disconnected: {},
+                    lookingForReplacement: false,
+                    replacementAt: serverTimestamp()
+                });
+                
+                // Try to update partner's queue entry (may fail due to security rules)
+                try {
+                    await updateDoc(doc(db, 'match_queue', partnerId), {
+                        matchId: matchId,
+                        status: 'matched'
+                    });
+                    console.log('✅ Updated partner queue entry directly');
+                } catch (e) {
+                    console.log('Partner will detect match via matches listener');
+                }
+                
+                // Update OUR queue entry to 'matched' (we put it back as 'needs_replacement')
+                try {
+                    await updateDoc(doc(db, 'match_queue', currentUser.uid), {
+                        status: 'matched',
+                        matchId: matchId
+                    });
+                } catch (e) {}
+                
+                stopQueueHeartbeat();
+                
+                // Listen for new partner's ready signal before starting WebRTC
+                const unsubReady = onSnapshot(doc(db, 'matches', matchId), async (snap) => {
+                    const data = snap.data();
+                    if (data && data.ready && data.ready[partnerId]) {
+                        unsubReady();
+                        clearTimeout(replacementReadyTimeout);
+                        console.log('✅ Replacement partner is ready, starting WebRTC');
+                        
+                        await setupWebRTC();
+                        
+                        resumeTimer();
+                        document.getElementById('reconnectingOverlay').classList.remove('active');
+                        showNotification('✅ New partner joined!', 'important');
                     }
-                }, 3000);
+                });
+                
+                const replacementReadyTimeout = setTimeout(() => {
+                    unsubReady();
+                    console.log('⏱️ Replacement partner did not respond');
+                    findReplacementPartner();
+                }, 20000);
+                
+            } catch (error) {
+                console.error('Error completing replacement:', error);
+                retryReplacement();
             }
         }
 

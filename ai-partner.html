@@ -21,545 +21,160 @@
     --border: #ddd5c4;
     --shadow: rgba(26,18,9,0.12);
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--parchment);
-    color: var(--ink);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
+  body { font-family: 'DM Sans', sans-serif; background: var(--parchment); color: var(--ink); min-height: 100vh; overflow-x: hidden; }
   body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      radial-gradient(ellipse at 20% 10%, rgba(201,150,58,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 90%, rgba(45,90,61,0.06) 0%, transparent 50%),
-      url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    content: ''; position: fixed; inset: 0;
+    background-image: radial-gradient(ellipse at 20% 10%, rgba(201,150,58,0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 90%, rgba(45,90,61,0.06) 0%, transparent 50%);
     pointer-events: none; z-index: 0;
   }
-
-  #auth-overlay {
-    position: fixed; inset: 0;
-    background: var(--ink);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 1000;
-    flex-direction: column; gap: 1rem;
-  }
+  #auth-overlay { position: fixed; inset: 0; background: var(--ink); display: flex; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; gap: 1rem; }
   #auth-overlay p { color: var(--gold-light); font-family: 'DM Mono', monospace; font-size: 0.85rem; letter-spacing: 0.1em; }
-  .auth-spinner {
-    width: 40px; height: 40px;
-    border: 3px solid rgba(201,150,58,0.2);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  #access-denied {
-    display: none;
-    position: fixed; inset: 0;
-    background: var(--parchment);
-    align-items: center; justify-content: center;
-    z-index: 999;
-    flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem;
-  }
+  .auth-spinner { width: 40px; height: 40px; border: 3px solid rgba(201,150,58,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  #access-denied { display: none; position: fixed; inset: 0; background: var(--parchment); align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem; }
   #access-denied h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--red); }
   #access-denied p { color: var(--muted); max-width: 400px; line-height: 1.6; }
-  #access-denied a {
-    display: inline-block;
-    padding: 0.75rem 2rem;
-    background: var(--ink);
-    color: var(--gold-light);
-    text-decoration: none;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    border-radius: 2px;
-    transition: background 0.2s;
-  }
-  #access-denied a:hover { background: var(--forest); }
-
-  .topbar {
-    position: relative; z-index: 10;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1rem 2rem;
-    border-bottom: 1px solid var(--border);
-    background: rgba(250,246,239,0.9);
-    backdrop-filter: blur(8px);
-  }
+  #access-denied a { display: inline-block; padding: 0.75rem 2rem; background: var(--ink); color: var(--gold-light); text-decoration: none; font-weight: 600; border-radius: 2px; }
+  .topbar { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; border-bottom: 1px solid var(--border); background: rgba(250,246,239,0.9); backdrop-filter: blur(8px); }
   .topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
-  .topbar-logo {
-    width: 36px; height: 36px;
-    background: var(--ink);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--gold-light); font-size: 1.1rem;
-  }
+  .topbar-logo { width: 36px; height: 36px; background: var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gold-light); font-size: 1.1rem; }
   .topbar-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
   .topbar-sub { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
   .topbar-user { display: flex; align-items: center; gap: 1rem; }
-  .user-badge {
-    font-size: 0.75rem; font-family: 'DM Mono', monospace;
-    background: var(--forest); color: #fff;
-    padding: 0.25rem 0.65rem; border-radius: 20px;
-    letter-spacing: 0.05em;
-  }
-  .topbar-back {
-    font-size: 0.8rem; color: var(--muted); text-decoration: none;
-    display: flex; align-items: center; gap: 0.3rem;
-    transition: color 0.2s;
-  }
+  .user-badge { font-size: 0.75rem; font-family: 'DM Mono', monospace; background: var(--forest); color: #fff; padding: 0.25rem 0.65rem; border-radius: 20px; }
+  .topbar-back { font-size: 0.8rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
   .topbar-back:hover { color: var(--ink); }
-
-  .container {
-    position: relative; z-index: 1;
-    max-width: 960px; margin: 0 auto;
-    padding: 2rem 1.5rem 4rem;
-  }
-
-  .hero {
-    text-align: center; margin-bottom: 3rem;
-    animation: fadeUp 0.6s ease both;
-  }
-  .hero-eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--gold); margin-bottom: 0.75rem;
-  }
-  .hero h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.2rem, 5vw, 3.5rem);
-    font-weight: 900; line-height: 1.1;
-    margin-bottom: 0.75rem;
-  }
+  .container { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .hero { text-align: center; margin-bottom: 3rem; animation: fadeUp 0.6s ease both; }
+  .hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.75rem; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; line-height: 1.1; margin-bottom: 0.75rem; }
   .hero h1 span { color: var(--gold); }
-  .hero p {
-    font-size: 1.05rem; color: var(--muted);
-    max-width: 520px; margin: 0 auto; line-height: 1.7;
-  }
-
+  .hero p { font-size: 1.05rem; color: var(--muted); max-width: 520px; margin: 0 auto; line-height: 1.7; }
   #setup-panel { animation: fadeUp 0.6s 0.1s ease both; }
-
-  .setup-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 1.5rem; margin-bottom: 1.5rem;
-  }
+  .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
   @media (max-width: 600px) { .setup-grid { grid-template-columns: 1fr; } }
-
-  .setup-card {
-    background: #fff;
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 12px var(--shadow);
-  }
-  .setup-card h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem; margin-bottom: 1rem;
-    display: flex; align-items: center; gap: 0.5rem;
-  }
-  .setup-card h3 span { font-size: 1.2rem; }
-
+  .setup-card { background: #fff; border: 1.5px solid var(--border); border-radius: 6px; padding: 1.5rem; box-shadow: 0 2px 12px var(--shadow); }
+  .setup-card h3 { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
   .level-tabs { display: flex; gap: 0.5rem; }
-  .level-tab {
-    flex: 1;
-    padding: 0.6rem; text-align: center;
-    border: 1.5px solid var(--border);
-    border-radius: 4px; cursor: pointer;
-    font-weight: 600; font-size: 0.9rem;
-    transition: all 0.2s; background: var(--cream);
-    color: var(--muted);
-  }
+  .level-tab { flex: 1; padding: 0.6rem; text-align: center; border: 1.5px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; background: var(--cream); color: var(--muted); }
   .level-tab.active { background: var(--ink); color: var(--gold-light); border-color: var(--ink); }
-
-  .scenario-select {
-    width: 100%;
-    padding: 0.7rem 0.9rem;
-    border: 1.5px solid var(--border);
-    border-radius: 4px;
-    background: var(--cream);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem; color: var(--ink);
-    cursor: pointer; appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7d6a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.9rem center;
-    padding-right: 2.5rem;
-  }
+  .scenario-select { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid var(--border); border-radius: 4px; background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7d6a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.5rem; }
   .scenario-select:focus { outline: none; border-color: var(--gold); }
-
-  .scenario-desc {
-    margin-top: 0.6rem;
-    font-size: 0.8rem; color: var(--muted);
-    font-style: italic; line-height: 1.5;
-    min-height: 2.5rem;
-  }
-
+  .scenario-desc { margin-top: 0.6rem; font-size: 0.8rem; color: var(--muted); font-style: italic; line-height: 1.5; min-height: 2.5rem; }
   .input-mode-tabs { display: flex; gap: 0.5rem; }
-  .mode-tab {
-    flex: 1; padding: 0.6rem; text-align: center;
-    border: 1.5px solid var(--border); border-radius: 4px;
-    cursor: pointer; font-size: 0.85rem; font-weight: 500;
-    background: var(--cream); color: var(--muted);
-    transition: all 0.2s;
-  }
+  .mode-tab { flex: 1; padding: 0.6rem; text-align: center; border: 1.5px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 500; background: var(--cream); color: var(--muted); transition: all 0.2s; }
   .mode-tab.active { background: var(--forest); color: #fff; border-color: var(--forest); }
-
-  .start-btn {
-    display: block; width: 100%;
-    padding: 1.1rem;
-    background: var(--ink);
-    color: var(--gold-light);
-    font-family: 'Playfair Display', serif;
-    font-size: 1.25rem; font-weight: 700;
-    letter-spacing: 0.04em;
-    border: none; border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    box-shadow: 0 4px 20px var(--shadow);
-  }
+  .start-btn { display: block; width: 100%; padding: 1.1rem; background: var(--ink); color: var(--gold-light); font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; border: none; border-radius: 5px; cursor: pointer; transition: background 0.2s, transform 0.1s; box-shadow: 0 4px 20px var(--shadow); }
   .start-btn:hover { background: var(--forest); transform: translateY(-1px); }
-  .start-btn:active { transform: translateY(0); }
-
   #session-panel { display: none; animation: fadeUp 0.5s ease both; }
-
-  .session-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1.5rem; padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
-  }
+  .session-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
   .session-info h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; }
   .session-info p { font-size: 0.82rem; color: var(--muted); margin-top: 0.2rem; }
-  .session-timer {
-    font-family: 'DM Mono', monospace;
-    font-size: 1.8rem; font-weight: 500;
-    color: var(--ink); letter-spacing: 0.05em;
-  }
+  .session-timer { font-family: 'DM Mono', monospace; font-size: 1.8rem; font-weight: 500; color: var(--ink); letter-spacing: 0.05em; }
   .session-timer.warning { color: var(--red); animation: pulse 1s infinite; }
-
-  .role-card {
-    background: var(--ink); color: var(--parchment);
-    border-radius: 6px; padding: 1.25rem 1.5rem;
-    margin-bottom: 1.25rem;
-    display: flex; align-items: flex-start; gap: 1rem;
-  }
-  .role-avatar {
-    width: 48px; height: 48px; min-width: 48px;
-    background: var(--gold);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem;
-  }
+  .role-card { background: var(--ink); color: var(--parchment); border-radius: 6px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 1rem; }
+  .role-avatar { width: 48px; height: 48px; min-width: 48px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
   .role-info h3 { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: 0.25rem; color: var(--gold-light); }
   .role-info p { font-size: 0.85rem; line-height: 1.6; opacity: 0.85; }
 
-  .conversation-box {
-    background: #fff;
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    height: 340px; overflow-y: auto;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-    scroll-behavior: smooth;
-  }
-
-  .msg {
-    display: flex; gap: 0.75rem;
-    margin-bottom: 1.1rem;
-    animation: fadeUp 0.3s ease both;
-  }
-  .msg.user { flex-direction: row-reverse; }
-
-  .msg-avatar {
-    width: 34px; height: 34px; min-width: 34px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.95rem; font-weight: 700;
-  }
-  .msg.ai .msg-avatar { background: var(--ink); color: var(--gold-light); }
-  .msg.user .msg-avatar { background: var(--forest); color: #fff; }
-
-  .msg-bubble {
-    max-width: 75%;
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    font-size: 0.92rem; line-height: 1.6;
-  }
-  .msg.ai .msg-bubble {
-    background: var(--cream);
-    border: 1px solid var(--border);
-    border-top-left-radius: 4px;
-  }
-  .msg.user .msg-bubble {
-    background: var(--forest);
-    color: #fff;
-    border-top-right-radius: 4px;
-  }
-  .msg-time {
-    font-size: 0.7rem; color: var(--muted);
-    margin-top: 0.25rem;
-    font-family: 'DM Mono', monospace;
-  }
-  .msg.user .msg-time { text-align: right; }
-
-  .feedback-inline {
-    background: var(--gold-pale);
-    border-left: 3px solid var(--gold);
-    border-radius: 0 6px 6px 0;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem; color: var(--ink);
-    margin-top: 0.3rem; line-height: 1.5;
-  }
-  .feedback-inline strong { color: var(--forest); }
-
-  /* Pronunciation feedback — distinct style */
-  .pronunciation-feedback {
-    background: #eef6ff;
-    border-left: 3px solid #3b82f6;
-    border-radius: 0 6px 6px 0;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem; color: var(--ink);
-    margin-top: 0.3rem; line-height: 1.6;
-  }
-  .pronunciation-feedback strong { color: #1d4ed8; }
-  .pronunciation-feedback .phoneme { 
-    font-family: 'DM Mono', monospace; 
-    background: #dbeafe; 
-    padding: 0.1rem 0.3rem; 
-    border-radius: 3px;
-    font-size: 0.78rem;
-  }
-
-  /* Speaking status banner */
-  .ai-speaking-banner {
-    display: none;
-    align-items: center; gap: 0.6rem;
-    background: var(--ink); color: var(--gold-light);
-    padding: 0.6rem 1rem;
-    border-radius: 4px;
-    font-size: 0.82rem;
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 0.04em;
-    margin-bottom: 0.75rem;
-    animation: pulse 1.5s infinite;
-  }
+  /* AI Speaking banner */
+  .ai-speaking-banner { display: none; align-items: center; gap: 0.6rem; background: var(--ink); color: var(--gold-light); padding: 0.6rem 1rem; border-radius: 4px; font-size: 0.82rem; font-family: 'DM Mono', monospace; margin-bottom: 0.75rem; }
   .ai-speaking-banner.visible { display: flex; }
   .speaking-wave { display: flex; gap: 3px; align-items: center; }
-  .speaking-wave span {
-    display: inline-block; width: 3px; background: var(--gold);
-    border-radius: 2px;
-    animation: wave 0.8s infinite;
-  }
+  .speaking-wave span { display: inline-block; width: 3px; background: var(--gold); border-radius: 2px; animation: wave 0.8s infinite; }
   .speaking-wave span:nth-child(1) { height: 8px; animation-delay: 0s; }
   .speaking-wave span:nth-child(2) { height: 14px; animation-delay: 0.1s; }
   .speaking-wave span:nth-child(3) { height: 10px; animation-delay: 0.2s; }
   .speaking-wave span:nth-child(4) { height: 16px; animation-delay: 0.15s; }
   .speaking-wave span:nth-child(5) { height: 8px; animation-delay: 0.05s; }
+  @keyframes wave { 0%, 100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
 
-  @keyframes wave {
-    0%, 100% { transform: scaleY(0.5); }
-    50% { transform: scaleY(1); }
-  }
+  /* Recording status */
+  .recording-status { display: none; align-items: center; gap: 0.75rem; background: #fff0f0; border: 1.5px solid var(--red-light); border-radius: 4px; padding: 0.6rem 1rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: var(--red); font-family: 'DM Mono', monospace; }
+  .recording-status.visible { display: flex; }
+  .rec-dot { width: 10px; height: 10px; background: var(--red); border-radius: 50%; animation: pulse 1s infinite; flex-shrink: 0; }
 
-  .thinking {
-    display: flex; gap: 0.4rem; align-items: center;
-    padding: 0.5rem 0;
-  }
-  .thinking-dot {
-    width: 8px; height: 8px;
-    background: var(--muted); border-radius: 50%;
-    animation: bounce 1.2s infinite;
-  }
+  /* Processing status */
+  .processing-status { display: none; align-items: center; gap: 0.75rem; background: #f0f7ff; border: 1.5px solid #93c5fd; border-radius: 4px; padding: 0.6rem 1rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: #1d4ed8; font-family: 'DM Mono', monospace; }
+  .processing-status.visible { display: flex; }
+
+  .conversation-box { background: #fff; border: 1.5px solid var(--border); border-radius: 6px; height: 340px; overflow-y: auto; padding: 1.25rem; margin-bottom: 1rem; scroll-behavior: smooth; }
+  .msg { display: flex; gap: 0.75rem; margin-bottom: 1.1rem; animation: fadeUp 0.3s ease both; }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar { width: 34px; height: 34px; min-width: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; font-weight: 700; }
+  .msg.ai .msg-avatar { background: var(--ink); color: var(--gold-light); }
+  .msg.user .msg-avatar { background: var(--forest); color: #fff; }
+  .msg-bubble { max-width: 75%; padding: 0.75rem 1rem; border-radius: 12px; font-size: 0.92rem; line-height: 1.6; }
+  .msg.ai .msg-bubble { background: var(--cream); border: 1px solid var(--border); border-top-left-radius: 4px; }
+  .msg.user .msg-bubble { background: var(--forest); color: #fff; border-top-right-radius: 4px; }
+  .msg-time { font-size: 0.7rem; color: var(--muted); margin-top: 0.25rem; font-family: 'DM Mono', monospace; }
+  .msg.user .msg-time { text-align: right; }
+  .feedback-inline { background: var(--gold-pale); border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: 0.5rem 0.75rem; font-size: 0.8rem; color: var(--ink); margin-top: 0.3rem; line-height: 1.5; }
+  .feedback-inline strong { color: var(--forest); }
+  .thinking { display: flex; gap: 0.4rem; align-items: center; padding: 0.5rem 0; }
+  .thinking-dot { width: 8px; height: 8px; background: var(--muted); border-radius: 50%; animation: bounce 1.2s infinite; }
   .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
   .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
-
-  .input-area {
-    display: flex; gap: 0.75rem; align-items: flex-end;
-    margin-bottom: 1rem;
-  }
-  .text-input-wrap { flex: 1; position: relative; }
-  #text-input {
-    width: 100%;
-    padding: 0.85rem 1rem;
-    border: 1.5px solid var(--border);
-    border-radius: 6px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.95rem; color: var(--ink);
-    background: #fff; resize: none;
-    transition: border-color 0.2s;
-    min-height: 50px; max-height: 120px;
-  }
+  .input-area { display: flex; gap: 0.75rem; align-items: flex-end; margin-bottom: 1rem; }
+  .text-input-wrap { flex: 1; }
+  #text-input { width: 100%; padding: 0.85rem 1rem; border: 1.5px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); background: #fff; resize: none; transition: border-color 0.2s; min-height: 50px; max-height: 120px; }
   #text-input:focus { outline: none; border-color: var(--gold); }
   #text-input::placeholder { color: var(--muted); }
-
-  .send-btn, .mic-btn {
-    width: 50px; height: 50px; min-width: 50px;
-    border: none; border-radius: 6px;
-    cursor: pointer; font-size: 1.2rem;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-  }
+  .send-btn, .mic-btn { width: 50px; height: 50px; min-width: 50px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
   .send-btn { background: var(--ink); color: var(--gold-light); }
   .send-btn:hover { background: var(--forest); }
   .mic-btn { background: var(--cream); border: 1.5px solid var(--border); color: var(--muted); }
-  .mic-btn.listening { background: var(--red); color: #fff; border-color: var(--red); animation: pulse 1s infinite; }
-  .mic-btn.waiting { background: #6b7280; color: #fff; border-color: #6b7280; cursor: not-allowed; }
-  .mic-btn:hover:not(.listening):not(.waiting) { background: var(--border); }
-
-  .session-controls {
-    display: flex; gap: 0.75rem; flex-wrap: wrap;
-  }
-  .ctrl-btn {
-    padding: 0.55rem 1rem;
-    border: 1.5px solid var(--border);
-    background: var(--cream); color: var(--ink);
-    border-radius: 4px; cursor: pointer;
-    font-size: 0.82rem; font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem;
-  }
+  .mic-btn.recording { background: var(--red); color: #fff; border-color: var(--red); }
+  .mic-btn.processing { background: #3b82f6; color: #fff; border-color: #3b82f6; cursor: wait; }
+  .mic-btn.waiting { background: #9ca3af; color: #fff; border-color: #9ca3af; cursor: not-allowed; }
+  .mic-btn:hover:not(.recording):not(.processing):not(.waiting) { background: var(--border); }
+  .session-controls { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .ctrl-btn { padding: 0.55rem 1rem; border: 1.5px solid var(--border); background: var(--cream); color: var(--ink); border-radius: 4px; cursor: pointer; font-size: 0.82rem; font-weight: 500; font-family: 'DM Sans', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem; }
   .ctrl-btn:hover { background: var(--border); }
   .ctrl-btn.danger { border-color: var(--red-light); color: var(--red); }
   .ctrl-btn.danger:hover { background: var(--red-light); color: #fff; }
-
   #score-panel { display: none; animation: fadeUp 0.5s ease both; }
-
   .score-header { text-align: center; margin-bottom: 2rem; }
   .score-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem; }
   .score-header p { color: var(--muted); }
-
-  .score-big {
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 2.5rem;
-  }
-  .score-circle {
-    width: 140px; height: 140px;
-    border-radius: 50%;
-    background: conic-gradient(var(--gold) 0%, var(--gold) var(--pct, 75%), var(--cream) var(--pct, 75%));
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 0 8px var(--gold-pale), 0 4px 20px var(--shadow);
-    position: relative;
-  }
-  .score-inner {
-    width: 110px; height: 110px;
-    background: #fff;
-    border-radius: 50%;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-  }
+  .score-big { display: flex; align-items: center; justify-content: center; margin-bottom: 2.5rem; }
+  .score-circle { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(var(--gold) 0%, var(--gold) var(--pct, 75%), var(--cream) var(--pct, 75%)); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 8px var(--gold-pale), 0 4px 20px var(--shadow); }
+  .score-inner { width: 110px; height: 110px; background: #fff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .score-num { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 900; line-height: 1; }
   .score-label { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
-
-  .criteria-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 1rem; margin-bottom: 2rem;
-  }
+  .criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
   @media (max-width: 500px) { .criteria-grid { grid-template-columns: 1fr; } }
-
-  .criterion-card {
-    background: #fff; border: 1.5px solid var(--border);
-    border-radius: 6px; padding: 1rem 1.25rem;
-    box-shadow: 0 2px 8px var(--shadow);
-  }
-  .criterion-card h4 {
-    font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 0.6rem;
-    font-family: 'DM Mono', monospace;
-  }
+  .criterion-card { background: #fff; border: 1.5px solid var(--border); border-radius: 6px; padding: 1rem 1.25rem; box-shadow: 0 2px 8px var(--shadow); }
+  .criterion-card h4 { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; font-family: 'DM Mono', monospace; }
   .criterion-bar-wrap { height: 8px; background: var(--cream); border-radius: 4px; overflow: hidden; margin-bottom: 0.4rem; }
   .criterion-bar { height: 100%; border-radius: 4px; background: var(--gold); transition: width 1s ease; }
   .criterion-score { font-weight: 700; font-size: 1.1rem; }
   .criterion-comment { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; line-height: 1.5; }
-
-  .feedback-section {
-    background: var(--cream); border: 1.5px solid var(--border);
-    border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem;
-  }
-  .feedback-section h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem; margin-bottom: 0.75rem;
-    display: flex; align-items: center; gap: 0.5rem;
-  }
-  .feedback-section p { font-size: 0.9rem; line-height: 1.7; color: var(--ink); }
-
-  /* Pronunciation section in score report */
-  .pronunciation-section {
-    background: #eff6ff; border: 1.5px solid #bfdbfe;
-    border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem;
-  }
-  .pronunciation-section h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem; margin-bottom: 1rem;
-    color: #1e40af;
-    display: flex; align-items: center; gap: 0.5rem;
-  }
-  .pronunciation-tip {
-    background: #fff; border: 1px solid #bfdbfe;
-    border-radius: 6px; padding: 0.75rem 1rem;
-    margin-bottom: 0.6rem; font-size: 0.85rem; line-height: 1.6;
-  }
-  .pronunciation-tip .word { font-family: 'DM Mono', monospace; font-weight: 600; color: #1d4ed8; font-size: 0.9rem; }
-  .pronunciation-tip .how { color: #047857; font-style: italic; }
+  .feedback-section { background: var(--cream); border: 1.5px solid var(--border); border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; }
+  .feedback-section h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.75rem; }
+  .feedback-section p { font-size: 0.9rem; line-height: 1.7; }
+  .pronunciation-section { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 6px; padding: 1.5rem; margin-bottom: 2rem; }
+  .pronunciation-section h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 1rem; color: #1e40af; }
+  .pronunciation-tip { background: #fff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 0.6rem; font-size: 0.85rem; line-height: 1.6; }
+  .pronunciation-tip .word { font-family: 'DM Mono', monospace; font-weight: 600; color: #1d4ed8; }
   .pronunciation-tip .gujarati-note { color: #92400e; font-size: 0.78rem; margin-top: 0.25rem; display: block; }
-
   .errors-list { list-style: none; }
-  .errors-list li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.87rem; line-height: 1.6;
-  }
+  .errors-list li { padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 0.87rem; line-height: 1.6; }
   .errors-list li:last-child { border-bottom: none; }
   .err-orig { color: var(--red); text-decoration: line-through; font-family: 'DM Mono', monospace; }
   .err-correct { color: var(--forest); font-family: 'DM Mono', monospace; font-weight: 600; }
-
   .score-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-  .score-actions button {
-    padding: 0.8rem 1.75rem;
-    border-radius: 4px; cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600; font-size: 0.9rem;
-    transition: all 0.2s;
-  }
+  .score-actions button { padding: 0.8rem 1.75rem; border-radius: 4px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
   .btn-primary { background: var(--ink); color: var(--gold-light); border: none; }
   .btn-primary:hover { background: var(--forest); }
   .btn-secondary { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
   .btn-secondary:hover { background: var(--cream); }
-
-  .toast {
-    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
-    background: var(--ink); color: var(--parchment);
-    padding: 0.75rem 1.5rem; border-radius: 4px;
-    font-size: 0.85rem; z-index: 999;
-    animation: fadeUp 0.3s ease both;
-    font-family: 'DM Mono', monospace; letter-spacing: 0.04em;
-    pointer-events: none;
-  }
-
+  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--parchment); padding: 0.75rem 1.5rem; border-radius: 4px; font-size: 0.85rem; z-index: 999; animation: fadeUp 0.3s ease both; font-family: 'DM Mono', monospace; pointer-events: none; }
+  .sr-badge { display: inline-block; font-size: 0.65rem; font-family: 'DM Mono', monospace; background: var(--forest); color: #fff; padding: 0.1rem 0.4rem; border-radius: 10px; margin-left: 0.4rem; vertical-align: middle; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
   @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
-
-  .voice-transcript {
-    background: var(--gold-pale);
-    border: 1.5px dashed var(--gold);
-    border-radius: 4px;
-    padding: 0.6rem 0.9rem;
-    font-size: 0.85rem; color: var(--ink);
-    font-style: italic;
-    margin-bottom: 0.5rem;
-    display: none;
-  }
-
-  .sr-badge {
-    display: inline-block;
-    font-size: 0.65rem; font-family: 'DM Mono', monospace;
-    background: var(--forest); color: #fff;
-    padding: 0.1rem 0.4rem; border-radius: 10px;
-    margin-left: 0.4rem; vertical-align: middle;
-  }
 </style>
 </head>
 <body>
@@ -572,12 +187,11 @@
 <div id="access-denied" style="display:none; position:fixed; inset:0; background:var(--parchment); align-items:center; justify-content:center; z-index:999; flex-direction:column; gap:1.5rem; text-align:center; padding:2rem;">
   <div style="font-size:3rem;">🔒</div>
   <h2 style="font-family:'Playfair Display',serif; font-size:2rem; color:var(--red);">Access Restricted</h2>
-  <p style="color:var(--muted); max-width:420px; line-height:1.6;">AI Practice Partner is available exclusively for enrolled students. Please log in with your course account or enrol to get access.</p>
-  <a href="/dashboard.html" style="display:inline-block; padding:0.75rem 2rem; background:var(--ink); color:var(--gold-light); text-decoration:none; font-weight:600; letter-spacing:0.05em; border-radius:2px;">Go to Dashboard</a>
+  <p style="color:var(--muted); max-width:420px; line-height:1.6;">AI Practice Partner is available exclusively for enrolled students.</p>
+  <a href="/dashboard.html" style="display:inline-block; padding:0.75rem 2rem; background:var(--ink); color:var(--gold-light); text-decoration:none; font-weight:600; border-radius:2px;">Go to Dashboard</a>
 </div>
 
 <div id="main-app" style="display:none;">
-
   <div class="topbar">
     <div class="topbar-brand">
       <div class="topbar-logo">🇩🇪</div>
@@ -602,7 +216,6 @@
         <h1>Practise German<br><span>anytime, alone.</span></h1>
         <p>Your personal AI partner plays real Goethe &amp; TELC exam roles. Speak or type — get instant grammar feedback and a final score.</p>
       </div>
-
       <div class="setup-grid">
         <div class="setup-card">
           <h3><span>📚</span> Your Level</h3>
@@ -611,44 +224,41 @@
             <div class="level-tab" onclick="setLevel('A2')">A2 Elementary</div>
           </div>
         </div>
-
         <div class="setup-card">
-          <h3><span>🎙️</span> How You'll Speak <span class="sr-badge">FREE</span></h3>
+          <h3><span>🎙️</span> Input Mode <span class="sr-badge">Deepgram AI</span></h3>
           <div class="input-mode-tabs">
             <div class="mode-tab active" onclick="setInputMode('both')">🎙️ + ⌨️ Both</div>
             <div class="mode-tab" onclick="setInputMode('voice')">🎙️ Voice only</div>
             <div class="mode-tab" onclick="setInputMode('text')">⌨️ Type only</div>
           </div>
         </div>
-
         <div class="setup-card" style="grid-column: 1 / -1;">
           <h3><span>🎭</span> Choose a Scenario</h3>
           <select class="scenario-select" id="scenario-select" onchange="onScenarioChange()">
             <optgroup label="— A1 Scenarios —">
-              <option value="a1_shop" data-level="A1" data-role="Shopkeeper" data-emoji="🛒" data-desc="You're a customer at a German supermarket. Ask for items, quantities, and prices. The shopkeeper only speaks German.">🛒 At the Supermarket</option>
-              <option value="a1_doctor" data-level="A1" data-role="Doctor" data-emoji="🏥" data-desc="You're at a German GP clinic. Describe your symptoms, answer the doctor's questions, and understand basic advice.">🏥 At the Doctor</option>
+              <option value="a1_shop" data-level="A1" data-role="Shopkeeper" data-emoji="🛒" data-desc="You're a customer at a German supermarket. Ask for items, quantities, and prices.">🛒 At the Supermarket</option>
+              <option value="a1_doctor" data-level="A1" data-role="Doctor" data-emoji="🏥" data-desc="You're at a German GP clinic. Describe your symptoms and understand basic advice.">🏥 At the Doctor</option>
               <option value="a1_hotel" data-level="A1" data-role="Hotel Receptionist" data-emoji="🏨" data-desc="Check into a German hotel. Ask about room types, prices, breakfast, and facilities.">🏨 Hotel Check-in</option>
-              <option value="a1_cafe" data-level="A1" data-role="Café Waiter" data-emoji="☕" data-desc="Order food and drinks at a German café. Ask about the menu, specials, and pay the bill.">☕ At the Café</option>
-              <option value="a1_directions" data-level="A1" data-role="Passerby" data-emoji="🗺️" data-desc="You're lost in a German city. Ask for directions to key locations, understand left/right, straight on.">🗺️ Asking for Directions</option>
+              <option value="a1_cafe" data-level="A1" data-role="Café Waiter" data-emoji="☕" data-desc="Order food and drinks at a German café. Ask about the menu and pay the bill.">☕ At the Café</option>
+              <option value="a1_directions" data-level="A1" data-role="Passerby" data-emoji="🗺️" data-desc="You're lost in a German city. Ask for directions to key locations.">🗺️ Asking for Directions</option>
               <option value="a1_phone" data-level="A1" data-role="Office Secretary" data-emoji="📞" data-desc="Make a simple phone call to book an appointment in German.">📞 Making an Appointment</option>
               <option value="a1_introduce" data-level="A1" data-role="New Neighbour" data-emoji="👋" data-desc="Introduce yourself to a new German neighbour. Share your name, country, job, and hobbies.">👋 Introducing Yourself</option>
-              <option value="a1_transport" data-level="A1" data-role="Ticket Office Staff" data-emoji="🚂" data-desc="Buy a train or bus ticket at a German station. Ask about times, platforms, and prices.">🚂 Buying a Train Ticket</option>
+              <option value="a1_transport" data-level="A1" data-role="Ticket Office Staff" data-emoji="🚂" data-desc="Buy a train or bus ticket at a German station. Ask about times and prices.">🚂 Buying a Train Ticket</option>
             </optgroup>
             <optgroup label="— A2 Scenarios —">
-              <option value="a2_flat" data-level="A2" data-role="Landlord" data-emoji="🏠" data-desc="Discuss renting a flat in Germany. Ask about rent, deposit, utilities, and neighbourhood.">🏠 Renting a Flat</option>
-              <option value="a2_job" data-level="A2" data-role="HR Manager" data-emoji="💼" data-desc="Attend a simple job interview for a part-time role. Describe your experience, strengths and ask questions.">💼 Job Interview</option>
-              <option value="a2_bank" data-level="A2" data-role="Bank Clerk" data-emoji="🏦" data-desc="Open a bank account in Germany. Provide personal details, understand account types, ask about fees.">🏦 Opening a Bank Account</option>
+              <option value="a2_flat" data-level="A2" data-role="Landlord" data-emoji="🏠" data-desc="Discuss renting a flat in Germany. Ask about rent, deposit, and utilities.">🏠 Renting a Flat</option>
+              <option value="a2_job" data-level="A2" data-role="HR Manager" data-emoji="💼" data-desc="Attend a simple job interview. Describe your experience and strengths.">💼 Job Interview</option>
+              <option value="a2_bank" data-level="A2" data-role="Bank Clerk" data-emoji="🏦" data-desc="Open a bank account in Germany. Provide personal details and ask about fees.">🏦 Opening a Bank Account</option>
               <option value="a2_complaint" data-level="A2" data-role="Shop Manager" data-emoji="⚠️" data-desc="Return a faulty product and make a complaint politely in German.">⚠️ Making a Complaint</option>
-              <option value="a2_party" data-level="A2" data-role="German Friend" data-emoji="🎉" data-desc="Discuss plans for a party with a German friend. Talk about food, guests, location, and time.">🎉 Planning a Party</option>
-              <option value="a2_health" data-level="A2" data-role="Pharmacist" data-emoji="💊" data-desc="Visit a German pharmacy. Describe symptoms, ask for medication, and follow dosage instructions.">💊 At the Pharmacy</option>
-              <option value="a2_school" data-level="A2" data-role="School Administrator" data-emoji="🏫" data-desc="Enrol a child or yourself in a German school or language course. Ask about schedules and fees.">🏫 School Enrolment</option>
-              <option value="a2_travel" data-level="A2" data-role="Travel Agent" data-emoji="✈️" data-desc="Book a holiday package at a German travel agency. Discuss destinations, dates, budget.">✈️ Booking a Holiday</option>
+              <option value="a2_party" data-level="A2" data-role="German Friend" data-emoji="🎉" data-desc="Discuss plans for a party. Talk about food, guests, location, and time.">🎉 Planning a Party</option>
+              <option value="a2_health" data-level="A2" data-role="Pharmacist" data-emoji="💊" data-desc="Visit a German pharmacy. Describe symptoms and ask for medication.">💊 At the Pharmacy</option>
+              <option value="a2_school" data-level="A2" data-role="School Administrator" data-emoji="🏫" data-desc="Enrol in a German school or language course. Ask about schedules and fees.">🏫 School Enrolment</option>
+              <option value="a2_travel" data-level="A2" data-role="Travel Agent" data-emoji="✈️" data-desc="Book a holiday package. Discuss destinations, dates, and budget.">✈️ Booking a Holiday</option>
             </optgroup>
           </select>
-          <div class="scenario-desc" id="scenario-desc">You're a customer at a German supermarket. Ask for items, quantities, and prices. The shopkeeper only speaks German.</div>
+          <div class="scenario-desc" id="scenario-desc">You're a customer at a German supermarket. Ask for items, quantities, and prices.</div>
         </div>
       </div>
-
       <button class="start-btn" onclick="startSession()">🎬 Start Conversation</button>
     </div>
 
@@ -657,7 +267,7 @@
       <div class="session-header">
         <div class="session-info">
           <h2 id="session-title">At the Supermarket</h2>
-          <p id="session-subtitle">A1 · Supermarket scenario · AI Partner</p>
+          <p id="session-subtitle">A1 · Shopkeeper · AI Partner</p>
         </div>
         <div class="session-timer" id="session-timer">20:00</div>
       </div>
@@ -670,25 +280,28 @@
         </div>
       </div>
 
-      <!-- AI speaking indicator -->
+      <!-- Status banners -->
       <div class="ai-speaking-banner" id="ai-speaking-banner">
-        <div class="speaking-wave">
-          <span></span><span></span><span></span><span></span><span></span>
-        </div>
-        🤖 AI is speaking... mic will activate when done
+        <div class="speaking-wave"><span></span><span></span><span></span><span></span><span></span></div>
+        🤖 AI speaking... mic activates when done
+      </div>
+      <div class="recording-status" id="recording-status">
+        <div class="rec-dot"></div>
+        🎙️ Recording... tap mic again to stop and send
+      </div>
+      <div class="processing-status" id="processing-status">
+        ⏳ Transcribing your German with Deepgram AI...
       </div>
 
       <div class="conversation-box" id="conversation-box"></div>
 
-      <div class="voice-transcript" id="voice-transcript">🎙️ Listening...</div>
-
       <div class="input-area" id="input-area">
         <div class="text-input-wrap">
-          <textarea id="text-input" placeholder="Type your response in German... (or use the mic 🎙️)" rows="1"
-            onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); sendMessage();}"></textarea>
+          <textarea id="text-input" placeholder="Type in German... or tap 🎙️ to speak" rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
         </div>
-        <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Voice input">🎙️</button>
-        <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
+        <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Hold to speak">🎙️</button>
+        <button class="send-btn" onclick="sendMessage()">➤</button>
       </div>
 
       <div class="session-controls">
@@ -705,7 +318,6 @@
         <h2>🏆 Session Complete!</h2>
         <p id="score-scenario-label">Supermarket · A1 · AI Partner</p>
       </div>
-
       <div class="score-big">
         <div class="score-circle" id="score-circle">
           <div class="score-inner">
@@ -714,7 +326,6 @@
           </div>
         </div>
       </div>
-
       <div class="criteria-grid">
         <div class="criterion-card">
           <h4>Vocabulary</h4>
@@ -741,24 +352,19 @@
           <div class="criterion-comment" id="comment-task"></div>
         </div>
       </div>
-
-      <div class="feedback-section" id="overall-feedback-box">
+      <div class="feedback-section">
         <h3>📝 Overall Feedback</h3>
         <p id="overall-feedback-text">Loading...</p>
       </div>
-
-      <!-- Pronunciation section - NEW -->
       <div class="pronunciation-section" id="pronunciation-section" style="display:none;">
         <h3>🗣️ Pronunciation Guide for Your Words</h3>
-        <p style="font-size:0.82rem; color:#1e40af; margin-bottom:1rem;">Based on what you said this session, here are key pronunciation tips for Gujarati speakers:</p>
+        <p style="font-size:0.82rem; color:#1e40af; margin-bottom:1rem;">Based on what you said this session — tips specifically for Gujarati speakers:</p>
         <div id="pronunciation-tips-list"></div>
       </div>
-
-      <div class="feedback-section" id="errors-box">
+      <div class="feedback-section">
         <h3>✏️ Grammar Corrections</h3>
         <ul class="errors-list" id="errors-list"></ul>
       </div>
-
       <div class="score-actions">
         <button class="btn-primary" onclick="practiceAgain()">🔄 Practice Again</button>
         <button class="btn-secondary" onclick="goToDashboard()">← Back to Dashboard</button>
@@ -784,12 +390,13 @@ const firebaseConfig = {
   measurementId: "G-B7JMB0G85L"
 };
 
-const CLAUDE_PROXY_URL = 'https://ai-proxy.jeetupadhyay1204.workers.dev';
+const PROXY_URL = 'https://ai-proxy.jeetupadhyay1204.workers.dev';
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ─── Globals ───────────────────────────────────────────────────────
+// ── Globals ──────────────────────────────────────────────────────
 let currentUser = null;
 let userProfile = null;
 let selectedLevel = 'A1';
@@ -800,13 +407,14 @@ let sessionTimerInterval = null;
 let sessionSeconds = 20 * 60;
 let addTimeUsed = false;
 let inlineFeedbackOn = true;
-let isListening = false;
-let isSpeaking = false;      // ← NEW: tracks if AI TTS is playing
-let recognition = null;
+let isSpeaking = false;
+let isRecording = false;
+let mediaRecorder = null;
+let audioChunks = [];
 let grammarErrors = [];
-let wordsUsedThisSession = new Set(); // ← NEW: tracks words for pronunciation guide
+let wordsUsed = new Set();
 
-// ─── Auth gate ─────────────────────────────────────────────────────
+// ── Auth ─────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
   if (!user) { showAccessDenied(); return; }
   try {
@@ -815,14 +423,13 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     userProfile = snap.data();
     showApp();
-  } catch (e) { showAccessDenied(); }
+  } catch(e) { showAccessDenied(); }
 });
 
 function showAccessDenied() {
   document.getElementById('auth-overlay').style.display = 'none';
   document.getElementById('access-denied').style.display = 'flex';
 }
-
 function showApp() {
   document.getElementById('auth-overlay').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
@@ -831,39 +438,32 @@ function showApp() {
   onScenarioChange();
 }
 
+// ── Setup controls ────────────────────────────────────────────────
 window.setLevel = (l) => {
   selectedLevel = l;
   document.querySelectorAll('.level-tab').forEach(t => t.classList.toggle('active', t.textContent.startsWith(l)));
   document.getElementById('level-badge').textContent = l;
 };
-
 window.setInputMode = (m) => {
   selectedInputMode = m;
-  document.querySelectorAll('.mode-tab').forEach(t => {
-    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${m}'`));
-  });
+  document.querySelectorAll('.mode-tab').forEach(t =>
+    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${m}'`)));
 };
-
 window.onScenarioChange = () => {
   const sel = document.getElementById('scenario-select');
-  const opt = sel.options[sel.selectedIndex];
-  document.getElementById('scenario-desc').textContent = opt.dataset.desc || '';
+  document.getElementById('scenario-desc').textContent = sel.options[sel.selectedIndex].dataset.desc || '';
 };
 
-// ─── START SESSION ─────────────────────────────────────────────────
+// ── Start session ─────────────────────────────────────────────────
 window.startSession = async () => {
   const sel = document.getElementById('scenario-select');
   const opt = sel.options[sel.selectedIndex];
-  selectedScenario = {
-    id: sel.value, title: opt.text, level: opt.dataset.level,
-    role: opt.dataset.role, emoji: opt.dataset.emoji, desc: opt.dataset.desc
-  };
+  selectedScenario = { id: sel.value, title: opt.text, level: opt.dataset.level, role: opt.dataset.role, emoji: opt.dataset.emoji, desc: opt.dataset.desc };
 
   document.getElementById('setup-panel').style.display = 'none';
   document.getElementById('session-panel').style.display = 'block';
   document.getElementById('session-title').textContent = selectedScenario.title;
-  document.getElementById('session-subtitle').textContent =
-    `${selectedScenario.level} · ${selectedScenario.role} scenario · AI Partner`;
+  document.getElementById('session-subtitle').textContent = `${selectedScenario.level} · ${selectedScenario.role} · AI Partner`;
   document.getElementById('role-avatar').textContent = selectedScenario.emoji;
   document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
   document.getElementById('role-description').textContent = selectedScenario.desc;
@@ -874,26 +474,16 @@ window.startSession = async () => {
   else if (selectedInputMode === 'text') { micBtn.style.display = 'none'; }
   else { textInput.style.display = ''; micBtn.style.display = 'flex'; }
 
-  conversationHistory = [];
-  grammarErrors = [];
-  wordsUsedThisSession = new Set();
-  sessionSeconds = 20 * 60;
-  addTimeUsed = false;
+  conversationHistory = []; grammarErrors = []; wordsUsed = new Set();
+  sessionSeconds = 20 * 60; addTimeUsed = false;
   document.getElementById('add-time-btn').disabled = false;
   document.getElementById('conversation-box').innerHTML = '';
   updateTimer();
 
-  sessionTimerInterval = setInterval(() => {
-    sessionSeconds--;
-    updateTimer();
-    if (sessionSeconds <= 0) endSession();
-  }, 1000);
-
-  initSpeechRecognition();
+  sessionTimerInterval = setInterval(() => { sessionSeconds--; updateTimer(); if (sessionSeconds <= 0) endSession(); }, 1000);
   await sendAIMessage(null, true);
 };
 
-// ─── TIMER ─────────────────────────────────────────────────────────
 function updateTimer() {
   const m = Math.floor(sessionSeconds / 60).toString().padStart(2, '0');
   const s = (sessionSeconds % 60).toString().padStart(2, '0');
@@ -902,129 +492,146 @@ function updateTimer() {
   el.classList.toggle('warning', sessionSeconds < 120);
 }
 
-// ─── SEND USER MESSAGE ─────────────────────────────────────────────
+// ── Send typed message ────────────────────────────────────────────
 window.sendMessage = async () => {
   const inp = document.getElementById('text-input');
   const text = inp.value.trim();
   if (!text) return;
   inp.value = '';
-
-  // Track words for pronunciation guide
-  text.toLowerCase().split(/\s+/).forEach(w => {
-    const clean = w.replace(/[^a-zäöüß]/gi, '');
-    if (clean.length > 2) wordsUsedThisSession.add(clean);
-  });
-
+  text.toLowerCase().split(/\s+/).forEach(w => { const c = w.replace(/[^a-zäöüß]/gi,''); if(c.length>2) wordsUsed.add(c); });
   appendMessage('user', text);
   conversationHistory.push({ role: 'user', content: text });
   await sendAIMessage(text);
 };
 
-// ─── SPEECH RECOGNITION — FIXED ────────────────────────────────────
-function initSpeechRecognition() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    document.getElementById('mic-btn').style.display = 'none';
-    toast('Voice input not supported in this browser. Use Chrome.');
-    return;
-  }
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SR();
-  recognition.lang = 'de-DE';
-  recognition.interimResults = true;
-  recognition.continuous = false; // ← single utterance, no restart conflicts
+// ── MIC: Deepgram recording ───────────────────────────────────────
+window.toggleMic = async () => {
+  if (isSpeaking) { toast('⏳ Wait for AI to finish speaking...'); return; }
 
-  recognition.onstart = () => {
-    isListening = true;
-    document.getElementById('mic-btn').classList.add('listening');
-    document.getElementById('mic-btn').textContent = '⏹️';
-    const vt = document.getElementById('voice-transcript');
-    vt.style.display = 'block';
-    vt.textContent = '🎙️ Start speaking...';
-  };
-
-  recognition.onresult = (e) => {
-    let interim = '';
-    let final = '';
-    for (let i = 0; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
-    }
-    document.getElementById('voice-transcript').textContent = '🎙️ ' + (final || interim);
-    document.getElementById('text-input').value = final || interim;
-  };
-
-  recognition.onend = () => {
-    isListening = false;
-    document.getElementById('mic-btn').classList.remove('listening');
-    document.getElementById('mic-btn').textContent = '🎙️';
-    document.getElementById('voice-transcript').style.display = 'none';
-    const transcript = document.getElementById('text-input').value.trim();
-    if (transcript) sendMessage();
-  };
-
-  recognition.onerror = (e) => {
-    isListening = false;
-    document.getElementById('mic-btn').classList.remove('listening');
-    document.getElementById('mic-btn').textContent = '🎙️';
-    document.getElementById('voice-transcript').style.display = 'none';
-    if (e.error === 'not-allowed') toast('Mic blocked — allow mic in browser settings.');
-    else if (e.error !== 'no-speech') toast('Mic error: ' + e.error);
-  };
-}
-
-// ─── TOGGLE MIC — FIXED: blocks mic while AI is speaking ───────────
-window.toggleMic = () => {
-  // ── KEY FIX: don't allow mic while AI TTS is playing ──
-  if (isSpeaking) {
-    toast('⏳ Wait for AI to finish speaking first...');
+  if (isRecording) {
+    // Stop recording → triggers ondataavailable → send to Deepgram
+    mediaRecorder.stop();
     return;
   }
 
-  if (!recognition) initSpeechRecognition();
+  // Start recording
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-  if (isListening) {
-    recognition.stop(); // onend will fire and clean up
-  } else {
-    // Cancel any stray TTS just in case
-    window.speechSynthesis?.cancel();
-    document.getElementById('text-input').value = '';
-    try {
-      recognition.start();
-    } catch(e) {
-      // recognition might already be running — reinit
-      initSpeechRecognition();
-      setTimeout(() => { try { recognition.start(); } catch(err) {} }, 100);
-    }
+    // Pick best supported format
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : 'audio/mp4';
+
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      // Stop all mic tracks
+      stream.getTracks().forEach(t => t.stop());
+      isRecording = false;
+      setMicState('processing');
+
+      const audioBlob = new Blob(audioChunks, { type: mimeType });
+      await transcribeWithDeeogram(audioBlob);
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+    setMicState('recording');
+
+  } catch(err) {
+    if (err.name === 'NotAllowedError') toast('🎙️ Microphone permission denied. Please allow mic access.');
+    else toast('Mic error: ' + err.message);
   }
 };
 
-// ─── SEND AI MESSAGE ───────────────────────────────────────────────
+async function transcribeWithDeeogram(audioBlob) {
+  try {
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const res = await fetch(`${PROXY_URL}/transcribe`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': audioBlob.type,
+        'Authorization': `Bearer ${await currentUser.getIdToken()}`
+      },
+      body: arrayBuffer
+    });
+
+    if (!res.ok) throw new Error('Transcription failed: ' + res.status);
+    const data = await res.json();
+    const transcript = (data.transcript || '').trim();
+
+    setMicState('idle');
+
+    if (!transcript) {
+      toast('🤔 No speech detected — try speaking closer to mic.');
+      return;
+    }
+
+    // Show transcript and send
+    document.getElementById('text-input').value = transcript;
+    toast(`✅ Heard: "${transcript}"`);
+    await window.sendMessage();
+
+  } catch(err) {
+    setMicState('idle');
+    toast('Transcription error: ' + err.message);
+    console.error(err);
+  }
+}
+
+function setMicState(state) {
+  const micBtn = document.getElementById('mic-btn');
+  const recStatus = document.getElementById('recording-status');
+  const procStatus = document.getElementById('processing-status');
+
+  micBtn.classList.remove('recording', 'processing', 'waiting');
+  recStatus.classList.remove('visible');
+  procStatus.classList.remove('visible');
+
+  if (state === 'recording') {
+    micBtn.textContent = '⏹️';
+    micBtn.classList.add('recording');
+    recStatus.classList.add('visible');
+  } else if (state === 'processing') {
+    micBtn.textContent = '⏳';
+    micBtn.classList.add('processing');
+    procStatus.classList.add('visible');
+  } else if (state === 'waiting') {
+    micBtn.textContent = '🎙️';
+    micBtn.classList.add('waiting');
+  } else {
+    micBtn.textContent = '🎙️';
+  }
+}
+
+// ── Claude AI message ─────────────────────────────────────────────
 async function sendAIMessage(userText, isOpening = false) {
   showThinking();
-
-  const systemPrompt = buildSystemPrompt(isOpening);
-  const messages = isOpening
-    ? [{ role: 'user', content: 'START_CONVERSATION' }]
-    : [...conversationHistory];
+  const messages = isOpening ? [{ role: 'user', content: 'START_CONVERSATION' }] : [...conversationHistory];
 
   try {
-    const res = await fetch(CLAUDE_PROXY_URL, {
+    const res = await fetch(PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await currentUser.getIdToken()}` },
-      body: JSON.stringify({ systemPrompt, messages, userId: currentUser.uid })
+      body: JSON.stringify({ systemPrompt: buildSystemPrompt(isOpening), messages, userId: currentUser.uid })
     });
     if (!res.ok) throw new Error('Proxy error ' + res.status);
     const data = await res.json();
-    const raw = data.reply || '';
     removeThinking();
 
     let parsed;
-    try {
-      const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { reply: raw, feedback: null };
-    } catch { parsed = { reply: raw, feedback: null }; }
+    try { const m = (data.reply||'').match(/\{[\s\S]*\}/); parsed = m ? JSON.parse(m[0]) : { reply: data.reply||'', feedback: null }; }
+    catch { parsed = { reply: data.reply||'', feedback: null }; }
 
-    const aiText = parsed.reply || raw;
+    const aiText = parsed.reply || data.reply || '';
     conversationHistory.push({ role: 'assistant', content: aiText });
     appendMessage('ai', aiText, parsed.feedback);
 
@@ -1032,31 +639,29 @@ async function sendAIMessage(userText, isOpening = false) {
       grammarErrors.push({ original: userText, corrected: parsed.feedback.corrected, note: parsed.feedback.note });
     }
 
-    // ── Speak AI response — mic is locked until TTS finishes ──
     await speakText(aiText);
 
-  } catch (err) {
+  } catch(err) {
     removeThinking();
-    appendMessage('ai', 'Entschuldigung, da ist etwas schiefgelaufen. Bitte versuche es nochmal! 🙏');
-    console.error(err);
-    // Make sure mic isn't stuck in locked state on error
+    appendMessage('ai', 'Entschuldigung! Bitte versuche es nochmal. 🙏');
     setAISpeaking(false);
+    console.error(err);
   }
 }
 
 function buildSystemPrompt(isOpening) {
-  const { level, role, title: scenario, desc } = selectedScenario;
-  return `You are an AI German language partner for ${level} learners playing the role of a ${role} in a "${scenario}" scenario.
+  const { level, role, title, desc } = selectedScenario;
+  return `You are an AI German language partner for ${level} learners, playing the role of a ${role} in a "${title}" scenario.
 
 SCENARIO: ${desc}
 
-YOUR ROLE:
-- Stay strictly in character as the ${role}. ALWAYS reply in German, appropriate for ${level} level.
-- Keep sentences short and clear (${level} vocabulary only).
+RULES:
+- Stay in character as the ${role}. ALWAYS reply in German at ${level} level.
+- Keep sentences short and clear.
 - If the user speaks English, gently nudge them back to German in character.
-- Note grammar mistakes in the feedback field only, not in your main reply.
+- Put grammar feedback in the feedback field only, never in your reply.
 
-RESPONSE FORMAT — always reply with valid JSON:
+RESPONSE FORMAT — always valid JSON:
 {
   "reply": "<your in-character German response>",
   "feedback": ${inlineFeedbackOn ? `{
@@ -1067,88 +672,62 @@ RESPONSE FORMAT — always reply with valid JSON:
   }` : 'null'}
 }
 
-${isOpening ? 'This is the opening line. Greet the student in character to begin the scenario.' : ''}
-
-Keep the conversation going naturally. Ask follow-up questions. Make it feel real.`;
+${isOpening ? 'Opening line: greet the student in character to start the scenario.' : ''}
+Keep the conversation natural. Ask follow-up questions.`;
 }
 
-// ─── TTS — FIXED: returns a Promise, locks mic while speaking ──────
+// ── TTS ───────────────────────────────────────────────────────────
 function setAISpeaking(speaking) {
   isSpeaking = speaking;
   const banner = document.getElementById('ai-speaking-banner');
-  const micBtn = document.getElementById('mic-btn');
-  if (speaking) {
-    banner.classList.add('visible');
-    micBtn.classList.add('waiting');
-    micBtn.title = 'Wait for AI to finish speaking...';
-  } else {
-    banner.classList.remove('visible');
-    micBtn.classList.remove('waiting');
-    micBtn.title = 'Voice input';
-  }
+  banner.classList.toggle('visible', speaking);
+  if (speaking) setMicState('waiting');
+  else setMicState('idle');
 }
 
 function speakText(text) {
   return new Promise((resolve) => {
     if (!window.speechSynthesis) { resolve(); return; }
-
     window.speechSynthesis.cancel();
     setAISpeaking(true);
 
     const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = 'de-DE';
-    utt.rate = 0.9;
-    utt.pitch = 1.05;
+    utt.lang = 'de-DE'; utt.rate = 0.9; utt.pitch = 1.05;
 
-    // Try to find a German voice
     const trySpeak = () => {
       const voices = window.speechSynthesis.getVoices();
       const germanVoice = voices.find(v => v.lang.startsWith('de'));
       if (germanVoice) utt.voice = germanVoice;
-
       utt.onend = () => { setAISpeaking(false); resolve(); };
       utt.onerror = () => { setAISpeaking(false); resolve(); };
-
       window.speechSynthesis.speak(utt);
-
-      // Safari/Chrome sometimes don't fire onend — failsafe timeout
-      const estimatedDuration = Math.max(3000, text.length * 80);
-      setTimeout(() => { setAISpeaking(false); resolve(); }, estimatedDuration + 2000);
+      // Failsafe
+      setTimeout(() => { setAISpeaking(false); resolve(); }, Math.max(4000, text.length * 80));
     };
 
-    // Voices may not be loaded yet on first call
-    if (window.speechSynthesis.getVoices().length > 0) {
-      trySpeak();
-    } else {
-      window.speechSynthesis.onvoiceschanged = trySpeak;
-    }
+    if (window.speechSynthesis.getVoices().length > 0) trySpeak();
+    else window.speechSynthesis.onvoiceschanged = trySpeak;
   });
 }
 
-// ─── UI HELPERS ────────────────────────────────────────────────────
+// ── UI helpers ────────────────────────────────────────────────────
 function appendMessage(who, text, feedback) {
   const box = document.getElementById('conversation-box');
   const div = document.createElement('div');
   div.className = `msg ${who}`;
   const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  const avatarChar = who === 'ai' ? selectedScenario?.emoji || '🤖' : '👤';
+  const avatar = who === 'ai' ? (selectedScenario?.emoji || '🤖') : '👤';
 
-  let feedbackHTML = '';
+  let fb = '';
   if (feedback && inlineFeedbackOn) {
     if (feedback.error && feedback.corrected) {
-      feedbackHTML = `<div class="feedback-inline">✏️ <strong>Korrektur:</strong> ${escHtml(feedback.corrected)} — <em>${escHtml(feedback.note || '')}</em></div>`;
+      fb = `<div class="feedback-inline">✏️ <strong>Korrektur:</strong> ${escHtml(feedback.corrected)} — <em>${escHtml(feedback.note||'')}</em></div>`;
     } else if (feedback.praise) {
-      feedbackHTML = `<div class="feedback-inline">✅ ${escHtml(feedback.praise)}</div>`;
+      fb = `<div class="feedback-inline">✅ ${escHtml(feedback.praise)}</div>`;
     }
   }
 
-  div.innerHTML = `
-    <div class="msg-avatar">${avatarChar}</div>
-    <div>
-      <div class="msg-bubble">${escHtml(text)}</div>
-      ${feedbackHTML}
-      <div class="msg-time">${now}</div>
-    </div>`;
+  div.innerHTML = `<div class="msg-avatar">${avatar}</div><div><div class="msg-bubble">${escHtml(text)}</div>${fb}<div class="msg-time">${now}</div></div>`;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 }
@@ -1157,24 +736,17 @@ function showThinking() {
   const box = document.getElementById('conversation-box');
   const div = document.createElement('div');
   div.className = 'msg ai'; div.id = 'thinking-indicator';
-  div.innerHTML = `<div class="msg-avatar">${selectedScenario?.emoji || '🤖'}</div>
-    <div class="msg-bubble"><div class="thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div></div>`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
+  div.innerHTML = `<div class="msg-avatar">${selectedScenario?.emoji||'🤖'}</div><div class="msg-bubble"><div class="thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div></div>`;
+  box.appendChild(div); box.scrollTop = box.scrollHeight;
 }
 function removeThinking() { document.getElementById('thinking-indicator')?.remove(); }
-
-function escHtml(t) {
-  return (t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-}
-function toast(msg, duration = 3500) {
-  const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), duration);
+function escHtml(t) { return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function toast(msg, dur=3500) {
+  const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(), dur);
 }
 
-// ─── SESSION CONTROLS ──────────────────────────────────────────────
+// ── Session controls ──────────────────────────────────────────────
 window.changeScenario = async () => {
   const all = [...document.getElementById('scenario-select').options];
   const same = all.filter(o => o.dataset.level === selectedScenario.level && o.value !== selectedScenario.id);
@@ -1183,7 +755,7 @@ window.changeScenario = async () => {
   selectedScenario = { id: pick.value, title: pick.text, level: pick.dataset.level, role: pick.dataset.role, emoji: pick.dataset.emoji, desc: pick.dataset.desc };
   conversationHistory = [];
   document.getElementById('session-title').textContent = selectedScenario.title;
-  document.getElementById('session-subtitle').textContent = `${selectedScenario.level} · ${selectedScenario.role} scenario · AI Partner`;
+  document.getElementById('session-subtitle').textContent = `${selectedScenario.level} · ${selectedScenario.role} · AI Partner`;
   document.getElementById('role-avatar').textContent = selectedScenario.emoji;
   document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
   document.getElementById('role-description').textContent = selectedScenario.desc;
@@ -1193,7 +765,7 @@ window.changeScenario = async () => {
 };
 
 window.addTime = () => {
-  if (addTimeUsed) { toast('You can only add time once per session.'); return; }
+  if (addTimeUsed) { toast('You can only add time once.'); return; }
   sessionSeconds += 10 * 60; addTimeUsed = true;
   document.getElementById('add-time-btn').disabled = true;
   toast('⏱️ +10 minutes added!');
@@ -1202,155 +774,107 @@ window.addTime = () => {
 window.toggleFeedback = () => {
   inlineFeedbackOn = !inlineFeedbackOn;
   document.getElementById('feedback-btn').textContent = inlineFeedbackOn ? '💡 Toggle Feedback' : '💡 Feedback Off';
-  toast(inlineFeedbackOn ? '💡 Inline feedback ON' : '🔕 Inline feedback OFF');
+  toast(inlineFeedbackOn ? '💡 Feedback ON' : '🔕 Feedback OFF');
 };
 
-// ─── END SESSION ───────────────────────────────────────────────────
+// ── End session & score ───────────────────────────────────────────
 window.endSession = async () => {
   clearInterval(sessionTimerInterval);
   window.speechSynthesis?.cancel();
   setAISpeaking(false);
-  if (isListening) recognition?.stop();
+  if (isRecording && mediaRecorder) mediaRecorder.stop();
 
   document.getElementById('session-panel').style.display = 'none';
   document.getElementById('score-panel').style.display = 'block';
-  document.getElementById('score-scenario-label').textContent =
-    `${selectedScenario.title} · ${selectedScenario.level} · AI Partner`;
+  document.getElementById('score-scenario-label').textContent = `${selectedScenario.title} · ${selectedScenario.level} · AI Partner`;
 
-  const evaluationPrompt = buildEvaluationPrompt();
+  const ep = buildEvaluationPrompt();
   try {
-    const res = await fetch(CLAUDE_PROXY_URL, {
+    const res = await fetch(PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${await currentUser.getIdToken()}` },
-      body: JSON.stringify({ systemPrompt: evaluationPrompt.system, messages: evaluationPrompt.messages, userId: currentUser.uid, maxTokens: 1000 })
+      body: JSON.stringify({ systemPrompt: ep.system, messages: ep.messages, userId: currentUser.uid, maxTokens: 1000 })
     });
     const data = await res.json();
-    const raw = data.reply || '{}';
-    let eval_;
-    try { const m = raw.match(/\{[\s\S]*\}/); eval_ = m ? JSON.parse(m[0]) : {}; }
-    catch { eval_ = {}; }
+    let eval_ = {};
+    try { const m = (data.reply||'').match(/\{[\s\S]*\}/); eval_ = m ? JSON.parse(m[0]) : {}; } catch {}
     displayScore(eval_);
-    await saveSessionToFirestore(eval_);
+    await saveSession(eval_);
   } catch(e) { console.error(e); displayScore({}); }
 };
 
 function buildEvaluationPrompt() {
-  const transcript = conversationHistory.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n');
-  const wordList = [...wordsUsedThisSession].slice(0, 20).join(', ');
-
+  const transcript = conversationHistory.map(m => `${m.role==='user'?'Student':'AI'}: ${m.content}`).join('\n');
+  const wordList = [...wordsUsed].slice(0,20).join(', ');
   return {
-    system: `You are a strict but fair Goethe/TELC German exam evaluator for ${selectedScenario.level} level.
-Evaluate the student's German AND provide pronunciation guidance specifically for Gujarati mother-tongue speakers.
-
-Reply ONLY with valid JSON:
+    system: `You are a Goethe/TELC German exam evaluator for ${selectedScenario.level} level.
+Evaluate the student's German. Reply ONLY with valid JSON:
 {
-  "overall": <0-100>,
-  "vocabulary": <0-100>,
-  "grammar": <0-100>,
-  "fluency": <0-100>,
-  "taskCompletion": <0-100>,
-  "vocabComment": "<1 sentence>",
-  "grammarComment": "<1 sentence>",
-  "fluencyComment": "<1 sentence>",
-  "taskComment": "<1 sentence>",
-  "overallFeedback": "<3-4 sentences constructive English feedback>",
-  "topErrors": [{"original":"<what they said>","corrected":"<correct form>","note":"<brief tip>"}],
-  "pronunciationTips": [
-    {
-      "word": "<German word from their session>",
-      "wrongWay": "<how Gujarati speakers typically mispronounce it>",
-      "rightWay": "<correct pronunciation in simple English phonetics, e.g. 'TSVY'>",
-      "gujaratiNote": "<comparison to help them, e.g. 'The ch sound is like in chair, not like cha in Gujarati'>"
-    }
-  ]
+  "overall":<0-100>,"vocabulary":<0-100>,"grammar":<0-100>,"fluency":<0-100>,"taskCompletion":<0-100>,
+  "vocabComment":"<1 sentence>","grammarComment":"<1 sentence>","fluencyComment":"<1 sentence>","taskComment":"<1 sentence>",
+  "overallFeedback":"<3-4 sentences constructive English feedback>",
+  "topErrors":[{"original":"","corrected":"","note":""}],
+  "pronunciationTips":[{"word":"","wrongWay":"<how Gujarati speakers typically say it>","rightWay":"<simple English phonetics>","gujaratiNote":"<Gujarati-specific tip>"}]
 }
-
-Focus pronunciationTips on words the student actually used: ${wordList}
-Pick the 3-5 most important ones where Gujarati speakers commonly make errors (e.g. German W sounds like V, Z sounds like TS, ä sounds like e in bed, ü has no Gujarati equivalent, ch after vowels is soft like sh, final -er is not rolled).`,
-    messages: [{ role: 'user', content: `Conversation transcript:\n\n${transcript}\n\nPlease evaluate.` }]
+Focus pronunciationTips on these words the student used: ${wordList}. Give 3-5 tips most relevant for Gujarati mother-tongue speakers (e.g. W→V sound, Z→TS, ä, ü, ch, final -er not rolled).`,
+    messages: [{ role: 'user', content: `Transcript:\n\n${transcript}\n\nPlease evaluate.` }]
   };
 }
 
-function displayScore(eval_) {
-  const overall = eval_.overall ?? 65;
-  const vocab = eval_.vocabulary ?? 60;
-  const grammar = eval_.grammar ?? 60;
-  const fluency = eval_.fluency ?? 60;
-  const task = eval_.taskCompletion ?? 60;
+function displayScore(e) {
+  const o=e.overall??65, v=e.vocabulary??60, g=e.grammar??60, f=e.fluency??60, t=e.taskCompletion??60;
+  document.getElementById('score-num').textContent = o;
+  document.getElementById('score-circle').style.setProperty('--pct', `${o}%`);
 
-  document.getElementById('score-num').textContent = overall;
-  document.getElementById('score-circle').style.setProperty('--pct', `${overall}%`);
+  const setBar = (bid, val, comment, cid, sid) => setTimeout(() => {
+    document.getElementById(bid).style.width=`${val}%`;
+    document.getElementById(sid).textContent=`${val}/100`;
+    document.getElementById(cid).textContent=comment||'';
+  }, 200);
+  setBar('bar-vocab',v,e.vocabComment,'comment-vocab','score-vocab');
+  setBar('bar-grammar',g,e.grammarComment,'comment-grammar','score-grammar');
+  setBar('bar-fluency',f,e.fluencyComment,'comment-fluency','score-fluency');
+  setBar('bar-task',t,e.taskComment,'comment-task','score-task');
 
-  const setBar = (barId, val, comment, commentId, scoreId) => {
-    setTimeout(() => {
-      document.getElementById(barId).style.width = `${val}%`;
-      document.getElementById(scoreId).textContent = `${val}/100`;
-      document.getElementById(commentId).textContent = comment || '';
-    }, 200);
-  };
-  setBar('bar-vocab', vocab, eval_.vocabComment, 'comment-vocab', 'score-vocab');
-  setBar('bar-grammar', grammar, eval_.grammarComment, 'comment-grammar', 'score-grammar');
-  setBar('bar-fluency', fluency, eval_.fluencyComment, 'comment-fluency', 'score-fluency');
-  setBar('bar-task', task, eval_.taskComment, 'comment-task', 'score-task');
-
-  document.getElementById('overall-feedback-text').textContent =
-    eval_.overallFeedback || 'Great effort! Keep practising every day to build confidence.';
+  document.getElementById('overall-feedback-text').textContent = e.overallFeedback || 'Great effort! Keep practising every day.';
 
   // Pronunciation tips
-  const tips = eval_.pronunciationTips;
-  if (tips && tips.length > 0) {
-    document.getElementById('pronunciation-section').style.display = 'block';
+  if (e.pronunciationTips?.length) {
+    document.getElementById('pronunciation-section').style.display='block';
     const list = document.getElementById('pronunciation-tips-list');
-    list.innerHTML = '';
-    tips.forEach(t => {
-      const div = document.createElement('div');
-      div.className = 'pronunciation-tip';
-      div.innerHTML = `
-        <div style="margin-bottom:0.3rem;">
-          <span class="word">${escHtml(t.word)}</span>
-          <span style="color:var(--muted); font-size:0.78rem; margin-left:0.5rem;">— common German word</span>
-        </div>
-        <div>❌ Often said as: <span style="color:var(--red); font-family:'DM Mono',monospace;">${escHtml(t.wrongWay || '—')}</span></div>
-        <div>✅ Should sound like: <span class="how">${escHtml(t.rightWay || '—')}</span></div>
-        ${t.gujaratiNote ? `<span class="gujarati-note">💡 ${escHtml(t.gujaratiNote)}</span>` : ''}
-      `;
-      list.appendChild(div);
+    list.innerHTML='';
+    e.pronunciationTips.forEach(tip => {
+      const d=document.createElement('div'); d.className='pronunciation-tip';
+      d.innerHTML=`<div style="margin-bottom:0.3rem"><span class="word">${escHtml(tip.word)}</span></div>
+<div>❌ Often said as: <span style="color:var(--red);font-family:'DM Mono',monospace">${escHtml(tip.wrongWay||'—')}</span></div>
+<div>✅ Should sound like: <span style="color:var(--forest);font-style:italic">${escHtml(tip.rightWay||'—')}</span></div>
+${tip.gujaratiNote?`<span class="gujarati-note">💡 ${escHtml(tip.gujaratiNote)}</span>`:''}`;
+      list.appendChild(d);
     });
   }
 
-  // Grammar errors
-  const allErrors = [...grammarErrors, ...(eval_.topErrors || [])];
+  // Errors
+  const allErr = [...grammarErrors, ...(e.topErrors||[])];
   const errList = document.getElementById('errors-list');
   errList.innerHTML = '';
-  if (!allErrors.length) {
-    errList.innerHTML = '<li>No major errors found — excellent work! 🎉</li>';
-  } else {
-    allErrors.slice(0, 6).forEach(e => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span class="err-orig">${escHtml(e.original || '')}</span> → <span class="err-correct">${escHtml(e.corrected || '')}</span><br><small>${escHtml(e.note || '')}</small>`;
-      errList.appendChild(li);
-    });
-  }
+  if (!allErr.length) { errList.innerHTML='<li>No major errors — excellent! 🎉</li>'; }
+  else allErr.slice(0,6).forEach(err => {
+    const li=document.createElement('li');
+    li.innerHTML=`<span class="err-orig">${escHtml(err.original||'')}</span> → <span class="err-correct">${escHtml(err.corrected||'')}</span><br><small>${escHtml(err.note||'')}</small>`;
+    errList.appendChild(li);
+  });
 }
 
-async function saveSessionToFirestore(eval_) {
+async function saveSession(eval_) {
   try {
-    const userRef = doc(db, 'users', currentUser.uid);
-    await updateDoc(userRef, { aiSessionsCompleted: increment(1), totalPoints: increment(30), lastAiSession: serverTimestamp() });
+    await updateDoc(doc(db,'users',currentUser.uid), { aiSessionsCompleted: increment(1), totalPoints: increment(30), lastAiSession: serverTimestamp() });
     const { addDoc, collection } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-    await addDoc(collection(db, 'aiSessions'), {
-      userId: currentUser.uid, scenario: selectedScenario.id,
-      level: selectedScenario.level, score: eval_.overall ?? 0, timestamp: serverTimestamp()
-    });
-  } catch(e) { console.error('Firestore save error:', e); }
+    await addDoc(collection(db,'aiSessions'), { userId: currentUser.uid, scenario: selectedScenario.id, level: selectedScenario.level, score: eval_.overall??0, timestamp: serverTimestamp() });
+  } catch(e) { console.error(e); }
 }
 
-window.practiceAgain = () => {
-  document.getElementById('score-panel').style.display = 'none';
-  document.getElementById('setup-panel').style.display = 'block';
-};
-window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
-
+window.practiceAgain = () => { document.getElementById('score-panel').style.display='none'; document.getElementById('setup-panel').style.display='block'; };
+window.goToDashboard = () => { window.location.href='/dashboard.html'; };
 </script>
 </body>
 </html>

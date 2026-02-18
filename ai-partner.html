@@ -965,15 +965,22 @@ function initSpeechRecognition() {
   };
 
   recognition.onend = () => {
-    isListening = false;
-    document.getElementById('mic-btn').classList.remove('listening');
-    document.getElementById('mic-btn').textContent = '🎙️';
     const vt = document.getElementById('voice-transcript');
     const transcript = (vt.textContent || '').replace('🎙️ ', '').trim();
-    vt.style.display = 'none';
+
+    // If user manually stopped OR we got a final transcript → send & stop
+    if (!isListening) return;
+
     if (transcript && transcript !== 'Listening...') {
+      isListening = false;
+      document.getElementById('mic-btn').classList.remove('listening');
+      document.getElementById('mic-btn').textContent = '🎙️';
+      vt.style.display = 'none';
       document.getElementById('text-input').value = transcript;
       sendMessage();
+    } else {
+      // Chrome killed it due to silence — restart automatically
+      try { recognition.start(); } catch(e) {}
     }
   };
 
@@ -987,6 +994,7 @@ function initSpeechRecognition() {
 window.toggleMic = () => {
   if (!recognition) { initSpeechRecognition(); }
   if (isListening) {
+    isListening = false;
     recognition.stop();
   } else {
     try { recognition.start(); } catch(e) { recognition = null; initSpeechRecognition(); recognition?.start(); }

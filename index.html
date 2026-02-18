@@ -1409,7 +1409,7 @@
         window.serverTimestamp = serverTimestamp;
 
         // Check Auth State
-        onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
             const navAuth = document.getElementById('navAuth');
             const userMenu = document.getElementById('userMenu');
             const userEmail = document.getElementById('userEmail');

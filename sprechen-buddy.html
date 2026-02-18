@@ -997,7 +997,13 @@
 
         async function startSession(md) {
             showState('sessionState'); disconnectionHandled = false; currentTask = md.task; displayTask(currentTask);
-            onSnapshot(doc(db, 'matches', matchId), (snap) => { const d = snap.data(); if (!d) return; if (d.task && JSON.stringify(d.task) !== JSON.stringify(currentTask)) { currentTask = d.task; displayTask(currentTask); showNotification('Task changed', 'important'); } if (d.timeExtended && !timeExtensionUsed) { timeExtensionUsed = true; timeRemaining += 600; sessionDuration += 600; document.getElementById('btnAddTime').disabled = true; document.getElementById('btnAddTime').textContent = 'Time Added'; } });
+            let isFirstSnapshot = true;
+            onSnapshot(doc(db, 'matches', matchId), (snap) => {
+                const d = snap.data(); if (!d) return;
+                if (isFirstSnapshot) { isFirstSnapshot = false; return; }
+                if (d.task && JSON.stringify(d.task) !== JSON.stringify(currentTask)) { currentTask = d.task; displayTask(currentTask); showNotification('Partner changed the task', 'important'); }
+                if (d.timeExtended && !timeExtensionUsed) { timeExtensionUsed = true; timeRemaining += 600; sessionDuration += 600; document.getElementById('btnAddTime').disabled = true; document.getElementById('btnAddTime').textContent = 'Time Added'; showNotification('Partner added 10 minutes', 'important'); }
+            });
             startTimer(); await setupWebRTC();
         }
 

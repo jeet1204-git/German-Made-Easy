@@ -984,25 +984,6 @@ function initSpeechRecognition() {
     document.getElementById('mic-btn').textContent = '🎙️';
   };
 }
-
-  recognition.onend = () => {
-    isListening = false;
-    document.getElementById('mic-btn').classList.remove('listening');
-    document.getElementById('mic-btn').textContent = '🎙️';
-    const vt = document.getElementById('voice-transcript');
-    const transcript = vt.textContent.replace('🎙️ ', '').trim();
-    vt.style.display = 'none';
-    if (transcript && transcript !== 'Listening...') {
-      document.getElementById('text-input').value = transcript;
-      sendMessage();
-    }
-  };
-
-  recognition.onerror = () => {
-    recognition.stop();
-  };
-}
-
 window.toggleMic = () => {
   if (!recognition) { initSpeechRecognition(); }
   if (isListening) {

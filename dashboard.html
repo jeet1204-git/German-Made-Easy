@@ -760,6 +760,10 @@
                 const userDocSnap = await getDoc(userDocRef);
                 var userData = userDocSnap.exists() ? userDocSnap.data() : {};
                 var enrolledCourses = userData.enrolledCourses || [];
+                // Show AI Partner banner for paid students
+if (userData.isPaidStudent) {
+    document.getElementById('aiPartnerBanner')?.classList.add('visible');
+}
 
                 var missingFields = {};
 

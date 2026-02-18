@@ -961,16 +961,30 @@ function initSpeechRecognition() {
     }
   };
 
-  recognition.onend = () => {
+  rrecognition.onend = () => {
+  const transcript = document.getElementById('text-input').value.trim();
+  
+  if (transcript) {
+    // Got speech — send it
     isListening = false;
     document.getElementById('mic-btn').classList.remove('listening');
     document.getElementById('mic-btn').textContent = '🎙️';
-    const vt = document.getElementById('voice-transcript');
-    const transcript = document.getElementById('text-input').value.trim();
-    vt.style.display = 'none';
-    vt.textContent = '🎙️ Listening...';
-    if (transcript) sendMessage(); // ← auto send on stop
-  };
+    document.getElementById('voice-transcript').style.display = 'none';
+    document.getElementById('voice-transcript').textContent = '🎙️ Listening...';
+    sendMessage();
+  } else if (isListening) {
+    // Chrome killed it with no speech — restart immediately
+    setTimeout(() => {
+      try { recognition.start(); }
+      catch(e) { console.log('restart failed', e); }
+    }, 100);
+  } else {
+    // User manually stopped with no speech
+    document.getElementById('mic-btn').classList.remove('listening');
+    document.getElementById('mic-btn').textContent = '🎙️';
+    document.getElementById('voice-transcript').style.display = 'none';
+  }
+};
 
   recognition.onerror = (e) => {
     console.error('Speech error:', e.error);

@@ -932,56 +932,44 @@ window.sendMessage = async () => {
 function initSpeechRecognition() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
     document.getElementById('mic-btn').style.display = 'none';
-    toast('Voice input not supported in this browser. Use Chrome.');
+    toast('Voice input not supported. Use Chrome.');
     return;
   }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SR();
   recognition.lang = 'de-DE';
   recognition.interimResults = true;
-  recognition.continuous = false;
+  recognition.continuous = false; // ← single utterance mode
 
   recognition.onstart = () => {
-    isListening = true;
     document.getElementById('mic-btn').classList.add('listening');
     document.getElementById('mic-btn').textContent = '⏹️';
-    const vt = document.getElementById('voice-transcript');
-    vt.style.display = 'block';
-    vt.textContent = '🎙️ Listening...';
+    document.getElementById('voice-transcript').style.display = 'block';
+    document.getElementById('voice-transcript').textContent = '🎙️ Listening...';
   };
 
   recognition.onresult = (e) => {
-    let interim = '';
-    let final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-      else interim += e.results[i][0].transcript;
+    let finalTranscript = '';
+    let interimTranscript = '';
+    for (let i = 0; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+      else interimTranscript += e.results[i][0].transcript;
     }
-    const vt = document.getElementById('voice-transcript');
-    vt.textContent = '🎙️ ' + (final || interim || 'Listening...');
-    if (final) {
-      document.getElementById('text-input').value = final;
+    document.getElementById('voice-transcript').textContent = '🎙️ ' + (finalTranscript || interimTranscript);
+    if (finalTranscript) {
+      document.getElementById('text-input').value = finalTranscript;
     }
   };
 
   recognition.onend = () => {
+    isListening = false;
+    document.getElementById('mic-btn').classList.remove('listening');
+    document.getElementById('mic-btn').textContent = '🎙️';
     const vt = document.getElementById('voice-transcript');
-    const transcript = (vt.textContent || '').replace('🎙️ ', '').trim();
-
-    // If user manually stopped OR we got a final transcript → send & stop
-    if (!isListening) return;
-
-    if (transcript && transcript !== 'Listening...') {
-      isListening = false;
-      document.getElementById('mic-btn').classList.remove('listening');
-      document.getElementById('mic-btn').textContent = '🎙️';
-      vt.style.display = 'none';
-      document.getElementById('text-input').value = transcript;
-      sendMessage();
-    } else {
-      // Chrome killed it due to silence — restart automatically
-      try { recognition.start(); } catch(e) {}
-    }
+    const transcript = document.getElementById('text-input').value.trim();
+    vt.style.display = 'none';
+    vt.textContent = '🎙️ Listening...';
+    if (transcript) sendMessage(); // ← auto send on stop
   };
 
   recognition.onerror = (e) => {
@@ -989,18 +977,22 @@ function initSpeechRecognition() {
     isListening = false;
     document.getElementById('mic-btn').classList.remove('listening');
     document.getElementById('mic-btn').textContent = '🎙️';
+    if (e.error === 'no-speech') toast('No speech detected. Try again.');
+    else if (e.error === 'not-allowed') toast('Mic blocked — allow mic in browser settings.');
   };
 }
 window.toggleMic = () => {
-  if (!recognition) { initSpeechRecognition(); }
+  if (!recognition) initSpeechRecognition();
   if (isListening) {
     isListening = false;
-    recognition.stop();
+    recognition.stop(); // stop → triggers onend → auto sends
   } else {
-    try { recognition.start(); } catch(e) { recognition = null; initSpeechRecognition(); recognition?.start(); }
+    isListening = true;
+    document.getElementById('text-input').value = ''; // clear previous
+    try { recognition.start(); }
+    catch(e) { recognition = null; initSpeechRecognition(); isListening = true; recognition.start(); }
   }
 };
-
 // ─── SEND AI MESSAGE (calls Cloud Function proxy) ──────────────────
 async function sendAIMessage(userText, isOpening = false) {
   showThinking();

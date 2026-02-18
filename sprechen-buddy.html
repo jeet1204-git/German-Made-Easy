@@ -1036,8 +1036,27 @@
             startMatching();
         });
 
+
+        // Clean up stale queue entries on load
+        async function cleanupStaleEntries() {
+            if (!currentUser) return;
+            
+            try {
+                // Remove any existing queue entry for this user
+                const queueDoc = await getDoc(doc(db, 'match_queue', currentUser.uid));
+                if (queueDoc.exists()) {
+                    console.log('🧹 Removing stale queue entry');
+                    await deleteDoc(doc(db, 'match_queue', currentUser.uid));
+                }
+            } catch (error) {
+                console.error('Stale cleanup error:', error);
+            }
+        }
         async function startMatching() {
             showState('waitingState');
+            
+            // Clean up any stale entries first
+            await cleanupStaleEntries();
 
             // Clean up any stale active matches from previous sessions.
             // Without this, the matches listener would immediately pick up old
@@ -1064,6 +1083,13 @@
                 console.log('Stale match cleanup:', e);
             }
 
+            // Prevent rejoining active session
+            if (matchId) {
+                showNotification('❌ Cannot rejoin active session', 'important');
+                console.log('Blocked: Trying to rejoin active match');
+                return;
+            }
+            
             // Create or update match queue entry with real name
             const queueRef = doc(db, 'match_queue', currentUser.uid);
             await setDoc(queueRef, {
@@ -1281,8 +1307,23 @@
             }, 30000);
         }
 
+
+        async function showMatchFoundState(partnerName, partnerLevel, partnerStreak) {
+            console.log('🎉 Showing match found state');
+            showState('matchFoundState');
+            
+            // Display partner info
+            document.getElementById('partnerName').textContent = partnerName || 'Anonymous Student';
+            document.getElementById('partnerLevel').textContent = partnerLevel || 'unknown';
+            document.getElementById('partnerStreak').textContent = partnerStreak || '0';
+            
+            // Wait 3 seconds before starting session
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            console.log('⏭️ Transitioning to session...');
+        }
         async function startSession(matchData) {
-            showState('sessionState');
+            console.log('🎬 Showing session state'); showState('sessionState');
 
             // Display task
             const task = matchData.task;
@@ -1576,6 +1617,27 @@
                     }
                 };
 
+
+                // Set connection timeout (30 seconds)
+                const connectionTimeout = setTimeout(() => {
+                    if (peerConnection && 
+                        peerConnection.iceConnectionState !== 'connected' && 
+                        peerConnection.iceConnectionState !== 'completed') {
+                        console.log('⏱️ WebRTC connection timeout');
+                        showNotification('Connection timeout. Trying to reconnect...', 'important');
+                        handlePartnerDisconnection();
+                    }
+                }, 30000);
+                
+                // Clear timeout when connected
+                const originalOnIceChange = peerConnection.oniceconnectionstatechange;
+                peerConnection.oniceconnectionstatechange = () => {
+                    if (originalOnIceChange) originalOnIceChange();
+                    if (peerConnection.iceConnectionState === 'connected' || 
+                        peerConnection.iceConnectionState === 'completed') {
+                        clearTimeout(connectionTimeout);
+                    }
+                };
                 // Setup robust monitoring
                 setupRobustConnectionMonitoring();
                 
@@ -1825,6 +1887,9 @@
             }
         }
 
+
+        let replacementAttempts = 0;
+        const MAX_REPLACEMENT_ATTEMPTS = 12; // 12 attempts × 5 seconds = 60 seconds max
         async function findReplacementPartner() {
             try {
                 const queueRef = collection(db, 'match_queue');
@@ -1838,7 +1903,8 @@
                 const candidates = [];
                 
                 snapshot.forEach(doc => {
-                    if (doc.id !== currentUser.uid) {
+                    // Don't match with yourself OR anyone already in this match
+                    if (doc.id !== currentUser.uid && doc.data().matchId !== matchId) {
                         candidates.push({ id: doc.id, ...doc.data() });
                     }
                 });
@@ -1998,21 +2064,45 @@
         };
 
         // Clean up queue entry and connections when leaving the page
-        window.addEventListener('beforeunload', () => {
-            if (currentUser) {
-                // Use navigator.sendBeacon for reliability during page unload
-                // Also attempt direct delete
-                try {
-                    deleteDoc(doc(db, 'match_queue', currentUser.uid));
-                } catch (e) {
-                    // Best effort cleanup
-                }
+        window.addEventListener('beforeunload', async () => {
+            console.log('🧹 Cleaning up on page unload...');
+            
+            // Stop all streams immediately
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
             }
             if (peerConnection) {
                 peerConnection.close();
             }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
+            
+            // Clean up queue and match
+            if (currentUser) {
+                try {
+                    // Remove from queue
+                    await deleteDoc(doc(db, 'match_queue', currentUser.uid));
+                    
+                    // Mark as disconnected in active match
+                    if (matchId) {
+                        await updateDoc(doc(db, 'matches', matchId), {
+                            [`disconnected.${currentUser.uid}`]: true,
+                            [`leftAt.${currentUser.uid}`]: serverTimestamp()
+                        });
+                    }
+                } catch (e) {
+                    console.error('Cleanup error:', e);
+                }
+            }
+        });
+
+        // Also cleanup on visibility change (browser tab close, minimize)
+        document.addEventListener('visibilitychange', async () => {
+            if (document.hidden && currentUser && matchId) {
+                try {
+                    await updateDoc(doc(db, 'matches', matchId), {
+                        [`disconnected.${currentUser.uid}`]: true,
+                        [`hiddenAt.${currentUser.uid}`]: serverTimestamp()
+                    });
+                } catch (e) {}
             }
         });
 

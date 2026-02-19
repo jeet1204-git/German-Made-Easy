@@ -208,7 +208,7 @@
     <div id="setup-panel">
       <div class="hero">
         <div class="hero-eyebrow">🤖 AI Conversation Partner</div>
-        <h1>Practice German<br><span>anytime, alone.</span></h1>
+        <h1>Practise German<br><span>anytime, alone.</span></h1>
         <p>Your personal AI partner plays real Goethe &amp; TELC exam roles. Speak or type — get instant grammar feedback and a final score.</p>
       </div>
       <div class="setup-grid">
@@ -709,7 +709,13 @@ function speakText(text) {
 
     const doSpeak = () => {
       const voices = window.speechSynthesis.getVoices();
-      const germanVoice = voices.find(v => v.lang.startsWith('de'));
+      // Prefer premium neural voices — avoid compact (robotic) ones
+      const germanVoice =
+        voices.find(v => v.lang.startsWith('de') && v.name.includes('Anna')) ||
+        voices.find(v => v.lang.startsWith('de') && v.name.includes('Markus')) ||
+        voices.find(v => v.lang.startsWith('de') && v.name.includes('Helena')) ||
+        voices.find(v => v.lang.startsWith('de') && !v.name.toLowerCase().includes('compact')) ||
+        voices.find(v => v.lang.startsWith('de'));
       if (germanVoice) utt.voice = germanVoice;
 
       utt.onend = () => { setAISpeaking(false); resolve(); };

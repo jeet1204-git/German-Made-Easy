@@ -301,7 +301,10 @@ onAuthStateChanged(auth, async (user) => {
         currentViewLevel = userData.level || 'A1';
 
         document.getElementById('weekSubtitle').textContent = 'Week of ' + formatDate(getLastMonday());
-        document.getElementById('levelBtn' + currentViewLevel).classList.add('active');
+        // Guard: userData.level could be undefined, B1, etc — only A1/A2 have buttons
+        if (!['A1','A2'].includes(currentViewLevel)) currentViewLevel = 'A1';
+        const lvlBtn = document.getElementById('levelBtn' + currentViewLevel);
+        if (lvlBtn) lvlBtn.classList.add('active');
 
         await loadUserStats(user);
         loadLeaderboards();

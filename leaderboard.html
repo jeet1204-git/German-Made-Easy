@@ -123,7 +123,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
@@ -205,42 +205,40 @@ async function loadUserStats(user) {
 
 async function getUserRank(weekId, level, userId, isWeekly) {
     try {
-        // ── FIX: correct collection path ──
-        // Weekly: leaderboard_weekly/{weekId}/scores
-        // All-time: leaderboard
         const colRef = isWeekly
             ? collection(db, 'leaderboard_weekly', weekId, 'scores')
             : collection(db, 'leaderboard');
-
         const snap = await getDocs(query(colRef, where('level', '==', level), orderBy('totalScore', 'desc')));
         let rank = 0, found = false;
-        snap.forEach(d => {
-            if (!found) {
-                rank++;
-                if (d.id === userId) found = true;
-            }
-        });
+        snap.forEach(d => { if (!found) { rank++; if (d.id === userId) found = true; } });
         return found ? rank : '-';
     } catch(e) { return '-'; }
 }
 
-async function loadLeaderboards() {
-    await loadLeaderboard(getWeekId(), currentViewLevel, true);
-    await loadLeaderboard(null, currentViewLevel, false);
+// Track active listeners so we can unsubscribe when switching level/tab
+const activeListeners = { weekly: null, alltime: null };
+
+function loadLeaderboards() {
+    loadLeaderboard(getWeekId(), currentViewLevel, true);
+    loadLeaderboard(null, currentViewLevel, false);
 }
 
-async function loadLeaderboard(weekId, level, isWeekly) {
+function loadLeaderboard(weekId, level, isWeekly) {
     const el = document.getElementById(isWeekly ? 'weeklyContent' : 'alltimeContent');
     el.innerHTML = '<div style="text-align:center;padding:20px;color:#999;">Loading...</div>';
 
-    try {
-        // ── FIX: correct collection path ──
-        const colRef = isWeekly
-            ? collection(db, 'leaderboard_weekly', weekId, 'scores')
-            : collection(db, 'leaderboard');
+    // Unsubscribe previous listener for this tab to avoid duplicates
+    const key = isWeekly ? 'weekly' : 'alltime';
+    if (activeListeners[key]) { activeListeners[key](); activeListeners[key] = null; }
 
-        const snap = await getDocs(query(colRef, where('level', '==', level), orderBy('totalScore', 'desc'), limit(50)));
+    const colRef = isWeekly
+        ? collection(db, 'leaderboard_weekly', weekId, 'scores')
+        : collection(db, 'leaderboard');
 
+    const q = query(colRef, where('level', '==', level), orderBy('totalScore', 'desc'), limit(50));
+
+    // onSnapshot fires immediately AND on every future change — real-time!
+    const unsub = onSnapshot(q, (snap) => {
         if (snap.empty) {
             el.innerHTML =
                 '<div class="leaderboard-empty">' +
@@ -258,7 +256,6 @@ async function loadLeaderboard(weekId, level, isWeekly) {
             const isMe = currentUser && d.id === currentUser.uid;
             const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
             const trophy = rank === 1 ? '<span class="lb-trophy">🥇</span>' : rank === 2 ? '<span class="lb-trophy">🥈</span>' : rank === 3 ? '<span class="lb-trophy">🥉</span>' : '';
-
             html +=
                 '<li class="leaderboard-row' + (isMe ? ' current-user' : '') + (rank <= 3 ? ' top-3' : '') + '">' +
                     trophy +
@@ -276,13 +273,21 @@ async function loadLeaderboard(weekId, level, isWeekly) {
                     '</div>' +
                 '</li>';
         });
-        html += '</ul>';
+        html += '</ul><div style="text-align:center;font-size:12px;color:#bbb;margin-top:12px;">🟢 Live — updates automatically</div>';
         el.innerHTML = html;
 
-    } catch(e) {
-        console.error('Leaderboard load error:', e);
-        el.innerHTML = '<div class="leaderboard-empty"><div class="leaderboard-empty-text">Error loading. Please refresh.</div></div>';
-    }
+    }, (err) => {
+        console.error('Leaderboard snapshot error:', err);
+        el.innerHTML =
+            '<div class="leaderboard-empty">' +
+                '<div class="leaderboard-empty-text">⚠️ Error loading. Check console — a Firestore index may be needed.</div>' +
+            '</div>';
+    });
+
+    activeListeners[key] = unsub;
+
+    // Clean up listeners when page is closed
+    window.addEventListener('beforeunload', () => { if (unsub) unsub(); });
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -299,7 +304,7 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById('levelBtn' + currentViewLevel).classList.add('active');
 
         await loadUserStats(user);
-        await loadLeaderboards();
+        loadLeaderboards();
 
         document.getElementById('loadingScreen').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';

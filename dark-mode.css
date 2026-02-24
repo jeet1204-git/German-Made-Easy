@@ -1,58 +1,81 @@
 /*
  * Dark Mode — German Made Easy
- * Gamified "new world" dark theme
+ * "Midnight Quest" — Gamified night theme
  * Activates automatically based on the user's OS/browser preference
  * (prefers-color-scheme: dark)
  *
- * Design language: deep space / adventure RPG
- *   --dm-bg          #05050f  deep-space black
- *   --dm-surface     #110d22  dark purple surface
- *   --dm-surface-2   #1c1638  mid-depth surface
- *   --dm-border      rgba(110, 80, 220, 0.35)  neon-purple border
- *   --dm-text        #ece6ff  crisp lavender-white
- *   --dm-muted       #8878aa  muted purple text
- *   --dm-orange      #FF6B35  primary accent (kept from light mode)
- *   --dm-cyan        #38bdf8  electric cyan accent
- *   --dm-glow-orange rgba(255, 107, 53, 0.25)
- *   --dm-glow-purple rgba(110, 80, 220, 0.20)
+ * Design language: midnight adventure / quest RPG — derived from brand palette
+ *
+ *   Base backgrounds  (midnight navy, not purple):
+ *     --dm-bg          #05080f   deep midnight navy-black
+ *     --dm-surface     #0c1221   dark navy surface
+ *     --dm-surface-2   #13203a   mid-depth navy
+ *     --dm-surface-3   #1a2e50   lifted navy (hover/active)
+ *
+ *   Text:
+ *     --dm-text        #edf2ff   crisp cool white
+ *     --dm-text-soft   #adc4e0   secondary text
+ *     --dm-muted       #6b8cad   muted steel-blue
+ *     --dm-dim         #2d4a6e   disabled / locked
+ *
+ *   Brand accents (exact light-mode colours, just with glow):
+ *     --dm-orange      #FF6B35   fire / energy / primary CTA
+ *     --dm-blue-brand  #004E89   brand navy-blue (mid-tones)
+ *     --dm-blue-elec   #38bdf8   electric sky-blue (links, timer, processing)
+ *     --dm-yellow      #FFD23F   achievement gold / rank 1
+ *     --dm-green       #10b981   success / badge / access
+ *
+ *   Glow tokens:
+ *     --dm-glow-orange rgba(255, 107,  53, 0.30)
+ *     --dm-glow-blue   rgba( 30, 100, 220, 0.22)
+ *     --dm-glow-yellow rgba(255, 210,  63, 0.40)
+ *     --dm-glow-green  rgba( 16, 185, 129, 0.30)
+ *
+ *   Borders:
+ *     --dm-border-soft rgba( 30, 100, 220, 0.22)   default card edges
+ *     --dm-border-act  rgba(255, 107,  53, 0.45)   active / selected
  */
 
 @media (prefers-color-scheme: dark) {
 
   /* ================================================
-     CSS Variable Overrides
+     CSS VARIABLE OVERRIDES
      ================================================ */
   :root {
-    --dark: #ece6ff !important;
-    --light: #05050f !important;
-    --white: #110d22 !important;
-    --border: #3d2d6e;
+    --dark:   #edf2ff !important;
+    --light:  #05080f !important;
+    --white:  #0c1221 !important;
+    --border: #1a3a6e;
 
     /* ai-partner.html design tokens */
-    --ink: #ece6ff;
-    --parchment: #05050f;
-    --cream: #1c1638;
-    --muted: #8878aa;
-    --shadow: rgba(0, 0, 0, 0.7);
-    --gold-pale: #1e1620;
+    --ink:        #edf2ff;
+    --parchment:  #05080f;
+    --cream:      #13203a;
+    --muted:      #6b8cad;
+    --shadow:     rgba(0, 0, 0, 0.80);
+    --gold-pale:  #101a2e;
 
-    /* Soften gold/yellow tokens for dark mode */
-    --gold: #a07830;
-    --gold-light: #c49050;
-    --accent: #FF6B35;
+    /* Gold / yellow tokens — warm amber glow */
+    --gold:       #c98a00;
+    --gold-light: #FFD23F;
+    --accent:     #FF6B35;
   }
 
 
   /* ================================================
      BODY & PAGE BACKGROUND
-     ================================================ */
+     ================================================
+     Night sky: deep navy-black with soft brand-blue nebula
+     on top-left and a warm orange ember at bottom-right.
+  */
   body {
-    background: #05050f !important;
+    background: #05080f !important;
     background-image:
-      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(80, 40, 180, 0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255, 107, 53, 0.07) 0%, transparent 55%) !important;
+      radial-gradient(ellipse 80% 55% at 10%  0%,  rgba(  0,  78, 137, 0.22) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 40% at 88%  90%, rgba(255, 107,  53, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 30% at 50%  50%, rgba( 16, 185, 129, 0.04) 0%, transparent 60%) !important;
     background-attachment: fixed !important;
-    color: #ece6ff !important;
+    color: #edf2ff !important;
   }
 
 
@@ -60,13 +83,13 @@
      NAVIGATION
      ================================================ */
   nav {
-    background: rgba(8, 5, 20, 0.97) !important;
-    border-bottom: 1px solid rgba(110, 80, 220, 0.25) !important;
-    box-shadow: 0 2px 24px rgba(80, 40, 180, 0.18) !important;
+    background: rgba(5, 8, 20, 0.97) !important;
+    border-bottom: 1px solid rgba(30, 100, 220, 0.18) !important;
+    box-shadow: 0 2px 24px rgba(0, 50, 160, 0.22) !important;
   }
 
   .nav-links a {
-    color: #c8bef0 !important;
+    color: #b8ceed !important;
   }
 
   .nav-links a:hover {
@@ -74,13 +97,13 @@
   }
 
   .user-email {
-    color: #c8bef0 !important;
+    color: #b8ceed !important;
   }
 
   /* ai-partner topbar */
   .topbar {
-    background: rgba(5, 5, 15, 0.97) !important;
-    border-bottom: 1px solid rgba(110, 80, 220, 0.25) !important;
+    background: rgba(5, 8, 20, 0.97) !important;
+    border-bottom: 1px solid rgba(30, 100, 220, 0.18) !important;
   }
 
 
@@ -104,30 +127,31 @@
   .setup-card,
   .conversation-box,
   .method-card {
-    background: #110d22 !important;
-    color: #ece6ff !important;
-    border-color: rgba(110, 80, 220, 0.35) !important;
-    box-shadow: 0 4px 32px rgba(80, 40, 180, 0.15), 0 1px 0 rgba(120, 90, 255, 0.08) inset !important;
+    background: #0c1221 !important;
+    color: #edf2ff !important;
+    border-color: rgba(30, 100, 220, 0.26) !important;
+    box-shadow: 0 4px 32px rgba(0, 50, 160, 0.18), 0 1px 0 rgba(60, 130, 255, 0.06) inset !important;
   }
 
   .course-card:hover {
-    box-shadow: 0 8px 40px rgba(80, 40, 180, 0.28), 0 0 0 1px rgba(110, 80, 220, 0.5) !important;
+    border-color: rgba(255, 107, 53, 0.42) !important;
+    box-shadow: 0 8px 44px rgba(255, 107, 53, 0.22), 0 0 0 1px rgba(255, 107, 53, 0.42) !important;
   }
 
   /* Document pages */
   .container {
-    background: #110d22 !important;
-    color: #ece6ff !important;
+    background: #0c1221 !important;
+    color: #edf2ff !important;
   }
 
   /* ai-partner access-denied overlay */
   #access-denied {
-    background: #05050f !important;
+    background: #05080f !important;
   }
 
 
   /* ================================================
-     INNER SURFACES
+     INNER SURFACES (nested cards, detail panels)
      ================================================ */
   .stat-box,
   .course-details,
@@ -139,13 +163,13 @@
   .criteria-item,
   .chapter-header,
   .method-tag {
-    background: #1c1638 !important;
-    color: #ece6ff !important;
+    background: #13203a !important;
+    color: #edf2ff !important;
   }
 
   .chapter-header:hover,
   .chapter.expanded .chapter-header {
-    background: #251e48 !important;
+    background: #1a2e50 !important;
     box-shadow: inset 3px 0 0 #FF6B35 !important;
   }
 
@@ -154,16 +178,16 @@
      TEXT COLOURS
      ================================================ */
   h1, h2, h3, h4, h5, h6 {
-    color: #ece6ff !important;
-    text-shadow: 0 0 20px rgba(140, 100, 255, 0.2) !important;
+    color: #edf2ff !important;
+    text-shadow: 0 0 28px rgba(30, 100, 255, 0.16) !important;
   }
 
   p {
-    color: #c0b4d8 !important;
+    color: #adc4e0 !important;
   }
 
   label {
-    color: #d8d0f0 !important;
+    color: #c8daee !important;
   }
 
   /* Secondary / muted text */
@@ -188,7 +212,7 @@
   .signup-link,
   .back-home,
   .back-link {
-    color: #8878aa !important;
+    color: #6b8cad !important;
   }
 
   /* Primary text elements */
@@ -206,13 +230,18 @@
   .chapter-title,
   .lesson-title,
   .page-title,
-  .course-name,
+  .course-name {
+    color: #edf2ff !important;
+  }
+
+  /* Stat numbers — orange fire with glow */
   .stat-number {
-    color: #ece6ff !important;
+    color: #FF6B35 !important;
+    text-shadow: 0 0 18px rgba(255, 107, 53, 0.45) !important;
   }
 
   .lesson-title.locked {
-    color: #5a4e78 !important;
+    color: #2d4a6e !important;
   }
 
   /* Links */
@@ -224,7 +253,7 @@
   .signup-link a,
   .login-link a {
     color: #FF6B35 !important;
-    text-shadow: 0 0 10px rgba(255, 107, 53, 0.4) !important;
+    text-shadow: 0 0 10px rgba(255, 107, 53, 0.50) !important;
   }
 
 
@@ -239,14 +268,14 @@
   textarea,
   select,
   .scenario-select {
-    background: #1c1638 !important;
-    color: #ece6ff !important;
-    border-color: rgba(110, 80, 220, 0.4) !important;
+    background: #13203a !important;
+    color: #edf2ff !important;
+    border-color: rgba(30, 100, 220, 0.35) !important;
   }
 
   input::placeholder,
   textarea::placeholder {
-    color: #5a4e78 !important;
+    color: #2d4a6e !important;
   }
 
   input:focus,
@@ -254,7 +283,7 @@
   select:focus,
   .scenario-select:focus {
     border-color: #FF6B35 !important;
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2), 0 0 12px rgba(255, 107, 53, 0.1) !important;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.20), 0 0 14px rgba(255, 107, 53, 0.14) !important;
   }
 
 
@@ -262,9 +291,9 @@
      SPECIAL BUTTONS
      ================================================ */
   .btn-google {
-    background: #1c1638 !important;
-    color: #ece6ff !important;
-    border-color: rgba(110, 80, 220, 0.4) !important;
+    background: #13203a !important;
+    color: #edf2ff !important;
+    border-color: rgba(30, 100, 220, 0.35) !important;
   }
 
   .btn-nav-link,
@@ -272,14 +301,14 @@
     background: transparent !important;
     border-color: #FF6B35 !important;
     color: #FF6B35 !important;
-    box-shadow: 0 0 10px rgba(255, 107, 53, 0.15) !important;
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.18) !important;
   }
 
   .btn-nav-link:hover,
   .btn-leaderboard:hover {
     background: #FF6B35 !important;
     color: #fff !important;
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.4) !important;
+    box-shadow: 0 0 24px rgba(255, 107, 53, 0.50) !important;
   }
 
   .btn-secondary {
@@ -291,62 +320,62 @@
 
   .btn-secondary:hover {
     background: rgba(255, 107, 53, 0.18) !important;
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.3) !important;
+    box-shadow: 0 0 22px rgba(255, 107, 53, 0.34) !important;
   }
 
   /* rating buttons (sprechen-buddy) */
   .rating-btn {
-    background: #1c1638 !important;
-    border-color: rgba(110, 80, 220, 0.4) !important;
-    color: #ece6ff !important;
+    background: #13203a !important;
+    border-color: rgba(30, 100, 220, 0.35) !important;
+    color: #edf2ff !important;
   }
 
   .rating-btn:hover {
     border-color: #FF6B35 !important;
-    background: rgba(255, 107, 53, 0.15) !important;
-    box-shadow: 0 0 14px rgba(255, 107, 53, 0.25) !important;
+    background: rgba(255, 107, 53, 0.14) !important;
+    box-shadow: 0 0 16px rgba(255, 107, 53, 0.28) !important;
   }
 
-  /* level-tab (ai-partner) inactive */
+  /* level-tab / mode-tab (ai-partner) — inactive */
   .level-tab:not(.active),
   .mode-tab:not(.active) {
-    background: #1c1638 !important;
-    color: #8878aa !important;
-    border-color: rgba(110, 80, 220, 0.35) !important;
+    background: #13203a !important;
+    color: #6b8cad !important;
+    border-color: rgba(30, 100, 220, 0.26) !important;
   }
 
-  /* level-tab active — add glow */
+  /* level-tab / mode-tab — active: brand orange glow */
   .level-tab.active,
   .mode-tab.active {
-    box-shadow: 0 0 14px rgba(255, 107, 53, 0.35) !important;
+    box-shadow: 0 0 18px rgba(255, 107, 53, 0.42) !important;
   }
 
-  /* level-btn (leaderboard) inactive */
+  /* level-btn (leaderboard) — inactive */
   .level-btn:not(.active) {
-    background: #110d22 !important;
-    border-color: rgba(110, 80, 220, 0.35) !important;
-    color: #8878aa !important;
+    background: #0c1221 !important;
+    border-color: rgba(30, 100, 220, 0.26) !important;
+    color: #6b8cad !important;
   }
 
-  /* tab-btn (leaderboard) inactive */
+  /* tab-btn (leaderboard) — inactive */
   .tab-btn:not(.active) {
-    color: #8878aa !important;
+    color: #6b8cad !important;
   }
 
-  /* tab-btn active — glow */
+  /* tab-btn — active */
   .tab-btn.active {
-    box-shadow: 0 0 14px rgba(255, 107, 53, 0.3) !important;
+    box-shadow: 0 0 16px rgba(255, 107, 53, 0.32) !important;
   }
 
   /* method-card (payment) */
   .method-card {
-    border-color: rgba(110, 80, 220, 0.35) !important;
+    border-color: rgba(30, 100, 220, 0.26) !important;
   }
 
   .method-card.selected {
-    background: rgba(255, 107, 53, 0.1) !important;
+    background: rgba(255, 107, 53, 0.10) !important;
     border-color: #FF6B35 !important;
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.25) !important;
+    box-shadow: 0 0 24px rgba(255, 107, 53, 0.28) !important;
   }
 
 
@@ -356,28 +385,28 @@
   .divider::before,
   .divider::after,
   .or-divider-line {
-    background: rgba(110, 80, 220, 0.25) !important;
+    background: rgba(30, 100, 220, 0.18) !important;
   }
 
   .divider {
-    color: #5a4e78 !important;
+    color: #2d4a6e !important;
   }
 
   .or-divider-text {
-    background: #110d22 !important;
-    color: #5a4e78 !important;
+    background: #0c1221 !important;
+    color: #2d4a6e !important;
   }
 
   .info-row {
-    border-bottom-color: rgba(110, 80, 220, 0.2) !important;
+    border-bottom-color: rgba(30, 100, 220, 0.14) !important;
   }
 
   .lesson {
-    border-bottom-color: rgba(110, 80, 220, 0.15) !important;
+    border-bottom-color: rgba(30, 100, 220, 0.12) !important;
   }
 
   .price-section {
-    border-bottom-color: rgba(110, 80, 220, 0.2) !important;
+    border-bottom-color: rgba(30, 100, 220, 0.14) !important;
   }
 
 
@@ -385,7 +414,7 @@
      PROGRESS BAR TRACK
      ================================================ */
   .progress-bar {
-    background: rgba(110, 80, 220, 0.2) !important;
+    background: rgba(30, 100, 220, 0.16) !important;
   }
 
 
@@ -394,9 +423,9 @@
      ================================================ */
   .loading-spinner,
   .spinner {
-    border-color: rgba(110, 80, 220, 0.25) !important;
+    border-color: rgba(30, 100, 220, 0.20) !important;
     border-top-color: #FF6B35 !important;
-    filter: drop-shadow(0 0 6px rgba(255, 107, 53, 0.5)) !important;
+    filter: drop-shadow(0 0 6px rgba(255, 107, 53, 0.60)) !important;
   }
 
 
@@ -404,13 +433,32 @@
      LEADERBOARD ROWS
      ================================================ */
   .leaderboard-row:nth-child(odd) {
-    background: rgba(28, 22, 56, 0.6) !important;
+    background: rgba(12, 25, 50, 0.58) !important;
   }
 
   .leaderboard-row.current-user {
     background: rgba(255, 107, 53, 0.12) !important;
     border-color: #FF6B35 !important;
     box-shadow: inset 0 0 20px rgba(255, 107, 53, 0.08) !important;
+  }
+
+  /* Leaderboard gold rank — glowing achievement */
+  .lb-rank.gold {
+    color: #FFD23F !important;
+    text-shadow: 0 0 12px rgba(255, 210, 63, 0.55) !important;
+  }
+
+  .lb-rank.silver {
+    color: #94b8d4 !important;
+  }
+
+  .lb-rank.bronze {
+    color: #cd7f32 !important;
+  }
+
+  .lb-score {
+    color: #FF6B35 !important;
+    text-shadow: 0 0 10px rgba(255, 107, 53, 0.35) !important;
   }
 
 
@@ -420,7 +468,11 @@
   .stat-chip {
     background: rgba(255, 107, 53, 0.14) !important;
     border-color: rgba(255, 107, 53, 0.35) !important;
-    box-shadow: 0 0 8px rgba(255, 107, 53, 0.1) !important;
+    box-shadow: 0 0 8px rgba(255, 107, 53, 0.12) !important;
+  }
+
+  .access-badge {
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.38) !important;
   }
 
 
@@ -428,17 +480,17 @@
      ALERT BOXES
      ================================================ */
   .alert-error {
-    background: rgba(42, 10, 10, 0.9) !important;
+    background: rgba(42, 8, 8, 0.92) !important;
     color: #ff9090 !important;
-    border-color: rgba(180, 40, 40, 0.6) !important;
-    box-shadow: 0 0 16px rgba(180, 40, 40, 0.15) !important;
+    border-color: rgba(180, 40, 40, 0.60) !important;
+    box-shadow: 0 0 16px rgba(180, 40, 40, 0.16) !important;
   }
 
   .alert-success {
-    background: rgba(10, 30, 10, 0.9) !important;
+    background: rgba(5, 28, 18, 0.92) !important;
     color: #7de8a0 !important;
-    border-color: rgba(40, 150, 80, 0.5) !important;
-    box-shadow: 0 0 16px rgba(40, 150, 80, 0.12) !important;
+    border-color: rgba(16, 185, 129, 0.50) !important;
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.14) !important;
   }
 
 
@@ -446,101 +498,208 @@
      SPRECHEN-BUDDY SPECIFIC
      ================================================ */
   .queue-info {
-    background: rgba(255, 107, 53, 0.1) !important;
+    background: rgba(255, 107, 53, 0.10) !important;
     border-color: #FF6B35 !important;
-    box-shadow: 0 0 16px rgba(255, 107, 53, 0.12) !important;
+    box-shadow: 0 0 18px rgba(255, 107, 53, 0.16) !important;
   }
 
   .task-card {
     background: rgba(255, 107, 53, 0.07) !important;
-    border-color: rgba(255, 107, 53, 0.4) !important;
+    border-color: rgba(255, 107, 53, 0.38) !important;
   }
 
   .points-earned {
-    background: rgba(255, 107, 53, 0.1) !important;
+    background: rgba(255, 107, 53, 0.10) !important;
     border-color: #FF6B35 !important;
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.2) !important;
+    box-shadow: 0 0 24px rgba(255, 107, 53, 0.24) !important;
   }
 
   .video-container {
-    background: #020208 !important;
+    background: #020409 !important;
   }
 
 
   /* ================================================
      AI PARTNER SPECIFIC
      ================================================ */
+
+  /* Role card — the "character you are speaking to" panel */
+  .role-card {
+    background: linear-gradient(135deg, #0c1e38, #0a1828) !important;
+    border: 1px solid rgba(56, 189, 248, 0.22) !important;
+    box-shadow: 0 4px 28px rgba(0, 50, 160, 0.26) !important;
+  }
+
+  /* AI message bubble — cool navy depth */
   .msg.ai .msg-bubble {
-    background: #1c1638 !important;
-    color: #ece6ff !important;
-    border: 1px solid rgba(110, 80, 220, 0.3) !important;
+    background: #13203a !important;
+    color: #edf2ff !important;
+    border: 1px solid rgba(30, 100, 220, 0.26) !important;
   }
 
+  /* User message bubble — brand green (success/correct) */
   .msg.user .msg-bubble {
-    background: rgba(0, 120, 80, 0.2) !important;
-    color: #ece6ff !important;
-    border: 1px solid rgba(0, 180, 100, 0.3) !important;
+    background: rgba(0, 100, 65, 0.22) !important;
+    color: #edf2ff !important;
+    border: 1px solid rgba(16, 185, 129, 0.32) !important;
   }
 
+  /* Processing / thinking status */
   .processing-status {
-    background: rgba(20, 20, 60, 0.8) !important;
-    border-color: rgba(56, 189, 248, 0.4) !important;
+    background: rgba(5, 14, 48, 0.88) !important;
+    border-color: rgba(56, 189, 248, 0.42) !important;
     color: #38bdf8 !important;
-    box-shadow: 0 0 14px rgba(56, 189, 248, 0.1) !important;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.14) !important;
   }
 
+  /* Recording live status */
   .recording-status {
-    background: rgba(40, 10, 20, 0.8) !important;
-    border-color: rgba(200, 50, 80, 0.5) !important;
+    background: rgba(40, 8, 18, 0.88) !important;
+    border-color: rgba(200, 50, 80, 0.50) !important;
     color: #ff8090 !important;
-    box-shadow: 0 0 14px rgba(200, 50, 80, 0.12) !important;
+    box-shadow: 0 0 14px rgba(200, 50, 80, 0.16) !important;
+  }
+
+  /* Session countdown timer — electric sky-blue */
+  .session-timer {
+    color: #38bdf8 !important;
+    text-shadow: 0 0 18px rgba(56, 189, 248, 0.45) !important;
+  }
+
+  /* AI speaking banner */
+  .ai-speaking-banner {
+    background: #0c1e38 !important;
+    border-color: rgba(56, 189, 248, 0.28) !important;
+    color: #38bdf8 !important;
+  }
+
+  /* Score circle — blazing orange halo */
+  .score-circle {
+    box-shadow:
+      0 0  40px rgba(255, 107,  53, 0.38),
+      0 0  80px rgba(255, 107,  53, 0.18),
+      0 0 120px rgba(  0,  78, 137, 0.15) !important;
+  }
+
+  /* Criteria progress bars — energised fill */
+  .criteria-fill {
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.45) !important;
+  }
+
+  /* Trial modal */
+  .trial-modal-card {
+    background: #0c1221 !important;
+    border: 1px solid rgba(255, 107, 53, 0.32) !important;
+    box-shadow:
+      0 8px 48px rgba(255, 107,  53, 0.22),
+      0 0  80px rgba(  0,  50, 160, 0.20) !important;
+  }
+
+  /* Trial badge pill */
+  .trial-badge {
+    background: rgba(255, 107, 53, 0.14) !important;
+    color: #FF6B35 !important;
+    border: 1px solid rgba(255, 107, 53, 0.35) !important;
+  }
+
+  /* Hero eyebrow (ai-partner top label) */
+  .hero-eyebrow {
+    color: #38bdf8 !important;
+    text-shadow: 0 0 14px rgba(56, 189, 248, 0.45) !important;
+  }
+
+  /* Trial counter badge */
+  .trial-counter-badge {
+    background: rgba(30, 100, 220, 0.12) !important;
+    border-color: rgba(30, 100, 220, 0.30) !important;
+    color: #6b8cad !important;
+  }
+
+  /* Text input area */
+  #text-input {
+    background: #13203a !important;
+    color: #edf2ff !important;
+    border-color: rgba(30, 100, 220, 0.35) !important;
+  }
+
+  #text-input:focus {
+    border-color: #FF6B35 !important;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.18), 0 0 14px rgba(255, 107, 53, 0.12) !important;
+  }
+
+  /* Inline grammar feedback block */
+  .feedback-inline {
+    background: rgba(16, 100, 60, 0.14) !important;
+    border-left-color: #10b981 !important;
+    color: #b0f0d0 !important;
+  }
+
+  .feedback-inline strong {
+    color: #10b981 !important;
+  }
+
+  /* Pronunciation tip block */
+  .feedback-pronunciation {
+    background: rgba(30, 100, 220, 0.10) !important;
+    border-left-color: #38bdf8 !important;
+    color: #adc4e0 !important;
+  }
+
+  /* Thinking dots */
+  .thinking-dot {
+    background: #6b8cad !important;
   }
 
 
   /* ================================================
-     COURSE PAGE (A1/A2) SPECIFIC
+     COURSE PAGE (A1 / A2) SPECIFIC
      ================================================ */
 
   /* Slider cards */
   .slider-card {
-    background: #110d22 !important;
-    border-color: rgba(110, 80, 220, 0.35) !important;
-    box-shadow: 0 4px 24px rgba(80, 40, 180, 0.15) !important;
+    background: #0c1221 !important;
+    border-color: rgba(30, 100, 220, 0.26) !important;
+    box-shadow: 0 4px 24px rgba(0, 50, 160, 0.18) !important;
   }
 
   .slider-card-body p {
-    color: #8878aa !important;
+    color: #6b8cad !important;
   }
 
   /* Slider arrow button */
   .slider-arrow {
-    background: #1c1638 !important;
-    border-color: rgba(110, 80, 220, 0.4) !important;
-    color: #ece6ff !important;
+    background: #13203a !important;
+    border-color: rgba(30, 100, 220, 0.35) !important;
+    color: #edf2ff !important;
   }
 
   .slider-arrow:hover {
     border-color: #FF6B35 !important;
-    box-shadow: 0 0 14px rgba(255, 107, 53, 0.25) !important;
+    box-shadow: 0 0 16px rgba(255, 107, 53, 0.30) !important;
   }
 
   /* Disabled slider card btn */
   .slider-card-btn.disabled {
-    background: rgba(110, 80, 220, 0.12) !important;
-    color: #5a4e78 !important;
+    background: rgba(30, 100, 220, 0.10) !important;
+    color: #2d4a6e !important;
   }
 
-  /* Gift modal */
+  /* Gift & nav-confirmation modal */
   .gift-modal-content,
   .nav-confirmation-modal {
-    background: #110d22 !important;
-    color: #ece6ff !important;
-    border: 1px solid rgba(110, 80, 220, 0.4) !important;
-    box-shadow: 0 8px 40px rgba(80, 40, 180, 0.3) !important;
+    background: #0c1221 !important;
+    color: #edf2ff !important;
+    border: 1px solid rgba(30, 100, 220, 0.35) !important;
+    box-shadow: 0 8px 44px rgba(0, 50, 160, 0.35) !important;
   }
 
   .gift-modal-close:hover {
-    background: rgba(110, 80, 220, 0.2) !important;
+    background: rgba(30, 100, 220, 0.18) !important;
+  }
+
+  /* Locked lesson */
+  .lesson.locked {
+    opacity: 0.42 !important;
   }
 
 
@@ -548,19 +707,19 @@
      PAYMENT PAGE SPECIFIC
      ================================================ */
   .payment-method {
-    background: #1c1638 !important;
-    color: #8878aa !important;
+    background: #13203a !important;
+    color: #6b8cad !important;
   }
 
   .gift-banner {
-    background: rgba(255, 107, 53, 0.1) !important;
+    background: rgba(255, 107, 53, 0.10) !important;
     border-color: #FF6B35 !important;
-    box-shadow: 0 0 16px rgba(255, 107, 53, 0.1) !important;
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.14) !important;
   }
 
   .gift-recipient-details {
     background: rgba(16, 185, 129, 0.08) !important;
-    border-color: rgba(16, 185, 129, 0.4) !important;
+    border-color: rgba(16, 185, 129, 0.40) !important;
     box-shadow: 0 0 16px rgba(16, 185, 129, 0.08) !important;
   }
 
@@ -577,112 +736,110 @@
      INDEX PAGE SPECIFIC
      ================================================ */
 
-  /* Full-width section backgrounds */
+  /* Full-width section alternates */
   .features,
   .testimonials {
-    background: #08051a !important;
+    background: #060b18 !important;
   }
 
-  /* Contact & Modal */
+  /* Contact form & modal */
   .contact-container,
   .modal-content {
-    background: #110d22 !important;
-    color: #ece6ff !important;
-    border: 1px solid rgba(110, 80, 220, 0.35) !important;
+    background: #0c1221 !important;
+    color: #edf2ff !important;
+    border: 1px solid rgba(30, 100, 220, 0.26) !important;
   }
 
-  /* Mobile menu */
+  /* Mobile menu overlay */
   .mobile-menu-overlay {
-    background: #08051a !important;
+    background: #060b18 !important;
   }
 
-  /* Testimonial / FAQ / feature cards */
+  /* Testimonial / FAQ / feature / instructor / step cards */
   .faq-item,
   .testimonial-card,
   .feature-card,
   .instructor-card,
   .step-card {
-    background: #110d22 !important;
-    border-color: rgba(110, 80, 220, 0.3) !important;
-    box-shadow: 0 4px 24px rgba(80, 40, 180, 0.12) !important;
+    background: #0c1221 !important;
+    border-color: rgba(30, 100, 220, 0.22) !important;
+    box-shadow: 0 4px 24px rgba(0, 50, 160, 0.14) !important;
   }
 
   .faq-item:hover,
   .testimonial-card:hover,
   .feature-card:hover {
-    border-color: rgba(110, 80, 220, 0.55) !important;
-    box-shadow: 0 6px 32px rgba(80, 40, 180, 0.22) !important;
+    border-color: rgba(255, 107, 53, 0.42) !important;
+    box-shadow: 0 6px 32px rgba(255, 107, 53, 0.16) !important;
   }
 
   .faq-answer {
-    background: #1c1638 !important;
+    background: #13203a !important;
   }
 
-  /* FAQ question button */
   .faq-question {
-    background: #110d22 !important;
-    color: #ece6ff !important;
+    background: #0c1221 !important;
+    color: #edf2ff !important;
   }
 
   /* Pricing cards */
   .pricing-card {
-    background: #110d22 !important;
-    border-color: rgba(110, 80, 220, 0.35) !important;
-    box-shadow: 0 4px 32px rgba(80, 40, 180, 0.15) !important;
+    background: #0c1221 !important;
+    border-color: rgba(30, 100, 220, 0.26) !important;
+    box-shadow: 0 4px 32px rgba(0, 50, 160, 0.18) !important;
   }
 
   /* Footer */
   footer {
-    background: #020208 !important;
-    border-top: 1px solid rgba(110, 80, 220, 0.2) !important;
+    background: #020408 !important;
+    border-top: 1px solid rgba(30, 100, 220, 0.16) !important;
   }
 
-  /* Section backgrounds */
+  /* Section overrides */
   .section-white,
   .bg-white {
-    background: #110d22 !important;
+    background: #0c1221 !important;
   }
 
 
   /* ================================================
-     YELLOW / GOLD OVERRIDES (eye-friendly in dark mode)
+     DASHBOARD — AI PARTNER BANNER & FAB
      ================================================ */
 
-  /* AI banner heading: replace blinding yellow with soft orange */
+  /* AI partner banner heading — keep yellow, add glow */
   .ai-banner-text h4 {
-    color: #FF6B35 !important;
+    color: #FFD23F !important;
+    text-shadow: 0 0 14px rgba(255, 210, 63, 0.50) !important;
   }
 
-  /* AI partner button: replace yellow background with orange */
+  /* AI partner CTA button — brand gradient with glow */
   .btn-ai-partner {
-    background: #FF6B35 !important;
+    background: linear-gradient(135deg, #FF6B35, #004E89) !important;
     color: #fff !important;
-    box-shadow: 0 4px 14px rgba(255, 107, 53, 0.35) !important;
+    box-shadow: 0 4px 18px rgba(255, 107, 53, 0.42) !important;
   }
 
   .btn-ai-partner:hover {
-    background: rgba(255, 107, 53, 0.85) !important;
+    box-shadow: 0 6px 30px rgba(255, 107, 53, 0.58) !important;
+    transform: translateY(-1px) !important;
     color: #fff !important;
   }
 
-  /* AI banner icon tint: replace yellow tint with orange tint */
+  /* AI banner icon background */
   .ai-banner-icon {
-    background: rgba(255, 107, 53, 0.15) !important;
+    background: rgba(255, 107, 53, 0.16) !important;
   }
 
-  /* Floating AI FAB button: remove yellow from gradient */
+  /* Floating AI FAB button */
   .ai-fab {
-    background: linear-gradient(135deg, #FF6B35, #cc4a1f) !important;
+    background: linear-gradient(135deg, #FF6B35, #004E89) !important;
     color: #fff !important;
+    box-shadow: 0 8px 30px rgba(255, 107, 53, 0.42) !important;
   }
 
   .ai-fab:hover {
     color: #fff !important;
-  }
-
-  /* Leaderboard gold rank: soften yellow to muted amber */
-  .lb-rank.gold {
-    color: #c49050 !important;
+    box-shadow: 0 12px 44px rgba(255, 107, 53, 0.58) !important;
   }
 
 }

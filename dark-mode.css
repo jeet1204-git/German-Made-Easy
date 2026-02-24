@@ -14,14 +14,13 @@
     --dark: #e0e0f4 !important;
     --light: #1a1a2e !important;
     --white: #1a1a2e !important;
-    --border: #333355 !important;
+    --border: #383855;
 
     /* ai-partner.html design tokens */
     --ink: #e0e0f4;
     --parchment: #0f0f1a;
     --cream: #1e1e30;
     --muted: #9090aa;
-    --border: #383855;
     --shadow: rgba(0, 0, 0, 0.5);
     --gold-pale: #2a2410;
   }
@@ -39,7 +38,6 @@
      NAVIGATION
      ================================================ */
   nav {
-    background: #1a1a2e !important;
     /* override index.html's rgba(255,255,255,0.95) */
     background: rgba(26, 26, 46, 0.97) !important;
     border-bottom-color: #333355 !important;

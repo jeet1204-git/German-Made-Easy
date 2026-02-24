@@ -545,8 +545,25 @@ function updateRemoteStatus(state) {
 }
 
 async function setupWebRTC() {
+    // Step 1: Acquire media — isolated so permission errors are reported accurately
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: { width:{ideal:640}, height:{ideal:480} }, audio: { echoCancellation:true, noiseSuppression:true } });
+    } catch(error) {
+        console.error('Media access error:', error.name, error.message);
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+            alert('Camera/microphone access was denied. Please allow permissions in your browser settings and try again.');
+        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+            alert('No camera or microphone found. Please connect a device and try again.');
+        } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+            alert('Camera/microphone is already in use by another app. Please close it and try again.');
+        } else {
+            alert('Could not start camera/microphone: ' + error.message + '. Please try again.');
+        }
+        return;
+    }
+
+    // Step 2: WebRTC peer connection setup — separate error handling from media access
+    try {
         const lv = document.getElementById('localVideo'); lv.srcObject = localStream; lv.play().catch(() => {});
 
         peerConnection = new RTCPeerConnection(rtcConfig);
@@ -636,8 +653,8 @@ async function setupWebRTC() {
             });
         }
     } catch(error) {
-        console.error('WebRTC error:', error);
-        alert('Could not access camera/microphone. Please check permissions and try again.');
+        console.error('WebRTC setup error:', error);
+        showToast('Connection setup failed. Please try again.');
     }
 }
 

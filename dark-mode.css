@@ -1,28 +1,40 @@
 /*
  * Dark Mode — German Made Easy
+ * Gamified "new world" dark theme
  * Activates automatically based on the user's OS/browser preference
  * (prefers-color-scheme: dark)
+ *
+ * Design language: deep space / adventure RPG
+ *   --dm-bg          #05050f  deep-space black
+ *   --dm-surface     #110d22  dark purple surface
+ *   --dm-surface-2   #1c1638  mid-depth surface
+ *   --dm-border      rgba(110, 80, 220, 0.35)  neon-purple border
+ *   --dm-text        #ece6ff  crisp lavender-white
+ *   --dm-muted       #8878aa  muted purple text
+ *   --dm-orange      #FF6B35  primary accent (kept from light mode)
+ *   --dm-cyan        #38bdf8  electric cyan accent
+ *   --dm-glow-orange rgba(255, 107, 53, 0.25)
+ *   --dm-glow-purple rgba(110, 80, 220, 0.20)
  */
 
 @media (prefers-color-scheme: dark) {
 
   /* ================================================
      CSS Variable Overrides
-     (for pages that use :root custom properties)
      ================================================ */
   :root {
-    --dark: #e0e0f4 !important;
-    --light: #1a1a2e !important;
-    --white: #1a1a2e !important;
-    --border: #383855;
+    --dark: #ece6ff !important;
+    --light: #05050f !important;
+    --white: #110d22 !important;
+    --border: #3d2d6e;
 
     /* ai-partner.html design tokens */
-    --ink: #e0e0f4;
-    --parchment: #0f0f1a;
-    --cream: #1e1e30;
-    --muted: #9090aa;
-    --shadow: rgba(0, 0, 0, 0.5);
-    --gold-pale: #2a2410;
+    --ink: #ece6ff;
+    --parchment: #05050f;
+    --cream: #1c1638;
+    --muted: #8878aa;
+    --shadow: rgba(0, 0, 0, 0.7);
+    --gold-pale: #1e1620;
   }
 
 
@@ -30,37 +42,45 @@
      BODY & PAGE BACKGROUND
      ================================================ */
   body {
-    background: #0f0f1a !important;
-    color: #e0e0f4 !important;
+    background: #05050f !important;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(80, 40, 180, 0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255, 107, 53, 0.07) 0%, transparent 55%) !important;
+    background-attachment: fixed !important;
+    color: #ece6ff !important;
   }
+
 
   /* ================================================
      NAVIGATION
      ================================================ */
   nav {
-    /* override index.html's rgba(255,255,255,0.95) */
-    background: rgba(26, 26, 46, 0.97) !important;
-    border-bottom-color: #333355 !important;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4) !important;
+    background: rgba(8, 5, 20, 0.97) !important;
+    border-bottom: 1px solid rgba(110, 80, 220, 0.25) !important;
+    box-shadow: 0 2px 24px rgba(80, 40, 180, 0.18) !important;
   }
 
   .nav-links a {
-    color: #e0e0f4 !important;
+    color: #c8bef0 !important;
+  }
+
+  .nav-links a:hover {
+    color: #FF6B35 !important;
   }
 
   .user-email {
-    color: #e0e0f4 !important;
+    color: #c8bef0 !important;
   }
 
   /* ai-partner topbar */
   .topbar {
-    background: rgba(15, 15, 26, 0.95) !important;
-    border-bottom-color: #333355 !important;
+    background: rgba(5, 5, 15, 0.97) !important;
+    border-bottom: 1px solid rgba(110, 80, 220, 0.25) !important;
   }
 
 
   /* ================================================
-     MAIN CARDS & CONTAINERS (white backgrounds)
+     MAIN CARDS & CONTAINERS
      ================================================ */
   .login-container,
   .signup-container,
@@ -79,25 +99,30 @@
   .setup-card,
   .conversation-box,
   .method-card {
-    background: #1e1e30 !important;
-    color: #e0e0f4 !important;
-    border-color: #333355 !important;
+    background: #110d22 !important;
+    color: #ece6ff !important;
+    border-color: rgba(110, 80, 220, 0.35) !important;
+    box-shadow: 0 4px 32px rgba(80, 40, 180, 0.15), 0 1px 0 rgba(120, 90, 255, 0.08) inset !important;
   }
 
-  /* Document pages (.container = full-page white container) */
+  .course-card:hover {
+    box-shadow: 0 8px 40px rgba(80, 40, 180, 0.28), 0 0 0 1px rgba(110, 80, 220, 0.5) !important;
+  }
+
+  /* Document pages */
   .container {
-    background: #1e1e30 !important;
-    color: #e0e0f4 !important;
+    background: #110d22 !important;
+    color: #ece6ff !important;
   }
 
   /* ai-partner access-denied overlay */
   #access-denied {
-    background: #0f0f1a !important;
+    background: #05050f !important;
   }
 
 
   /* ================================================
-     INNER SURFACES (#f8f8f8 / #fafafa / #f0f0f0)
+     INNER SURFACES
      ================================================ */
   .stat-box,
   .course-details,
@@ -109,13 +134,14 @@
   .criteria-item,
   .chapter-header,
   .method-tag {
-    background: #252540 !important;
-    color: #e0e0f4 !important;
+    background: #1c1638 !important;
+    color: #ece6ff !important;
   }
 
   .chapter-header:hover,
   .chapter.expanded .chapter-header {
-    background: #2e2e50 !important;
+    background: #251e48 !important;
+    box-shadow: inset 3px 0 0 #FF6B35 !important;
   }
 
 
@@ -123,15 +149,16 @@
      TEXT COLOURS
      ================================================ */
   h1, h2, h3, h4, h5, h6 {
-    color: #e0e0f4 !important;
+    color: #ece6ff !important;
+    text-shadow: 0 0 20px rgba(140, 100, 255, 0.2) !important;
   }
 
   p {
-    color: #c0c0d8 !important;
+    color: #c0b4d8 !important;
   }
 
   label {
-    color: #e0e0f4 !important;
+    color: #d8d0f0 !important;
   }
 
   /* Secondary / muted text */
@@ -156,10 +183,10 @@
   .signup-link,
   .back-home,
   .back-link {
-    color: #9090aa !important;
+    color: #8878aa !important;
   }
 
-  /* Forced-dark elements that use color: #1A1A2E / #333 */
+  /* Primary text elements */
   .lb-name,
   .lb-stat,
   .lb-rank,
@@ -176,23 +203,23 @@
   .page-title,
   .course-name,
   .stat-number {
-    color: #e0e0f4 !important;
+    color: #ece6ff !important;
   }
 
   .lesson-title.locked {
-    color: #707090 !important;
+    color: #5a4e78 !important;
   }
 
-  /* Links that are explicitly coloured #004E89 on light */
+  /* Links */
   .back-home a,
   .back-link a {
-    color: #6aacff !important;
+    color: #38bdf8 !important;
   }
 
-  /* signup/login link */
   .signup-link a,
   .login-link a {
     color: #FF6B35 !important;
+    text-shadow: 0 0 10px rgba(255, 107, 53, 0.4) !important;
   }
 
 
@@ -207,14 +234,14 @@
   textarea,
   select,
   .scenario-select {
-    background: #252540 !important;
-    color: #e0e0f4 !important;
-    border-color: #44446a !important;
+    background: #1c1638 !important;
+    color: #ece6ff !important;
+    border-color: rgba(110, 80, 220, 0.4) !important;
   }
 
   input::placeholder,
   textarea::placeholder {
-    color: #70708a !important;
+    color: #5a4e78 !important;
   }
 
   input:focus,
@@ -222,75 +249,99 @@
   select:focus,
   .scenario-select:focus {
     border-color: #FF6B35 !important;
-    box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2), 0 0 12px rgba(255, 107, 53, 0.1) !important;
   }
 
 
   /* ================================================
-     SPECIAL BUTTONS (white-background variants)
+     SPECIAL BUTTONS
      ================================================ */
   .btn-google {
-    background: #252540 !important;
-    color: #e0e0f4 !important;
-    border-color: #44446a !important;
+    background: #1c1638 !important;
+    color: #ece6ff !important;
+    border-color: rgba(110, 80, 220, 0.4) !important;
   }
 
   .btn-nav-link,
   .btn-leaderboard {
-    background: #1e1e30 !important;
+    background: transparent !important;
     border-color: #FF6B35 !important;
+    color: #FF6B35 !important;
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.15) !important;
+  }
+
+  .btn-nav-link:hover,
+  .btn-leaderboard:hover {
+    background: #FF6B35 !important;
+    color: #fff !important;
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.4) !important;
   }
 
   .btn-secondary {
-    background: #252540 !important;
+    background: transparent !important;
     color: #FF6B35 !important;
     border-color: #FF6B35 !important;
+    box-shadow: 0 0 10px rgba(255, 107, 53, 0.15) !important;
   }
 
   .btn-secondary:hover {
-    background: rgba(255, 107, 53, 0.15) !important;
+    background: rgba(255, 107, 53, 0.18) !important;
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.3) !important;
   }
 
   /* rating buttons (sprechen-buddy) */
   .rating-btn {
-    background: #252540 !important;
-    border-color: #44446a !important;
-    color: #e0e0f4 !important;
+    background: #1c1638 !important;
+    border-color: rgba(110, 80, 220, 0.4) !important;
+    color: #ece6ff !important;
   }
 
   .rating-btn:hover {
     border-color: #FF6B35 !important;
     background: rgba(255, 107, 53, 0.15) !important;
+    box-shadow: 0 0 14px rgba(255, 107, 53, 0.25) !important;
   }
 
   /* level-tab (ai-partner) inactive */
   .level-tab:not(.active),
   .mode-tab:not(.active) {
-    background: #252540 !important;
-    color: #9090aa !important;
-    border-color: #44446a !important;
+    background: #1c1638 !important;
+    color: #8878aa !important;
+    border-color: rgba(110, 80, 220, 0.35) !important;
+  }
+
+  /* level-tab active — add glow */
+  .level-tab.active,
+  .mode-tab.active {
+    box-shadow: 0 0 14px rgba(255, 107, 53, 0.35) !important;
   }
 
   /* level-btn (leaderboard) inactive */
   .level-btn:not(.active) {
-    background: #1e1e30 !important;
-    border-color: #44446a !important;
-    color: #9090aa !important;
+    background: #110d22 !important;
+    border-color: rgba(110, 80, 220, 0.35) !important;
+    color: #8878aa !important;
   }
 
   /* tab-btn (leaderboard) inactive */
   .tab-btn:not(.active) {
-    color: #9090aa !important;
+    color: #8878aa !important;
   }
 
-  /* method-card (payment) unselected */
+  /* tab-btn active — glow */
+  .tab-btn.active {
+    box-shadow: 0 0 14px rgba(255, 107, 53, 0.3) !important;
+  }
+
+  /* method-card (payment) */
   .method-card {
-    border-color: #44446a !important;
+    border-color: rgba(110, 80, 220, 0.35) !important;
   }
 
   .method-card.selected {
     background: rgba(255, 107, 53, 0.1) !important;
     border-color: #FF6B35 !important;
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.25) !important;
   }
 
 
@@ -300,35 +351,36 @@
   .divider::before,
   .divider::after,
   .or-divider-line {
-    background: #333355 !important;
+    background: rgba(110, 80, 220, 0.25) !important;
   }
 
   .divider {
-    color: #70708a !important;
+    color: #5a4e78 !important;
   }
 
   .or-divider-text {
-    background: #1e1e30 !important;
-    color: #70708a !important;
+    background: #110d22 !important;
+    color: #5a4e78 !important;
   }
 
   .info-row {
-    border-bottom-color: #333355 !important;
+    border-bottom-color: rgba(110, 80, 220, 0.2) !important;
   }
 
   .lesson {
-    border-bottom-color: #2e2e50 !important;
+    border-bottom-color: rgba(110, 80, 220, 0.15) !important;
   }
 
   .price-section {
-    border-bottom-color: #333355 !important;
+    border-bottom-color: rgba(110, 80, 220, 0.2) !important;
   }
+
 
   /* ================================================
      PROGRESS BAR TRACK
      ================================================ */
   .progress-bar {
-    background: #333355 !important;
+    background: rgba(110, 80, 220, 0.2) !important;
   }
 
 
@@ -337,8 +389,9 @@
      ================================================ */
   .loading-spinner,
   .spinner {
-    border-color: #333355 !important;
+    border-color: rgba(110, 80, 220, 0.25) !important;
     border-top-color: #FF6B35 !important;
+    filter: drop-shadow(0 0 6px rgba(255, 107, 53, 0.5)) !important;
   }
 
 
@@ -346,12 +399,13 @@
      LEADERBOARD ROWS
      ================================================ */
   .leaderboard-row:nth-child(odd) {
-    background: #252540 !important;
+    background: rgba(28, 22, 56, 0.6) !important;
   }
 
   .leaderboard-row.current-user {
-    background: rgba(255, 107, 53, 0.15) !important;
+    background: rgba(255, 107, 53, 0.12) !important;
     border-color: #FF6B35 !important;
+    box-shadow: inset 0 0 20px rgba(255, 107, 53, 0.08) !important;
   }
 
 
@@ -359,8 +413,9 @@
      CHIPS & BADGES
      ================================================ */
   .stat-chip {
-    background: rgba(255, 107, 53, 0.15) !important;
-    border-color: rgba(255, 107, 53, 0.3) !important;
+    background: rgba(255, 107, 53, 0.14) !important;
+    border-color: rgba(255, 107, 53, 0.35) !important;
+    box-shadow: 0 0 8px rgba(255, 107, 53, 0.1) !important;
   }
 
 
@@ -368,15 +423,17 @@
      ALERT BOXES
      ================================================ */
   .alert-error {
-    background: #2a1818 !important;
+    background: rgba(42, 10, 10, 0.9) !important;
     color: #ff9090 !important;
-    border-color: #5a2828 !important;
+    border-color: rgba(180, 40, 40, 0.6) !important;
+    box-shadow: 0 0 16px rgba(180, 40, 40, 0.15) !important;
   }
 
   .alert-success {
-    background: #182a18 !important;
-    color: #90d090 !important;
-    border-color: #285a28 !important;
+    background: rgba(10, 30, 10, 0.9) !important;
+    color: #7de8a0 !important;
+    border-color: rgba(40, 150, 80, 0.5) !important;
+    box-shadow: 0 0 16px rgba(40, 150, 80, 0.12) !important;
   }
 
 
@@ -386,20 +443,22 @@
   .queue-info {
     background: rgba(255, 107, 53, 0.1) !important;
     border-color: #FF6B35 !important;
+    box-shadow: 0 0 16px rgba(255, 107, 53, 0.12) !important;
   }
 
   .task-card {
-    background: rgba(255, 107, 53, 0.08) !important;
-    border-color: #FF6B35 !important;
+    background: rgba(255, 107, 53, 0.07) !important;
+    border-color: rgba(255, 107, 53, 0.4) !important;
   }
 
   .points-earned {
     background: rgba(255, 107, 53, 0.1) !important;
     border-color: #FF6B35 !important;
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.2) !important;
   }
 
   .video-container {
-    background: #0a0a14 !important;
+    background: #020208 !important;
   }
 
 
@@ -407,25 +466,29 @@
      AI PARTNER SPECIFIC
      ================================================ */
   .msg.ai .msg-bubble {
-    background: #252540 !important;
-    color: #e0e0f4 !important;
+    background: #1c1638 !important;
+    color: #ece6ff !important;
+    border: 1px solid rgba(110, 80, 220, 0.3) !important;
   }
 
   .msg.user .msg-bubble {
-    background: #1a3a2e !important;
-    color: #e0e0f4 !important;
+    background: rgba(0, 120, 80, 0.2) !important;
+    color: #ece6ff !important;
+    border: 1px solid rgba(0, 180, 100, 0.3) !important;
   }
 
   .processing-status {
-    background: #1a1a35 !important;
-    border-color: #3355aa !important;
-    color: #88aaff !important;
+    background: rgba(20, 20, 60, 0.8) !important;
+    border-color: rgba(56, 189, 248, 0.4) !important;
+    color: #38bdf8 !important;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.1) !important;
   }
 
   .recording-status {
-    background: #2a1a1a !important;
-    border-color: #aa3355 !important;
+    background: rgba(40, 10, 20, 0.8) !important;
+    border-color: rgba(200, 50, 80, 0.5) !important;
     color: #ff8090 !important;
+    box-shadow: 0 0 14px rgba(200, 50, 80, 0.12) !important;
   }
 
 
@@ -433,59 +496,67 @@
      COURSE PAGE (A1/A2) SPECIFIC
      ================================================ */
 
-  /* White course page body (course-a1 has background:#fff) */
-  /* Already covered by the general body rule above */
-
   /* Slider cards */
   .slider-card {
-    background: #1e1e30 !important;
-    border-color: #333355 !important;
+    background: #110d22 !important;
+    border-color: rgba(110, 80, 220, 0.35) !important;
+    box-shadow: 0 4px 24px rgba(80, 40, 180, 0.15) !important;
   }
 
   .slider-card-body p {
-    color: #9090aa !important;
+    color: #8878aa !important;
   }
 
   /* Slider arrow button */
   .slider-arrow {
-    background: #1e1e30 !important;
-    border-color: #333355 !important;
-    color: #e0e0f4 !important;
+    background: #1c1638 !important;
+    border-color: rgba(110, 80, 220, 0.4) !important;
+    color: #ece6ff !important;
+  }
+
+  .slider-arrow:hover {
+    border-color: #FF6B35 !important;
+    box-shadow: 0 0 14px rgba(255, 107, 53, 0.25) !important;
   }
 
   /* Disabled slider card btn */
   .slider-card-btn.disabled {
-    background: #333355 !important;
-    color: #70708a !important;
+    background: rgba(110, 80, 220, 0.12) !important;
+    color: #5a4e78 !important;
   }
 
   /* Gift modal */
   .gift-modal-content,
   .nav-confirmation-modal {
-    background: #1e1e30 !important;
-    color: #e0e0f4 !important;
+    background: #110d22 !important;
+    color: #ece6ff !important;
+    border: 1px solid rgba(110, 80, 220, 0.4) !important;
+    box-shadow: 0 8px 40px rgba(80, 40, 180, 0.3) !important;
   }
 
   .gift-modal-close:hover {
-    background: #333355 !important;
+    background: rgba(110, 80, 220, 0.2) !important;
   }
+
 
   /* ================================================
      PAYMENT PAGE SPECIFIC
      ================================================ */
   .payment-method {
-    background: #252540 !important;
-    color: #9090aa !important;
+    background: #1c1638 !important;
+    color: #8878aa !important;
   }
 
   .gift-banner {
-    background: rgba(255, 107, 53, 0.12) !important;
+    background: rgba(255, 107, 53, 0.1) !important;
     border-color: #FF6B35 !important;
+    box-shadow: 0 0 16px rgba(255, 107, 53, 0.1) !important;
   }
 
   .gift-recipient-details {
-    background: rgba(16, 185, 129, 0.1) !important;
-    border-color: #10b981 !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.08) !important;
   }
 
   .gift-recipient-details h4 {
@@ -501,59 +572,70 @@
      INDEX PAGE SPECIFIC
      ================================================ */
 
-  /* Full-width section backgrounds (white sections on index.html) */
+  /* Full-width section backgrounds */
   .features,
   .testimonials {
-    background: #1a1a2e !important;
+    background: #08051a !important;
   }
 
   /* Contact & Modal */
   .contact-container,
   .modal-content {
-    background: #1e1e30 !important;
-    color: #e0e0f4 !important;
+    background: #110d22 !important;
+    color: #ece6ff !important;
+    border: 1px solid rgba(110, 80, 220, 0.35) !important;
   }
 
-  /* Mobile menu (index.html nav overlay) */
+  /* Mobile menu */
   .mobile-menu-overlay {
-    background: #1a1a2e !important;
+    background: #08051a !important;
   }
 
-  /* Testimonial / FAQ cards that use white bg */
+  /* Testimonial / FAQ / feature cards */
   .faq-item,
   .testimonial-card,
   .feature-card,
   .instructor-card,
   .step-card {
-    background: #1e1e30 !important;
-    border-color: #333355 !important;
+    background: #110d22 !important;
+    border-color: rgba(110, 80, 220, 0.3) !important;
+    box-shadow: 0 4px 24px rgba(80, 40, 180, 0.12) !important;
+  }
+
+  .faq-item:hover,
+  .testimonial-card:hover,
+  .feature-card:hover {
+    border-color: rgba(110, 80, 220, 0.55) !important;
+    box-shadow: 0 6px 32px rgba(80, 40, 180, 0.22) !important;
   }
 
   .faq-answer {
-    background: #252540 !important;
+    background: #1c1638 !important;
   }
 
   /* FAQ question button */
   .faq-question {
-    background: #1e1e30 !important;
-    color: #e0e0f4 !important;
+    background: #110d22 !important;
+    color: #ece6ff !important;
   }
 
   /* Pricing cards */
   .pricing-card {
-    background: #1e1e30 !important;
-    border-color: #333355 !important;
+    background: #110d22 !important;
+    border-color: rgba(110, 80, 220, 0.35) !important;
+    box-shadow: 0 4px 32px rgba(80, 40, 180, 0.15) !important;
   }
 
   /* Footer */
   footer {
-    background: #0a0a14 !important;
+    background: #020208 !important;
+    border-top: 1px solid rgba(110, 80, 220, 0.2) !important;
   }
 
-  /* Section backgrounds that use #f5f5f5 / var(--light) */
+  /* Section backgrounds */
   .section-white,
   .bg-white {
-    background: #1e1e30 !important;
+    background: #110d22 !important;
   }
 
 }

@@ -3,9 +3,23 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users collection: authenticated users can read/write only their own document
+    // Users collection:
+    // - Users can read their own document
+    // - Users can CREATE their own document (signup), but NOT set isPaidStudent
+    // - Users can UPDATE their own document for normal fields (streak, score, etc.)
+    //   but CANNOT modify isPaidStudent or enrolledCourses (payment-gated fields)
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // On creation: block isPaidStudent field
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && !request.resource.data.keys().hasAny(['isPaidStudent']);
+
+      // On update: block changing isPaidStudent; allow enrolledCourses (set by payment handler)
+      allow update: if request.auth != null
+        && request.auth.uid == userId
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isPaidStudent']);
     }
 
     // Leaderboard collection: any authenticated user can read, but can only write their own entry
@@ -14,10 +28,19 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Leaderboard weekly collection: authenticated users can read all documents, can write only their own entry
+    // Leaderboard weekly collection: authenticated users can read all documents,
+    // and write only their own entry under the /scores/ subcollection
     match /leaderboard_weekly/{weekId} {
       allow read: if request.auth != null;
+
+      // This rule covers the old (unused) direct subcollection path for backwards compat
       match /{userId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // This is the ACTIVE path: leaderboard_weekly/{weekId}/scores/{userId}
+      match /scores/{userId} {
         allow read: if request.auth != null;
         allow write: if request.auth != null && request.auth.uid == userId;
       }
@@ -41,6 +64,13 @@ service cloud.firestore {
     match /mail/{mailId} {
       allow create: if request.auth != null;
       allow read, update, delete: if false;
+    }
+
+    // AI sessions: authenticated users can create their own session records
+    match /aiSessions/{sessionId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
     }
 
     // Match queue: authenticated users can read all entries, manage their own,

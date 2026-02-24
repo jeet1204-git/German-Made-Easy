@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment - German Made Easy</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id=AR7NZ5pUfxW9N7TAd8ajdMk098kuJGnO--IXa5ZjBTAnDiw3SIlfkrQUwBAGmysFl_PxTBRgYrSu29w6&currency=EUR,INR"></script>
+    <!-- PayPal SDK: currency must be a single value. EUR used for international students. -->
+    <script src="https://www.paypal.com/sdk/js?client-id=AR7NZ5pUfxW9N7TAd8ajdMk098kuJGnO--IXa5ZjBTAnDiw3SIlfkrQUwBAGmysFl_PxTBRgYrSu29w6&currency=EUR"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
@@ -476,7 +477,14 @@
                 width: 100%;
                 max-width: 100%;
             }
+
+            /* Stack payment method cards on small screens */
+            .method-options {
+                grid-template-columns: 1fr;
+            }
         }
+
+        button, a { touch-action: manipulation; }
     </style>
 </head>
 <body>
@@ -823,8 +831,9 @@
                 await setDoc(doc(db, 'payments', paymentId), paymentData);
 
                 // Razorpay options
+                // ⚠️ BEFORE LAUNCH: Replace rzp_test_ key below with your rzp_live_ key from Razorpay Dashboard
                 const options = {
-                    key: 'rzp_test_SGPQO4RhvkKDke', // Your Razorpay key
+                    key: 'rzp_test_SGPQO4RhvkKDke', // TODO: Replace with rzp_live_ key before going live!
                     amount: totalAmount * 100, // Amount in paise
                     currency: 'INR',
                     name: 'German Made Easy',

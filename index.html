@@ -920,77 +920,96 @@
                 padding: 20px;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
                 gap: 20px;
+                z-index: 999;
             }
-            
+
             .nav-links.active {
                 display: flex;
             }
-            
+
+            /* Hide auth buttons in the header on mobile — they move into the hamburger menu */
+            .nav-auth {
+                display: none !important;
+            }
+
+            /* When hamburger is open, show auth buttons inside the dropdown */
+            .nav-links.active .mobile-auth-links {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding-top: 10px;
+                border-top: 1px solid #eee;
+                width: 100%;
+            }
+
+            .mobile-auth-links .btn-login,
+            .mobile-auth-links .btn-signup {
+                width: 100%;
+                text-align: center;
+                display: block;
+                padding: 12px 20px;
+                font-size: 15px;
+            }
+
             .mobile-menu-btn {
                 display: block;
             }
-            
+
             .nav-container {
                 padding: 20px;
             }
-            
+
             .hero {
                 padding: 100px 20px 60px;
             }
-            
+
             .features,
             .courses,
             .testimonials,
             .contact {
                 padding: 60px 20px;
             }
-            
+
             .features-grid,
             .courses-grid,
             .testimonials-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .cta-buttons {
                 flex-direction: column;
             }
-            
+
             .btn-primary,
             .btn-secondary {
                 width: 100%;
                 justify-content: center;
             }
-            
+
             .combo-offer {
                 padding: 40px 20px;
             }
-            
+
             .contact-container {
-                padding: 40px 30px;
+                padding: 40px 20px;
             }
-            
+
             .scroll-top {
                 width: 50px;
                 height: 50px;
                 bottom: 20px;
                 right: 20px;
             }
-            
+
             .scroll-top svg {
                 width: 24px;
                 height: 24px;
             }
+        }
 
-            .nav-auth {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .btn-login, .btn-signup {
-                width: 100%;
-                text-align: center;
-                display: block;
-            }
+        /* Fast tap on mobile — removes 300ms tap delay */
+        button, a, [onclick] {
+            touch-action: manipulation;
         }
 
         /* AI Partner Banner */
@@ -1035,6 +1054,11 @@
                 <li><a href="#courses">Courses</a></li>
                 <li><a href="#testimonials">Success Stories</a></li>
                 <li><a href="#contact">Contact</a></li>
+                <!-- Auth buttons shown inside hamburger menu on mobile -->
+                <li class="mobile-auth-links" id="mobileNavAuth">
+                    <a href="login.html" class="btn-login">Login</a>
+                    <a href="signup.html" class="btn-signup">Sign Up</a>
+                </li>
             </ul>
             <div class="nav-auth" id="navAuth">
                 <a href="login.html" class="btn-login">Login</a>
@@ -1366,7 +1390,7 @@
                 <a href="refund.html">Refund Policy</a>
             </div>
             <div class="copyright">
-                © 2024 German Made Easy. All rights reserved.<br>
+                © 2025 German Made Easy. All rights reserved.<br>
                 Contact: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6c0b091e010d0242010d080942090d1f155d5e2c0b010d0500420f0301">[email&#160;protected]</a> | Munich, Germany
             </div>
         </div>
@@ -1420,6 +1444,9 @@ onAuthStateChanged(auth, async (user) => {
                 userMenu.classList.add('active');
                 userEmail.textContent = user.email;
                 if (dashboardNav) dashboardNav.style.display = 'block';
+                // Hide mobile auth links in hamburger when logged in
+                const mobileNavAuth = document.getElementById('mobileNavAuth');
+                if (mobileNavAuth) mobileNavAuth.style.display = 'none';
 
                 // Show AI Partner banner for paid students
 try {

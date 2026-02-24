@@ -191,9 +191,9 @@
             color: var(--dark);
         }
 
-        /* Mobile logout inside hamburger dropdown */
+        /* Mobile logout — always hidden on desktop regardless of JS class */
         .mobile-logout-link {
-            display: none;
+            display: none !important;
             width: 100%;
         }
 
@@ -1014,9 +1014,9 @@
                 display: none;
             }
 
-            /* Show the in-dropdown logout (display set by JS) */
-            .mobile-logout-link {
-                display: block;
+            /* Show logout in dropdown only when .logged-in class is set by JS */
+            .mobile-logout-link.logged-in {
+                display: block !important;
                 width: 100%;
                 padding-top: 10px;
                 border-top: 1px solid #eee;
@@ -1091,11 +1091,29 @@
             touch-action: manipulation;
         }
 
+        /* AI Practice Partner FAB */
+        .ai-fab {
+            position: fixed; bottom: 28px; right: 28px;
+            background: linear-gradient(135deg, #FFD23F, #FF6B35);
+            color: #1A1A2E; padding: 14px 22px; border-radius: 50px;
+            font-weight: 800; font-size: 15px; font-family: 'Outfit', sans-serif;
+            display: none; align-items: center; gap: 10px;
+            box-shadow: 0 8px 30px rgba(255,107,53,0.35);
+            text-decoration: none; z-index: 9998;
+            transition: transform 0.25s, box-shadow 0.25s; white-space: nowrap;
+        }
+        .ai-fab.visible { display: flex; }
+        .ai-fab:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(255,107,53,0.5); color: #1A1A2E; }
+        @media (max-width: 768px) {
+            .ai-fab { bottom: 20px; right: 16px; padding: 12px 16px; font-size: 13px; }
+            .ai-fab .fab-text { display: none; }
+        }
+
         /* AI Partner Banner */
 .ai-partner-banner {
     display: none;
     background: linear-gradient(135deg, #1A1A2E 0%, #004E89 100%);
-    border-radius: 16px; padding: 22px 26px; margin: 0 0 28px 0;
+    border-radius: 16px; padding: 22px 26px; margin: 80px 16px 0 16px;
     align-items: center; justify-content: space-between;
     gap: 20px; flex-wrap: wrap;
     box-shadow: 0 8px 30px rgba(0,78,137,0.25);
@@ -1139,7 +1157,7 @@
                     <a href="signup.html" class="btn-signup">Sign Up</a>
                 </li>
                 <!-- Logout shown inside hamburger menu on mobile when logged in -->
-                <li class="mobile-logout-link" id="mobileNavLogout" style="display:none;">
+                <li class="mobile-logout-link" id="mobileNavLogout">
                     <button class="btn-logout-mobile" onclick="logout()">Logout</button>
                 </li>
             </ul>
@@ -1533,7 +1551,7 @@ onAuthStateChanged(auth, async (user) => {
                 const mobileNavAuth = document.getElementById('mobileNavAuth');
                 if (mobileNavAuth) mobileNavAuth.style.display = 'none';
                 const mobileNavLogout = document.getElementById('mobileNavLogout');
-                if (mobileNavLogout) mobileNavLogout.style.display = 'block';
+                if (mobileNavLogout) mobileNavLogout.classList.add('logged-in');
 
                 // Show AI Partner banner for paid students
 try {
@@ -1542,6 +1560,7 @@ try {
     const snap = await getDoc(doc(dbIdx, 'users', user.uid));
     if (snap.exists() && snap.data().isPaidStudent) {
         document.getElementById('aiPartnerBanner')?.classList.add('visible');
+        document.getElementById('aiFab')?.classList.add('visible');
     }
 } catch(e) {}
             } else {
@@ -1549,7 +1568,7 @@ try {
                 userMenu.classList.remove('active');
                 if (dashboardNav) dashboardNav.style.display = 'none';
                 const mobileNavLogout = document.getElementById('mobileNavLogout');
-                if (mobileNavLogout) mobileNavLogout.style.display = 'none';
+                if (mobileNavLogout) mobileNavLogout.classList.remove('logged-in');
             }
         });
 
@@ -1700,3 +1719,6 @@ try {
     });
   });
 </script>
+
+<!-- AI Practice Partner FAB — visible to paid students only (shown via JS) -->
+<a href="ai-partner.html" class="ai-fab" id="aiFab">🤖 <span class="fab-text">AI Practice</span></a>

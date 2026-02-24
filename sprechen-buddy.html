@@ -106,6 +106,10 @@
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1A1A2E; color: white; padding: 12px 24px; border-radius: 12px; font-family: 'Outfit', sans-serif; font-weight: 600; z-index: 10000; animation: fadeUp 0.3s ease; pointer-events: none; }
         @keyframes fadeUp { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         button, a { touch-action: manipulation; }
+        .ai-fab { position: fixed; bottom: 28px; right: 28px; background: linear-gradient(135deg, #FFD23F, #FF6B35); color: #1A1A2E; padding: 14px 22px; border-radius: 50px; font-weight: 800; font-size: 15px; font-family: 'Outfit', sans-serif; display: none; align-items: center; gap: 10px; box-shadow: 0 8px 30px rgba(255,107,53,0.35); text-decoration: none; z-index: 9998; transition: transform 0.25s, box-shadow 0.25s; white-space: nowrap; }
+        .ai-fab.visible { display: flex; }
+        .ai-fab:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(255,107,53,0.5); color: #1A1A2E; }
+        @media (max-width: 768px) { .ai-fab { bottom: 20px; right: 16px; padding: 12px 16px; font-size: 13px; } .ai-fab .fab-text { display: none; } }
     </style>
 </head>
 <body>
@@ -345,6 +349,7 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     userData = userDoc.data();
+    if (userData?.isPaidStudent) document.getElementById('aiFab')?.classList.add('visible');
     startMatching();
 });
 
@@ -855,5 +860,6 @@ window.addEventListener('beforeunload', async () => {
     }
 });
 </script>
+<a href="ai-partner.html" class="ai-fab" id="aiFab">🤖 <span class="fab-text">AI Practice</span></a>
 </body>
 </html>

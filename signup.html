@@ -226,7 +226,16 @@
         .password-strength.strong {
             color: #10b981;
         }
+
+        .or-divider-text {
+            background: white;
+        }
+
+        .or-divider-line {
+            background: #ddd;
+        }
     </style>
+    <link rel="stylesheet" href="dark-mode.css">
 </head>
 <body>
     <div class="signup-container">
@@ -267,8 +276,8 @@
         </form>
 
         <div style="text-align: center; margin: 25px 0; color: #999; position: relative;">
-            <span style="background: white; padding: 0 15px; position: relative; z-index: 1;">OR</span>
-            <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #ddd; z-index: 0;"></div>
+            <span class="or-divider-text" style="padding: 0 15px; position: relative; z-index: 1;">OR</span>
+            <div class="or-divider-line" style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; z-index: 0;"></div>
         </div>
         
         <button class="btn-google" id="googleSignUp">

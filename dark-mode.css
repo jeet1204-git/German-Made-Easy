@@ -1,0 +1,559 @@
+/*
+ * Dark Mode — German Made Easy
+ * Activates automatically based on the user's OS/browser preference
+ * (prefers-color-scheme: dark)
+ */
+
+@media (prefers-color-scheme: dark) {
+
+  /* ================================================
+     CSS Variable Overrides
+     (for pages that use :root custom properties)
+     ================================================ */
+  :root {
+    --dark: #e0e0f4 !important;
+    --light: #1a1a2e !important;
+    --white: #1a1a2e !important;
+    --border: #383855;
+
+    /* ai-partner.html design tokens */
+    --ink: #e0e0f4;
+    --parchment: #0f0f1a;
+    --cream: #1e1e30;
+    --muted: #9090aa;
+    --shadow: rgba(0, 0, 0, 0.5);
+    --gold-pale: #2a2410;
+  }
+
+
+  /* ================================================
+     BODY & PAGE BACKGROUND
+     ================================================ */
+  body {
+    background: #0f0f1a !important;
+    color: #e0e0f4 !important;
+  }
+
+  /* ================================================
+     NAVIGATION
+     ================================================ */
+  nav {
+    /* override index.html's rgba(255,255,255,0.95) */
+    background: rgba(26, 26, 46, 0.97) !important;
+    border-bottom-color: #333355 !important;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4) !important;
+  }
+
+  .nav-links a {
+    color: #e0e0f4 !important;
+  }
+
+  .user-email {
+    color: #e0e0f4 !important;
+  }
+
+  /* ai-partner topbar */
+  .topbar {
+    background: rgba(15, 15, 26, 0.95) !important;
+    border-bottom-color: #333355 !important;
+  }
+
+
+  /* ================================================
+     MAIN CARDS & CONTAINERS (white backgrounds)
+     ================================================ */
+  .login-container,
+  .signup-container,
+  .payment-container,
+  .card,
+  .leaderboard-card,
+  .course-card,
+  .empty-state,
+  .tab-switcher,
+  .reconnecting-card,
+  .sprechen-card-active,
+  .section-box,
+  .price-card,
+  .chapter,
+  .chapter-content,
+  .setup-card,
+  .conversation-box,
+  .method-card {
+    background: #1e1e30 !important;
+    color: #e0e0f4 !important;
+    border-color: #333355 !important;
+  }
+
+  /* Document pages (.container = full-page white container) */
+  .container {
+    background: #1e1e30 !important;
+    color: #e0e0f4 !important;
+  }
+
+  /* ai-partner access-denied overlay */
+  #access-denied {
+    background: #0f0f1a !important;
+  }
+
+
+  /* ================================================
+     INNER SURFACES (#f8f8f8 / #fafafa / #f0f0f0)
+     ================================================ */
+  .stat-box,
+  .course-details,
+  .partner-info,
+  .evaluation-form,
+  .feedback-section,
+  .course-stat,
+  .task-questions,
+  .criteria-item,
+  .chapter-header,
+  .method-tag {
+    background: #252540 !important;
+    color: #e0e0f4 !important;
+  }
+
+  .chapter-header:hover,
+  .chapter.expanded .chapter-header {
+    background: #2e2e50 !important;
+  }
+
+
+  /* ================================================
+     TEXT COLOURS
+     ================================================ */
+  h1, h2, h3, h4, h5, h6 {
+    color: #e0e0f4 !important;
+  }
+
+  p {
+    color: #c0c0d8 !important;
+  }
+
+  label {
+    color: #e0e0f4 !important;
+  }
+
+  /* Secondary / muted text */
+  .course-description,
+  .sprechen-description,
+  .leaderboard-note,
+  .leaderboard-empty-text,
+  .footer-note,
+  .page-subtitle,
+  .timer-label,
+  .level-switcher-label,
+  .lb-motivational-badge,
+  .lb-streak,
+  .stat-label,
+  .scenario-gujarati,
+  .waiting-subtext,
+  .content-summary,
+  .chapter-meta,
+  .lesson-duration,
+  .price-note,
+  .method-desc,
+  .signup-link,
+  .back-home,
+  .back-link {
+    color: #9090aa !important;
+  }
+
+  /* Forced-dark elements that use color: #1A1A2E / #333 */
+  .lb-name,
+  .lb-stat,
+  .lb-rank,
+  .course-title,
+  .feature-text strong,
+  .waiting-text,
+  .match-text,
+  .results-title,
+  .criteria-label,
+  .welcome-header h1,
+  .section-heading,
+  .chapter-title,
+  .lesson-title,
+  .page-title,
+  .course-name,
+  .stat-number {
+    color: #e0e0f4 !important;
+  }
+
+  .lesson-title.locked {
+    color: #707090 !important;
+  }
+
+  /* Links that are explicitly coloured #004E89 on light */
+  .back-home a,
+  .back-link a {
+    color: #6aacff !important;
+  }
+
+  /* signup/login link */
+  .signup-link a,
+  .login-link a {
+    color: #FF6B35 !important;
+  }
+
+
+  /* ================================================
+     FORM INPUTS
+     ================================================ */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  textarea,
+  select,
+  .scenario-select {
+    background: #252540 !important;
+    color: #e0e0f4 !important;
+    border-color: #44446a !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #70708a !important;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus,
+  .scenario-select:focus {
+    border-color: #FF6B35 !important;
+    box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.15) !important;
+  }
+
+
+  /* ================================================
+     SPECIAL BUTTONS (white-background variants)
+     ================================================ */
+  .btn-google {
+    background: #252540 !important;
+    color: #e0e0f4 !important;
+    border-color: #44446a !important;
+  }
+
+  .btn-nav-link,
+  .btn-leaderboard {
+    background: #1e1e30 !important;
+    border-color: #FF6B35 !important;
+  }
+
+  .btn-secondary {
+    background: #252540 !important;
+    color: #FF6B35 !important;
+    border-color: #FF6B35 !important;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 107, 53, 0.15) !important;
+  }
+
+  /* rating buttons (sprechen-buddy) */
+  .rating-btn {
+    background: #252540 !important;
+    border-color: #44446a !important;
+    color: #e0e0f4 !important;
+  }
+
+  .rating-btn:hover {
+    border-color: #FF6B35 !important;
+    background: rgba(255, 107, 53, 0.15) !important;
+  }
+
+  /* level-tab (ai-partner) inactive */
+  .level-tab:not(.active),
+  .mode-tab:not(.active) {
+    background: #252540 !important;
+    color: #9090aa !important;
+    border-color: #44446a !important;
+  }
+
+  /* level-btn (leaderboard) inactive */
+  .level-btn:not(.active) {
+    background: #1e1e30 !important;
+    border-color: #44446a !important;
+    color: #9090aa !important;
+  }
+
+  /* tab-btn (leaderboard) inactive */
+  .tab-btn:not(.active) {
+    color: #9090aa !important;
+  }
+
+  /* method-card (payment) unselected */
+  .method-card {
+    border-color: #44446a !important;
+  }
+
+  .method-card.selected {
+    background: rgba(255, 107, 53, 0.1) !important;
+    border-color: #FF6B35 !important;
+  }
+
+
+  /* ================================================
+     DIVIDERS & BORDERS
+     ================================================ */
+  .divider::before,
+  .divider::after,
+  .or-divider-line {
+    background: #333355 !important;
+  }
+
+  .divider {
+    color: #70708a !important;
+  }
+
+  .or-divider-text {
+    background: #1e1e30 !important;
+    color: #70708a !important;
+  }
+
+  .info-row {
+    border-bottom-color: #333355 !important;
+  }
+
+  .lesson {
+    border-bottom-color: #2e2e50 !important;
+  }
+
+  .price-section {
+    border-bottom-color: #333355 !important;
+  }
+
+  /* ================================================
+     PROGRESS BAR TRACK
+     ================================================ */
+  .progress-bar {
+    background: #333355 !important;
+  }
+
+
+  /* ================================================
+     LOADING SPINNER
+     ================================================ */
+  .loading-spinner,
+  .spinner {
+    border-color: #333355 !important;
+    border-top-color: #FF6B35 !important;
+  }
+
+
+  /* ================================================
+     LEADERBOARD ROWS
+     ================================================ */
+  .leaderboard-row:nth-child(odd) {
+    background: #252540 !important;
+  }
+
+  .leaderboard-row.current-user {
+    background: rgba(255, 107, 53, 0.15) !important;
+    border-color: #FF6B35 !important;
+  }
+
+
+  /* ================================================
+     CHIPS & BADGES
+     ================================================ */
+  .stat-chip {
+    background: rgba(255, 107, 53, 0.15) !important;
+    border-color: rgba(255, 107, 53, 0.3) !important;
+  }
+
+
+  /* ================================================
+     ALERT BOXES
+     ================================================ */
+  .alert-error {
+    background: #2a1818 !important;
+    color: #ff9090 !important;
+    border-color: #5a2828 !important;
+  }
+
+  .alert-success {
+    background: #182a18 !important;
+    color: #90d090 !important;
+    border-color: #285a28 !important;
+  }
+
+
+  /* ================================================
+     SPRECHEN-BUDDY SPECIFIC
+     ================================================ */
+  .queue-info {
+    background: rgba(255, 107, 53, 0.1) !important;
+    border-color: #FF6B35 !important;
+  }
+
+  .task-card {
+    background: rgba(255, 107, 53, 0.08) !important;
+    border-color: #FF6B35 !important;
+  }
+
+  .points-earned {
+    background: rgba(255, 107, 53, 0.1) !important;
+    border-color: #FF6B35 !important;
+  }
+
+  .video-container {
+    background: #0a0a14 !important;
+  }
+
+
+  /* ================================================
+     AI PARTNER SPECIFIC
+     ================================================ */
+  .msg.ai .msg-bubble {
+    background: #252540 !important;
+    color: #e0e0f4 !important;
+  }
+
+  .msg.user .msg-bubble {
+    background: #1a3a2e !important;
+    color: #e0e0f4 !important;
+  }
+
+  .processing-status {
+    background: #1a1a35 !important;
+    border-color: #3355aa !important;
+    color: #88aaff !important;
+  }
+
+  .recording-status {
+    background: #2a1a1a !important;
+    border-color: #aa3355 !important;
+    color: #ff8090 !important;
+  }
+
+
+  /* ================================================
+     COURSE PAGE (A1/A2) SPECIFIC
+     ================================================ */
+
+  /* White course page body (course-a1 has background:#fff) */
+  /* Already covered by the general body rule above */
+
+  /* Slider cards */
+  .slider-card {
+    background: #1e1e30 !important;
+    border-color: #333355 !important;
+  }
+
+  .slider-card-body p {
+    color: #9090aa !important;
+  }
+
+  /* Slider arrow button */
+  .slider-arrow {
+    background: #1e1e30 !important;
+    border-color: #333355 !important;
+    color: #e0e0f4 !important;
+  }
+
+  /* Disabled slider card btn */
+  .slider-card-btn.disabled {
+    background: #333355 !important;
+    color: #70708a !important;
+  }
+
+  /* Gift modal */
+  .gift-modal-content,
+  .nav-confirmation-modal {
+    background: #1e1e30 !important;
+    color: #e0e0f4 !important;
+  }
+
+  .gift-modal-close:hover {
+    background: #333355 !important;
+  }
+
+  /* ================================================
+     PAYMENT PAGE SPECIFIC
+     ================================================ */
+  .payment-method {
+    background: #252540 !important;
+    color: #9090aa !important;
+  }
+
+  .gift-banner {
+    background: rgba(255, 107, 53, 0.12) !important;
+    border-color: #FF6B35 !important;
+  }
+
+  .gift-recipient-details {
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-color: #10b981 !important;
+  }
+
+  .gift-recipient-details h4 {
+    color: #6ee7b7 !important;
+  }
+
+  .gift-recipient-row {
+    color: #a0e0c0 !important;
+  }
+
+
+  /* ================================================
+     INDEX PAGE SPECIFIC
+     ================================================ */
+
+  /* Full-width section backgrounds (white sections on index.html) */
+  .features,
+  .testimonials {
+    background: #1a1a2e !important;
+  }
+
+  /* Contact & Modal */
+  .contact-container,
+  .modal-content {
+    background: #1e1e30 !important;
+    color: #e0e0f4 !important;
+  }
+
+  /* Mobile menu (index.html nav overlay) */
+  .mobile-menu-overlay {
+    background: #1a1a2e !important;
+  }
+
+  /* Testimonial / FAQ cards that use white bg */
+  .faq-item,
+  .testimonial-card,
+  .feature-card,
+  .instructor-card,
+  .step-card {
+    background: #1e1e30 !important;
+    border-color: #333355 !important;
+  }
+
+  .faq-answer {
+    background: #252540 !important;
+  }
+
+  /* FAQ question button */
+  .faq-question {
+    background: #1e1e30 !important;
+    color: #e0e0f4 !important;
+  }
+
+  /* Pricing cards */
+  .pricing-card {
+    background: #1e1e30 !important;
+    border-color: #333355 !important;
+  }
+
+  /* Footer */
+  footer {
+    background: #0a0a14 !important;
+  }
+
+  /* Section backgrounds that use #f5f5f5 / var(--light) */
+  .section-white,
+  .bg-white {
+    background: #1e1e30 !important;
+  }
+
+}

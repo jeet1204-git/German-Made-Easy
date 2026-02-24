@@ -191,6 +191,30 @@
             color: var(--dark);
         }
 
+        /* Mobile logout inside hamburger dropdown */
+        .mobile-logout-link {
+            display: none;
+            width: 100%;
+        }
+
+        .btn-logout-mobile {
+            width: 100%;
+            padding: 13px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 15px;
+            font-family: 'Outfit', sans-serif;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-logout-mobile:hover {
+            background: var(--secondary);
+        }
+
         /* Hidden on desktop — only shown inside hamburger menu on mobile */
         .mobile-auth-links {
             display: none;
@@ -985,12 +1009,33 @@
                 font-size: 15px;
             }
 
-            .mobile-menu-btn {
+            /* Hide logout from the top nav bar — it lives inside the hamburger dropdown */
+            .user-menu .btn-logout {
+                display: none;
+            }
+
+            /* Show the in-dropdown logout (display set by JS) */
+            .mobile-logout-link {
                 display: block;
+                width: 100%;
+                padding-top: 10px;
+                border-top: 1px solid #eee;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                min-width: 48px;
+                min-height: 48px;
+                background: #f0f0f0;
+                border-radius: 10px;
+                padding: 0;
             }
 
             .nav-container {
-                padding: 20px;
+                padding: 14px 16px;
             }
 
             .hero {
@@ -1092,6 +1137,10 @@
                 <li class="mobile-auth-links" id="mobileNavAuth">
                     <a href="login.html" class="btn-login">Login</a>
                     <a href="signup.html" class="btn-signup">Sign Up</a>
+                </li>
+                <!-- Logout shown inside hamburger menu on mobile when logged in -->
+                <li class="mobile-logout-link" id="mobileNavLogout" style="display:none;">
+                    <button class="btn-logout-mobile" onclick="logout()">Logout</button>
                 </li>
             </ul>
             <div class="nav-auth" id="navAuth">
@@ -1480,9 +1529,11 @@ onAuthStateChanged(auth, async (user) => {
                 const initial = (user.displayName || user.email || '?')[0].toUpperCase();
                 if (userAvatar) userAvatar.textContent = initial;
                 if (dashboardNav) dashboardNav.style.display = 'block';
-                // Hide mobile auth links in hamburger when logged in
+                // Hide login/signup in hamburger; show logout in hamburger
                 const mobileNavAuth = document.getElementById('mobileNavAuth');
                 if (mobileNavAuth) mobileNavAuth.style.display = 'none';
+                const mobileNavLogout = document.getElementById('mobileNavLogout');
+                if (mobileNavLogout) mobileNavLogout.style.display = 'block';
 
                 // Show AI Partner banner for paid students
 try {
@@ -1497,6 +1548,8 @@ try {
                 navAuth.style.display = ''; // Remove inline style — let CSS control (media query hides it on mobile)
                 userMenu.classList.remove('active');
                 if (dashboardNav) dashboardNav.style.display = 'none';
+                const mobileNavLogout = document.getElementById('mobileNavLogout');
+                if (mobileNavLogout) mobileNavLogout.style.display = 'none';
             }
         });
 

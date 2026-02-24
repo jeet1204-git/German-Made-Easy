@@ -35,6 +35,11 @@
     --muted: #8878aa;
     --shadow: rgba(0, 0, 0, 0.7);
     --gold-pale: #1e1620;
+
+    /* Soften gold/yellow tokens for dark mode */
+    --gold: #a07830;
+    --gold-light: #c49050;
+    --accent: #FF6B35;
   }
 
 
@@ -636,6 +641,48 @@
   .section-white,
   .bg-white {
     background: #110d22 !important;
+  }
+
+
+  /* ================================================
+     YELLOW / GOLD OVERRIDES (eye-friendly in dark mode)
+     ================================================ */
+
+  /* AI banner heading: replace blinding yellow with soft orange */
+  .ai-banner-text h4 {
+    color: #FF6B35 !important;
+  }
+
+  /* AI partner button: replace yellow background with orange */
+  .btn-ai-partner {
+    background: #FF6B35 !important;
+    color: #fff !important;
+    box-shadow: 0 4px 14px rgba(255, 107, 53, 0.35) !important;
+  }
+
+  .btn-ai-partner:hover {
+    background: rgba(255, 107, 53, 0.85) !important;
+    color: #fff !important;
+  }
+
+  /* AI banner icon tint: replace yellow tint with orange tint */
+  .ai-banner-icon {
+    background: rgba(255, 107, 53, 0.15) !important;
+  }
+
+  /* Floating AI FAB button: remove yellow from gradient */
+  .ai-fab {
+    background: linear-gradient(135deg, #FF6B35, #cc4a1f) !important;
+    color: #fff !important;
+  }
+
+  .ai-fab:hover {
+    color: #fff !important;
+  }
+
+  /* Leaderboard gold rank: soften yellow to muted amber */
+  .lb-rank.gold {
+    color: #c49050 !important;
   }
 
 }

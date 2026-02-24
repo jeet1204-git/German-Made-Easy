@@ -162,6 +162,11 @@
             color: var(--dark);
         }
 
+        /* Hidden on desktop — only shown inside hamburger menu on mobile */
+        .mobile-auth-links {
+            display: none;
+        }
+
         /* Hero Section */
         .hero {
             min-height: 100vh;
@@ -1458,7 +1463,7 @@ try {
     }
 } catch(e) {}
             } else {
-                navAuth.style.display = 'flex';
+                navAuth.style.display = ''; // Remove inline style — let CSS control (media query hides it on mobile)
                 userMenu.classList.remove('active');
                 if (dashboardNav) dashboardNav.style.display = 'none';
             }

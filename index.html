@@ -1118,6 +1118,9 @@
     gap: 20px; flex-wrap: wrap;
     box-shadow: 0 8px 30px rgba(0,78,137,0.25);
     border: 1.5px solid rgba(255,210,63,0.2);
+    position: sticky;
+    top: var(--nav-height, 70px);
+    z-index: 999;
 }
 .ai-partner-banner.visible { display: flex; }
 .ai-banner-left { display: flex; align-items: center; gap: 14px; }
@@ -1719,6 +1722,18 @@ try {
       if (formGroup) formGroup.classList.remove('error');
     });
   });
+</script>
+
+<script>
+(function() {
+    function setNavHeight() {
+        var nav = document.querySelector('nav');
+        if (nav) document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
+    }
+    setNavHeight();
+    document.addEventListener('DOMContentLoaded', setNavHeight);
+    window.addEventListener('resize', setNavHeight);
+})();
 </script>
 
 <!-- AI Practice Partner FAB — visible to paid students only (shown via JS) -->

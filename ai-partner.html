@@ -194,8 +194,8 @@
 <div id="access-denied" style="display:none; position:fixed; inset:0; background:var(--parchment); align-items:center; justify-content:center; z-index:999; flex-direction:column; gap:1.5rem; text-align:center; padding:2rem;">
   <div style="font-size:3rem;">🔒</div>
   <h2 style="font-family:'Playfair Display',serif; font-size:2rem; color:var(--red);">Access Restricted</h2>
-  <p style="color:var(--muted); max-width:420px; line-height:1.6;">AI Practice Partner is available exclusively for enrolled students.</p>
-  <a href="/dashboard.html" style="display:inline-block; padding:0.75rem 2rem; background:var(--ink); color:var(--gold-light); text-decoration:none; font-weight:600; border-radius:2px;">Go to Dashboard</a>
+  <p style="color:var(--muted); max-width:420px; line-height:1.6;">Please sign in to try AI Practice Partner — <strong>2 free conversations</strong> for everyone, no purchase needed to start!</p>
+  <a href="/login.html" style="display:inline-block; padding:0.75rem 2rem; background:var(--ink); color:var(--gold-light); text-decoration:none; font-weight:600; border-radius:2px;">Sign In to Try Free</a>
 </div>
 
 <div id="main-app" style="display:none;">
@@ -383,8 +383,8 @@
   <div class="trial-modal-card">
     <div class="trial-badge">✨ Free Trial Ended</div>
     <h2>Enjoying it so far? 🎓</h2>
-    <p>You've used your 3 free AI practice conversations. Buy the full course to unlock <strong>unlimited conversations</strong>, get your exam score, and practise every day!</p>
-    <a href="/payment.html" class="trial-modal-btn">🛒 Buy the Course</a>
+    <p>You've used your 2 free AI practice conversations. Buy the course to practise more — unlock <strong>unlimited conversations</strong>, full exam scores, and daily practice!</p>
+    <a href="/payment.html" class="trial-modal-btn">🛒 Buy the Course to Practise More</a>
   </div>
 </div>
 
@@ -405,7 +405,7 @@ const firebaseConfig = {
 };
 
 const PROXY_URL = 'https://ai-proxy.jeetupadhyay1204.workers.dev';
-const MAX_TRIAL_CONVERSATIONS = 3;
+const MAX_TRIAL_CONVERSATIONS = 2;
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

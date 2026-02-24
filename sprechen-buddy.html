@@ -97,6 +97,12 @@
         .reconnecting-card { background: white; border-radius: 20px; padding: 40px; text-align: center; max-width: 400px; }
         .reconnecting-card h3 { font-size: 24px; color: #1A1A2E; margin-bottom: 15px; }
         .reconnecting-card p { color: #666; margin-bottom: 20px; }
+        .camera-error-box { background: #FFF3ED; border: 2px solid #FF6B35; border-radius: 16px; padding: 20px; margin-bottom: 25px; text-align: left; }
+        .camera-error-box p { font-weight: 700; color: #1A1A2E; margin-bottom: 10px; }
+        .camera-error-box ol { margin-left: 20px; color: #444; line-height: 1.8; }
+        .camera-error-icon { font-size: 64px; margin-bottom: 20px; }
+        .camera-error-title { font-size: 24px; font-weight: 700; color: #1A1A2E; margin-bottom: 12px; }
+        .camera-error-msg { color: #666; margin-bottom: 20px; line-height: 1.6; }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1A1A2E; color: white; padding: 12px 24px; border-radius: 12px; font-family: 'Outfit', sans-serif; font-weight: 600; z-index: 10000; animation: fadeUp 0.3s ease; pointer-events: none; }
         @keyframes fadeUp { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         button, a { touch-action: manipulation; }
@@ -108,6 +114,26 @@
         <div class="header">
             <h1>🗣️ Sprechen Buddy</h1>
             <p>Practice speaking German with real students</p>
+        </div>
+
+        <div id="cameraErrorState" class="state">
+            <div style="text-align:center;padding:40px 20px;">
+                <div class="camera-error-icon" id="cameraErrorIcon">📷</div>
+                <div class="camera-error-title" id="cameraErrorTitle">Camera Access Needed</div>
+                <p class="camera-error-msg" id="cameraErrorMsg">Sprechen Buddy needs your camera and microphone to connect with your practice partner.</p>
+                <div class="camera-error-box">
+                    <p>How to fix:</p>
+                    <ol id="cameraErrorSteps">
+                        <li>Click the camera/lock icon in your browser's address bar</li>
+                        <li>Set Camera and Microphone to <strong>Allow</strong></li>
+                        <li>Click <strong>Retry</strong> below</li>
+                    </ol>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-primary" onclick="retryCameraAccess()">🔄 Retry</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+                </div>
+            </div>
         </div>
 
         <div id="waitingState" class="state active">
@@ -292,6 +318,21 @@ const tasks = {
 };
 
 function getUserDisplayName() { return userData.name || currentUser.displayName || currentUser.email.split('@')[0]; }
+
+function showCameraError(title, msg, steps) {
+    document.getElementById('cameraErrorIcon').textContent = '📷';
+    document.getElementById('cameraErrorTitle').textContent = title;
+    document.getElementById('cameraErrorMsg').textContent = msg;
+    if (steps) {
+        document.getElementById('cameraErrorSteps').innerHTML = steps.map(s => '<li>' + s + '</li>').join('');
+    }
+    showState('cameraErrorState');
+}
+
+window.retryCameraAccess = async function() {
+    showState('sessionState');
+    await setupWebRTC();
+};
 function getRandomTask(level) { const t = tasks[level] || tasks.A1; return t[Math.floor(Math.random() * t.length)]; }
 function showState(s) { document.querySelectorAll('.state').forEach(el => el.classList.remove('active')); document.getElementById(s).classList.add('active'); }
 function showToast(msg) {
@@ -564,13 +605,29 @@ async function setupWebRTC() {
     } catch(error) {
         console.error('Media access error:', error.name, error.message);
         if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-            alert('Camera/microphone access was denied. Please allow permissions in your browser settings and try again.');
+            showCameraError(
+                '🚫 Camera Access Denied',
+                'You blocked camera/microphone access. Please allow it in your browser settings, then click Retry.',
+                ['Click the camera or lock icon in your browser\'s address bar', 'Set Camera and Microphone to <strong>Allow</strong>', 'Click <strong>Retry</strong> below']
+            );
         } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-            alert('No camera or microphone found. Please connect a device and try again.');
+            showCameraError(
+                '🔌 No Camera Found',
+                'No camera or microphone was detected. Please connect a device and try again.',
+                ['Connect a webcam or headset with microphone', 'Click <strong>Retry</strong> below']
+            );
         } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-            alert('Camera/microphone is already in use by another app. Please close it and try again.');
+            showCameraError(
+                '⚠️ Camera In Use',
+                'Your camera or microphone is being used by another app. Close it and try again.',
+                ['Close other apps using your camera (e.g. Zoom, Teams, other browser tabs)', 'Click <strong>Retry</strong> below']
+            );
         } else {
-            alert('Could not start camera/microphone: ' + error.message + '. Please try again.');
+            showCameraError(
+                '📷 Camera Error',
+                'Could not start camera/microphone: ' + error.message,
+                ['Check that your camera and microphone are connected', 'Try refreshing the page', 'Click <strong>Retry</strong> below']
+            );
         }
         return;
     }

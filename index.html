@@ -131,10 +131,39 @@
             display: flex;
         }
 
-        .user-email {
-            font-size: 14px;
-            color: var(--dark);
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: 800;
+            flex-shrink: 0;
+            cursor: default;
+            user-select: none;
+        }
+
+        .btn-dashboard {
+            padding: 10px 20px;
+            border-radius: 25px;
             font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            background: var(--primary);
+            color: white;
+            border: none;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-dashboard:hover {
+            background: var(--secondary);
         }
 
         .btn-logout {
@@ -1070,7 +1099,8 @@
                 <a href="signup.html" class="btn-signup">Sign Up</a>
             </div>
             <div class="user-menu" id="userMenu">
-                <span class="user-email" id="userEmail"></span>
+                <div class="user-avatar" id="userAvatar">?</div>
+                <a href="dashboard.html" class="btn-dashboard">Dashboard</a>
                 <button class="btn-logout" onclick="logout()">Logout</button>
             </div>
             <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
@@ -1441,13 +1471,14 @@
 onAuthStateChanged(auth, async (user) => {
             const navAuth = document.getElementById('navAuth');
             const userMenu = document.getElementById('userMenu');
-            const userEmail = document.getElementById('userEmail');
+            const userAvatar = document.getElementById('userAvatar');
             const dashboardNav = document.getElementById('dashboardNav');
 
             if (user) {
                 navAuth.style.display = 'none';
                 userMenu.classList.add('active');
-                userEmail.textContent = user.email;
+                const initial = (user.displayName || user.email || '?')[0].toUpperCase();
+                if (userAvatar) userAvatar.textContent = initial;
                 if (dashboardNav) dashboardNav.style.display = 'block';
                 // Hide mobile auth links in hamburger when logged in
                 const mobileNavAuth = document.getElementById('mobileNavAuth');

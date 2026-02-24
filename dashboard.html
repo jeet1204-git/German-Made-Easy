@@ -136,7 +136,7 @@
     <div class="ai-banner-left">
         <div class="ai-banner-icon">🤖</div>
         <div class="ai-banner-text">
-            <h4>🇩🇪 AI Practice Partner — Your Exclusive Benefit</h4>
+            <h4>🇩🇪 AI Practice Partner — Try 2 Free Conversations!</h4>
             <p>Practise German anytime with AI. Real Goethe/TELC scenarios • Instant feedback • Score report.</p>
         </div>
     </div>
@@ -217,10 +217,9 @@ onAuthStateChanged(auth, async (user) => {
         const userSnap = await getDoc(userRef);
         let userData = userSnap.exists() ? userSnap.data() : {};
 
-        if (userData.isPaidStudent) {
-            document.getElementById('aiPartnerBanner')?.classList.add('visible');
-            document.getElementById('aiFab')?.classList.add('visible');
-        }
+        // Show AI partner banner & FAB for all logged-in users (paid get unlimited; free get 2 trial conversations)
+        document.getElementById('aiPartnerBanner')?.classList.add('visible');
+        document.getElementById('aiFab')?.classList.add('visible');
 
         // ── DERIVE LEVEL ──
         const enrolledCourses = userData.enrolledCourses || [];

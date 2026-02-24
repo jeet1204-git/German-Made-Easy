@@ -483,7 +483,8 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     userData = userDoc.data();
-    if (userData?.isPaidStudent) document.getElementById('aiFab')?.classList.add('visible');
+    // Show AI FAB for all logged-in users (free trial available to everyone)
+    document.getElementById('aiFab')?.classList.add('visible');
     startMatching();
 });
 

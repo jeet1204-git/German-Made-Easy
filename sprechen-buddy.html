@@ -106,6 +106,10 @@
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1A1A2E; color: white; padding: 12px 24px; border-radius: 12px; font-family: 'Outfit', sans-serif; font-weight: 600; z-index: 10000; animation: fadeUp 0.3s ease; pointer-events: none; }
         @keyframes fadeUp { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
         button, a { touch-action: manipulation; }
+
+        /* ── NEW: permission checking state styles ── */
+        .perm-checking { text-align: center; padding: 20px 0; color: #666; font-size: 15px; margin-bottom: 15px; }
+        .perm-checking .spinner { width: 32px; height: 32px; border-width: 4px; margin: 0 auto 10px; }
     </style>
 </head>
 <body>
@@ -129,7 +133,12 @@
                         <li>Click <strong>Retry</strong> below</li>
                     </ol>
                 </div>
-                <div class="controls">
+                <!-- Retry spinner shown while checking -->
+                <div class="perm-checking" id="retryChecking" style="display:none;">
+                    <div class="spinner"></div>
+                    Checking camera access...
+                </div>
+                <div class="controls" id="cameraErrorControls">
                     <button class="btn btn-primary" onclick="retryCameraAccess()">🔄 Retry</button>
                     <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
                 </div>
@@ -297,6 +306,9 @@ let sessionTimer = null, sessionDuration = 1200, timeRemaining = 1200, timerPaus
 let timeExtensionUsed = false, currentTask = null, partnerId = null;
 let evaluationScores = { fluency: 0, vocabulary: 0, grammar: 0, taskCompletion: 0 };
 
+// ── Track whether the camera error was hit during initial load or during a session ──
+let cameraErrorContext = 'init'; // 'init' | 'session'
+
 const rtcConfig = {
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
@@ -319,20 +331,141 @@ const tasks = {
 
 function getUserDisplayName() { return userData.name || currentUser.displayName || currentUser.email.split('@')[0]; }
 
-function showCameraError(title, msg, steps) {
+// ── IMPROVED: showCameraError now records context so retry knows where to go back ──
+function showCameraError(title, msg, steps, context = 'init') {
+    cameraErrorContext = context;
     document.getElementById('cameraErrorIcon').textContent = '📷';
     document.getElementById('cameraErrorTitle').textContent = title;
     document.getElementById('cameraErrorMsg').textContent = msg;
     if (steps) {
         document.getElementById('cameraErrorSteps').innerHTML = steps.map(s => '<li>' + s + '</li>').join('');
     }
+    document.getElementById('retryChecking').style.display = 'none';
+    document.getElementById('cameraErrorControls').style.display = 'flex';
     showState('cameraErrorState');
 }
 
+// ── FIXED retryCameraAccess: uses Permissions API to pre-check, then attempts getUserMedia ──
+// On Mac, even with browser permission toggled on, the OS may still block it.
+// We try getUserMedia directly (most reliable test) with a clear loading state.
 window.retryCameraAccess = async function() {
-    showState('sessionState');
-    await setupWebRTC();
+    // Show checking UI
+    document.getElementById('retryChecking').style.display = 'block';
+    document.getElementById('cameraErrorControls').style.display = 'none';
+
+    // ── Step 1: Use Permissions API if available to get a hint ──
+    let camPermState = 'prompt', micPermState = 'prompt';
+    try {
+        const [camPerm, micPerm] = await Promise.all([
+            navigator.permissions.query({ name: 'camera' }),
+            navigator.permissions.query({ name: 'microphone' })
+        ]);
+        camPermState = camPerm.state;
+        micPermState = micPerm.state;
+        console.log('Permissions API → camera:', camPermState, 'mic:', micPermState);
+    } catch(e) {
+        // Permissions API not supported (older browsers) — just proceed
+        console.warn('Permissions API not available, proceeding to getUserMedia');
+    }
+
+    // If Permissions API says 'denied', we know the browser (or OS) is blocking it.
+    // We can still try getUserMedia — if it was the browser toggle, it may now work.
+    // If both say 'granted' but we're still on the error screen, it's almost certainly
+    // a macOS System Preferences block (Brave not listed / not allowed in Privacy & Security).
+    if (camPermState === 'granted' && micPermState === 'granted') {
+        // Browser says granted — macOS System Preferences is the likely culprit
+        // Update the instructions to guide the user to System Preferences
+        document.getElementById('cameraErrorIcon').textContent = '🍎';
+        document.getElementById('cameraErrorTitle').textContent = 'macOS Camera Permission Needed';
+        document.getElementById('cameraErrorMsg').textContent = 'Your browser has permission, but macOS is blocking camera access for Brave. Fix it in System Settings:';
+        document.getElementById('cameraErrorSteps').innerHTML = [
+            'Open <strong>System Settings</strong> (Apple menu → System Settings)',
+            'Go to <strong>Privacy & Security → Camera</strong>',
+            'Enable the toggle next to <strong>Brave</strong> (or your browser)',
+            'Go to <strong>Privacy & Security → Microphone</strong> and do the same',
+            'Quit and reopen Brave, then click <strong>Retry</strong>'
+        ].map(s => '<li>' + s + '</li>').join('');
+        document.getElementById('retryChecking').style.display = 'none';
+        document.getElementById('cameraErrorControls').style.display = 'flex';
+        // Still attempt getUserMedia in case the user already fixed it
+    }
+
+    // ── Step 2: Actually try to get the stream ──
+    try {
+        // Stop any existing tracks first to release the device
+        if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+
+        // Try with ideal constraints, fall back to basic
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: { ideal: 640 }, height: { ideal: 480 } },
+                audio: { echoCancellation: true, noiseSuppression: true }
+            });
+        } catch(constraintErr) {
+            if (['NotAllowedError','PermissionDeniedError','NotFoundError','DevicesNotFoundError','NotReadableError','TrackStartError'].includes(constraintErr.name)) {
+                throw constraintErr;
+            }
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        }
+
+        // ── SUCCESS ──
+        console.log('✅ Camera access granted on retry');
+        document.getElementById('retryChecking').style.display = 'none';
+        document.getElementById('cameraErrorControls').style.display = 'flex';
+
+        // Route back to the correct state
+        if (cameraErrorContext === 'session' && matchId) {
+            // Was in a session — go back and set up WebRTC with existing stream
+            showState('sessionState');
+            const lv = document.getElementById('localVideo');
+            lv.srcObject = localStream;
+            lv.play().catch(() => {});
+            await setupWebRTC(true); // true = stream already acquired
+        } else {
+            // Was on initial load — restart matching flow
+            showState('waitingState');
+            await startMatching();
+        }
+
+    } catch(error) {
+        console.error('Retry camera error:', error.name, error.message);
+        document.getElementById('retryChecking').style.display = 'none';
+        document.getElementById('cameraErrorControls').style.display = 'flex';
+
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+            if (camPermState === 'granted') {
+                // Browser says granted but OS blocked it — confirm macOS message
+                document.getElementById('cameraErrorIcon').textContent = '🍎';
+                document.getElementById('cameraErrorTitle').textContent = 'macOS is Blocking Camera Access';
+                document.getElementById('cameraErrorMsg').textContent = 'Your browser permissions look fine, but macOS System Settings is blocking camera/microphone access for this browser.';
+                document.getElementById('cameraErrorSteps').innerHTML = [
+                    'Open <strong>System Settings</strong> → <strong>Privacy & Security</strong> → <strong>Camera</strong>',
+                    'Enable the toggle next to <strong>Brave</strong> (or your browser name)',
+                    'Do the same under <strong>Privacy & Security</strong> → <strong>Microphone</strong>',
+                    'Quit and reopen your browser, then come back and click <strong>Retry</strong>'
+                ].map(s => '<li>' + s + '</li>').join('');
+            } else {
+                document.getElementById('cameraErrorIcon').textContent = '🚫';
+                document.getElementById('cameraErrorTitle').textContent = 'Camera Access Denied';
+                document.getElementById('cameraErrorMsg').textContent = 'Camera/microphone access is still blocked. Please allow it and try again.';
+                document.getElementById('cameraErrorSteps').innerHTML = [
+                    'Click the camera or lock icon in your browser\'s address bar',
+                    'Set Camera and Microphone to <strong>Allow</strong>',
+                    'Click <strong>Retry</strong> below'
+                ].map(s => '<li>' + s + '</li>').join('');
+            }
+        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+            document.getElementById('cameraErrorIcon').textContent = '🔌';
+            document.getElementById('cameraErrorTitle').textContent = 'No Camera Found';
+            document.getElementById('cameraErrorMsg').textContent = 'No camera or microphone was detected. Please connect a device and try again.';
+        } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+            document.getElementById('cameraErrorIcon').textContent = '⚠️';
+            document.getElementById('cameraErrorTitle').textContent = 'Camera In Use';
+            document.getElementById('cameraErrorMsg').textContent = 'Your camera or microphone is being used by another app. Close it and try again.';
+        }
+    }
 };
+
 function getRandomTask(level) { const t = tasks[level] || tasks.A1; return t[Math.floor(Math.random() * t.length)]; }
 function showState(s) { document.querySelectorAll('.state').forEach(el => el.classList.remove('active')); document.getElementById(s).classList.add('active'); }
 function showToast(msg) {
@@ -366,13 +499,10 @@ function stopQueueHeartbeat() { if (queueHeartbeat) { clearInterval(queueHeartbe
 
 async function startMatching() {
     showState('waitingState');
-    matchHandled = false; // Always reset on fresh start
+    matchHandled = false;
 
-    // ── FIX STEP 1: Remove own stale queue entry ──
     try { await deleteDoc(doc(db, 'match_queue', currentUser.uid)); } catch(e) {}
 
-    // ── FIX STEP 2: Mark ALL previous matches as completed ──
-    // Without this, the onSnapshot fires immediately with old 'active' docs
     try {
         const staleSnap = await getDocs(query(collection(db, 'matches'), where('users', 'array-contains', currentUser.uid)));
         const cleanups = [];
@@ -381,20 +511,15 @@ async function startMatching() {
                 cleanups.push(updateDoc(doc(db, 'matches', d.id), { status: 'completed' }));
             }
         });
-        if (cleanups.length) { await Promise.all(cleanups); console.log(`🧹 Cleaned ${cleanups.length} stale match(es)`); }
+        if (cleanups.length) await Promise.all(cleanups);
     } catch(e) {}
 
-    // ── FIX STEP 3: Record all existing match IDs BEFORE attaching listener ──
-    // The onSnapshot listener fires immediately with every existing doc.
-    // By pre-recording what already exists, we can ignore those docs.
     const preExistingMatchIds = new Set();
     try {
         const snap = await getDocs(query(collection(db, 'matches'), where('users', 'array-contains', currentUser.uid)));
         snap.forEach(d => preExistingMatchIds.add(d.id));
-        console.log(`📋 Pre-existing matches to ignore: ${preExistingMatchIds.size}`);
     } catch(e) {}
 
-    // Enter queue
     const queueRef = doc(db, 'match_queue', currentUser.uid);
     await setDoc(queueRef, {
         userId: currentUser.uid,
@@ -410,16 +535,10 @@ async function startMatching() {
 
     let unsubQueue = null, unsubMatches = null;
 
-    // Listen to own queue entry
     unsubQueue = onSnapshot(queueRef, async (snapshot) => {
         const data = snapshot.data();
         if (data?.matchId && !matchHandled) {
-            // ── FIX: ignore if this matchId was known before we started ──
-            if (preExistingMatchIds.has(data.matchId)) {
-                console.log('🚫 Ignoring stale matchId in queue:', data.matchId);
-                return;
-            }
-            console.log('✅ Matched via queue entry:', data.matchId);
+            if (preExistingMatchIds.has(data.matchId)) return;
             matchHandled = true; matchId = data.matchId;
             stopQueueHeartbeat();
             if (unsubQueue) unsubQueue();
@@ -428,19 +547,13 @@ async function startMatching() {
         }
     });
 
-    // Listen for new match documents
     unsubMatches = onSnapshot(query(collection(db, 'matches'), where('users', 'array-contains', currentUser.uid)), async (snapshot) => {
         for (const change of snapshot.docChanges()) {
             if (change.type === 'added') {
                 const docId = change.doc.id;
-                // ── FIX: the critical guard — ignore pre-existing docs ──
-                if (preExistingMatchIds.has(docId)) {
-                    console.log('🚫 Ignoring pre-existing match doc:', docId);
-                    continue;
-                }
+                if (preExistingMatchIds.has(docId)) continue;
                 const data = change.doc.data();
                 if (data.status === 'active' && !matchHandled) {
-                    console.log('✅ New match doc detected:', docId);
                     matchHandled = true; matchId = docId;
                     stopQueueHeartbeat();
                     try { await updateDoc(queueRef, { matchId: docId, status: 'matched' }); } catch(e) {}
@@ -465,13 +578,8 @@ async function findMatch() {
             if (d.id !== currentUser.uid) {
                 const data = d.data();
                 const lastSeen = data.lastSeen?.toMillis() || data.timestamp?.toMillis() || 0;
-                // Only match with users active in last 30 seconds
                 if (Date.now() - lastSeen < 30000) candidates.push({ id: d.id, ...data });
-                else {
-                    // Clean up ghost entries
-                    deleteDoc(doc(db, 'match_queue', d.id)).catch(() => {});
-                    console.log('🗑️ Removed ghost queue entry:', d.id);
-                }
+                else deleteDoc(doc(db, 'match_queue', d.id)).catch(() => {});
             }
         });
 
@@ -492,7 +600,6 @@ async function findMatch() {
             setTimeout(() => findMatch(), 3000);
         }
     } catch(e) {
-        console.error('findMatch error:', e);
         if (!matchId && !matchHandled) setTimeout(() => findMatch(), 3000);
     }
 }
@@ -549,7 +656,7 @@ async function startSession(matchData) {
     });
 
     startTimer();
-    await setupWebRTC();
+    await setupWebRTC(false);
 }
 
 function displayTask(task) {
@@ -585,54 +692,71 @@ function updateRemoteStatus(state) {
     dot.style.background = color; text.textContent = label;
 }
 
-async function setupWebRTC() {
-    // Step 1: Acquire media — isolated so permission errors are reported accurately
-    // Try with ideal constraints first; fall back to basic constraints if device rejects them
-    try {
+// ── FIXED setupWebRTC: accepts `streamAlreadyAcquired` flag so retry doesn't re-request camera ──
+async function setupWebRTC(streamAlreadyAcquired = false) {
+    // Step 1: Acquire media (skip if already acquired by retryCameraAccess)
+    if (!streamAlreadyAcquired || !localStream) {
         try {
-            localStream = await navigator.mediaDevices.getUserMedia({ video: { width:{ideal:640}, height:{ideal:480} }, audio: { echoCancellation:true, noiseSuppression:true } });
-        } catch(constraintError) {
-            // If it's a permission/hardware error, re-throw so the outer catch shows the right message
-            if (constraintError.name === 'NotAllowedError' || constraintError.name === 'PermissionDeniedError' ||
-                constraintError.name === 'NotFoundError' || constraintError.name === 'DevicesNotFoundError' ||
-                constraintError.name === 'NotReadableError' || constraintError.name === 'TrackStartError') {
-                throw constraintError;
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: { echoCancellation: true, noiseSuppression: true }
+                });
+            } catch(constraintError) {
+                if (['NotAllowedError','PermissionDeniedError','NotFoundError','DevicesNotFoundError','NotReadableError','TrackStartError'].includes(constraintError.name)) {
+                    throw constraintError;
+                }
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             }
-            // Otherwise (e.g. OverconstrainedError), retry with basic constraints
-            console.warn('Retrying getUserMedia with basic constraints:', constraintError.name);
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        } catch(error) {
+            console.error('Media access error:', error.name, error.message);
+            cameraErrorContext = matchId ? 'session' : 'init';
+
+            // ── Check Permissions API to give smarter error message ──
+            let camState = 'unknown';
+            try { camState = (await navigator.permissions.query({ name: 'camera' })).state; } catch(e) {}
+
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                if (camState === 'granted') {
+                    // Browser says granted → macOS System Preferences is blocking
+                    showCameraError(
+                        '🍎 macOS is Blocking Camera Access',
+                        'Your browser permissions look fine, but macOS System Settings is blocking camera/microphone access for Brave.',
+                        [
+                            'Open <strong>System Settings</strong> → <strong>Privacy & Security</strong> → <strong>Camera</strong>',
+                            'Enable the toggle next to <strong>Brave</strong>',
+                            'Do the same under <strong>Microphone</strong>',
+                            'Quit and reopen Brave, then click <strong>Retry</strong>'
+                        ],
+                        cameraErrorContext
+                    );
+                } else {
+                    showCameraError(
+                        '🚫 Camera Access Denied',
+                        'You blocked camera/microphone access. Please allow it in your browser settings, then click Retry.',
+                        [
+                            'Click the camera or lock icon in your browser\'s address bar',
+                            'Set Camera and Microphone to <strong>Allow</strong>',
+                            'Click <strong>Retry</strong> below'
+                        ],
+                        cameraErrorContext
+                    );
+                }
+            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                showCameraError('🔌 No Camera Found', 'No camera or microphone was detected. Please connect a device and try again.',
+                    ['Connect a webcam or headset with microphone', 'Click <strong>Retry</strong> below'], cameraErrorContext);
+            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                showCameraError('⚠️ Camera In Use', 'Your camera or microphone is being used by another app. Close it and try again.',
+                    ['Close other apps using your camera (e.g. Zoom, Teams, other browser tabs)', 'Click <strong>Retry</strong> below'], cameraErrorContext);
+            } else {
+                showCameraError('📷 Camera Error', 'Could not start camera/microphone: ' + error.message,
+                    ['Check that your camera and microphone are connected', 'Try refreshing the page', 'Click <strong>Retry</strong> below'], cameraErrorContext);
+            }
+            return;
         }
-    } catch(error) {
-        console.error('Media access error:', error.name, error.message);
-        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-            showCameraError(
-                '🚫 Camera Access Denied',
-                'You blocked camera/microphone access. Please allow it in your browser settings, then click Retry.',
-                ['Click the camera or lock icon in your browser\'s address bar', 'Set Camera and Microphone to <strong>Allow</strong>', 'Click <strong>Retry</strong> below']
-            );
-        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-            showCameraError(
-                '🔌 No Camera Found',
-                'No camera or microphone was detected. Please connect a device and try again.',
-                ['Connect a webcam or headset with microphone', 'Click <strong>Retry</strong> below']
-            );
-        } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-            showCameraError(
-                '⚠️ Camera In Use',
-                'Your camera or microphone is being used by another app. Close it and try again.',
-                ['Close other apps using your camera (e.g. Zoom, Teams, other browser tabs)', 'Click <strong>Retry</strong> below']
-            );
-        } else {
-            showCameraError(
-                '📷 Camera Error',
-                'Could not start camera/microphone: ' + error.message,
-                ['Check that your camera and microphone are connected', 'Try refreshing the page', 'Click <strong>Retry</strong> below']
-            );
-        }
-        return;
     }
 
-    // Step 2: WebRTC peer connection setup — separate error handling from media access
+    // Step 2: WebRTC peer connection setup
     try {
         const lv = document.getElementById('localVideo'); lv.srcObject = localStream; lv.play().catch(() => {});
 
@@ -661,7 +785,6 @@ async function setupWebRTC() {
             if (s === 'failed' || s === 'closed') handlePartnerDisconnection();
         };
 
-        // ICE candidate buffering — prevents lost candidates before remote description is set
         let iceCandidateBuffer = [], isRemoteDescSet = false;
         async function flushBuffer() {
             isRemoteDescSet = true;
@@ -669,7 +792,6 @@ async function setupWebRTC() {
             iceCandidateBuffer = [];
         }
 
-        // 30s connection timeout
         const connTimeout = setTimeout(() => {
             if (peerConnection && !['connected','completed'].includes(peerConnection.iceConnectionState)) {
                 showToast('Connection timeout — retrying...');
@@ -685,7 +807,6 @@ async function setupWebRTC() {
         partnerId = users.find(id => id !== currentUser.uid);
         document.getElementById('remoteLabel').textContent = partnerDisplayName || 'Partner';
 
-        // Listen for partner's ICE candidates
         onSnapshot(query(collection(db,'matches',matchId,'candidates_'+partnerId)), (snap) => {
             snap.docChanges().forEach(async (change) => {
                 if (change.type === 'added') {
@@ -697,7 +818,6 @@ async function setupWebRTC() {
         });
 
         if (users[0] === currentUser.uid) {
-            // Offerer
             const offer = await peerConnection.createOffer({ offerToReceiveAudio:true, offerToReceiveVideo:true });
             await peerConnection.setLocalDescription(offer);
             await updateDoc(doc(db,'matches',matchId), { offer: {type:offer.type, sdp:offer.sdp} });
@@ -708,7 +828,6 @@ async function setupWebRTC() {
                 }
             });
         } else {
-            // Answerer
             const unsub = onSnapshot(doc(db,'matches',matchId), async (snap) => {
                 const d = snap.data();
                 if (d?.offer && !peerConnection.remoteDescription) {
@@ -740,9 +859,8 @@ async function handlePartnerDisconnection() {
         if (remoteStream) { remoteStream.getTracks().forEach(t=>t.stop()); remoteStream = null; document.getElementById('remoteVideo').srcObject = null; }
         if (matchId) { try { await updateDoc(doc(db,'matches',matchId), {status:'completed'}); } catch(e) {} }
 
-        matchId = null; matchHandled = false; partnerId = null; // ← CRITICAL resets
+        matchId = null; matchHandled = false; partnerId = null;
 
-        // ── Same pre-existing set guard as startMatching ──
         const seenIds = new Set();
         const q = query(collection(db,'matches'), where('users','array-contains',currentUser.uid));
         (await getDocs(q)).forEach(d => seenIds.add(d.id));

@@ -336,6 +336,66 @@ const tasks = {
 
 function getUserDisplayName() { return userData.name || currentUser.displayName || currentUser.email.split('@')[0]; }
 
+// ── OS / browser detection for smart error messages ──────────────
+function getOSName() {
+    const ua = navigator.userAgent;
+    if (/Windows/.test(ua)) return 'windows';
+    if (/Mac/.test(ua)) return 'mac';
+    if (/Android/.test(ua)) return 'android';
+    if (/iPhone|iPad/.test(ua)) return 'ios';
+    return 'other';
+}
+function getBrowserName() {
+    const ua = navigator.userAgent;
+    if (navigator.brave || /Brave/.test(ua)) return 'Brave';
+    if (/Edg\//.test(ua)) return 'Microsoft Edge';
+    if (/OPR|Opera/.test(ua)) return 'Opera';
+    if (/Chrome/.test(ua)) return 'Chrome';
+    if (/Firefox/.test(ua)) return 'Firefox';
+    if (/Safari/.test(ua)) return 'Safari';
+    return 'your browser';
+}
+
+// ── Smart camera error steps based on OS + browser ───────────────
+function getCameraSteps(errorType) {
+    const os = getOSName();
+    const browser = getBrowserName();
+    if (errorType === 'denied') {
+        if (os === 'windows') return [
+            `Click the <strong>camera/lock icon</strong> in ${browser}'s address bar → set Camera &amp; Microphone to <strong>Allow</strong>`,
+            'Still blocked? Open <strong>Windows Settings → Privacy &amp; Security → Camera</strong>',
+            `Make sure <strong>Camera access</strong> and <strong>${browser}</strong> are both toggled <strong>On</strong>`,
+            'Reload the page and click <strong>Retry</strong>'
+        ];
+        if (os === 'mac') return [
+            `Click the <strong>camera/lock icon</strong> in ${browser}'s address bar → set to <strong>Allow</strong>`,
+            'Still blocked? Open <strong>System Settings → Privacy &amp; Security → Camera</strong>',
+            `Enable the toggle next to <strong>${browser}</strong>`,
+            `Quit &amp; reopen ${browser}, then click <strong>Retry</strong>`
+        ];
+        return [
+            `Click the camera or lock icon in <strong>${browser}'s</strong> address bar`,
+            'Set Camera and Microphone to <strong>Allow</strong>',
+            'Click <strong>Retry</strong> below'
+        ];
+    }
+    if (errorType === 'inuse') return [
+        'Close <strong>Zoom, Teams, Google Meet</strong> or any other video app',
+        'Close other browser tabs that may be using the camera',
+        'Click <strong>Retry</strong> below'
+    ];
+    if (errorType === 'notfound') return [
+        'Connect a webcam and microphone (or use a laptop with built-in camera)',
+        'Check Device Manager / System Settings to ensure the camera is recognised',
+        'Click <strong>Retry</strong> below'
+    ];
+    return [
+        'Make sure camera and microphone are connected and working',
+        'Try a different browser (Chrome or Firefox recommended)',
+        'Reload the page, then click <strong>Retry</strong>'
+    ];
+}
+
 // ── IMPROVED: showCameraError now records context so retry knows where to go back ──
 function showCameraError(title, msg, steps, context = 'init') {
     cameraErrorContext = context;
@@ -378,18 +438,23 @@ window.retryCameraAccess = async function() {
     // If both say 'granted' but we're still on the error screen, it's almost certainly
     // a macOS System Preferences block (Brave not listed / not allowed in Privacy & Security).
     if (camPermState === 'granted' && micPermState === 'granted') {
-        // Browser says granted — macOS System Preferences is the likely culprit
-        // Update the instructions to guide the user to System Preferences
-        document.getElementById('cameraErrorIcon').textContent = '🍎';
-        document.getElementById('cameraErrorTitle').textContent = 'macOS Camera Permission Needed';
-        document.getElementById('cameraErrorMsg').textContent = 'Your browser has permission, but macOS is blocking camera access for Brave. Fix it in System Settings:';
-        document.getElementById('cameraErrorSteps').innerHTML = [
-            'Open <strong>System Settings</strong> (Apple menu → System Settings)',
-            'Go to <strong>Privacy & Security → Camera</strong>',
-            'Enable the toggle next to <strong>Brave</strong> (or your browser)',
-            'Go to <strong>Privacy & Security → Microphone</strong> and do the same',
-            'Quit and reopen Brave, then click <strong>Retry</strong>'
-        ].map(s => '<li>' + s + '</li>').join('');
+        // Browser says granted — OS-level block (Windows or macOS System Settings)
+        const browser = getBrowserName(), os = getOSName();
+        const osIcon = os === 'windows' ? '🪟' : '🍎';
+        const osName = os === 'windows' ? 'Windows' : 'macOS';
+        const osSteps = os === 'windows'
+            ? ['Open <strong>Windows Settings → Privacy &amp; Security → Camera</strong>',
+               `Make sure <strong>Camera access</strong> and <strong>${browser}</strong> are toggled <strong>On</strong>`,
+               `Check <strong>Microphone</strong> the same way`,
+               `Reload the page and click <strong>Retry</strong>`]
+            : [`Open <strong>System Settings → Privacy &amp; Security → Camera</strong>`,
+               `Enable the toggle next to <strong>${browser}</strong>`,
+               `Also enable <strong>${browser}</strong> under <strong>Microphone</strong>`,
+               `Quit &amp; reopen ${browser}, then click <strong>Retry</strong>`];
+        document.getElementById('cameraErrorIcon').textContent = osIcon;
+        document.getElementById('cameraErrorTitle').textContent = `${osName} is Blocking Camera Access`;
+        document.getElementById('cameraErrorMsg').textContent = `${browser} has permission, but ${osName} System Settings is blocking camera/microphone access.`;
+        document.getElementById('cameraErrorSteps').innerHTML = osSteps.map(s => '<li>' + s + '</li>').join('');
         document.getElementById('retryChecking').style.display = 'none';
         document.getElementById('cameraErrorControls').style.display = 'flex';
         // Still attempt getUserMedia in case the user already fixed it
@@ -437,36 +502,39 @@ window.retryCameraAccess = async function() {
         document.getElementById('retryChecking').style.display = 'none';
         document.getElementById('cameraErrorControls').style.display = 'flex';
 
+        const browser = getBrowserName(), os = getOSName();
         if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
             if (camPermState === 'granted') {
-                // Browser says granted but OS blocked it — confirm macOS message
-                document.getElementById('cameraErrorIcon').textContent = '🍎';
-                document.getElementById('cameraErrorTitle').textContent = 'macOS is Blocking Camera Access';
-                document.getElementById('cameraErrorMsg').textContent = 'Your browser permissions look fine, but macOS System Settings is blocking camera/microphone access for this browser.';
-                document.getElementById('cameraErrorSteps').innerHTML = [
-                    'Open <strong>System Settings</strong> → <strong>Privacy & Security</strong> → <strong>Camera</strong>',
-                    'Enable the toggle next to <strong>Brave</strong> (or your browser name)',
-                    'Do the same under <strong>Privacy & Security</strong> → <strong>Microphone</strong>',
-                    'Quit and reopen your browser, then come back and click <strong>Retry</strong>'
-                ].map(s => '<li>' + s + '</li>').join('');
+                const osIcon = os === 'windows' ? '🪟' : '🍎';
+                const osName = os === 'windows' ? 'Windows' : 'macOS';
+                const osSteps = os === 'windows'
+                    ? ['Open <strong>Windows Settings → Privacy &amp; Security → Camera</strong>',
+                       `Toggle <strong>Camera access</strong> and <strong>${browser}</strong> to <strong>On</strong>`,
+                       `Same for <strong>Microphone</strong>`,
+                       `Reload and click <strong>Retry</strong>`]
+                    : [`Open <strong>System Settings → Privacy &amp; Security → Camera</strong>`,
+                       `Enable <strong>${browser}</strong>, do same for Microphone`,
+                       `Quit &amp; reopen ${browser}, then click <strong>Retry</strong>`];
+                document.getElementById('cameraErrorIcon').textContent = osIcon;
+                document.getElementById('cameraErrorTitle').textContent = `${osName} is Blocking Camera`;
+                document.getElementById('cameraErrorMsg').textContent = `${browser} has permission but ${osName} System Settings is blocking camera/microphone access.`;
+                document.getElementById('cameraErrorSteps').innerHTML = osSteps.map(s => '<li>' + s + '</li>').join('');
             } else {
                 document.getElementById('cameraErrorIcon').textContent = '🚫';
                 document.getElementById('cameraErrorTitle').textContent = 'Camera Access Denied';
-                document.getElementById('cameraErrorMsg').textContent = 'Camera/microphone access is still blocked. Please allow it and try again.';
-                document.getElementById('cameraErrorSteps').innerHTML = [
-                    'Click the camera or lock icon in your browser\'s address bar',
-                    'Set Camera and Microphone to <strong>Allow</strong>',
-                    'Click <strong>Retry</strong> below'
-                ].map(s => '<li>' + s + '</li>').join('');
+                document.getElementById('cameraErrorMsg').textContent = `${browser} needs permission to use your camera and microphone.`;
+                document.getElementById('cameraErrorSteps').innerHTML = getCameraSteps('denied').map(s => '<li>' + s + '</li>').join('');
             }
         } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
             document.getElementById('cameraErrorIcon').textContent = '🔌';
             document.getElementById('cameraErrorTitle').textContent = 'No Camera Found';
             document.getElementById('cameraErrorMsg').textContent = 'No camera or microphone was detected. Please connect a device and try again.';
+            document.getElementById('cameraErrorSteps').innerHTML = getCameraSteps('notfound').map(s => '<li>' + s + '</li>').join('');
         } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
             document.getElementById('cameraErrorIcon').textContent = '⚠️';
             document.getElementById('cameraErrorTitle').textContent = 'Camera In Use';
             document.getElementById('cameraErrorMsg').textContent = 'Your camera or microphone is being used by another app. Close it and try again.';
+            document.getElementById('cameraErrorSteps').innerHTML = getCameraSteps('inuse').map(s => '<li>' + s + '</li>').join('');
         }
     }
 };
@@ -507,6 +575,62 @@ function stopQueueHeartbeat() { if (queueHeartbeat) { clearInterval(queueHeartbe
 async function startMatching() {
     showState('waitingState');
     matchHandled = false;
+
+    // ── Request camera permission UPFRONT so user sees the prompt immediately ──
+    // This is the key fix for desktop: on mobile the OS prompt is hard to miss,
+    // but on desktop it shows as a small browser dropdown that can be dismissed.
+    // By requesting early (in the waiting state), the user grants/denies before matching.
+    if (!localStream) {
+        try {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: { echoCancellation: true, noiseSuppression: true }
+                });
+            } catch(constraintErr) {
+                if (['NotAllowedError','PermissionDeniedError','NotFoundError','DevicesNotFoundError','NotReadableError','TrackStartError'].includes(constraintErr.name)) {
+                    throw constraintErr;
+                }
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            }
+        } catch(error) {
+            console.error('Early camera request failed:', error.name, error.message);
+            cameraErrorContext = 'init';
+            let camState = 'unknown';
+            try { camState = (await navigator.permissions.query({ name: 'camera' })).state; } catch(e) {}
+            const browser = getBrowserName(), os = getOSName();
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                if (camState === 'granted') {
+                    const osIcon = os === 'windows' ? '🪟' : '🍎';
+                    const osName = os === 'windows' ? 'Windows' : 'macOS';
+                    const osSteps = os === 'windows'
+                        ? ['Open <strong>Windows Settings → Privacy &amp; Security → Camera</strong>',
+                           `Toggle <strong>Camera access</strong> and <strong>${browser}</strong> to <strong>On</strong>`,
+                           `Same for <strong>Microphone</strong>`, `Reload and click <strong>Retry</strong>`]
+                        : [`Open <strong>System Settings → Privacy &amp; Security → Camera</strong>`,
+                           `Enable <strong>${browser}</strong>`, `Same for Microphone`,
+                           `Quit &amp; reopen ${browser}, click <strong>Retry</strong>`];
+                    showCameraError(`${osIcon} ${osName} is Blocking Camera`,
+                        `${browser} has permission but ${osName} System Settings is blocking camera/microphone access.`,
+                        osSteps, 'init');
+                } else {
+                    showCameraError('🚫 Camera Access Denied',
+                        `${browser} needs permission to use your camera and microphone.`,
+                        getCameraSteps('denied'), 'init');
+                }
+            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                showCameraError('🔌 No Camera Found', 'No camera or microphone was detected.',
+                    getCameraSteps('notfound'), 'init');
+            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                showCameraError('⚠️ Camera In Use', 'Your camera is being used by another app. Close it and retry.',
+                    getCameraSteps('inuse'), 'init');
+            } else {
+                showCameraError('📷 Camera Error', 'Could not access camera: ' + error.message,
+                    getCameraSteps('other'), 'init');
+            }
+            return; // Stop matching — user needs to fix camera first
+        }
+    }
 
     try { await deleteDoc(doc(db, 'match_queue', currentUser.uid)); } catch(e) {}
 
@@ -699,10 +823,10 @@ function updateRemoteStatus(state) {
     dot.style.background = color; text.textContent = label;
 }
 
-// ── FIXED setupWebRTC: accepts `streamAlreadyAcquired` flag so retry doesn't re-request camera ──
+// ── setupWebRTC: skips camera if already acquired by startMatching() or retryCameraAccess() ──
 async function setupWebRTC(streamAlreadyAcquired = false) {
-    // Step 1: Acquire media (skip if already acquired by retryCameraAccess)
-    if (!streamAlreadyAcquired || !localStream) {
+    // Step 1: Acquire media (skip if already acquired — reuse stream from startMatching)
+    if (!localStream) {
         try {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({
@@ -724,40 +848,39 @@ async function setupWebRTC(streamAlreadyAcquired = false) {
             try { camState = (await navigator.permissions.query({ name: 'camera' })).state; } catch(e) {}
 
             if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                const browser = getBrowserName(), os = getOSName();
                 if (camState === 'granted') {
-                    // Browser says granted → macOS System Preferences is blocking
+                    // Browser says granted → OS-level block (Windows or macOS system settings)
+                    const osSteps = os === 'windows'
+                        ? ['Open <strong>Windows Settings → Privacy &amp; Security → Camera</strong>',
+                           `Make sure <strong>Camera access</strong> and <strong>${browser}</strong> are toggled <strong>On</strong>`,
+                           `Also check <strong>Microphone</strong> settings the same way`,
+                           `Reload the page and click <strong>Retry</strong>`]
+                        : [`Open <strong>System Settings → Privacy &amp; Security → Camera</strong>`,
+                           `Enable the toggle next to <strong>${browser}</strong>`,
+                           `Also enable <strong>${browser}</strong> under <strong>Microphone</strong>`,
+                           `Quit &amp; reopen ${browser}, then click <strong>Retry</strong>`];
+                    const osIcon = os === 'windows' ? '🪟' : '🍎';
+                    const osName = os === 'windows' ? 'Windows' : 'macOS';
                     showCameraError(
-                        '🍎 macOS is Blocking Camera Access',
-                        'Your browser permissions look fine, but macOS System Settings is blocking camera/microphone access for Brave.',
-                        [
-                            'Open <strong>System Settings</strong> → <strong>Privacy & Security</strong> → <strong>Camera</strong>',
-                            'Enable the toggle next to <strong>Brave</strong>',
-                            'Do the same under <strong>Microphone</strong>',
-                            'Quit and reopen Brave, then click <strong>Retry</strong>'
-                        ],
-                        cameraErrorContext
+                        `${osIcon} ${osName} is Blocking Camera Access`,
+                        `${browser} has permission, but ${osName} System Settings is blocking camera/microphone access.`,
+                        osSteps, cameraErrorContext
                     );
                 } else {
-                    showCameraError(
-                        '🚫 Camera Access Denied',
-                        'You blocked camera/microphone access. Please allow it in your browser settings, then click Retry.',
-                        [
-                            'Click the camera or lock icon in your browser\'s address bar',
-                            'Set Camera and Microphone to <strong>Allow</strong>',
-                            'Click <strong>Retry</strong> below'
-                        ],
-                        cameraErrorContext
-                    );
+                    showCameraError('🚫 Camera Access Denied',
+                        `${browser} needs permission to use your camera and microphone.`,
+                        getCameraSteps('denied'), cameraErrorContext);
                 }
             } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
                 showCameraError('🔌 No Camera Found', 'No camera or microphone was detected. Please connect a device and try again.',
-                    ['Connect a webcam or headset with microphone', 'Click <strong>Retry</strong> below'], cameraErrorContext);
+                    getCameraSteps('notfound'), cameraErrorContext);
             } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
                 showCameraError('⚠️ Camera In Use', 'Your camera or microphone is being used by another app. Close it and try again.',
-                    ['Close other apps using your camera (e.g. Zoom, Teams, other browser tabs)', 'Click <strong>Retry</strong> below'], cameraErrorContext);
+                    getCameraSteps('inuse'), cameraErrorContext);
             } else {
                 showCameraError('📷 Camera Error', 'Could not start camera/microphone: ' + error.message,
-                    ['Check that your camera and microphone are connected', 'Try refreshing the page', 'Click <strong>Retry</strong> below'], cameraErrorContext);
+                    getCameraSteps('other'), cameraErrorContext);
             }
             return;
         }

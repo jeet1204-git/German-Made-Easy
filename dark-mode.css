@@ -830,16 +830,15 @@
     background: rgba(255, 107, 53, 0.16) !important;
   }
 
-  /* Floating AI FAB button */
+  /* Floating Aura Orb — keep its own dark design, just enhance glow */
   .ai-fab {
-    background: linear-gradient(135deg, #FF6B35, #004E89) !important;
+    background: radial-gradient(circle at 35% 35%, #0e2648, #04101f) !important;
+    border-color: rgba(0, 240, 255, 0.55) !important;
     color: #fff !important;
-    box-shadow: 0 8px 30px rgba(255, 107, 53, 0.42) !important;
   }
 
   .ai-fab:hover {
     color: #fff !important;
-    box-shadow: 0 12px 44px rgba(255, 107, 53, 0.58) !important;
   }
 
 }

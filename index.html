@@ -1091,22 +1091,77 @@
             touch-action: manipulation;
         }
 
-        /* AI Practice Partner FAB */
-        .ai-fab {
-            position: fixed; bottom: 28px; right: 28px;
-            background: linear-gradient(135deg, #FFD23F, #FF6B35);
-            color: #1A1A2E; padding: 14px 22px; border-radius: 50px;
-            font-weight: 800; font-size: 15px; font-family: 'Outfit', sans-serif;
-            display: none; align-items: center; gap: 10px;
-            box-shadow: 0 8px 30px rgba(255,107,53,0.35);
-            text-decoration: none; z-index: 9998;
-            transition: transform 0.25s, box-shadow 0.25s; white-space: nowrap;
+        /* ── Aura Floating Orb ── */
+        @keyframes aura-orb-float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33%  { transform: translateY(-11px) rotate(1.5deg); }
+            66%  { transform: translateY(-5px) rotate(-1deg); }
         }
-        .ai-fab.visible { display: flex; }
-        .ai-fab:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(255,107,53,0.5); color: #1A1A2E; }
+        @keyframes aura-orb-glow {
+            0%, 100% { box-shadow: 0 0 18px rgba(0,240,255,0.28), 0 0 38px rgba(0,240,255,0.10), 0 8px 22px rgba(0,0,0,0.55); }
+            50%  { box-shadow: 0 0 32px rgba(0,240,255,0.52), 0 0 65px rgba(0,240,255,0.20), 0 10px 28px rgba(0,0,0,0.65); }
+        }
+        .ai-fab {
+            position: fixed; bottom: 32px; right: 32px;
+            width: 64px; height: 64px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #0e2648, #04101f);
+            border: 1.5px solid rgba(0,240,255,0.42);
+            color: #fff; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-decoration: none; z-index: 9998; cursor: pointer;
+            animation: aura-orb-float 3.6s ease-in-out infinite, aura-orb-glow 2.6s ease-in-out infinite;
+            transition: width 0.35s cubic-bezier(0.175,0.885,0.32,1.275),
+                        height 0.35s cubic-bezier(0.175,0.885,0.32,1.275),
+                        border-radius 0.35s ease; overflow: hidden; white-space: nowrap;
+        }
+        .ai-fab::before {
+            content: ''; position: absolute; inset: 0; border-radius: inherit;
+            background: radial-gradient(circle at 35% 30%, rgba(0,240,255,0.18), transparent 60%);
+            pointer-events: none;
+        }
+        .ai-fab .fab-icon { font-size: 1.35rem; line-height: 1; position: relative; z-index: 1; }
+        .ai-fab .fab-text {
+            font-size: 0.48rem; letter-spacing: 0.14em; text-transform: uppercase;
+            color: rgba(0,240,255,0.85); font-family: 'Outfit', sans-serif;
+            font-weight: 700; position: relative; z-index: 1; margin-top: 3px;
+        }
+        .ai-fab:hover {
+            width: 148px; height: 48px; border-radius: 24px;
+            flex-direction: row; gap: 8px;
+            animation: aura-orb-glow 2.6s ease-in-out infinite;
+        }
+        .ai-fab:hover .fab-icon { font-size: 1.1rem; }
+        .ai-fab:hover .fab-text { font-size: 0.78rem; letter-spacing: 0.05em; color: #fff; margin-top: 0; }
         @media (max-width: 768px) {
-            .ai-fab { bottom: 20px; right: 16px; padding: 12px 16px; font-size: 13px; }
-            .ai-fab .fab-text { display: none; }
+            .ai-fab { width: 56px; height: 56px; bottom: 20px; right: 20px; }
+            .ai-fab:hover { width: 56px; height: 56px; border-radius: 50%; flex-direction: column; gap: 0; }
+            .ai-fab:hover .fab-text { font-size: 0.48rem; color: rgba(0,240,255,0.85); margin-top: 3px; }
+        }
+        /* Aura login prompt for non-logged-in users */
+        #aura-login-prompt {
+            display: none; position: fixed; inset: 0; z-index: 10000;
+            background: rgba(0,0,8,0.82); align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        #aura-login-prompt.open { display: flex; }
+        .aura-prompt-card {
+            background: #0c1221; border: 1px solid rgba(0,240,255,0.28);
+            border-radius: 18px; padding: 2.2rem 2rem; text-align: center;
+            max-width: 370px; width: 90%;
+            box-shadow: 0 0 60px rgba(0,240,255,0.15), 0 0 100px rgba(0,0,0,0.6);
+        }
+        .aura-prompt-card .orb-icon { font-size: 2.5rem; margin-bottom: 0.6rem; filter: drop-shadow(0 0 12px rgba(0,240,255,0.5)); }
+        .aura-prompt-card h3 { color: #edf2ff; font-family: 'Outfit',sans-serif; font-size: 1.3rem; font-weight: 800; margin-bottom: 0.4rem; }
+        .aura-prompt-card p { color: #6b8cad; font-size: 0.88rem; line-height: 1.65; margin-bottom: 1.5rem; }
+        .aura-prompt-card .prompt-cta {
+            display: block; background: linear-gradient(135deg,#FF6B35,#004E89);
+            color: #fff; padding: 0.8rem 2rem; border-radius: 8px; text-decoration: none;
+            font-weight: 700; font-size: 0.95rem; margin-bottom: 0.7rem;
+            box-shadow: 0 4px 18px rgba(255,107,53,0.35);
+        }
+        .aura-prompt-card .prompt-dismiss {
+            background: transparent; border: none; color: #6b8cad;
+            font-size: 0.82rem; cursor: pointer; font-family: inherit;
         }
 
         /* AI Partner Banner */
@@ -1546,6 +1601,7 @@ onAuthStateChanged(auth, async (user) => {
             const dashboardNav = document.getElementById('dashboardNav');
 
             if (user) {
+                window.__setAuraLoggedIn?.(true);
                 navAuth.style.display = 'none';
                 userMenu.classList.add('active');
                 const initial = (user.displayName || user.email || '?')[0].toUpperCase();
@@ -1557,15 +1613,12 @@ onAuthStateChanged(auth, async (user) => {
                 const mobileNavLogout = document.getElementById('mobileNavLogout');
                 if (mobileNavLogout) mobileNavLogout.classList.add('logged-in');
 
-                // Show AI Partner banner for paid students
+                // Show AI Partner banner for all logged-in users
 try {
     const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
     const dbIdx = getFirestore(app);
     const snap = await getDoc(doc(dbIdx, 'users', user.uid));
-    if (snap.exists() && snap.data().isPaidStudent) {
-        document.getElementById('aiPartnerBanner')?.classList.add('visible');
-        document.getElementById('aiFab')?.classList.add('visible');
-    }
+    document.getElementById('aiPartnerBanner')?.classList.add('visible');
 } catch(e) {}
             } else {
                 navAuth.style.display = ''; // Remove inline style — let CSS control (media query hides it on mobile)
@@ -1736,5 +1789,44 @@ try {
 })();
 </script>
 
-<!-- AI Practice Partner FAB — visible to paid students only (shown via JS) -->
-<a href="ai-partner.html" class="ai-fab" id="aiFab">🤖 <span class="fab-text">AI Practice</span></a>
+<!-- Aura Floating Orb — always visible, click opens login prompt if not logged in -->
+<div class="ai-fab" id="aiFab" role="button" tabindex="0" aria-label="Try Aura AI German companion">
+  <span class="fab-icon">✦</span>
+  <span class="fab-text">AURA</span>
+</div>
+
+<!-- Aura Login Prompt (shown to non-logged-in users) -->
+<div id="aura-login-prompt">
+  <div class="aura-prompt-card">
+    <div class="orb-icon">✦</div>
+    <h3>Try Aura Free</h3>
+    <p>Your AI German companion. Log in to get <strong style="color:#edf2ff;">2 free conversations</strong> every day — no purchase needed.</p>
+    <a href="login.html" class="prompt-cta">Log In to Try Aura</a>
+    <button class="prompt-dismiss" onclick="document.getElementById('aura-login-prompt').classList.remove('open')">Not now</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  let _auraLoggedIn = false;
+  // Track login state from the module script above
+  // We poll the auth state via a global flag set by the module
+  window.__setAuraLoggedIn = function(v) { _auraLoggedIn = v; };
+
+  const fab = document.getElementById('aiFab');
+  fab.addEventListener('click', function() {
+    if (_auraLoggedIn) {
+      window.location.href = 'ai-partner.html';
+    } else {
+      document.getElementById('aura-login-prompt').classList.add('open');
+    }
+  });
+  fab.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fab.click(); }
+  });
+  // Close prompt on backdrop click
+  document.getElementById('aura-login-prompt').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+})();
+</script>

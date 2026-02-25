@@ -265,6 +265,41 @@
     opacity: 0; animation: aura-fadein 0.5s ease 2.5s forwards;
   }
   .aura-skip-btn:hover { border-color: rgba(0,240,255,0.5); color: rgba(0,240,255,0.9); }
+
+  /* ── Correction Card (prominent grammar feedback) ── */
+  .feedback-correction-card {
+    background: rgba(201,150,58,0.08); border: 1.5px solid var(--gold);
+    border-radius: 8px; padding: 0.9rem 1.1rem; margin-top: 0.5rem;
+  }
+  .feedback-correction-card .corr-label {
+    font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 0.45rem;
+  }
+  .feedback-correction-wrong {
+    font-family: 'DM Mono', monospace; font-size: 0.88rem;
+    color: var(--red); text-decoration: line-through; display: block; margin-bottom: 0.2rem;
+  }
+  .feedback-correction-right {
+    font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 700;
+    color: var(--forest); display: block; margin-bottom: 0.45rem;
+  }
+  .feedback-correction-note { font-size: 0.82rem; color: var(--ink); line-height: 1.55; }
+  .feedback-praise-card {
+    background: rgba(45,90,61,0.08); border-left: 3px solid var(--forest);
+    border-radius: 0 6px 6px 0; padding: 0.5rem 0.75rem; margin-top: 0.4rem;
+    font-size: 0.82rem; color: var(--forest);
+  }
+  /* Ack button wrap */
+  #correction-ack-wrap { display:none; text-align:center; padding:0.6rem 0 0.2rem; }
+  .correction-ack-btn {
+    background: var(--ink); color: var(--gold-light); border: none;
+    padding: 0.6rem 1.6rem; border-radius: 4px; font-weight: 700;
+    font-size: 0.9rem; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s; letter-spacing: 0.02em;
+  }
+  .correction-ack-btn:hover { background: var(--forest); }
+  /* Disabled input state while ack pending */
+  .input-area.awaiting-ack { opacity: 0.38; pointer-events: none; }
 </style>
 <link rel="stylesheet" href="dark-mode.css">
 </head>
@@ -302,7 +337,13 @@
 <div id="main-app" style="display:none;">
   <div class="topbar">
     <div class="topbar-brand">
-      <div class="topbar-logo">🇩🇪</div>
+      <div class="topbar-logo" style="background:none;padding:0;overflow:visible;width:38px;height:38px;">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 5px rgba(0,240,255,0.45));">
+          <polygon points="19,2 34,10.5 34,27.5 19,36 4,27.5 4,10.5" fill="#050e20" stroke="rgba(0,240,255,0.7)" stroke-width="1.4"/>
+          <polygon points="19,7 29,12.8 29,24.2 19,30 9,24.2 9,12.8" fill="rgba(0,240,255,0.07)"/>
+          <text x="19" y="25" text-anchor="middle" font-family="DM Mono,monospace" font-size="14" font-weight="900" fill="rgba(0,240,255,0.92)" letter-spacing="-1">A</text>
+        </svg>
+      </div>
       <div>
         <div class="topbar-title">✦ Aura</div>
         <div class="topbar-sub">AI German Companion</div>
@@ -409,7 +450,11 @@
         <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Tap to speak">🎙️</button>
         <button class="send-btn" onclick="sendMessage()">➤</button>
       </div>
+      <div id="correction-ack-wrap">
+        <button class="correction-ack-btn" id="correction-ack-btn" onclick="hideCorrectionAck()">✓ Got it — Continue →</button>
+      </div>
       <div class="session-controls">
+        <button class="ctrl-btn" onclick="goBackToSetup()">← Back to Aura</button>
         <button class="ctrl-btn" onclick="changeScenario()">🔄 Change Task</button>
         <button class="ctrl-btn" onclick="addTime()" id="add-time-btn">⏱️ +10 min</button>
         <button class="ctrl-btn" onclick="toggleFeedback()" id="feedback-btn">💡 Toggle Feedback</button>
@@ -595,11 +640,13 @@ function showApp() {
 
 // ── Setup controls ────────────────────────────────────────────────
 window.setLevel = (l) => {
+  playUISound('click');
   selectedLevel = l;
   document.querySelectorAll('.level-tab').forEach(t => t.classList.toggle('active', t.textContent.startsWith(l)));
   document.getElementById('level-badge').textContent = l;
 };
 window.setInputMode = (m) => {
+  playUISound('click');
   selectedInputMode = m;
   document.querySelectorAll('.mode-tab').forEach(t =>
     t.classList.toggle('active', t.getAttribute('onclick').includes(`'${m}'`)));
@@ -611,6 +658,7 @@ window.onScenarioChange = () => {
 
 // ── Start session ─────────────────────────────────────────────────
 window.startSession = async () => {
+  playUISound('start');
   if (!isPaidStudent) {
     if (dailyTrialCount >= MAX_TRIAL_CONVERSATIONS) { showTrialLimitPopup(); return; }
     dailyTrialCount++;
@@ -669,6 +717,7 @@ window.sendMessage = async () => {
   const inp = document.getElementById('text-input');
   const text = inp.value.trim();
   if (!text) return;
+  playUISound('send');
   inp.value = '';
 
   text.toLowerCase().split(/\s+/).forEach(w => {
@@ -694,6 +743,7 @@ window.sendMessage = async () => {
 
 // ── MIC ───────────────────────────────────────────────────────────
 window.toggleMic = async () => {
+  playUISound('mic');
   unlockAudio(); // ← iOS fix: also unlock on mic tap
 
   if (isSpeaking) { toast('⏳ Wait for AI to finish speaking...'); return; }
@@ -798,6 +848,7 @@ async function sendAIMessage(userDisplayText, isOpening = false) {
     appendMessage('ai', aiText, parsed.feedback);
 
     if (parsed.feedback?.error && userDisplayText) {
+      parsed.feedback._userOriginal = userDisplayText; // attach for correction card display
       grammarErrors.push({ original: userDisplayText, corrected: parsed.feedback.corrected, note: parsed.feedback.note });
     }
     if (parsed.feedback?.pronunciationWord && parsed.feedback?.pronunciationNote) {
@@ -805,6 +856,11 @@ async function sendAIMessage(userDisplayText, isOpening = false) {
     }
 
     await speakText(aiText);
+
+    // After speaking: show ack button if correction needs acknowledgment
+    if (parsed.feedback?.error && parsed.feedback?.pause_for_ack && userDisplayText) {
+      showCorrectionAck();
+    }
 
   } catch(err) {
     removeThinking();
@@ -822,9 +878,16 @@ SCENARIO: ${desc}
 
 RULES:
 - Stay in character as the ${role}. ALWAYS reply in German at ${level} level.
-- Keep sentences short and clear.
+- Keep sentences short and clear (2–3 sentences max).
 - If the user speaks English, gently nudge them back to German in character.
 - Put ALL feedback in the feedback JSON field only, never in your German reply.
+- Sound natural and warm, like a real person — vary your phrasing.
+
+CORRECTION RULE (IMPORTANT):
+- If the student makes a grammar, vocabulary, or sentence structure error, first acknowledge it briefly IN CHARACTER in your German reply (e.g., "Ah, ich verstehe! Man sagt eigentlich..." or "Interessant! Auf Deutsch sagt man...") — then continue the conversation.
+- Set "error": true, "corrected": "<the correct German version of what the student tried to say>", "pause_for_ack": true.
+- This pauses the conversation so the student can read and understand the correction before continuing.
+- If the student's German is correct, set "error": false, "pause_for_ack": false. Give a brief praise if they did well.
 
 PRONUNCIATION RULE:
 - If the user message contains [PRONUNCIATION_FLAGS], those words were unclear to speech recognition — the student likely mispronounced them.
@@ -837,16 +900,17 @@ RESPONSE FORMAT — always valid JSON:
   "reply": "<your in-character German response>",
   "feedback": ${inlineFeedbackOn ? `{
     "error": true/false,
-    "corrected": "<corrected version or null>",
-    "note": "<brief English grammar tip>",
-    "praise": "<optional short praise>",
+    "corrected": "<corrected German version of what the student said, or null>",
+    "note": "<brief English grammar/structure tip, or null>",
+    "praise": "<optional short English praise, or null>",
     "pronunciationWord": "<the flagged word or null>",
-    "pronunciationNote": "<one sentence tip for Gujarati speakers or null>"
+    "pronunciationNote": "<one sentence tip for Gujarati speakers or null>",
+    "pause_for_ack": true/false
   }` : 'null'}
 }
 
-${isOpening ? 'Opening line: greet the student in character to start the scenario.' : ''}
-Keep the conversation natural. Ask follow-up questions.`;
+${isOpening ? 'Opening line: greet the student warmly in character to start the scenario.' : ''}
+Keep the conversation natural and engaging. Ask follow-up questions.`;
 }
 
 // ── TTS — iOS Safari fixed ────────────────────────────────────────
@@ -867,16 +931,17 @@ function speakText(text) {
 
     const utt = new SpeechSynthesisUtterance(text);
     utt.lang = 'de-DE';
-    utt.rate = 0.9;
-    utt.pitch = 1.05;
+    utt.rate = 0.88;   // Slightly slower = more natural, less robotic
+    utt.pitch = 1.0;   // Natural pitch
 
     const doSpeak = () => {
       const voices = window.speechSynthesis.getVoices();
-      // Prefer premium neural voices — avoid compact (robotic) ones
+      // Priority: premium neural/enhanced/natural voices > named female > named male > any non-compact
       const germanVoice =
-        voices.find(v => v.lang.startsWith('de') && v.name.includes('Anna')) ||
-        voices.find(v => v.lang.startsWith('de') && v.name.includes('Markus')) ||
+        voices.find(v => v.lang.startsWith('de') && /Anna|Marlene|Vicki/.test(v.name)) ||
+        voices.find(v => v.lang.startsWith('de') && /Natural|Neural|Enhanced|Premium/.test(v.name)) ||
         voices.find(v => v.lang.startsWith('de') && v.name.includes('Helena')) ||
+        voices.find(v => v.lang.startsWith('de') && v.name.includes('Markus')) ||
         voices.find(v => v.lang.startsWith('de') && !v.name.toLowerCase().includes('compact')) ||
         voices.find(v => v.lang.startsWith('de'));
       if (germanVoice) utt.voice = germanVoice;
@@ -909,9 +974,16 @@ function appendMessage(who, text, feedback) {
   let fb = '';
   if (feedback && inlineFeedbackOn) {
     if (feedback.error && feedback.corrected) {
-      fb += `<div class="feedback-inline">✏️ <strong>Korrektur:</strong> ${escHtml(feedback.corrected)} — <em>${escHtml(feedback.note || '')}</em></div>`;
+      const wrongPart = feedback._userOriginal
+        ? `<span class="feedback-correction-wrong">${escHtml(feedback._userOriginal)}</span>` : '';
+      fb += `<div class="feedback-correction-card">
+        <div class="corr-label">✏️ Grammar Correction</div>
+        ${wrongPart}
+        <span class="feedback-correction-right">✓ ${escHtml(feedback.corrected)}</span>
+        ${feedback.note ? `<div class="feedback-correction-note">${escHtml(feedback.note)}</div>` : ''}
+      </div>`;
     } else if (feedback.praise) {
-      fb += `<div class="feedback-inline">✅ ${escHtml(feedback.praise)}</div>`;
+      fb += `<div class="feedback-praise-card">✅ ${escHtml(feedback.praise)}</div>`;
     }
     if (feedback.pronunciationWord && feedback.pronunciationNote) {
       fb += `<div class="feedback-pronunciation">🗣️ <strong>${escHtml(feedback.pronunciationWord)}:</strong> ${escHtml(feedback.pronunciationNote)}</div>`;
@@ -935,6 +1007,77 @@ function escHtml(t) { return (t || '').replace(/&/g, '&amp;').replace(/</g, '&lt
 function toast(msg, dur = 3500) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
   document.body.appendChild(t); setTimeout(() => t.remove(), dur);
+}
+
+// ── Correction ack ────────────────────────────────────────────────
+function showCorrectionAck() {
+  document.getElementById('correction-ack-wrap').style.display = 'block';
+  document.getElementById('input-area').classList.add('awaiting-ack');
+}
+window.hideCorrectionAck = function() {
+  document.getElementById('correction-ack-wrap').style.display = 'none';
+  document.getElementById('input-area').classList.remove('awaiting-ack');
+  playUISound('click');
+};
+
+// ── Back to setup ─────────────────────────────────────────────────
+window.goBackToSetup = () => {
+  clearInterval(sessionTimerInterval);
+  window.speechSynthesis?.cancel();
+  setAISpeaking(false);
+  hideCorrectionAck();
+  if (isRecording && mediaRecorder) { try { mediaRecorder.stop(); } catch(e) {} }
+  document.getElementById('session-panel').style.display = 'none';
+  document.getElementById('score-panel').style.display = 'none';
+  document.getElementById('setup-panel').style.display = 'block';
+  updateTrialBadge();
+};
+
+// ── UI Sounds (Web Audio API) ─────────────────────────────────────
+let _uiAC = null;
+function getUIAudioCtx() {
+  if (!_uiAC || _uiAC.state === 'closed') _uiAC = new (window.AudioContext || window.webkitAudioContext)();
+  return _uiAC;
+}
+function playUISound(type) {
+  try {
+    const ac = getUIAudioCtx();
+    if (ac.state === 'suspended') ac.resume();
+    const now = ac.currentTime;
+    if (type === 'start') {
+      // Rising chord — session start
+      [[440, 0.05], [554, 0.04], [660, 0.04]].forEach(([freq, g], i) => {
+        const o = ac.createOscillator(), gn = ac.createGain();
+        o.connect(gn); gn.connect(ac.destination);
+        o.type = 'sine'; o.frequency.value = freq;
+        gn.gain.setValueAtTime(0, now + i * 0.07);
+        gn.gain.linearRampToValueAtTime(g, now + i * 0.07 + 0.06);
+        gn.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.28);
+        o.start(now + i * 0.07); o.stop(now + i * 0.07 + 0.32);
+      });
+    } else if (type === 'send') {
+      // Short upward blip
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type = 'sine'; o.frequency.setValueAtTime(600, now); o.frequency.linearRampToValueAtTime(880, now + 0.09);
+      g.gain.setValueAtTime(0.055, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      o.start(now); o.stop(now + 0.2);
+    } else if (type === 'mic') {
+      // Two-tone mic toggle
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type = 'triangle'; o.frequency.setValueAtTime(440, now); o.frequency.setValueAtTime(660, now + 0.05);
+      g.gain.setValueAtTime(0.05, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      o.start(now); o.stop(now + 0.2);
+    } else {
+      // Generic soft click
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type = 'sine'; o.frequency.setValueAtTime(880, now); o.frequency.linearRampToValueAtTime(660, now + 0.07);
+      g.gain.setValueAtTime(0.05, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      o.start(now); o.stop(now + 0.15);
+    }
+  } catch(e) { /* silent fail — AudioContext not available */ }
 }
 
 // ── Session controls ──────────────────────────────────────────────
@@ -1103,37 +1246,101 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
   }
   animId = requestAnimationFrame(drawParticles);
 
-  // ── Ambient intro sound (Web Audio API) ────────
-  function playIntroSound() {
+  // ── Dramatic "entering a different realm" sound ─
+  function playIntroSound(ac) {
     try {
-      const ac = new (window.AudioContext || window.webkitAudioContext)();
       const now = ac.currentTime;
-      // Ethereal pad — stacked sine waves
-      [[55, 0.04], [110, 0.03], [165, 0.02], [220, 0.015], [329.63, 0.01]].forEach(([freq, g], i) => {
+
+      // 1. Sub-bass portal rumble — deep vibration building from nothing
+      const rumble = ac.createOscillator(), rumbleG = ac.createGain(), rumbleF = ac.createBiquadFilter();
+      rumbleF.type = 'lowpass'; rumbleF.frequency.value = 90; rumbleF.Q.value = 2;
+      rumble.connect(rumbleF); rumbleF.connect(rumbleG); rumbleG.connect(ac.destination);
+      rumble.type = 'sawtooth'; rumble.frequency.setValueAtTime(38, now); rumble.frequency.linearRampToValueAtTime(55, now + 1.8);
+      rumbleG.gain.setValueAtTime(0, now);
+      rumbleG.gain.linearRampToValueAtTime(0.14, now + 0.5);
+      rumbleG.gain.setValueAtTime(0.14, now + 2.5);
+      rumbleG.gain.linearRampToValueAtTime(0, now + 4.2);
+      rumble.start(now); rumble.stop(now + 4.5);
+
+      // 2. White-noise portal whoosh (sweeps through frequencies)
+      const bufSize = Math.floor(ac.sampleRate * 2.5);
+      const noiseBuffer = ac.createBuffer(1, bufSize, ac.sampleRate);
+      const noiseData = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) noiseData[i] = Math.random() * 2 - 1;
+      const noise = ac.createBufferSource(), noiseG = ac.createGain(), noiseF = ac.createBiquadFilter();
+      noiseF.type = 'bandpass'; noiseF.Q.value = 0.6;
+      noiseF.frequency.setValueAtTime(120, now + 0.15);
+      noiseF.frequency.exponentialRampToValueAtTime(5000, now + 1.4);
+      noiseF.frequency.exponentialRampToValueAtTime(12000, now + 2.8);
+      noise.buffer = noiseBuffer;
+      noise.connect(noiseF); noiseF.connect(noiseG); noiseG.connect(ac.destination);
+      noiseG.gain.setValueAtTime(0, now + 0.15);
+      noiseG.gain.linearRampToValueAtTime(0.09, now + 0.5);
+      noiseG.gain.linearRampToValueAtTime(0.04, now + 2.0);
+      noiseG.gain.linearRampToValueAtTime(0, now + 3.2);
+      noise.start(now + 0.15); noise.stop(now + 3.5);
+
+      // 3. Ethereal minor chord — opening portal harmony
+      [[220, 0.065], [261.63, 0.055], [329.63, 0.06], [392, 0.04], [493.88, 0.03]].forEach(([freq, g], i) => {
         const osc = ac.createOscillator(), gain = ac.createGain(), filt = ac.createBiquadFilter();
-        filt.type = 'lowpass'; filt.frequency.value = 700;
+        filt.type = 'lowpass'; filt.frequency.value = 1400;
         osc.connect(filt); filt.connect(gain); gain.connect(ac.destination);
-        osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now);
-        gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(g, now + 0.5 + i * 0.08);
-        gain.gain.linearRampToValueAtTime(g * 0.55, now + 3.5);
-        gain.gain.linearRampToValueAtTime(0, now + 4.8);
-        osc.start(now); osc.stop(now + 5);
+        osc.type = 'sine'; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + 0.3 + i * 0.06);
+        gain.gain.linearRampToValueAtTime(g, now + 0.8 + i * 0.06);
+        gain.gain.setValueAtTime(g, now + 2.8);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 4.6);
+        osc.start(now + 0.3); osc.stop(now + 5.0);
       });
-      // Rising synth sweep
-      const sw = ac.createOscillator(), swg = ac.createGain(), swf = ac.createBiquadFilter();
-      swf.type = 'bandpass'; swf.Q.value = 6;
-      swf.frequency.setValueAtTime(40, now + 0.4);
-      swf.frequency.linearRampToValueAtTime(900, now + 1.9);
-      sw.connect(swf); swf.connect(swg); swg.connect(ac.destination);
-      sw.type = 'sawtooth'; sw.frequency.setValueAtTime(25, now + 0.4);
-      sw.frequency.linearRampToValueAtTime(280, now + 1.9);
-      swg.gain.setValueAtTime(0, now + 0.4);
-      swg.gain.linearRampToValueAtTime(0.018, now + 0.9);
-      swg.gain.linearRampToValueAtTime(0, now + 2.1);
-      sw.start(now + 0.4); sw.stop(now + 2.5);
-    } catch(e) { /* AudioContext unavailable — silent fail */ }
+
+      // 4. Crystalline impact ping — portal materialises
+      const ping = ac.createOscillator(), pingG = ac.createGain();
+      ping.connect(pingG); pingG.connect(ac.destination);
+      ping.type = 'sine'; ping.frequency.setValueAtTime(1320, now + 1.0); ping.frequency.exponentialRampToValueAtTime(660, now + 1.8);
+      pingG.gain.setValueAtTime(0, now + 1.0);
+      pingG.gain.linearRampToValueAtTime(0.14, now + 1.06);
+      pingG.gain.exponentialRampToValueAtTime(0.001, now + 2.6);
+      ping.start(now + 1.0); ping.stop(now + 2.8);
+
+      // 5. High shimmer — alien presence sustained
+      const shimmer = ac.createOscillator(), shimmerG = ac.createGain(), shimmerF = ac.createBiquadFilter();
+      shimmerF.type = 'highpass'; shimmerF.frequency.value = 2800;
+      shimmer.connect(shimmerF); shimmerF.connect(shimmerG); shimmerG.connect(ac.destination);
+      shimmer.type = 'triangle'; shimmer.frequency.setValueAtTime(880, now + 1.1); shimmer.frequency.linearRampToValueAtTime(1108, now + 3.5);
+      shimmerG.gain.setValueAtTime(0, now + 1.1);
+      shimmerG.gain.linearRampToValueAtTime(0.028, now + 1.8);
+      shimmerG.gain.linearRampToValueAtTime(0, now + 4.4);
+      shimmer.start(now + 1.1); shimmer.stop(now + 4.6);
+
+    } catch(e) { /* silent fail */ }
   }
+
+  // ── Mobile-safe audio init ───────────────────────
+  // iOS/Android: AudioContext starts suspended until user gesture.
+  // We create it immediately; if suspended, we resume on first touch/click.
+  let soundPlayed = false;
+  let introAC = null;
+  try { introAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+
+  function tryPlayIntroSound() {
+    if (soundPlayed || !introAC) return;
+    if (introAC.state === 'suspended') {
+      introAC.resume().then(() => {
+        if (!soundPlayed) { soundPlayed = true; playIntroSound(introAC); }
+      }).catch(() => {});
+    } else {
+      soundPlayed = true;
+      playIntroSound(introAC);
+    }
+  }
+
+  // Try immediately (works on desktop where context starts 'running')
+  tryPlayIntroSound();
+
+  // Mobile fallback: unlock on first user interaction with the intro
+  const introEl = document.getElementById('aura-intro');
+  introEl.addEventListener('touchstart', tryPlayIntroSound, { once: true, passive: true });
+  introEl.addEventListener('click', tryPlayIntroSound, { once: true });
 
   // ── Skip handler ────────────────────────────────
   function skipIntro() {
@@ -1145,14 +1352,12 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
   }
   window.skipIntro = skipIntro;
 
-  // Sound plays immediately (desktop); on mobile AudioContext may need a gesture
-  playIntroSound();
-  setTimeout(skipIntro, 4200);
+  setTimeout(skipIntro, 4600);
 
   document.getElementById('aura-skip-btn').addEventListener('click', e => {
-    e.stopPropagation(); skipIntro();
+    e.stopPropagation(); tryPlayIntroSound(); skipIntro();
   });
-  document.getElementById('aura-intro').addEventListener('click', skipIntro);
+  introEl.addEventListener('click', skipIntro);
 })();
 </script>
 </body>

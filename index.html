@@ -1166,7 +1166,7 @@
 
         /* AI Partner Banner */
 .ai-partner-banner {
-    display: none;
+    display: flex;
     background: linear-gradient(135deg, #1A1A2E 0%, #004E89 100%);
     border-radius: 16px; padding: 22px 26px; margin: 80px 16px 0 16px;
     align-items: center; justify-content: space-between;
@@ -1233,16 +1233,16 @@
         </div>
     </nav>
 
-    <!-- AI Partner Banner: shown only to paid students via JS -->
+    <!-- AI Partner Banner: visible to all visitors -->
 <div class="ai-partner-banner" id="aiPartnerBanner">
     <div class="ai-banner-left">
-        <div class="ai-banner-icon">🤖</div>
+        <div class="ai-banner-icon">✦</div>
         <div class="ai-banner-text">
-            <h4>🇩🇪 AI Practice Partner — Your Exclusive Benefit</h4>
-            <p>Practise German anytime with AI. Real Goethe/TELC scenarios • Instant feedback • Score report.</p>
+            <h4>✦ Meet Aura — Your AI German Companion</h4>
+            <p>2 free practice conversations daily • Real Goethe/TELC scenarios • Instant corrections • Score report.</p>
         </div>
     </div>
-    <a href="ai-partner.html" class="btn-ai-partner">Start Practising →</a>
+    <a href="ai-partner.html" class="btn-ai-partner" id="aiBannerCta">Try Aura Free →</a>
 </div>
 
     <!-- Hero Section -->
@@ -1613,13 +1613,9 @@ onAuthStateChanged(auth, async (user) => {
                 const mobileNavLogout = document.getElementById('mobileNavLogout');
                 if (mobileNavLogout) mobileNavLogout.classList.add('logged-in');
 
-                // Show AI Partner banner for all logged-in users
-try {
-    const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-    const dbIdx = getFirestore(app);
-    const snap = await getDoc(doc(dbIdx, 'users', user.uid));
-    document.getElementById('aiPartnerBanner')?.classList.add('visible');
-} catch(e) {}
+                // Update Aura banner CTA for logged-in users
+                const aiBannerCta = document.getElementById('aiBannerCta');
+                if (aiBannerCta) aiBannerCta.textContent = 'Start Practising →';
             } else {
                 navAuth.style.display = ''; // Remove inline style — let CSS control (media query hides it on mobile)
                 userMenu.classList.remove('active');

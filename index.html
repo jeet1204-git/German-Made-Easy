@@ -899,42 +899,6 @@
             margin-bottom: 30px;
         }
 
-        /* Scroll to Top */
-        .scroll-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s;
-            z-index: 999;
-            box-shadow: 0 5px 20px rgba(255, 107, 53, 0.4);
-        }
-        
-        .scroll-top.visible {
-            opacity: 1;
-            pointer-events: all;
-        }
-        
-        .scroll-top:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.6);
-        }
-        
-        .scroll-top svg {
-            width: 30px;
-            height: 30px;
-            fill: white;
-        }
-
         /* Loading Spinner */
         .loading {
             display: inline-block;

@@ -6,6 +6,244 @@
     <title>A1 Course - Beginner German | German Made Easy</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Gujarati:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+
+
+<style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --primary:#FF6B35;--secondary:#004E89;--accent:#FFD23F;
+      --dark:#1A1A2E;--border:#e0e0e0;--success:#10b981;
+    }
+    body{font-family:'Outfit',sans-serif;color:var(--dark);background:#f0f4f8;padding:24px 16px;}
+    h1{font-size:20px;font-weight:800;margin-bottom:4px;}
+    .note{font-size:13px;color:#64748B;margin-bottom:24px;}
+    .note code{background:#E2E8F0;padding:2px 6px;border-radius:4px;font-family:monospace;}
+
+    /* ===== DASHBOARD ===== */
+    .gme-dash{
+      background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 100%);
+      border-radius:20px;padding:28px 28px 24px;color:white;
+      position:relative;overflow:hidden;
+      box-shadow:0 12px 40px rgba(0,78,137,0.3);
+      margin-bottom:20px;
+    }
+    .gme-dash::before{
+      content:'';position:absolute;top:-80px;right:-80px;
+      width:260px;height:260px;border-radius:50%;
+      background:rgba(255,210,63,0.07);pointer-events:none;
+    }
+
+    /* Top row */
+    .dash-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px;}
+    .dash-label{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#FFD23F;margin-bottom:4px;}
+    .dash-title{font-size:20px;font-weight:900;line-height:1.3;}
+    .dash-title span{color:#FFD23F;}
+
+    /* Stat pills */
+    .stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+    .stat-pill{
+      background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);
+      border-radius:12px;padding:10px 16px;text-align:center;min-width:80px;
+    }
+    .stat-pill.highlight{background:rgba(255,210,63,0.15);border-color:rgba(255,210,63,0.4);}
+    .stat-pill.green{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.4);}
+    .stat-val{font-size:22px;font-weight:900;color:white;line-height:1;}
+    .stat-val.gold{color:#FFD23F;}
+    .stat-val.green{color:#4ADE80;}
+    .stat-lbl{font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.7px;margin-top:3px;}
+
+    /* Ahead badge */
+    .ahead-badge{
+      display:none;align-items:center;gap:10px;
+      background:linear-gradient(135deg,rgba(255,210,63,0.2),rgba(255,107,53,0.2));
+      border:1px solid rgba(255,210,63,0.4);border-radius:12px;
+      padding:12px 16px;margin-bottom:18px;
+      animation:pop 0.4s cubic-bezier(.4,0,.2,1);
+    }
+    .ahead-badge.show{display:flex;}
+    .ahead-icon{font-size:26px;flex-shrink:0;}
+    .ahead-text h4{font-size:14px;font-weight:800;color:#FFD23F;margin-bottom:2px;}
+    .ahead-text p{font-size:12px;color:rgba(255,255,255,0.7);line-height:1.4;}
+
+    /* Dual bar */
+    .bar-section{margin-bottom:16px;}
+    .bar-meta{display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:6px;}
+    .bar-meta strong{color:white;}
+
+    .bar-track{background:rgba(255,255,255,0.1);border-radius:999px;height:12px;position:relative;overflow:visible;}
+    
+    /* Target ghost line */
+    .bar-target-line{
+      position:absolute;top:-5px;height:22px;width:3px;
+      background:rgba(255,255,255,0.4);border-radius:2px;
+      transform:translateX(-50%);z-index:3;transition:left 0.4s ease;
+    }
+    .bar-target-line::before{
+      content:'Target';position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+      font-size:9px;color:rgba(255,255,255,0.5);white-space:nowrap;font-family:'Outfit',sans-serif;font-weight:700;
+    }
+
+    /* Actual fill */
+    .bar-fill-wrap{position:relative;height:12px;border-radius:999px;overflow:hidden;}
+    .bar-fill-bg{position:absolute;inset:0;background:rgba(255,255,255,0.1);border-radius:999px;}
+    .bar-fill{
+      position:absolute;left:0;top:0;height:100%;border-radius:999px;
+      background:linear-gradient(90deg,#22C55E,#FFD23F);
+      transition:width 0.7s cubic-bezier(.4,0,.2,1);
+      z-index:2;
+    }
+    .bar-fill.on-pace{background:linear-gradient(90deg,#FFD23F,#FF6B35);}
+    .bar-fill.behind{background:linear-gradient(90deg,#94A3B8,#64748B);}
+
+    /* Shine */
+    .bar-fill::after{
+      content:'';position:absolute;top:1px;right:8px;
+      width:5px;height:10px;background:rgba(255,255,255,0.4);border-radius:3px;
+    }
+
+    .bar-hint{font-size:11px;color:rgba(255,255,255,0.45);margin-top:5px;text-align:right;}
+
+    /* Chapter dots */
+    .dots-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
+    .dot-wrap{position:relative;}
+    .dot{
+      width:30px;height:30px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:10px;font-weight:800;cursor:pointer;
+      transition:transform 0.2s,box-shadow 0.2s;border:2px solid transparent;
+    }
+    .dot:hover{transform:scale(1.18);box-shadow:0 4px 14px rgba(0,0,0,0.3);}
+    .dot.done{background:#22C55E;color:white;border-color:#16A34A;}
+    .dot.partial{background:#FFD23F;color:#1A1A2E;border-color:#F59E0B;}
+    .dot.today{background:rgba(255,107,53,0.25);color:#FF6B35;border-color:#FF6B35;animation:pulse 2s infinite;}
+    .dot.empty{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.35);border-color:rgba(255,255,255,0.15);}
+    .dot.ahead-dot{background:linear-gradient(135deg,#FFD23F,#FF6B35);color:#1A1A2E;border-color:#FFD23F;}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,53,0.4);}50%{box-shadow:0 0 0 6px rgba(255,107,53,0);}}
+
+    .dot-tip{
+      position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+      background:#1A1A2E;color:white;font-size:11px;white-space:nowrap;
+      padding:5px 10px;border-radius:6px;opacity:0;pointer-events:none;
+      transition:opacity 0.2s;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.4);
+    }
+    .dot-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1A1A2E;}
+    .dot-wrap:hover .dot-tip{opacity:1;}
+
+    /* ===== STREAK / MOTIVATIONAL BANNERS ===== */
+    .banner{
+      display:none;border-radius:14px;padding:14px 18px;
+      margin-bottom:16px;align-items:center;gap:12px;
+      font-weight:700;font-size:14px;animation:pop 0.4s ease;
+    }
+    .banner.show{display:flex;}
+    .banner-icon{font-size:26px;flex-shrink:0;}
+    .banner-text{flex:1;}
+    .banner-text h4{font-size:14px;font-weight:800;margin-bottom:2px;}
+    .banner-text p{font-size:12px;font-weight:400;opacity:0.8;line-height:1.4;}
+    .banner.fire{background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#1A1A2E;}
+    .banner.rocket{background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;}
+    .banner.crown{background:linear-gradient(135deg,#F59E0B,#EF4444);color:white;}
+
+    /* ===== CHAPTER BLOCKS ===== */
+    .chapter{
+      background:white;border:2px solid var(--border);
+      border-radius:14px;margin-bottom:12px;overflow:hidden;
+    }
+    .chapter.complete{border-color:#86EFAC;}
+    .chapter.ahead-chapter{border-color:#FFD23F;}
+
+    .ch-header{
+      padding:16px 22px;background:#fafafa;
+      display:flex;justify-content:space-between;align-items:center;
+      cursor:pointer;transition:background 0.2s;
+    }
+    .ch-header:hover{background:#f0f0f0;}
+    .ch-left{display:flex;align-items:center;gap:12px;}
+    .ch-num{
+      width:30px;height:30px;border-radius:50%;
+      background:var(--primary);color:white;
+      display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:700;flex-shrink:0;
+    }
+    .ch-num.done-num{background:#22C55E;}
+    .ch-num.ahead-num{background:linear-gradient(135deg,#FFD23F,#FF6B35);color:#1A1A2E;}
+    .ch-title-text{font-weight:700;font-size:15px;}
+    .ch-right{display:flex;align-items:center;gap:10px;font-size:12px;color:#666;}
+    .badge{padding:3px 9px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;}
+    .badge.free{background:#10b981;color:white;}
+    .badge.locked{background:#999;color:white;}
+    .badge.done-badge{background:#DCFCE7;color:#15803D;}
+    .badge.today-badge{background:#FF6B35;color:white;animation:pulse 2s infinite;}
+    .badge.ahead-badge-sm{background:linear-gradient(135deg,#FFD23F,#FF6B35);color:#1A1A2E;}
+
+    .ch-content{display:none;padding:0 20px 16px;}
+    .chapter.open .ch-content{display:block;}
+    .chapter.open .ch-header{background:#f0f0f0;}
+
+    /* Mini bar inside chapter */
+    .ch-progress-row{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 2px 10px;border-bottom:1px solid #f0f0f0;margin-bottom:4px;
+    }
+    .ch-mini-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94A3B8;}
+    .ch-mini-right{display:flex;align-items:center;gap:8px;}
+    .ch-mini-bar{width:90px;height:6px;background:#E2E8F0;border-radius:999px;overflow:hidden;}
+    .ch-mini-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#FFD23F,#FF6B35);transition:width 0.5s ease;}
+    .ch-mini-pct{font-size:12px;font-weight:700;color:#334155;}
+
+    /* Check items */
+    .check-item{
+      display:flex;align-items:center;gap:10px;
+      padding:8px 8px;border-radius:8px;cursor:pointer;
+      transition:background 0.15s;user-select:none;
+    }
+    .check-item:hover{background:#F8FAFC;}
+    .check-item input[type="checkbox"]{
+      appearance:none;-webkit-appearance:none;
+      width:18px;height:18px;border:2px solid #CBD5E1;
+      border-radius:5px;background:white;cursor:pointer;
+      flex-shrink:0;position:relative;transition:all 0.2s;
+    }
+    .check-item input:checked{background:#22C55E;border-color:#22C55E;}
+    .check-item input:checked::after{
+      content:'';position:absolute;left:3px;top:1px;
+      width:8px;height:5px;border-left:2px solid white;
+      border-bottom:2px solid white;transform:rotate(-45deg);
+    }
+    .type-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0;}
+    .check-label{font-size:13px;color:#334155;flex:1;line-height:1.4;}
+    .check-label.crossed{text-decoration:line-through;color:#94A3B8;}
+
+    /* Chapter complete */
+    .ch-complete{
+      display:none;align-items:center;gap:8px;
+      padding:10px 14px;background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
+      border:1px solid #86EFAC;border-radius:10px;margin-top:10px;
+      font-size:13px;font-weight:700;color:#15803D;
+    }
+    .ch-complete.show{display:flex;animation:pop 0.4s ease;}
+
+    /* Confetti */
+    .confetti-p{position:fixed;pointer-events:none;z-index:9999;width:8px;height:8px;border-radius:2px;animation:fall 2s ease-in forwards;}
+    @keyframes fall{0%{opacity:1;transform:translateY(0) rotate(0deg);}100%{opacity:0;transform:translateY(100vh) rotate(720deg);}}
+    @keyframes pop{0%{opacity:0;transform:scale(0.85);}60%{transform:scale(1.04);}100%{opacity:1;transform:scale(1);}}
+
+    /* Reset button */
+    .reset-btn{
+      background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.4);
+      font-family:'Outfit',sans-serif;font-size:11px;padding:4px 10px;border-radius:6px;
+      cursor:pointer;transition:all 0.2s;float:right;margin-top:2px;
+    }
+    .reset-btn:hover{border-color:rgba(255,107,53,0.6);color:#FF6B35;}
+
+    @media(max-width:600px){
+      .gme-dash{padding:20px 16px;}
+      .stat-row{gap:7px;}
+      .stat-pill{min-width:68px;padding:8px 10px;}
+      .stat-val{font-size:18px;}
+    }
+  </style>
+        
         * {
             margin: 0;
             padding: 0;
@@ -1096,6 +1334,29 @@
     </section>
 
     <!-- Main Content -->
+    <!-- ===== MOTIVATIONAL BANNERS ===== -->
+<div class="banner fire" id="bannerFire">
+  <span class="banner-icon">🔥</span>
+  <div class="banner-text">
+    <h4 id="bannerFireTitle">You're ahead of schedule!</h4>
+    <p id="bannerFireText">Keep going — momentum is everything.</p>
+  </div>
+</div>
+<div class="banner rocket" id="bannerRocket">
+  <span class="banner-icon">🚀</span>
+  <div class="banner-text">
+    <h4 id="bannerRocketTitle">Flying ahead!</h4>
+    <p id="bannerRocketText">At this pace you'll finish the A1 course way before target.</p>
+  </div>
+</div>
+<div class="banner crown" id="bannerCrown">
+  <span class="banner-icon">👑</span>
+  <div class="banner-text">
+    <h4>You're in the top learners!</h4>
+    <p>Less than 10% of students get this far ahead. Wunderbar!</p>
+  </div>
+</div>
+
     <div class="main-content">
         <div class="content-left">
             <!-- What You'll Learn -->
@@ -1180,6 +1441,25 @@
             <div class="section-box">
                 <div class="content-header">
                     <h2 class="section-title" style="margin-bottom: 0;">Course Content</h2>
+                    <div class="gme-dash" id="gmeDash">
+  <button class="reset-btn" onclick="resetProgress()">Reset demo</button>
+
+  <div class="dash-top">
+    <div>
+      <div class="dash-label">A1 Course · Your Pace</div>
+      <div class="dash-title" id="dashTitle">Ready to start? Let's go! 🇩🇪</div>
+    </div>
+  </div>
+
+  <!-- Ahead badge inside card -->
+  <div class="ahead-badge" id="aheadBadge">
+    <span class="ahead-icon">⚡</span>
+    <div class="ahead-text">
+      <h4 id="aheadTitle">You're ahead!</h4>
+      <p id="aheadText"></p>
+    </div>
+  </div>
+
                     <a href="#" class="expand-all" onclick="expandAll(); return false;">Expand all chapters</a>
                 </div>
                 <p class="content-summary">12 chapters • 72 lectures • 40h 30m total length • First 2 chapters FREE</p>
@@ -1791,5 +2071,445 @@ onAuthStateChanged(auth, async (user) => {
   <span class="fab-icon">✦</span>
   <span class="fab-text">AURA</span>
 </a>
+    <script src="course-progress.js"></script>
+<script>
+var _gmeMemState = null;
+
+var CHAPTERS = [
+  { id:1,  title:'Greetings & Introductions',   free:true,  items:[
+    {id:'1-v1',type:'video',    label:'1.1 How to greet in German'},
+    {id:'1-v2',type:'video',    label:'1.2 Saying your name - Ich heisse...'},
+    {id:'1-v3',type:'video',    label:'1.3 Where are you from?'},
+    {id:'1-v4',type:'video',    label:'1.4 Asking questions (W-Fragen)'},
+    {id:'1-q1',type:'quiz',     label:'Chapter 1 Quiz'},
+    {id:'1-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:2,  title:'Family and Friends',           free:true,  items:[
+    {id:'2-v1',type:'video',    label:'2.1 Family members'},
+    {id:'2-v2',type:'video',    label:'2.2 Possessive articles'},
+    {id:'2-v3',type:'video',    label:'2.3 Talking about your family'},
+    {id:'2-v4',type:'video',    label:'2.4 Friends and relationships'},
+    {id:'2-q1',type:'quiz',     label:'Chapter 2 Quiz'},
+    {id:'2-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:3,  title:'Food and Drinks',              free:false, items:[
+    {id:'3-v1',type:'video',    label:'3.1 At the restaurant'},
+    {id:'3-v2',type:'video',    label:'3.2 Food vocabulary'},
+    {id:'3-v3',type:'video',    label:'3.3 Ordering food'},
+    {id:'3-v4',type:'video',    label:'3.4 Preferences'},
+    {id:'3-q1',type:'quiz',     label:'Chapter 3 Quiz'},
+    {id:'3-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:4,  title:'Home and Living',              free:false, items:[
+    {id:'4-v1',type:'video',    label:'4.1 Rooms in a house'},
+    {id:'4-v2',type:'video',    label:'4.2 Furniture vocabulary'},
+    {id:'4-v3',type:'video',    label:'4.3 Describing your home'},
+    {id:'4-v4',type:'video',    label:'4.4 Renting an apartment'},
+    {id:'4-q1',type:'quiz',     label:'Chapter 4 Quiz'},
+    {id:'4-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:5,  title:'Daily Routine',                free:false, items:[
+    {id:'5-v1',type:'video',    label:'5.1 Morning routine'},
+    {id:'5-v2',type:'video',    label:'5.2 Telling the time'},
+    {id:'5-v3',type:'video',    label:'5.3 Days and months'},
+    {id:'5-v4',type:'video',    label:'5.4 Making plans'},
+    {id:'5-q1',type:'quiz',     label:'Chapter 5 Quiz'},
+    {id:'5-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:6,  title:'Hobbies and Free Time',        free:false, items:[
+    {id:'6-v1',type:'video',    label:'6.1 Sports and activities'},
+    {id:'6-v2',type:'video',    label:'6.2 Modal verbs (mogen, wollen)'},
+    {id:'6-v3',type:'video',    label:'6.3 Expressing preferences'},
+    {id:'6-v4',type:'video',    label:'6.4 Weekend plans'},
+    {id:'6-q1',type:'quiz',     label:'Chapter 6 Quiz'},
+    {id:'6-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:7,  title:'Shopping',                     free:false, items:[
+    {id:'7-v1',type:'video',    label:'7.1 At the shop'},
+    {id:'7-v2',type:'video',    label:'7.2 Prices and numbers'},
+    {id:'7-v3',type:'video',    label:'7.3 Colours and sizes'},
+    {id:'7-v4',type:'video',    label:'7.4 Asking for help'},
+    {id:'7-q1',type:'quiz',     label:'Chapter 7 Quiz'},
+    {id:'7-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:8,  title:'Work and Education',           free:false, items:[
+    {id:'8-v1',type:'video',    label:'8.1 Jobs and professions'},
+    {id:'8-v2',type:'video',    label:'8.2 Workplace phrases'},
+    {id:'8-v3',type:'video',    label:'8.3 School and university'},
+    {id:'8-v4',type:'video',    label:'8.4 Writing a CV intro'},
+    {id:'8-q1',type:'quiz',     label:'Chapter 8 Quiz'},
+    {id:'8-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:9,  title:'Travel and Directions',        free:false, items:[
+    {id:'9-v1',type:'video',    label:'9.1 Transport types'},
+    {id:'9-v2',type:'video',    label:'9.2 Asking for directions'},
+    {id:'9-v3',type:'video',    label:'9.3 At the hotel'},
+    {id:'9-v4',type:'video',    label:'9.4 Travel phrases'},
+    {id:'9-q1',type:'quiz',     label:'Chapter 9 Quiz'},
+    {id:'9-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:10, title:'Health and Body',              free:false, items:[
+    {id:'10-v1',type:'video',    label:'10.1 Body parts'},
+    {id:'10-v2',type:'video',    label:'10.2 At the doctor'},
+    {id:'10-v3',type:'video',    label:'10.3 Describing symptoms'},
+    {id:'10-v4',type:'video',    label:'10.4 Healthy lifestyle'},
+    {id:'10-q1',type:'quiz',     label:'Chapter 10 Quiz'},
+    {id:'10-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:11, title:'Weather and Seasons',          free:false, items:[
+    {id:'11-v1',type:'video',    label:'11.1 Weather vocabulary'},
+    {id:'11-v2',type:'video',    label:'11.2 Seasons and temperature'},
+    {id:'11-v3',type:'video',    label:'11.3 Talking about weather'},
+    {id:'11-v4',type:'video',    label:'11.4 Planning by weather'},
+    {id:'11-q1',type:'quiz',     label:'Chapter 11 Quiz'},
+    {id:'11-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:12, title:'Review and Exam Preparation',  free:false, items:[
+    {id:'12-v1',type:'video',    label:'12.1 Full grammar review'},
+    {id:'12-v2',type:'video',    label:'12.2 Vocabulary revision'},
+    {id:'12-v3',type:'video',    label:'12.3 Mock speaking test'},
+    {id:'12-v4',type:'video',    label:'12.4 Exam strategies'},
+    {id:'12-q1',type:'quiz',     label:'Final Practice Quiz'},
+    {id:'12-e1',type:'exercise', label:'Exam Practice Pack'}
+  ]}
+];
+
+var TYPE_STYLE = {
+  video:    {bg:'#EEF2FF', color:'#4338CA', icon:'&#9654;'},
+  quiz:     {bg:'#FFF7ED', color:'#C2410C', icon:'&#128221;'},
+  exercise: {bg:'#F0FDF4', color:'#166534', icon:'&#128196;'}
+};
+
+var TOTAL_CHAPTERS = 12;
+var SIM_START_DAY = 1;
+
+// In-memory state (persists for the session)
+var state = {};
+
+function loadState() {
+  if (_gmeMemState) {
+    try { state = JSON.parse(_gmeMemState) || {}; } catch(e) { state = {}; }
+  }
+}
+
+function saveState() {
+  try { _gmeMemState = JSON.stringify(state); } catch(e) {}
+}
+
+function chapDone(chap) {
+  var count = 0;
+  for (var i = 0; i < chap.items.length; i++) {
+    if (state[chap.items[i].id]) count++;
+  }
+  return count;
+}
+
+function chapTotal(chap) { return chap.items.length; }
+
+function chapPct(chap) { return Math.round(chapDone(chap) / chapTotal(chap) * 100); }
+
+function chapComplete(chap) { return chapDone(chap) === chapTotal(chap); }
+
+function totalChapsCompleted() {
+  var count = 0;
+  for (var i = 0; i < CHAPTERS.length; i++) {
+    if (chapComplete(CHAPTERS[i])) count++;
+  }
+  return count;
+}
+
+function overallPct() {
+  var done = 0, total = 0;
+  for (var i = 0; i < CHAPTERS.length; i++) {
+    done  += chapDone(CHAPTERS[i]);
+    total += chapTotal(CHAPTERS[i]);
+  }
+  return Math.round(done / total * 100);
+}
+
+function buildChapters() {
+  var container = document.getElementById('chaptersContainer');
+  var html = '';
+  var chapsDoneCount = totalChapsCompleted();
+
+  for (var idx = 0; idx < CHAPTERS.length; idx++) {
+    var chap = CHAPTERS[idx];
+    var done = chapDone(chap);
+    var total = chapTotal(chap);
+    var pct = chapPct(chap);
+    var complete = chapComplete(chap);
+    var isToday = !complete && chap.id === chapsDoneCount + 1;
+    var isAhead = chap.id > chapsDoneCount + 1 && done > 0;
+
+    var numCls = '';
+    if (complete) numCls = 'done-num';
+    else if (isAhead) numCls = 'ahead-num';
+
+    var badgeHTML = '';
+    if (complete)      badgeHTML = '<span class="badge done-badge">Done</span>';
+    else if (isToday)  badgeHTML = '<span class="badge today-badge">Today</span>';
+    else if (chap.free) badgeHTML = '<span class="badge free">Free</span>';
+    else if (isAhead)  badgeHTML = '<span class="badge ahead-badge-sm">Ahead!</span>';
+    else               badgeHTML = '<span class="badge locked">Locked</span>';
+
+    var chapClass = 'chapter';
+    if (complete) chapClass += ' complete';
+    if (isAhead)  chapClass += ' ahead-chapter';
+    if (isToday || chap.free || idx === 0) chapClass += ' open';
+
+    var rows = '';
+    for (var j = 0; j < chap.items.length; j++) {
+      var item = chap.items[j];
+      var checked = !!state[item.id];
+      var s = TYPE_STYLE[item.type];
+      rows += '<label class="check-item">' +
+        '<input type="checkbox" data-item="' + item.id + '" data-chap="' + chap.id + '"' +
+        (checked ? ' checked' : '') + ' onchange="onTick(this)">' +
+        '<span class="type-pill" style="background:' + s.bg + ';color:' + s.color + ';">' + s.icon + ' ' + item.type.charAt(0).toUpperCase() + item.type.slice(1) + '</span>' +
+        '<span class="check-label' + (checked ? ' crossed' : '') + '" id="lbl-' + item.id + '">' + item.label + '</span>' +
+        '</label>';
+    }
+
+    html += '<div class="' + chapClass + '" id="chap-' + chap.id + '">' +
+      '<div class="ch-header" onclick="toggleChap(' + chap.id + ')">' +
+        '<div class="ch-left">' +
+          '<div class="ch-num ' + numCls + '">' + (complete ? '&#10003;' : chap.id) + '</div>' +
+          '<div class="ch-title-text">' + chap.title + '</div>' +
+        '</div>' +
+        '<div class="ch-right">' + badgeHTML + '<span style="font-size:12px;color:#999;">' + total + ' items</span></div>' +
+      '</div>' +
+      '<div class="ch-content">' +
+        '<div class="ch-progress-row">' +
+          '<span class="ch-mini-label">Chapter Progress</span>' +
+          '<div class="ch-mini-right">' +
+            '<div class="ch-mini-bar"><div class="ch-mini-fill" id="mini-' + chap.id + '" style="width:' + pct + '%"></div></div>' +
+            '<span class="ch-mini-pct" id="pct-' + chap.id + '">' + pct + '%</span>' +
+          '</div>' +
+        '</div>' +
+        rows +
+        '<div class="ch-complete' + (complete ? ' show' : '') + '" id="cbadge-' + chap.id + '">&#127881; Chapter ' + chap.id + ' complete - Sehr gut!</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function toggleChap(id) {
+  var el = document.getElementById('chap-' + id);
+  if (el) el.classList.toggle('open');
+}
+
+function onTick(cb) {
+  var itemId = cb.getAttribute('data-item');
+  var chapId = parseInt(cb.getAttribute('data-chap'), 10);
+  state[itemId] = cb.checked;
+  saveState();
+
+  var lbl = document.getElementById('lbl-' + itemId);
+  if (lbl) lbl.classList.toggle('crossed', cb.checked);
+
+  var chap = null;
+  for (var i = 0; i < CHAPTERS.length; i++) {
+    if (CHAPTERS[i].id === chapId) { chap = CHAPTERS[i]; break; }
+  }
+
+  if (chap) {
+    var pct = chapPct(chap);
+    var mini = document.getElementById('mini-' + chapId);
+    var pctEl = document.getElementById('pct-' + chapId);
+    if (mini) mini.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
+
+    if (chapComplete(chap)) {
+      var badge = document.getElementById('cbadge-' + chapId);
+      if (badge) badge.classList.add('show');
+      launchConfetti();
+      setTimeout(function() { buildChapters(); updateDashboard(); }, 500);
+    } else {
+      var badge2 = document.getElementById('cbadge-' + chapId);
+      if (badge2) badge2.classList.remove('show');
+    }
+  }
+
+  updateDashboard();
+}
+
+function updateDashboard() {
+  var chapsDone  = totalChapsCompleted();
+  var overall    = overallPct();
+  var currentDay = SIM_START_DAY;
+  var targetChaps = Math.min(currentDay, TOTAL_CHAPTERS);
+  var daysAhead  = chapsDone - targetChaps;
+  var targetPct  = Math.round((targetChaps / TOTAL_CHAPTERS) * 100);
+
+  // Stats
+  document.getElementById('statOverall').textContent = overall + '%';
+  document.getElementById('statChaps').textContent   = chapsDone + '/' + TOTAL_CHAPTERS;
+  document.getElementById('statTarget').textContent  = 'Day ' + currentDay;
+  document.getElementById('barPctLabel').textContent = overall + '%';
+
+  // Bars
+  document.getElementById('actualFill').style.width = overall + '%';
+  document.getElementById('targetFill').style.width = targetPct + '%';
+  document.getElementById('targetLine').style.left  = targetPct + '%';
+
+  var fill = document.getElementById('actualFill');
+  if (daysAhead > 0)       fill.className = 'bar-fill ahead-fill';
+  else if (daysAhead === 0) fill.className = 'bar-fill on-pace';
+  else                      fill.className = 'bar-fill behind';
+
+  // Ahead pills
+  var pillAhead  = document.getElementById('pillAhead');
+  var pillFinish = document.getElementById('pillFinish');
+  if (daysAhead > 0) {
+    pillAhead.style.display  = 'block';
+    pillFinish.style.display = 'block';
+    document.getElementById('statAhead').textContent  = '+' + daysAhead + ' day' + (daysAhead > 1 ? 's' : '');
+    var remaining = TOTAL_CHAPTERS - chapsDone;
+    document.getElementById('statFinish').textContent = '~' + (currentDay + remaining) + 'd';
+  } else {
+    pillAhead.style.display  = 'none';
+    pillFinish.style.display = 'none';
+  }
+
+  // Ahead badge inside card
+  var aheadBadge = document.getElementById('aheadBadge');
+  var aheadTitle = document.getElementById('aheadTitle');
+  var aheadText  = document.getElementById('aheadText');
+  if (daysAhead > 0) {
+    aheadBadge.classList.add('show');
+    aheadTitle.textContent = 'You are ' + daysAhead + ' day' + (daysAhead > 1 ? 's' : '') + ' ahead of the target!';
+    var rem = TOTAL_CHAPTERS - chapsDone;
+    aheadText.textContent = 'Target: finish in ' + TOTAL_CHAPTERS + ' days. At your pace: ~' + (currentDay + rem) + ' days. That\'s ' + daysAhead + ' day' + (daysAhead > 1 ? 's' : '') + ' early - keep going!';
+  } else {
+    aheadBadge.classList.remove('show');
+  }
+
+  // Title
+  var titleEl = document.getElementById('dashTitle');
+  if (overall === 100) {
+    titleEl.innerHTML = '&#127881; Course complete! Du bist ein Star!';
+  } else if (daysAhead >= 3) {
+    titleEl.innerHTML = '&#128081; You\'re crushing it - <span>' + daysAhead + ' days ahead!</span>';
+  } else if (daysAhead > 0) {
+    titleEl.innerHTML = '&#128293; Ahead of schedule by <span>' + daysAhead + ' day' + (daysAhead > 1 ? 's' : '') + '</span>!';
+  } else if (chapsDone === 0) {
+    titleEl.innerHTML = 'Ready to start? Let\'s go!';
+  } else {
+    var nextChap = null;
+    for (var i = 0; i < CHAPTERS.length; i++) {
+      if (!chapComplete(CHAPTERS[i])) { nextChap = CHAPTERS[i]; break; }
+    }
+    titleEl.innerHTML = nextChap ? 'Today: <span>Chapter ' + nextChap.id + ' - ' + nextChap.title + '</span>' : 'Almost there!';
+  }
+
+  // Hint
+  var hint = document.getElementById('barHint');
+  if (daysAhead > 0) {
+    hint.textContent = 'You\'ve done ' + chapsDone + ' chapters. Target was ' + targetChaps + '. Keep the momentum!';
+  } else if (daysAhead < 0) {
+    hint.textContent = 'You\'re ' + Math.abs(daysAhead) + ' day(s) behind - one chapter today gets you back on track!';
+  } else {
+    var nc = null;
+    for (var i = 0; i < CHAPTERS.length; i++) {
+      if (!chapComplete(CHAPTERS[i])) { nc = CHAPTERS[i]; break; }
+    }
+    hint.textContent = nc ? 'On track! Complete Chapter ' + nc.id + ' today to stay on schedule.' : 'All done!';
+  }
+
+  // Banners
+  var bFire   = document.getElementById('bannerFire');
+  var bRocket = document.getElementById('bannerRocket');
+  var bCrown  = document.getElementById('bannerCrown');
+  bFire.classList.toggle('show',   daysAhead === 1);
+  bRocket.classList.toggle('show', daysAhead === 2);
+  bCrown.classList.toggle('show',  daysAhead >= 3);
+
+  if (daysAhead === 1) {
+    document.getElementById('bannerFireTitle').textContent = 'You\'re 1 day ahead!';
+    document.getElementById('bannerFireText').textContent  = 'You\'ve done ' + chapsDone + ' chapter(s). Target today: ' + targetChaps + '. Do one more to be 2 days ahead!';
+  }
+  if (daysAhead >= 2) {
+    document.getElementById('bannerRocketTitle').textContent = daysAhead + ' days ahead of target!';
+    document.getElementById('bannerRocketText').textContent  = 'Only ' + (TOTAL_CHAPTERS - chapsDone) + ' chapters left. At this pace you\'ll finish in ~' + (TOTAL_CHAPTERS - chapsDone + currentDay) + ' days total!';
+  }
+
+  buildDots(chapsDone, targetChaps);
+}
+
+function buildDots(chapsDone, targetChaps) {
+  var row = document.getElementById('dotsRow');
+  var html = '';
+  for (var i = 0; i < CHAPTERS.length; i++) {
+    var c = CHAPTERS[i];
+    var done = chapDone(c);
+    var total = chapTotal(c);
+    var complete = done === total;
+    var partial  = done > 0 && !complete;
+    var isAhead  = c.id > targetChaps && (complete || partial);
+    var cls = 'empty', label = '' + c.id;
+    if (complete && isAhead) { cls = 'ahead-dot'; label = '&#10003;'; }
+    else if (complete)       { cls = 'done';      label = '&#10003;'; }
+    else if (partial)        { cls = 'partial'; }
+    else if (c.id === chapsDone + 1) { cls = 'today'; }
+    var pct = Math.round(done / total * 100);
+    html += '<div class="dot-wrap">' +
+      '<div class="dot ' + cls + '" onclick="scrollToChap(' + c.id + ')">' + label + '</div>' +
+      '<div class="dot-tip">Ch ' + c.id + ': ' + c.title + ' - ' + pct + '% done</div>' +
+      '</div>';
+  }
+  row.innerHTML = html;
+}
+
+function scrollToChap(id) {
+  var el = document.getElementById('chap-' + id);
+  if (el) {
+    el.classList.add('open');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+function resetProgress() {
+  if (confirm('Reset all progress for this demo?')) {
+    state = {};
+    _gmeMemState = null;
+    buildChapters();
+    updateDashboard();
+  }
+}
+
+function launchConfetti() {
+  var colors = ['#FFD23F','#FF6B35','#22C55E','#6366F1','#F472B6'];
+  for (var i = 0; i < 35; i++) {
+    (function(delay) {
+      setTimeout(function() {
+        var el = document.createElement('div');
+        el.className = 'confetti-p';
+        el.style.left = (Math.random() * 100) + 'vw';
+        el.style.top  = (Math.random() * 20) + 'vh';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        document.body.appendChild(el);
+        setTimeout(function() { el.parentNode && el.parentNode.removeChild(el); }, 3000);
+      }, delay);
+    })(i * 25);
+  }
+}
+
+// Also add ahead-fill style dynamically
+var style = document.createElement('style');
+style.textContent = '.bar-fill.ahead-fill { background: linear-gradient(90deg, #FFD23F, #FF6B35); }' +
+  '.bar-fill.behind { background: linear-gradient(90deg, #94A3B8, #64748B); }';
+document.head.appendChild(style);
+
+// Init
+loadState();
+buildChapters();
+updateDashboard();
+</script>
+
+        
 </body>
 </html>

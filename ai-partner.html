@@ -527,10 +527,10 @@
 <!-- TRIAL LIMIT MODAL -->
 <div id="trial-limit-modal">
   <div class="trial-modal-card">
-    <div class="trial-badge">⏱️ Daily Limit Reached</div>
-    <h2>Come back tomorrow 🌙</h2>
-    <p>You've used your 2 free Aura conversations for today. Your limit resets every day — or buy the course for <strong>unlimited daily conversations</strong>, full exam scores, and guided practice!</p>
-    <a href="/payment.html" class="trial-modal-btn">🛒 Unlock Unlimited with Aura</a>
+    <div class="trial-badge">✦ Free Trial Complete</div>
+    <h2>You've tried Aura! 🎯</h2>
+    <p>You've used your 2 free demo conversations. Buy the course to get <strong>unlimited Aura conversations</strong>, full exam scores, guided lessons, and more!</p>
+    <a href="/#courses" class="trial-modal-btn">🛒 See Courses & Unlock Unlimited</a>
   </div>
 </div>
 
@@ -561,11 +561,7 @@ const db = getFirestore(app);
 let currentUser = null;
 let userProfile = null;
 let isPaidStudent = false;
-let dailyTrialCount = 0; // Firestore-backed, resets each calendar day
-
-function getTodayStr() {
-  return new Date().toISOString().split('T')[0]; // "YYYY-MM-DD" in UTC
-}
+let trialCount = 0; // Firestore-backed lifetime count (never resets)
 let selectedLevel = 'A1';
 let selectedInputMode = 'both';
 let selectedScenario = null;
@@ -603,10 +599,9 @@ onAuthStateChanged(auth, async (user) => {
     if (snap.exists()) userProfile = snap.data();
     isPaidStudent = snap.exists() && !!snap.data().isPaidStudent;
 
-    // Load today's trial count from Firestore (cross-device, resets daily)
+    // Load lifetime trial count from Firestore (shared across devices, never resets)
     if (!isPaidStudent && snap.exists()) {
-      const dt = snap.data().aiDailyTrials;
-      dailyTrialCount = (dt?.date === getTodayStr()) ? (dt.count || 0) : 0;
+      trialCount = snap.data().aiTrialCount || 0;
     }
 
     showApp();
@@ -622,12 +617,12 @@ function showTrialLimitPopup() {
 }
 function updateTrialBadge() {
   if (isPaidStudent || !currentUser) return;
-  const remaining = Math.max(0, MAX_TRIAL_CONVERSATIONS - dailyTrialCount);
+  const remaining = Math.max(0, MAX_TRIAL_CONVERSATIONS - trialCount);
   document.getElementById('trial-counter-wrap').style.display = 'block';
   document.getElementById('trial-counter-text').textContent =
     remaining > 0
-      ? `✦ ${remaining} free Aura conversation${remaining !== 1 ? 's' : ''} left today`
-      : '⏱️ Daily limit reached — resets tomorrow or buy the course';
+      ? `✦ ${remaining} free Aura conversation${remaining !== 1 ? 's' : ''} remaining`
+      : '⏱️ Free trial used — buy the course for unlimited access';
 }
 function showApp() {
   document.getElementById('auth-overlay').style.display = 'none';
@@ -660,11 +655,11 @@ window.onScenarioChange = () => {
 window.startSession = async () => {
   playUISound('start');
   if (!isPaidStudent) {
-    if (dailyTrialCount >= MAX_TRIAL_CONVERSATIONS) { showTrialLimitPopup(); return; }
-    dailyTrialCount++;
-    // Persist to Firestore so the count is shared across all devices
+    if (trialCount >= MAX_TRIAL_CONVERSATIONS) { showTrialLimitPopup(); return; }
+    trialCount++;
+    // Persist to Firestore — shared across all devices, never resets
     updateDoc(doc(db, 'users', currentUser.uid), {
-      aiDailyTrials: { date: getTodayStr(), count: dailyTrialCount }
+      aiTrialCount: trialCount
     }).catch(e => console.error('Trial counter save failed:', e));
     updateTrialBadge();
   }
@@ -848,7 +843,6 @@ async function sendAIMessage(userDisplayText, isOpening = false) {
     appendMessage('ai', aiText, parsed.feedback);
 
     if (parsed.feedback?.error && userDisplayText) {
-      parsed.feedback._userOriginal = userDisplayText; // attach for correction card display
       grammarErrors.push({ original: userDisplayText, corrected: parsed.feedback.corrected, note: parsed.feedback.note });
     }
     if (parsed.feedback?.pronunciationWord && parsed.feedback?.pronunciationNote) {
@@ -856,11 +850,6 @@ async function sendAIMessage(userDisplayText, isOpening = false) {
     }
 
     await speakText(aiText);
-
-    // After speaking: show ack button if correction needs acknowledgment
-    if (parsed.feedback?.error && parsed.feedback?.pause_for_ack && userDisplayText) {
-      showCorrectionAck();
-    }
 
   } catch(err) {
     removeThinking();
@@ -878,16 +867,9 @@ SCENARIO: ${desc}
 
 RULES:
 - Stay in character as the ${role}. ALWAYS reply in German at ${level} level.
-- Keep sentences short and clear (2–3 sentences max).
+- Keep sentences short and clear.
 - If the user speaks English, gently nudge them back to German in character.
 - Put ALL feedback in the feedback JSON field only, never in your German reply.
-- Sound natural and warm, like a real person — vary your phrasing.
-
-CORRECTION RULE (IMPORTANT):
-- If the student makes a grammar, vocabulary, or sentence structure error, first acknowledge it briefly IN CHARACTER in your German reply (e.g., "Ah, ich verstehe! Man sagt eigentlich..." or "Interessant! Auf Deutsch sagt man...") — then continue the conversation.
-- Set "error": true, "corrected": "<the correct German version of what the student tried to say>", "pause_for_ack": true.
-- This pauses the conversation so the student can read and understand the correction before continuing.
-- If the student's German is correct, set "error": false, "pause_for_ack": false. Give a brief praise if they did well.
 
 PRONUNCIATION RULE:
 - If the user message contains [PRONUNCIATION_FLAGS], those words were unclear to speech recognition — the student likely mispronounced them.
@@ -900,17 +882,16 @@ RESPONSE FORMAT — always valid JSON:
   "reply": "<your in-character German response>",
   "feedback": ${inlineFeedbackOn ? `{
     "error": true/false,
-    "corrected": "<corrected German version of what the student said, or null>",
-    "note": "<brief English grammar/structure tip, or null>",
-    "praise": "<optional short English praise, or null>",
+    "corrected": "<corrected version or null>",
+    "note": "<brief English grammar tip>",
+    "praise": "<optional short praise>",
     "pronunciationWord": "<the flagged word or null>",
-    "pronunciationNote": "<one sentence tip for Gujarati speakers or null>",
-    "pause_for_ack": true/false
+    "pronunciationNote": "<one sentence tip for Gujarati speakers or null>"
   }` : 'null'}
 }
 
-${isOpening ? 'Opening line: greet the student warmly in character to start the scenario.' : ''}
-Keep the conversation natural and engaging. Ask follow-up questions.`;
+${isOpening ? 'Opening line: greet the student in character to start the scenario.' : ''}
+Keep the conversation natural. Ask follow-up questions.`;
 }
 
 // ── TTS — iOS Safari fixed ────────────────────────────────────────
@@ -974,16 +955,9 @@ function appendMessage(who, text, feedback) {
   let fb = '';
   if (feedback && inlineFeedbackOn) {
     if (feedback.error && feedback.corrected) {
-      const wrongPart = feedback._userOriginal
-        ? `<span class="feedback-correction-wrong">${escHtml(feedback._userOriginal)}</span>` : '';
-      fb += `<div class="feedback-correction-card">
-        <div class="corr-label">✏️ Grammar Correction</div>
-        ${wrongPart}
-        <span class="feedback-correction-right">✓ ${escHtml(feedback.corrected)}</span>
-        ${feedback.note ? `<div class="feedback-correction-note">${escHtml(feedback.note)}</div>` : ''}
-      </div>`;
+      fb += `<div class="feedback-inline">✏️ <strong>Korrektur:</strong> ${escHtml(feedback.corrected)} — <em>${escHtml(feedback.note || '')}</em></div>`;
     } else if (feedback.praise) {
-      fb += `<div class="feedback-praise-card">✅ ${escHtml(feedback.praise)}</div>`;
+      fb += `<div class="feedback-inline">✅ ${escHtml(feedback.praise)}</div>`;
     }
     if (feedback.pronunciationWord && feedback.pronunciationNote) {
       fb += `<div class="feedback-pronunciation">🗣️ <strong>${escHtml(feedback.pronunciationWord)}:</strong> ${escHtml(feedback.pronunciationNote)}</div>`;
@@ -1009,11 +983,7 @@ function toast(msg, dur = 3500) {
   document.body.appendChild(t); setTimeout(() => t.remove(), dur);
 }
 
-// ── Correction ack ────────────────────────────────────────────────
-function showCorrectionAck() {
-  document.getElementById('correction-ack-wrap').style.display = 'block';
-  document.getElementById('input-area').classList.add('awaiting-ack');
-}
+// ── Correction ack (button stays for manual use but no longer auto-shown) ──
 window.hideCorrectionAck = function() {
   document.getElementById('correction-ack-wrap').style.display = 'none';
   document.getElementById('input-area').classList.remove('awaiting-ack');
@@ -1025,7 +995,8 @@ window.goBackToSetup = () => {
   clearInterval(sessionTimerInterval);
   window.speechSynthesis?.cancel();
   setAISpeaking(false);
-  hideCorrectionAck();
+  document.getElementById('correction-ack-wrap').style.display = 'none';
+  document.getElementById('input-area').classList.remove('awaiting-ack');
   if (isRecording && mediaRecorder) { try { mediaRecorder.stop(); } catch(e) {} }
   document.getElementById('session-panel').style.display = 'none';
   document.getElementById('score-panel').style.display = 'none';
@@ -1246,73 +1217,35 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
   }
   animId = requestAnimationFrame(drawParticles);
 
-  // ── Dramatic "entering a different realm" sound ─
+  // ── Ethereal pad intro sound ────────────────────
   function playIntroSound(ac) {
     try {
       const now = ac.currentTime;
-
-      // 1. Sub-bass portal rumble — deep vibration building from nothing
-      const rumble = ac.createOscillator(), rumbleG = ac.createGain(), rumbleF = ac.createBiquadFilter();
-      rumbleF.type = 'lowpass'; rumbleF.frequency.value = 90; rumbleF.Q.value = 2;
-      rumble.connect(rumbleF); rumbleF.connect(rumbleG); rumbleG.connect(ac.destination);
-      rumble.type = 'sawtooth'; rumble.frequency.setValueAtTime(38, now); rumble.frequency.linearRampToValueAtTime(55, now + 1.8);
-      rumbleG.gain.setValueAtTime(0, now);
-      rumbleG.gain.linearRampToValueAtTime(0.14, now + 0.5);
-      rumbleG.gain.setValueAtTime(0.14, now + 2.5);
-      rumbleG.gain.linearRampToValueAtTime(0, now + 4.2);
-      rumble.start(now); rumble.stop(now + 4.5);
-
-      // 2. White-noise portal whoosh (sweeps through frequencies)
-      const bufSize = Math.floor(ac.sampleRate * 2.5);
-      const noiseBuffer = ac.createBuffer(1, bufSize, ac.sampleRate);
-      const noiseData = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < bufSize; i++) noiseData[i] = Math.random() * 2 - 1;
-      const noise = ac.createBufferSource(), noiseG = ac.createGain(), noiseF = ac.createBiquadFilter();
-      noiseF.type = 'bandpass'; noiseF.Q.value = 0.6;
-      noiseF.frequency.setValueAtTime(120, now + 0.15);
-      noiseF.frequency.exponentialRampToValueAtTime(5000, now + 1.4);
-      noiseF.frequency.exponentialRampToValueAtTime(12000, now + 2.8);
-      noise.buffer = noiseBuffer;
-      noise.connect(noiseF); noiseF.connect(noiseG); noiseG.connect(ac.destination);
-      noiseG.gain.setValueAtTime(0, now + 0.15);
-      noiseG.gain.linearRampToValueAtTime(0.09, now + 0.5);
-      noiseG.gain.linearRampToValueAtTime(0.04, now + 2.0);
-      noiseG.gain.linearRampToValueAtTime(0, now + 3.2);
-      noise.start(now + 0.15); noise.stop(now + 3.5);
-
-      // 3. Ethereal minor chord — opening portal harmony
-      [[220, 0.065], [261.63, 0.055], [329.63, 0.06], [392, 0.04], [493.88, 0.03]].forEach(([freq, g], i) => {
+      // Stacked sine waves — soft ambient pad
+      [[55, 0.04], [110, 0.03], [165, 0.02], [220, 0.015], [329.63, 0.01]].forEach(([freq, g], i) => {
         const osc = ac.createOscillator(), gain = ac.createGain(), filt = ac.createBiquadFilter();
-        filt.type = 'lowpass'; filt.frequency.value = 1400;
+        filt.type = 'lowpass'; filt.frequency.value = 700;
         osc.connect(filt); filt.connect(gain); gain.connect(ac.destination);
-        osc.type = 'sine'; osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0, now + 0.3 + i * 0.06);
-        gain.gain.linearRampToValueAtTime(g, now + 0.8 + i * 0.06);
-        gain.gain.setValueAtTime(g, now + 2.8);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 4.6);
-        osc.start(now + 0.3); osc.stop(now + 5.0);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(g, now + 0.5 + i * 0.08);
+        gain.gain.linearRampToValueAtTime(g * 0.55, now + 3.5);
+        gain.gain.linearRampToValueAtTime(0, now + 4.8);
+        osc.start(now); osc.stop(now + 5);
       });
-
-      // 4. Crystalline impact ping — portal materialises
-      const ping = ac.createOscillator(), pingG = ac.createGain();
-      ping.connect(pingG); pingG.connect(ac.destination);
-      ping.type = 'sine'; ping.frequency.setValueAtTime(1320, now + 1.0); ping.frequency.exponentialRampToValueAtTime(660, now + 1.8);
-      pingG.gain.setValueAtTime(0, now + 1.0);
-      pingG.gain.linearRampToValueAtTime(0.14, now + 1.06);
-      pingG.gain.exponentialRampToValueAtTime(0.001, now + 2.6);
-      ping.start(now + 1.0); ping.stop(now + 2.8);
-
-      // 5. High shimmer — alien presence sustained
-      const shimmer = ac.createOscillator(), shimmerG = ac.createGain(), shimmerF = ac.createBiquadFilter();
-      shimmerF.type = 'highpass'; shimmerF.frequency.value = 2800;
-      shimmer.connect(shimmerF); shimmerF.connect(shimmerG); shimmerG.connect(ac.destination);
-      shimmer.type = 'triangle'; shimmer.frequency.setValueAtTime(880, now + 1.1); shimmer.frequency.linearRampToValueAtTime(1108, now + 3.5);
-      shimmerG.gain.setValueAtTime(0, now + 1.1);
-      shimmerG.gain.linearRampToValueAtTime(0.028, now + 1.8);
-      shimmerG.gain.linearRampToValueAtTime(0, now + 4.4);
-      shimmer.start(now + 1.1); shimmer.stop(now + 4.6);
-
-    } catch(e) { /* silent fail */ }
+      // Rising synth sweep
+      const sw = ac.createOscillator(), swg = ac.createGain(), swf = ac.createBiquadFilter();
+      swf.type = 'bandpass'; swf.Q.value = 6;
+      swf.frequency.setValueAtTime(40, now + 0.4);
+      swf.frequency.linearRampToValueAtTime(900, now + 1.9);
+      sw.connect(swf); swf.connect(swg); swg.connect(ac.destination);
+      sw.type = 'sawtooth'; sw.frequency.setValueAtTime(25, now + 0.4);
+      sw.frequency.linearRampToValueAtTime(280, now + 1.9);
+      swg.gain.setValueAtTime(0, now + 0.4);
+      swg.gain.linearRampToValueAtTime(0.018, now + 0.9);
+      swg.gain.linearRampToValueAtTime(0, now + 2.1);
+      sw.start(now + 0.4); sw.stop(now + 2.5);
+    } catch(e) {}
   }
 
   // ── Mobile-safe audio init ───────────────────────

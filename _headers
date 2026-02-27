@@ -12,8 +12,8 @@
   # Force HTTPS for 1 year (including subdomains)
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 
-  # Permissions policy — allow microphone for speaking features, restrict everything else
-  Permissions-Policy: microphone=*, camera=(), geolocation=(), payment=(self)
+  # Permissions policy — allow camera + microphone for speaking features, restrict everything else
+  Permissions-Policy: microphone=(self), camera=(self), geolocation=(), payment=(self)
 
   # Allow Google OAuth popups (required for Firebase Google Sign-In)
   Cross-Origin-Opener-Policy: same-origin-allow-popups

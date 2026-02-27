@@ -467,16 +467,10 @@ window.retryCameraAccess = async function() {
 
         // Try with ideal constraints, fall back to basic
         try {
-            localStream = await navigator.mediaDevices.getUserMedia({
-                video: { width: { ideal: 640 }, height: { ideal: 480 } },
-                audio: { echoCancellation: true, noiseSuppression: true }
-            });
-        } catch(constraintErr) {
-            if (['NotAllowedError','PermissionDeniedError','NotFoundError','DevicesNotFoundError','NotReadableError','TrackStartError'].includes(constraintErr.name)) {
-                throw constraintErr;
-            }
-            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        }
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+} catch(basicErr) {
+    throw basicErr;
+}
 
         // ── SUCCESS ──
         console.log('✅ Camera access granted on retry');
@@ -583,16 +577,10 @@ async function startMatching() {
     if (!localStream) {
         try {
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 640 }, height: { ideal: 480 } },
-                    audio: { echoCancellation: true, noiseSuppression: true }
-                });
-            } catch(constraintErr) {
-                if (['NotAllowedError','PermissionDeniedError','NotFoundError','DevicesNotFoundError','NotReadableError','TrackStartError'].includes(constraintErr.name)) {
-                    throw constraintErr;
-                }
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            }
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+} catch(basicErr) {
+    throw basicErr;
+}
         } catch(error) {
             console.error('Early camera request failed:', error.name, error.message);
             cameraErrorContext = 'init';
@@ -829,16 +817,11 @@ async function setupWebRTC(streamAlreadyAcquired = false) {
     if (!localStream) {
         try {
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 640 }, height: { ideal: 480 } },
-                    audio: { echoCancellation: true, noiseSuppression: true }
-                });
-            } catch(constraintError) {
-                if (['NotAllowedError','PermissionDeniedError','NotFoundError','DevicesNotFoundError','NotReadableError','TrackStartError'].includes(constraintError.name)) {
-                    throw constraintError;
-                }
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-            }
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+} catch(basicErr) {
+    throw basicErr;
+}
+        
         } catch(error) {
             console.error('Media access error:', error.name, error.message);
             cameraErrorContext = matchId ? 'session' : 'init';

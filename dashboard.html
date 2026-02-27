@@ -66,6 +66,28 @@
         .empty-state p { font-size: 18px; color: #666; margin-bottom: 30px; }
         .btn-browse { padding: 16px 40px; background: #FF6B35; color: white; text-decoration: none; border-radius: 50px; font-weight: 700; display: inline-block; transition: all 0.3s; }
         .btn-browse:hover { background: #004E89; transform: translateY(-2px); }
+        .my-courses-head { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+        .courses-subtitle { color:#666; font-size:15px; }
+        .course-catalog { margin-top: 22px; }
+        .catalog-title { font-size: 20px; font-weight: 700; color: #1A1A2E; margin: 0 0 14px; }
+        .catalog-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap:18px; }
+        .catalog-card { background: linear-gradient(135deg,#fff,#fff8f5); border:1px solid rgba(255,107,53,0.2); border-radius:16px; padding:20px; box-shadow:0 4px 14px rgba(0,0,0,0.06); }
+        .catalog-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+        .catalog-level { font-size:28px; font-weight:900; color:#FF6B35; }
+        .catalog-badge { font-size:11px; font-weight:700; padding:5px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.04em; }
+        .catalog-badge.available { background:#e8fff4; color:#0f9f63; }
+        .catalog-badge.coming { background:#fff4e8; color:#c76a00; }
+        .catalog-name { font-size:20px; font-weight:700; color:#1A1A2E; margin-bottom:8px; }
+        .catalog-desc { color:#666; font-size:14px; line-height:1.5; min-height:44px; margin-bottom:12px; }
+        .catalog-meta { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+        .catalog-pill { font-size:12px; font-weight:600; color:#1A1A2E; background:#f4f4f8; border-radius:999px; padding:4px 10px; }
+        .catalog-cta { width:100%; display:inline-block; text-align:center; text-decoration:none; padding:11px 14px; border-radius:10px; font-weight:700; }
+        .catalog-cta.open { background:linear-gradient(135deg,#FF6B35,#004E89); color:#fff; }
+        .catalog-cta.wait { background:#eee; color:#777; }
+        .ad-banner { background: linear-gradient(135deg,#1A1A2E,#004E89); border-radius:16px; padding:18px 22px; color:#fff; display:flex; justify-content:space-between; align-items:center; gap:16px; margin-top: 12px; }
+        .ad-banner h4 { font-size:20px; margin-bottom:4px; }
+        .ad-banner p { opacity:.9; font-size:14px; }
+        .ad-banner a { background:#FFD23F; color:#1A1A2E; text-decoration:none; padding:11px 18px; border-radius:30px; font-weight:800; white-space:nowrap; }
         .leaderboard-section { margin-bottom: 40px; }
         .leaderboard-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); }
         .leaderboard-list { list-style: none; }
@@ -99,6 +121,8 @@
             .stat-chip { font-size: 13px; padding: 6px 14px; }
             .courses-grid { grid-template-columns: 1fr; }
             .course-stats { flex-wrap: wrap; gap: 8px; }
+            .ad-banner { flex-direction: column; align-items: flex-start; }
+            .ad-banner a { align-self: stretch; text-align: center; }
             .leaderboard-row { padding: 12px; }
             .lb-score { margin-right: 8px; }
             .sprechen-card-active { padding: 30px 20px; }
@@ -190,6 +214,32 @@ function getCourseUrl(name) {
     return '#';
 }
 function escapeHtml(str) { const d = document.createElement('div'); d.appendChild(document.createTextNode(String(str||''))); return d.innerHTML; }
+
+const COURSE_CATALOG = [
+    { id: 'A1', name: 'A1 Beginner', level: 'A1', desc: 'Build a strong German foundation for daily conversations.', lessons: '40+ lessons', price: '₹6,000', status: 'available', href: 'course-a1.html' },
+    { id: 'A2', name: 'A2 Elementary', level: 'A2', desc: 'Expand grammar and speaking for real-life situations.', lessons: '50+ lessons', price: '₹6,000', status: 'available', href: 'course-a2.html' },
+    { id: 'B1', name: 'B1 Intermediate', level: 'B1', desc: 'Handle complex topics and communicate with confidence.', lessons: '60+ lessons', price: 'Coming soon', status: 'coming', href: 'index.html#courses' },
+    { id: 'B2', name: 'B2 Upper Intermediate', level: 'B2', desc: 'Master advanced German for work and higher studies.', lessons: '70+ lessons', price: 'Coming soon', status: 'coming', href: 'index.html#courses' },
+    { id: 'A1A2', name: 'A1 + A2 Bundle', level: 'Bundle', desc: 'Complete beginner-to-elementary track with best pricing.', lessons: '24 chapters', price: '₹10,000', status: 'available', href: 'course-bundle.html' }
+];
+function isCourseOwned(ownedCourses, catalogItem) {
+    const names = (ownedCourses || []).map(c => String(c || '').toLowerCase());
+    return names.some(n => n.includes(catalogItem.level.toLowerCase()) || n.includes(catalogItem.name.toLowerCase()));
+}
+function renderCatalogCard(item) {
+    const badgeClass = item.status === 'available' ? 'available' : 'coming';
+    const badgeText = item.status === 'available' ? 'Available' : 'Coming Soon';
+    const ctaClass = item.status === 'available' ? 'open' : 'wait';
+    const ctaText = item.status === 'available' ? 'View Course →' : 'Notify Me';
+    const href = item.status === 'available' ? item.href : 'index.html#courses';
+    return '<div class="catalog-card">' +
+        '<div class="catalog-top"><div class="catalog-level">' + escapeHtml(item.level) + '</div><span class="catalog-badge ' + badgeClass + '">' + badgeText + '</span></div>' +
+        '<div class="catalog-name">' + escapeHtml(item.name) + '</div>' +
+        '<div class="catalog-desc">' + escapeHtml(item.desc) + '</div>' +
+        '<div class="catalog-meta"><span class="catalog-pill">📚 ' + escapeHtml(item.lessons) + '</span><span class="catalog-pill">💰 ' + escapeHtml(item.price) + '</span></div>' +
+        '<a class="catalog-cta ' + ctaClass + '" href="' + href + '">' + ctaText + '</a>' +
+    '</div>';
+}
 
 function getWeekId() {
     const now = new Date();
@@ -349,10 +399,14 @@ async function renderDashboard(data) {
             '</div>' +
         '</div>';
 
-    html += '<div class="courses-section"><h2 class="section-heading">My Courses</h2>';
+    html += '<div class="courses-section">' +
+        '<div class="my-courses-head"><h2 class="section-heading" style="margin-bottom:0;">My Courses</h2><p class="courses-subtitle">Owned courses + recommended learning paths</p></div>';
 
     if (!data.enrolledCourses.length) {
-        html += '<div class="empty-state"><h3>No courses yet</h3><p>Start your German learning journey!</p><a href="index.html#courses" class="btn-browse">Browse Courses</a></div>';
+        html += '<div class="empty-state"><h3>No courses yet</h3><p>Start your German learning journey! Explore all available and upcoming programs below.</p><a href="index.html#courses" class="btn-browse">Browse Courses</a></div>';
+        html += '<div class="course-catalog"><h3 class="catalog-title">🎓 Popular Courses You Can Buy</h3><div class="catalog-grid">';
+        for (const item of COURSE_CATALOG) html += renderCatalogCard(item);
+        html += '</div></div>';
     } else {
         html += '<div class="courses-grid">';
         for (const courseName of data.enrolledCourses) {
@@ -368,6 +422,14 @@ async function renderDashboard(data) {
                 '</div>';
         }
         html += '</div>';
+
+        const recommended = COURSE_CATALOG.filter(item => !isCourseOwned(data.enrolledCourses, item));
+        html += '<div class="ad-banner"><div><h4>✨ Continue Your German Journey</h4><p>Unlock your next level with our structured courses and bundle offers.</p></div><a href="index.html#courses">View Offers →</a></div>';
+        if (recommended.length) {
+            html += '<div class="course-catalog"><h3 class="catalog-title">Recommended For You</h3><div class="catalog-grid">';
+            for (const item of recommended) html += renderCatalogCard(item);
+            html += '</div></div>';
+        }
     }
     html += '</div>';
 

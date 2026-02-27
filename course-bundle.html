@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A1 + A2 Bundle | German Made Easy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary:#FF6B35; --secondary:#004E89; --accent:#FFD23F; --dark:#1A1A2E; --border:#e5e7eb; --ok:#10b981; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Outfit',sans-serif; color:var(--dark); background:#fff; }
+    nav { padding:16px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; background:#fff; z-index:9; }
+    .nav-wrap { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
+    .logo { text-decoration:none; font-weight:900; font-size:24px; background:linear-gradient(135deg,var(--primary),var(--secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .btn-back { text-decoration:none; border:2px solid var(--primary); color:var(--primary); border-radius:10px; padding:10px 16px; font-weight:700; }
+    .hero { background:linear-gradient(125deg,#121f44,#004E89); color:#fff; padding:56px 24px; }
+    .hero-inner { max-width:1200px; margin:0 auto; display:grid; gap:28px; grid-template-columns:1.6fr 1fr; align-items:center; }
+    .pill { display:inline-block; background:rgba(255,210,63,0.2); border:1px solid rgba(255,210,63,0.5); color:#ffe08a; padding:8px 14px; border-radius:999px; font-size:12px; letter-spacing:.06em; font-weight:800; text-transform:uppercase; margin-bottom:14px; }
+    h1 { font-size: clamp(34px,5vw,56px); line-height:1.12; margin-bottom:12px; }
+    .hero p { font-size:19px; opacity:.95; margin-bottom:16px; }
+    .meta { display:flex; gap:10px; flex-wrap:wrap; }
+    .meta span { background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.22); border-radius:999px; padding:8px 12px; font-weight:700; font-size:13px; }
+    .price-card { background:#fff; color:var(--dark); border-radius:18px; padding:24px; box-shadow:0 12px 35px rgba(0,0,0,.25); }
+    .strike { color:#94a3b8; text-decoration:line-through; font-size:24px; }
+    .price { font-size:56px; line-height:1; font-weight:900; color:var(--primary); }
+    .save { margin:10px 0 16px; font-weight:800; color:#047857; }
+    .enroll { width:100%; border:none; background:linear-gradient(135deg,var(--primary),var(--secondary)); color:#fff; border-radius:12px; padding:14px; font-size:17px; font-weight:800; cursor:pointer; }
+    .main { max-width:1200px; margin:0 auto; padding:40px 24px 60px; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+    .card { border:1.5px solid var(--border); border-radius:14px; padding:22px; background:#fff; }
+    .card h2 { font-size:24px; margin-bottom:14px; }
+    .card h3 { font-size:18px; margin-bottom:10px; color:#0f172a; }
+    .list { display:grid; gap:8px; }
+    .item { display:flex; gap:10px; align-items:flex-start; font-size:14px; color:#334155; }
+    .item b { color:#111827; }
+    .tick { color:var(--ok); font-weight:900; }
+    .dual { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:22px; }
+    .course-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .badge { font-size:11px; font-weight:800; text-transform:uppercase; border-radius:999px; padding:4px 10px; }
+    .b1 { background:#fff3ed; color:var(--primary); }
+    .b2 { background:#e0efff; color:#004E89; }
+    @media (max-width: 900px){ .hero-inner,.grid,.dual{grid-template-columns:1fr;} }
+  </style>
+  <link rel="stylesheet" href="dark-mode.css">
+</head>
+<body>
+  <nav><div class="nav-wrap"><a class="logo" href="index.html">German Made Easy</a><a class="btn-back" href="index.html#courses">← Back to Courses</a></div></nav>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="pill">Hero Product • Best Value</div>
+        <h1>A1 + A2 Complete German Bundle</h1>
+        <p>Everything from A1 and A2 in one path — build your base, improve fluency, and prepare for Goethe A1/A2 confidently.</p>
+        <div class="meta">
+          <span>24 Chapters</span><span>140+ Lessons</span><span>80+ Hours</span><span>Lifetime Access</span>
+        </div>
+      </div>
+      <div class="price-card">
+        <div class="strike">₹12,000</div>
+        <div class="price">₹10,000</div>
+        <div class="save">Save ₹2,000 on bundle purchase</div>
+        <button class="enroll" onclick="enrollBundle()">Enroll in Bundle →</button>
+      </div>
+    </div>
+  </section>
+
+  <main class="main">
+    <div class="grid">
+      <div class="card">
+        <h2>What You Get</h2>
+        <div class="list">
+          <div class="item"><span class="tick">✓</span><span><b>A1 + A2 full curriculum</b> with structured sequence.</span></div>
+          <div class="item"><span class="tick">✓</span><span><b>Exam-focused training</b> for Goethe A1 and A2 levels.</span></div>
+          <div class="item"><span class="tick">✓</span><span><b>Gujarati-friendly explanations</b> for faster understanding.</span></div>
+          <div class="item"><span class="tick">✓</span><span><b>Practice sheets + homework</b> chapter-wise.</span></div>
+          <div class="item"><span class="tick">✓</span><span><b>Lifetime access</b> with future content updates.</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Bundle Includes</h2>
+        <div class="list">
+          <div class="item"><span class="tick">✓</span><span>A1 Course access (₹6,000 value)</span></div>
+          <div class="item"><span class="tick">✓</span><span>A2 Course access (₹6,000 value)</span></div>
+          <div class="item"><span class="tick">✓</span><span>Combined progression plan (Beginner → Elementary)</span></div>
+          <div class="item"><span class="tick">✓</span><span>Guided revision flow for both levels</span></div>
+          <div class="item"><span class="tick">✓</span><span>Priority support + roadmap templates</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dual">
+      <div class="card">
+        <div class="course-head"><h3>A1 Chapters</h3><span class="badge b1">12 Chapters</span></div>
+        <div class="list">
+          <div class="item"><span class="tick">•</span><span>Greetings and Introductions</span></div>
+          <div class="item"><span class="tick">•</span><span>Family and Friends</span></div>
+          <div class="item"><span class="tick">•</span><span>Food and Drinks</span></div>
+          <div class="item"><span class="tick">•</span><span>Home and Living</span></div>
+          <div class="item"><span class="tick">•</span><span>Daily Routine</span></div>
+          <div class="item"><span class="tick">•</span><span>Hobbies and Free Time</span></div>
+          <div class="item"><span class="tick">•</span><span>Shopping</span></div>
+          <div class="item"><span class="tick">•</span><span>Work and Education</span></div>
+          <div class="item"><span class="tick">•</span><span>Travel and Directions</span></div>
+          <div class="item"><span class="tick">•</span><span>Health and Body</span></div>
+          <div class="item"><span class="tick">•</span><span>Weather and Seasons</span></div>
+          <div class="item"><span class="tick">•</span><span>Review and Exam Preparation</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="course-head"><h3>A2 Chapters</h3><span class="badge b2">12 Chapters</span></div>
+        <div class="list">
+          <div class="item"><span class="tick">•</span><span>Everyday Conversations & Small Talk</span></div>
+          <div class="item"><span class="tick">•</span><span>Appointments, Invitations & Social Plans</span></div>
+          <div class="item"><span class="tick">•</span><span>Housing, Rent & Utilities</span></div>
+          <div class="item"><span class="tick">•</span><span>At the Doctor & Pharmacy</span></div>
+          <div class="item"><span class="tick">•</span><span>Workplace Communication Basics</span></div>
+          <div class="item"><span class="tick">•</span><span>School, Courses & Formal Emails</span></div>
+          <div class="item"><span class="tick">•</span><span>Shopping Problems, Returns & Complaints</span></div>
+          <div class="item"><span class="tick">•</span><span>Travel Planning & Public Transport</span></div>
+          <div class="item"><span class="tick">•</span><span>Past Experiences: Perfekt in Action</span></div>
+          <div class="item"><span class="tick">•</span><span>Future Plans, Goals & Intentions</span></div>
+          <div class="item"><span class="tick">•</span><span>Opinions, Reasons & Comparisons</span></div>
+          <div class="item"><span class="tick">•</span><span>Goethe A2 Speaking + Writing Exam Prep</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    const firebaseConfig = {
+      apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
+      authDomain: "german-made-easy.firebaseapp.com",
+      projectId: "german-made-easy",
+      storageBucket: "german-made-easy.firebasestorage.app",
+      messagingSenderId: "259276936055",
+      appId: "1:259276936055:web:5c9b4916734d0271100772",
+      measurementId: "G-B7JMB0G85L"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    let currentUser = null;
+    onAuthStateChanged(auth, (u) => { currentUser = u; });
+    window.enrollBundle = function(){
+      if (!currentUser) { alert('Please login or sign up first.'); window.location.href = 'login.html'; return; }
+      sessionStorage.setItem('enrollCourse', 'A1+A2 Bundle - Complete German Path');
+      sessionStorage.setItem('enrollAmount', '10000');
+      window.location.href = 'payment.html';
+    };
+  </script>
+</body>
+</html>

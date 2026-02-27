@@ -1226,7 +1226,19 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     }
 
     setMicState('idle');
+
+    // Speak the German reply
     await speakText(aiText);
+
+    // Also speak the correction aloud in English so student hears it, not just reads it
+    // This makes it feel like a real teacher talking, not a quiz
+    if (feedback?.error === true && feedback?.note && feedback.note !== 'null') {
+      const correctionSpeech = `Correction: ${feedback.corrected || ''}. ${feedback.note}`;
+      await speakEnglish(correctionSpeech);
+    } else if (feedback?.pronunciationWord && feedback.pronunciationWord !== 'null'
+               && feedback?.pronunciationNote && feedback.pronunciationNote !== 'null') {
+      await speakEnglish(feedback.pronunciationNote);
+    }
 
   } catch(err) {
     removeThinking();
@@ -1258,14 +1270,34 @@ You are currently playing the role of: ${role}
 Scenario: ${title} — ${desc}
 
 ════════════════════════════════════
-IDENTITY & TONE
+LANGUAGE RULES — CRITICAL
+════════════════════════════════════
+- Your German REPLY field: always in German (you are playing the role)
+- ALL feedback fields (note, praise, pronunciationNote): ALWAYS in ENGLISH only
+- NEVER write feedback, corrections, or pronunciation tips in German
+- The student is A1/A2 level — they cannot understand German explanations
+
+════════════════════════════════════
+IDENTITY & TONE — BE A TEACHER, NOT A QUIZ
 ════════════════════════════════════
 - You are warm, encouraging, but EXTREMELY precise. You never let a single error slide.
-- You are not a chatbot. You are a respected teacher who happens to speak German fluently.
-- Students trust you because you tell the truth, not what they want to hear.
+- You are NOT running a quiz. You are having a REAL CONVERSATION with a student.
+- Think of yourself as a friendly German teacher who is also playing a role.
+- After correcting, CONTINUE the conversation naturally — don't just stop and wait.
+- Ask follow-up questions within the scenario to keep things flowing.
+- React like a real person in the role would: surprised, helpful, curious, friendly.
 - Never use hollow praise like "Great job!" unless it is genuinely great.
 - Always balance one correction with one genuine encouragement.
 - If the student seems frustrated or confused, slow down and simplify.
+
+════════════════════════════════════
+CONVERSATIONAL FLOW RULES
+════════════════════════════════════
+- Your German reply should ALWAYS move the conversation forward naturally.
+- Never give one-word replies. Always keep the scene alive with a follow-up.
+- After correcting a pronunciation error in feedback, your German reply should naturally USE the correct word so the student hears it via TTS.
+- The conversation should feel like being in Germany, not like a classroom test.
+- React to the CONTENT of what the student says, not just the grammar.
 
 ════════════════════════════════════
 GUJARATI SPEAKER PROFILE
@@ -1320,11 +1352,15 @@ CORRECTION RULES — NEVER BREAK THESE
 ════════════════════════════════════
 PRONUNCIATION ASSESSMENT (AUDIO ONLY)
 ════════════════════════════════════
-When you receive audio input:
-- Listen carefully for the specific Gujarati-speaker errors listed above.
+When you receive audio input, listen VERY carefully for these specific issues:
+- "möchte" said as "mökhte" or "mokhte" → WRONG. Correct is "MÖCH-teh" — the ch is a soft palatal sound like in "ich", not a hard kh/k sound. Flag this immediately.
+- "ich" said as "ish" → WRONG. The ch in ich is a soft hiss from mid-mouth, not a sh sound.
+- "ü" said as "u" → WRONG. Round your lips like saying "oo" but try to say "ee".
+- "ö" said as "o" → WRONG. Round lips like "o" but try to say "e".
 - Pick the ONE most critical pronunciation issue from this response.
-- Give a specific, actionable tip. Not vague ("work on your pronunciation") — specific ("You said 'ish' for 'ich' — the correct sound is a soft 'kh' made at the back of the throat, not 'sh' at the front").
-- If pronunciation was good, say so in the pronunciationNote field with "Good pronunciation ✓".
+- Give a tip in plain simple English. Be specific and actionable.
+- ALWAYS write pronunciationNote in ENGLISH, never German.
+- If pronunciation was genuinely good, write "Good pronunciation ✓" in pronunciationNote.
 
 ════════════════════════════════════
 RESPONSE FORMAT — ALWAYS RETURN VALID JSON
@@ -1475,6 +1511,35 @@ function speakText(text) {
   });
 }
 
+// ── Speak English feedback aloud ─────────────────────────────────
+// Called after German reply to voice corrections like a real teacher
+function speakEnglish(text) {
+  return new Promise((resolve) => {
+    if (!window.speechSynthesis) { resolve(); return; }
+    // Small pause before speaking correction — feels natural
+    setTimeout(() => {
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.lang = 'en-GB'; // British English sounds clear and teacherly
+      utt.rate = 0.9;
+      utt.pitch = 1.0;
+      const doSpeak = () => {
+        const voices = window.speechSynthesis.getVoices();
+        const engVoice =
+          voices.find(v => v.lang === 'en-GB' && /Natural|Neural|Enhanced|Premium/.test(v.name)) ||
+          voices.find(v => v.lang === 'en-GB') ||
+          voices.find(v => v.lang.startsWith('en'));
+        if (engVoice) utt.voice = engVoice;
+        utt.onend = () => resolve();
+        utt.onerror = () => resolve();
+        window.speechSynthesis.speak(utt);
+        setTimeout(() => resolve(), Math.max(2000, text.length * 65));
+      };
+      if (window.speechSynthesis.getVoices().length > 0) doSpeak();
+      else { window.speechSynthesis.onvoiceschanged = doSpeak; }
+    }, 600); // 600ms pause after German reply before English correction
+  });
+}
+
 // ── UI helpers ────────────────────────────────────────────────────
 // UPGRADED: supports isTranscription flag for voice input display
 function appendMessage(who, text, feedback, isTranscription = false) {
@@ -1492,10 +1557,10 @@ function appendMessage(who, text, feedback, isTranscription = false) {
   let fb = '';
   if (feedback && inlineFeedbackOn && who === 'ai') {
 
-    // Show correction card if there's an error
-    if (feedback.error && feedback.corrected) {
+    // Show correction card ONLY if error is true AND corrected is a real string (not null)
+    if (feedback.error === true && feedback.corrected && feedback.corrected !== 'null') {
       const repeatedBadge = feedback.isRepeatedMistake
-        ? `<div style="font-size:0.72rem; color:#ff8b8b; margin-bottom:0.4rem; font-weight:600;">⚠️ Repeated mistake — this is a pattern to fix!</div>`
+        ? `<div style="font-size:0.72rem; color:#ff8b8b; margin-bottom:0.4rem; font-weight:600;">⚠️ Repeated mistake — fix this before your exam!</div>`
         : '';
       fb += `<div class="feedback-correction-card">
         <div class="corr-label">Correction</div>
@@ -1506,13 +1571,14 @@ function appendMessage(who, text, feedback, isTranscription = false) {
       </div>`;
     }
 
-    // Show praise if present
-    if (feedback.praise) {
+    // Show praise ONLY if it's a real string (not null)
+    if (feedback.praise && feedback.praise !== 'null') {
       fb += `<div class="feedback-praise-card">✓ ${escHtml(feedback.praise)}</div>`;
     }
 
-    // Show pronunciation tip if present
-    if (feedback.pronunciationWord && feedback.pronunciationNote) {
+    // Show pronunciation tip ONLY if both word and note are real strings (not null)
+    if (feedback.pronunciationWord && feedback.pronunciationWord !== 'null'
+      && feedback.pronunciationNote && feedback.pronunciationNote !== 'null') {
       fb += `<div class="feedback-pronunciation">🗣️ <strong>${escHtml(feedback.pronunciationWord)}:</strong> ${escHtml(feedback.pronunciationNote)}</div>`;
     }
   }
@@ -1912,7 +1978,6 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
     e.stopPropagation(); tryPlayIntroSound(); skipIntro();
   });
   introEl.addEventListener('click', skipIntro);
-})();
-</script>
+})();</script>
 </body>
 </html>

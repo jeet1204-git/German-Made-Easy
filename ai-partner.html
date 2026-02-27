@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aura — German Made Easy</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --ink: #1a1209;
@@ -300,6 +300,268 @@
   .correction-ack-btn:hover { background: var(--forest); }
   /* Disabled input state while ack pending */
   .input-area.awaiting-ack { opacity: 0.38; pointer-events: none; }
+
+  /* 2070 Dark UI Override */
+  :root {
+    --bg-void: #080A0F;
+    --surface-1: #0D1117;
+    --surface-2: #111827;
+    --text-primary: #E8EAF0;
+    --text-muted: #6B7280;
+    --accent-cyan: #00F5FF;
+    --accent-gold: #C9A84C;
+    --accent-violet: #7B61FF;
+  }
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: radial-gradient(circle at 15% 10%, rgba(123,97,255,0.12), transparent 30%), radial-gradient(circle at 80% 12%, rgba(0,245,255,0.08), transparent 26%), var(--bg-void);
+    color: var(--text-primary);
+  }
+  body::before {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(0,245,255,0.1) 0 2px, transparent 3px),
+      radial-gradient(circle at 80% 70%, rgba(123,97,255,0.14) 0 2px, transparent 3px),
+      linear-gradient(rgba(0,245,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.05) 1px, transparent 1px);
+    background-size: auto, auto, 48px 48px, 48px 48px;
+    animation: gridDrift 22s linear infinite;
+    opacity: 0.35;
+  }
+  .topbar {
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: rgba(13,17,23,0.72);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 1px 0 rgba(0,245,255,0.3), 0 0 24px rgba(0,245,255,0.08);
+  }
+  .topbar-title { font-family: 'Space Grotesk', sans-serif; letter-spacing: 0.03em; }
+  .topbar-sub, .hero-eyebrow, .user-badge, #user-name, .topbar-back, .trial-counter-badge, .scenario-desc {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .topbar-sub { color: rgba(232,234,240,0.6); letter-spacing: 0.16em; font-size: 0.68rem; }
+  .topbar-logo { position: relative; }
+  .topbar-logo::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--accent-cyan);
+    box-shadow: 0 0 12px var(--accent-cyan);
+    animation: onlinePulse 1.8s ease infinite;
+  }
+  .topbar-user { gap: 0.7rem; }
+  #user-name { color: var(--text-primary) !important; font-size: 0.78rem !important; }
+  .user-badge { background: rgba(123,97,255,0.28); color: #d8ddff; border: 1px solid rgba(123,97,255,0.45); }
+  .topbar-back { color: var(--text-muted); }
+  .topbar-back:hover { color: var(--accent-cyan); }
+  .container { max-width: 980px; padding-top: 2.4rem; }
+  .hero { position: relative; padding: 2.5rem 1.2rem 1.8rem; isolation: isolate; }
+  .hero::before, .hero::after { content: ''; position: absolute; border-radius: 50%; filter: blur(50px); z-index: -1; }
+  .hero::before { width: 240px; height: 240px; background: rgba(0,245,255,0.2); left: 10%; top: 0; animation: floatOrb 7s ease-in-out infinite; }
+  .hero::after { width: 260px; height: 260px; background: rgba(123,97,255,0.18); right: 8%; bottom: -10px; animation: floatOrb 9s ease-in-out infinite reverse; }
+  .hero-eyebrow {
+    display: inline-flex;
+    background: rgba(17,24,39,0.82);
+    border: 1px solid rgba(0,245,255,0.4);
+    border-radius: 999px;
+    padding: 0.45rem 0.95rem;
+    color: #b7f8ff;
+    box-shadow: 0 0 22px rgba(0,245,255,0.2);
+    backdrop-filter: blur(8px);
+  }
+  .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.5rem, 5.4vw, 4.2rem); margin-bottom: 1rem; }
+  .hero h1 span {
+    background: linear-gradient(110deg, var(--accent-gold), var(--accent-cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 24px rgba(0,245,255,0.15);
+  }
+  .hero p { color: #a7b1c2; animation: shimmerText 5.6s linear infinite; }
+  .setup-card {
+    background: linear-gradient(145deg, rgba(13,17,23,0.94), rgba(17,24,39,0.87));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    box-shadow: 0 14px 34px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+    backdrop-filter: blur(8px);
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+    will-change: transform, box-shadow;
+  }
+  .setup-card:hover { transform: scale(1.01); border-color: rgba(0,245,255,0.4); box-shadow: 0 0 0 1px rgba(0,245,255,0.18), 0 18px 38px rgba(0,0,0,0.45), 0 0 26px rgba(0,245,255,0.14); }
+  .setup-card h3 { color: var(--text-primary); font-family: 'Space Grotesk', sans-serif; }
+  .level-tabs, .input-mode-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .level-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 0.55rem; }
+  .level-tab, .mode-tab {
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(17,24,39,0.5);
+    color: #9ca4b3;
+    transition: all 200ms ease;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .level-tab:hover, .mode-tab:hover { border-color: rgba(0,245,255,0.65); box-shadow: 0 0 0 1px rgba(0,245,255,0.35), 0 0 16px rgba(0,245,255,0.15); color: #d8fafe; }
+  .level-tab.active, .mode-tab.active {
+    color: #effcff;
+    border-color: rgba(0,245,255,0.5);
+    background: radial-gradient(circle at 20% 20%, rgba(0,245,255,0.36), rgba(123,97,255,0.28) 55%, rgba(13,17,23,0.9));
+    box-shadow: 0 0 20px rgba(0,245,255,0.2);
+  }
+  .level-indicator { display: flex; gap: 0.35rem; justify-content: center; }
+  .level-indicator span { width: 18px; height: 4px; border-radius: 999px; background: rgba(255,255,255,0.16); transition: 0.25s; }
+  .level-indicator span.active { background: var(--accent-cyan); box-shadow: 0 0 12px var(--accent-cyan); }
+  .sr-badge {
+    background: linear-gradient(120deg, rgba(123,97,255,0.45), rgba(0,245,255,0.35), rgba(201,168,76,0.45));
+    color: #eef4ff;
+    border: 1px solid rgba(255,255,255,0.2);
+    animation: holoShimmer 2.8s linear infinite;
+  }
+  .scenario-head { display: flex; align-items: center; gap: 0.6rem; }
+  #scenario-emoji { font-size: 1.35rem; animation: bounceSoft 3.8s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(0,245,255,0.45)); }
+  .scenario-select {
+    background-color: rgba(10,14,22,0.9);
+    color: var(--text-primary);
+    border-color: rgba(0,245,255,0.22);
+    border-radius: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .scenario-select:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 2px rgba(0,245,255,0.22), 0 0 14px rgba(0,245,255,0.2); }
+  .scenario-desc {
+    margin-top: 0.8rem;
+    border-left: 2px solid rgba(0,245,255,0.7);
+    padding-left: 0.8rem;
+    color: #8f99ab;
+    font-style: normal;
+  }
+  #trial-counter-wrap { margin-bottom: 1rem; }
+  .trial-counter-badge {
+    color: #f5cf87;
+    background: rgba(201,168,76,0.12);
+    border-color: rgba(201,168,76,0.45);
+    padding: 0.38rem 0.82rem;
+    letter-spacing: 0.05em;
+    animation: warningPulse 2.4s ease-in-out infinite;
+  }
+  .start-btn {
+    position: relative;
+    height: 64px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #f1f8ff;
+    background: linear-gradient(115deg, rgba(0,245,255,0.92), rgba(123,97,255,0.92), rgba(201,168,76,0.9));
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 14px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.45), 0 0 24px rgba(0,245,255,0.25), 0 0 38px rgba(201,168,76,0.2);
+    overflow: hidden;
+    will-change: transform;
+  }
+  .start-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(120deg, transparent 25%, rgba(255,255,255,0.45) 50%, transparent 75%);
+    transform: translateX(-140%);
+    transition: transform 420ms ease;
+  }
+  .start-btn:hover { transform: translateY(-1px) scale(1.01); }
+  .start-btn:hover::before { transform: translateX(140%); }
+  .start-btn:hover .cta-icon { animation: iconPulse 0.9s ease-in-out infinite; }
+  #session-panel { color: var(--text-primary); }
+  .session-header { border-bottom-color: rgba(232,234,240,0.28); }
+  .session-info h2 { font-family: 'Space Grotesk', sans-serif; color: #f6f8ff; }
+  .session-info p { color: #a6b0c2; font-family: 'JetBrains Mono', monospace; }
+  .session-timer { color: #f5fbff; text-shadow: 0 0 12px rgba(0,245,255,0.25); }
+  .session-timer.warning { color: #ff8a8a; }
+  .role-card {
+    background: linear-gradient(140deg, rgba(35,24,8,0.95), rgba(23,17,11,0.92));
+    border: 1px solid rgba(201,168,76,0.25);
+    box-shadow: 0 0 20px rgba(201,168,76,0.1);
+  }
+  .role-avatar { box-shadow: 0 0 18px rgba(201,168,76,0.22); }
+  .role-info h3 { color: #ffe2a2; font-family: 'Space Grotesk', sans-serif; }
+  .role-info p { color: #f2f5ff; opacity: 0.95; }
+  .conversation-box {
+    background: linear-gradient(160deg, rgba(11,16,26,0.98), rgba(15,22,35,0.96));
+    border-color: rgba(157,168,186,0.38);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .msg.ai .msg-avatar { background: rgba(0,245,255,0.17); color: #a4f9ff; border: 1px solid rgba(0,245,255,0.35); }
+  .msg.user .msg-avatar { background: rgba(123,97,255,0.3); border: 1px solid rgba(123,97,255,0.45); }
+  .msg.ai .msg-bubble {
+    background: rgba(13,23,36,0.96);
+    border-color: rgba(0,245,255,0.24);
+    color: #eaf5ff;
+  }
+  .msg.user .msg-bubble {
+    background: linear-gradient(130deg, rgba(0,245,255,0.28), rgba(123,97,255,0.3));
+    border: 1px solid rgba(0,245,255,0.3);
+    color: #f9fcff;
+  }
+  .msg-time { color: #95a2b8; }
+  #text-input {
+    color: #f2f6ff;
+    background: rgba(13,19,30,0.95);
+    border-color: rgba(157,168,186,0.35);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  #text-input::placeholder { color: #9aa6bb; }
+  #text-input:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 2px rgba(0,245,255,0.2); }
+  .mic-btn {
+    background: rgba(13,19,30,0.96);
+    color: #d7e7ff;
+    border-color: rgba(157,168,186,0.38);
+  }
+  .mic-btn:hover:not(.recording):not(.processing):not(.waiting) {
+    border-color: rgba(0,245,255,0.5);
+    color: #e9fbff;
+    background: rgba(18,28,43,0.98);
+  }
+  .send-btn {
+    background: linear-gradient(140deg, rgba(201,168,76,0.95), rgba(148,107,25,0.95));
+    color: #1b1205;
+    box-shadow: 0 6px 16px rgba(201,168,76,0.25);
+  }
+  .send-btn:hover { background: linear-gradient(140deg, #e1bf69, #a6771d); color: #140d03; }
+  .ctrl-btn {
+    background: rgba(18,26,41,0.94);
+    color: #e8eefc;
+    border-color: rgba(157,168,186,0.4);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .ctrl-btn:hover { background: rgba(29,42,64,0.95); border-color: rgba(0,245,255,0.35); }
+  .ctrl-btn.danger { border-color: rgba(255,115,115,0.6); color: #ffb2b2; }
+  .ctrl-btn.danger:hover { background: rgba(145,38,38,0.85); color: #fff4f4; }
+  .ai-speaking-banner { background: rgba(10,26,37,0.92); border: 1px solid rgba(0,245,255,0.3); color: #c6f8ff; }
+  .recording-status { background: rgba(74,15,15,0.66); border-color: rgba(255,138,138,0.7); color: #ffd6d6; }
+  .processing-status { background: rgba(11,35,71,0.65); border-color: rgba(96,165,250,0.65); color: #d8eaff; }
+  .set-fade { animation: setFadeUp .55s ease both; }
+  .interactive { will-change: transform, box-shadow; }
+  .interactive:hover { transform: scale(1.01); }
+  @keyframes gridDrift { from { background-position: 0 0, 0 0, 0 0, 0 0; } to { background-position: 0 0, 0 0, 48px 48px, 48px 48px; } }
+  @keyframes onlinePulse { 0%,100% { opacity: 0.7; } 50% { opacity: 1; box-shadow: 0 0 18px var(--accent-cyan); } }
+  @keyframes floatOrb { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+  @keyframes warningPulse { 0%,100% { box-shadow: 0 0 0 rgba(201,168,76,0); } 50% { box-shadow: 0 0 14px rgba(201,168,76,0.35); } }
+  @keyframes holoShimmer { 0% { filter: brightness(0.9); } 50% { filter: brightness(1.2); } 100% { filter: brightness(0.9); } }
+  @keyframes shimmerText { 0%,100% { opacity: 0.9; } 50% { opacity: 1; text-shadow: 0 0 10px rgba(0,245,255,0.15); } }
+  @keyframes bounceSoft { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-4px);} }
+  @keyframes iconPulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.1) rotate(10deg);} }
+  @keyframes setFadeUp { from { opacity: 0; transform: translateY(20px);} to { opacity: 1; transform: translateY(0);} }
+  @media (max-width: 720px) {
+    .topbar { padding: 0.85rem 1rem; }
+    .topbar-user { gap: 0.45rem; }
+    .topbar-back { display: none; }
+    .hero { padding-top: 1rem; }
+    .hero h1 { font-size: clamp(2.1rem, 11vw, 2.9rem); }
+    .mode-tab { font-size: 0.76rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
 </style>
 <link rel="stylesheet" href="dark-mode.css">
 </head>
@@ -335,7 +597,7 @@
 </div>
 
 <div id="main-app" style="display:none;">
-  <div class="topbar">
+  <div class="topbar set-fade">
     <div class="topbar-brand">
       <div class="topbar-logo" style="background:none;padding:0;overflow:visible;width:38px;height:38px;">
         <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 5px rgba(0,240,255,0.45));">
@@ -352,7 +614,7 @@
     <div class="topbar-user">
       <span class="user-badge" id="level-badge">A1</span>
       <span id="user-name" style="font-size:0.85rem; color:var(--muted);"></span>
-      <a href="/dashboard.html" class="topbar-back">← Dashboard</a>
+      <a href="/dashboard.html" class="topbar-back interactive" data-sound="hover">← Dashboard</a>
     </div>
   </div>
 
@@ -360,30 +622,31 @@
 
     <!-- SETUP PANEL -->
     <div id="setup-panel">
-      <div class="hero">
+      <div class="hero set-fade">
         <div class="hero-eyebrow">✦ AURA — AI CONVERSATION PARTNER</div>
         <h1>Meet Aura.<br><span>Your AI German companion.</span></h1>
         <p>Aura plays real Goethe &amp; TELC exam roles — speak or type in German, get instant corrections, and earn a scored evaluation.</p>
       </div>
-      <div class="setup-grid">
+      <div class="setup-grid set-fade">
         <div class="setup-card">
           <h3><span>📚</span> Your Level</h3>
           <div class="level-tabs">
-            <div class="level-tab active" onclick="setLevel('A1')">A1 Beginner</div>
-            <div class="level-tab" onclick="setLevel('A2')">A2 Elementary</div>
+            <div class="level-tab active interactive" onclick="setLevel('A1')" data-sound="click">A1 Beginner</div>
+            <div class="level-tab interactive" onclick="setLevel('A2')" data-sound="click">A2 Elementary</div>
           </div>
+          <div class="level-indicator"><span class="active" id="level-dot-a1"></span><span id="level-dot-a2"></span></div>
         </div>
         <div class="setup-card">
           <h3><span>🎙️</span> Input Mode <span class="sr-badge">Deepgram AI</span></h3>
           <div class="input-mode-tabs">
-            <div class="mode-tab active" onclick="setInputMode('both')">🎙️ + ⌨️ Both</div>
-            <div class="mode-tab" onclick="setInputMode('voice')">🎙️ Voice only</div>
-            <div class="mode-tab" onclick="setInputMode('text')">⌨️ Type only</div>
+            <div class="mode-tab active interactive" onclick="setInputMode('both')" data-sound="click"><span class="cta-icon">🎙️</span> + <span class="cta-icon">⌨️</span> Both</div>
+            <div class="mode-tab interactive" onclick="setInputMode('voice')" data-sound="click"><span class="cta-icon">🎙️</span> Voice only</div>
+            <div class="mode-tab interactive" onclick="setInputMode('text')" data-sound="click"><span class="cta-icon">⌨️</span> Type only</div>
           </div>
         </div>
         <div class="setup-card" style="grid-column: 1 / -1;">
-          <h3><span>🎭</span> Choose a Scenario</h3>
-          <select class="scenario-select" id="scenario-select" onchange="onScenarioChange()">
+          <h3 class="scenario-head"><span id="scenario-emoji">🛒</span> Choose a Scenario</h3>
+          <select class="scenario-select interactive" id="scenario-select" onchange="onScenarioChange()" data-sound="click">
             <optgroup label="— A1 Scenarios —">
               <option value="a1_shop" data-level="A1" data-role="Shopkeeper" data-emoji="🛒" data-desc="You're a customer at a German supermarket. Ask for items, quantities, and prices.">🛒 At the Supermarket</option>
               <option value="a1_doctor" data-level="A1" data-role="Doctor" data-emoji="🏥" data-desc="You're at a German GP clinic. Describe your symptoms and understand basic advice.">🏥 At the Doctor</option>
@@ -411,7 +674,7 @@
       <div id="trial-counter-wrap">
         <span class="trial-counter-badge" id="trial-counter-text"></span>
       </div>
-      <button class="start-btn" onclick="startSession()">🎬 Start Conversation</button>
+      <button class="start-btn interactive" onclick="startSession()" data-sound="click"><span class="cta-icon">✦</span> Start Conversation</button>
     </div>
 
     <!-- SESSION PANEL -->
@@ -639,6 +902,8 @@ window.setLevel = (l) => {
   selectedLevel = l;
   document.querySelectorAll('.level-tab').forEach(t => t.classList.toggle('active', t.textContent.startsWith(l)));
   document.getElementById('level-badge').textContent = l;
+  document.getElementById('level-dot-a1').classList.toggle('active', l === 'A1');
+  document.getElementById('level-dot-a2').classList.toggle('active', l === 'A2');
 };
 window.setInputMode = (m) => {
   playUISound('click');
@@ -648,7 +913,9 @@ window.setInputMode = (m) => {
 };
 window.onScenarioChange = () => {
   const sel = document.getElementById('scenario-select');
-  document.getElementById('scenario-desc').textContent = sel.options[sel.selectedIndex].dataset.desc || '';
+  const current = sel.options[sel.selectedIndex];
+  document.getElementById('scenario-desc').textContent = current.dataset.desc || '';
+  document.getElementById('scenario-emoji').textContent = current.dataset.emoji || '🎭';
 };
 
 // ── Start session ─────────────────────────────────────────────────

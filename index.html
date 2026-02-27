@@ -590,66 +590,71 @@
 
         /* Combo Offer */
         .combo-offer {
-            max-width: 1000px;
-            margin: 80px auto 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 30px;
-            padding: 60px 40px;
+            max-width: 1100px;
+            margin: 90px auto 0;
+            background: radial-gradient(circle at 10% 10%, rgba(255,210,63,0.22), transparent 35%),
+                        radial-gradient(circle at 90% 0%, rgba(255,107,53,0.22), transparent 35%),
+                        linear-gradient(120deg, #130f40 0%, #1A1A2E 45%, #004E89 100%);
+            border-radius: 32px;
+            padding: 66px 46px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            border: 2px solid rgba(255,210,63,0.38);
+            box-shadow: 0 18px 45px rgba(0,0,0,0.28), 0 0 35px rgba(255,210,63,0.2);
         }
-        
         .combo-offer::before {
-            content: '🎉';
+            content: '';
             position: absolute;
-            font-size: 200px;
-            opacity: 0.1;
-            top: -50px;
-            right: -50px;
+            inset: 0;
+            background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.15) 50%, transparent 65%);
+            transform: translateX(-130%);
+            animation: comboShine 3.6s linear infinite;
         }
-        
+        @keyframes comboShine { to { transform: translateX(130%); } }
         .combo-offer h2 {
             color: white;
-            font-size: clamp(32px, 5vw, 48px);
+            font-size: clamp(36px, 5vw, 56px);
             font-weight: 900;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            position: relative;
+            text-shadow: 0 0 24px rgba(255,210,63,0.25);
         }
-        
-        .combo-offer p {
-            color: rgba(255, 255, 255, 0.95);
+        .combo-offer .combo-tagline {
+            color: #dbeafe;
             font-size: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 18px;
+            position: relative;
         }
-        
+        .combo-highlight {
+            display: inline-block;
+            margin-bottom: 24px;
+            background: rgba(255,210,63,0.16);
+            border: 1px solid rgba(255,210,63,0.5);
+            color: #ffe08a;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            position: relative;
+        }
         .combo-pricing {
             display: flex;
-            align-items: center;
+            align-items: baseline;
             justify-content: center;
-            gap: 30px;
-            margin-bottom: 40px;
+            gap: 24px;
+            margin-bottom: 26px;
             flex-wrap: wrap;
+            position: relative;
         }
-        
-        .old-price {
-            font-size: 28px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: line-through;
-        }
-        
-        .new-price {
-            font-size: 64px;
-            font-weight: 900;
-            color: var(--accent);
-        }
-        
-        .savings {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px 20px;
-            border-radius: 20px;
-            color: white;
-            font-weight: 700;
-        }
+        .old-price { font-size: 36px; color: rgba(255, 255, 255, 0.58); text-decoration: line-through; }
+        .new-price { font-size: clamp(58px, 9vw, 84px); font-weight: 900; color: var(--accent); text-shadow: 0 0 26px rgba(255,210,63,0.28); }
+        .savings { background: rgba(255, 255, 255, 0.16); padding: 10px 20px; border-radius: 999px; color: #fff; font-weight: 800; }
+        .combo-feature-row { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:30px; position:relative; }
+        .combo-pill { background: rgba(255,255,255,0.12); color:#f8fafc; border:1px solid rgba(255,255,255,0.22); border-radius:999px; padding:8px 14px; font-size:13px; font-weight:700; }
+        .combo-cta-wrap { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; position:relative; }
 
         /* Testimonials */
         .testimonials {
@@ -1032,6 +1037,13 @@
             .combo-offer {
                 padding: 40px 20px;
             }
+            .combo-cta-wrap {
+                flex-direction: column;
+            }
+            .combo-cta-wrap .btn-primary,
+            .combo-cta-wrap .btn-secondary {
+                width: 100%;
+            }
 
             .contact-container {
                 padding: 40px 20px;
@@ -1304,7 +1316,7 @@
             <!-- A2 -->
             <div class="course-card">
                 <div class="course-header">
-                    <div class="badge badge-coming">Coming Soon</div>
+                    <div class="badge badge-available">Available Now</div>
                     <div class="course-level">A2</div>
                     <div class="course-name">Elementary</div>
                 </div>
@@ -1328,7 +1340,12 @@
                             Lifetime access
                         </li>
                     </ul>
-                    <button class="course-btn course-btn-disabled" disabled>Coming Soon</button>
+                    <div style="display: flex; gap: 10px; flex-direction: column;">
+                        <button class="course-btn" style="background: var(--secondary); color: white; font-weight: 700;" onclick="window.location.href='course-a2.html'">
+                            View Course Details →
+                        </button>
+                        <button class="course-btn course-btn-enroll" onclick="enrollCourse('A2 Course', 6000)">Enroll Now - ₹6,000</button>
+                    </div>
                 </div>
             </div>
 
@@ -1397,16 +1414,24 @@
 
         <!-- Combo Offer -->
         <div class="combo-offer">
-            <h2>🎉 Special Launch Offer</h2>
-            <p>Get A1 + A2 Bundle and Save Big!</p>
+            <div class="combo-highlight">Hero Product • Best Value</div>
+            <h2>🚀 A1 + A2 Power Bundle</h2>
+            <p class="combo-tagline">From complete beginner to confident everyday German — all in one premium track.</p>
             <div class="combo-pricing">
                 <span class="old-price">₹12,000</span>
                 <span class="new-price">₹10,000</span>
                 <span class="savings">Save ₹2,000</span>
             </div>
-            <button class="btn-primary" style="background: var(--accent); color: var(--dark);" onclick="enrollCourse('A1+A2 Bundle', 10000)">
-                Get Bundle Now →
-            </button>
+            <div class="combo-feature-row">
+                <span class="combo-pill">📚 24 Chapters</span>
+                <span class="combo-pill">🎥 140+ Lessons</span>
+                <span class="combo-pill">♾️ Lifetime Access</span>
+                <span class="combo-pill">🧪 Exam Practice + Templates</span>
+            </div>
+            <div class="combo-cta-wrap">
+                <button class="btn-primary" style="background: var(--accent); color: var(--dark);" onclick="window.location.href='course-bundle.html'">View Bundle Details →</button>
+                <button class="btn-secondary" style="border-color:rgba(255,255,255,0.55); color:white;" onclick="enrollCourse('A1+A2 Bundle', 10000)">Get Bundle Now</button>
+            </div>
         </div>
     </section>
 

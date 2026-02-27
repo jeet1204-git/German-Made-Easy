@@ -217,9 +217,10 @@ function escapeHtml(str) { const d = document.createElement('div'); d.appendChil
 
 const COURSE_CATALOG = [
     { id: 'A1', name: 'A1 Beginner', level: 'A1', desc: 'Build a strong German foundation for daily conversations.', lessons: '40+ lessons', price: '₹6,000', status: 'available', href: 'course-a1.html' },
-    { id: 'A2', name: 'A2 Elementary', level: 'A2', desc: 'Expand grammar and speaking for real-life situations.', lessons: '50+ lessons', price: 'Coming soon', status: 'coming', href: 'index.html#courses' },
+    { id: 'A2', name: 'A2 Elementary', level: 'A2', desc: 'Expand grammar and speaking for real-life situations.', lessons: '50+ lessons', price: '₹6,000', status: 'available', href: 'course-a2.html' },
     { id: 'B1', name: 'B1 Intermediate', level: 'B1', desc: 'Handle complex topics and communicate with confidence.', lessons: '60+ lessons', price: 'Coming soon', status: 'coming', href: 'index.html#courses' },
-    { id: 'B2', name: 'B2 Upper Intermediate', level: 'B2', desc: 'Master advanced German for work and higher studies.', lessons: '70+ lessons', price: 'Coming soon', status: 'coming', href: 'index.html#courses' }
+    { id: 'B2', name: 'B2 Upper Intermediate', level: 'B2', desc: 'Master advanced German for work and higher studies.', lessons: '70+ lessons', price: 'Coming soon', status: 'coming', href: 'index.html#courses' },
+    { id: 'A1A2', name: 'A1 + A2 Bundle', level: 'Bundle', desc: 'Complete beginner-to-elementary track with best pricing.', lessons: '24 chapters', price: '₹10,000', status: 'available', href: 'course-bundle.html' }
 ];
 function isCourseOwned(ownedCourses, catalogItem) {
     const names = (ownedCourses || []).map(c => String(c || '').toLowerCase());

@@ -6,1012 +6,555 @@
     <title>A2 Course - Elementary German | German Made Easy</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Noto+Sans+Gujarati:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary: #FF6B35;
-            --secondary: #004E89;
-            --accent: #FFD23F;
-            --dark: #1A1A2E;
-            --light: #F5F5F5;
-            --border: #e0e0e0;
-            --success: #10b981;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            color: var(--dark);
-            background: #fff;
-            line-height: 1.6;
-        }
-
-        /* Navigation */
-        nav {
-            background: white;
-            border-bottom: 1px solid var(--border);
-            padding: 16px 24px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-decoration: none;
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-        }
-
-        .btn-back {
-            padding: 10px 20px;
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .btn-back:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Hero */
-        .hero {
-            background: linear-gradient(135deg, var(--secondary) 0%, #003366 100%);
-            color: white;
-            padding: 40px 24px;
-        }
-
-        .hero-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 40px;
-            align-items: center;
-        }
-
-        .breadcrumb {
-            font-size: 14px;
-            margin-bottom: 16px;
-            opacity: 0.9;
-        }
-
-        .breadcrumb a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .hero h1 {
-            font-size: 42px;
-            font-weight: 900;
-            margin-bottom: 12px;
-            line-height: 1.2;
-        }
-
-        .hero-description {
-            font-size: 20px;
-            margin-bottom: 20px;
-            opacity: 0.95;
-        }
-
-        .course-badges {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-available {
-            background: var(--success);
-            color: white;
-        }
-
-        .badge-level {
-            background: var(--accent);
-            color: var(--dark);
-        }
-
-        .course-meta {
-            display: flex;
-            gap: 24px;
-            font-size: 15px;
-            flex-wrap: wrap;
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .rating {
-            color: var(--accent);
-            font-weight: 700;
-            font-size: 18px;
-        }
-
-        .video-preview {
-            background: linear-gradient(135deg, var(--accent), #f4c430);
-            border-radius: 12px;
-            aspect-ratio: 16/9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-        }
-
-        .play-btn {
-            width: 70px;
-            height: 70px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s;
-        }
-
-        .play-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .play-icon {
-            width: 0;
-            height: 0;
-            border-left: 22px solid var(--secondary);
-            border-top: 13px solid transparent;
-            border-bottom: 13px solid transparent;
-            margin-left: 6px;
-        }
-
-        .preview-label {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        /* Main Content */
-        .main-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 24px;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 40px;
-        }
-
-        .content-left {
-            min-width: 0;
-        }
-
-        /* What You'll Learn */
-        .section-box {
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
-            margin-bottom: 32px;
-        }
-
-        .section-title {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 24px;
-            color: var(--dark);
-        }
-
-        .learn-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .learn-item {
-            display: flex;
-            gap: 12px;
-            font-size: 15px;
-            line-height: 1.5;
-        }
-
-        .checkmark {
-            color: var(--success);
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        /* Course Includes */
-        .includes-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .include-item {
-            display: flex;
-            gap: 12px;
-            font-size: 15px;
-            align-items: center;
-        }
-
-        .icon {
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        /* Course Content */
-        .content-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .content-summary {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 12px;
-        }
-
-        .expand-all {
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-        }
-
-        .expand-all:hover {
-            text-decoration: underline;
-        }
-
-        .chapter {
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 12px;
-            overflow: hidden;
-            background: white;
-        }
-
-        .chapter-header {
-            padding: 20px 24px;
-            background: #fafafa;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.2s;
-        }
-
-        .chapter-header:hover {
-            background: #f5f5f5;
-        }
-
-        .chapter-title {
-            font-weight: 700;
-            font-size: 17px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .chapter-number {
-            background: var(--primary);
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .chapter-meta {
-            display: flex;
-            gap: 16px;
-            font-size: 14px;
-            color: #666;
-            align-items: center;
-        }
-
-        .free-badge {
-            background: var(--success);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .locked-badge {
-            background: #999;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .chapter-content {
-            display: none;
-            padding: 0 24px 20px;
-            background: white;
-        }
-
-        .chapter.expanded .chapter-content {
-            display: block;
-        }
-
-        .chapter.expanded .chapter-header {
-            background: #f0f0f0;
-        }
-
-        .lesson {
-            padding: 14px 0;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-        }
-
-        .lesson:last-child {
-            border-bottom: none;
-        }
-
-        .lesson-left {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex: 1;
-        }
-
-        .lesson-icon {
-            width: 24px;
-            text-align: center;
-        }
-
-        .lesson-title {
-            flex: 1;
-        }
-
-        .lesson-title.locked {
-            color: #999;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .preview-link {
-            color: var(--primary);
-            font-weight: 600;
-            text-decoration: none;
-            margin-right: 12px;
-        }
-
-        .preview-link:hover {
-            text-decoration: underline;
-        }
-
-        .lesson-duration {
-            color: #666;
-            font-size: 13px;
-        }
-
-        .lock-icon {
-            font-size: 12px;
-            color: #999;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            position: sticky;
-            top: 100px;
-            height: fit-content;
-        }
-
-        .price-card {
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-
-        .price-section {
-            text-align: center;
-            margin-bottom: 24px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .price {
-            font-size: 48px;
-            font-weight: 900;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .price-note {
-            font-size: 13px;
-            color: #666;
-        }
-
-        .btn-enroll {
-            width: 100%;
-            padding: 16px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-bottom: 12px;
-            transition: all 0.3s;
-        }
-
-        .btn-enroll:hover {
-            background: #ff5722;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
-        }
-
-        .guarantee {
-            text-align: center;
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 24px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .sidebar-includes h4 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .sidebar-include {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 14px;
-            font-size: 14px;
-        }
-
-        /* Explore Other Courses Slider */
-        .explore-courses {
-            max-width: 1400px;
-            margin: 40px auto;
-            padding: 0 24px 40px;
-        }
-
-        .explore-courses h2 {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--dark);
-            margin-bottom: 24px;
-        }
-
-        .courses-slider-wrapper {
-            position: relative;
-        }
-
-        .courses-slider {
-            display: flex;
-            gap: 20px;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            padding: 8px 0;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .courses-slider::-webkit-scrollbar {
-            display: none;
-        }
-
-        .slider-card {
-            min-width: 280px;
-            max-width: 280px;
-            background: white;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            flex-shrink: 0;
-        }
-
-        .slider-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-        }
-
-        .slider-card-header {
-            padding: 20px;
-            background: linear-gradient(135deg, var(--secondary), #003366);
-            color: white;
-            text-align: center;
-        }
-
-        .slider-card-level {
-            font-size: 32px;
-            font-weight: 900;
-        }
-
-        .slider-card-name {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .slider-card-body {
-            padding: 20px;
-        }
-
-        .slider-card-body p {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 16px;
-            line-height: 1.5;
-        }
-
-        .slider-card-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .slider-card-badge.available {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .slider-card-badge.coming {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .slider-card-badge.combo {
-            background: #fde68a;
-            color: #78350f;
-        }
-
-        .slider-card-btn {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            text-decoration: none;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .slider-card-btn.primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .slider-card-btn.primary:hover {
-            background: var(--secondary);
-        }
-
-        .slider-card-btn.disabled {
-            background: #e5e7eb;
-            color: #9ca3af;
-            cursor: not-allowed;
-        }
-
-        .slider-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid var(--border);
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .slider-arrow:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .slider-arrow.left {
-            left: -16px;
-        }
-
-        .slider-arrow.right {
-            right: -16px;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .hero-container,
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                position: relative;
-                top: 0;
-            }
-
-            .learn-grid,
-            .includes-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .hero h1 {
-                font-size: 32px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body { overflow-x: hidden; }
-
-            nav { padding: 12px 16px; }
-
-            .nav-container {
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-
-            .logo { font-size: 18px; }
-
-            .nav-actions {
-                width: 100%;
-                gap: 8px;
-            }
-
-            .btn-back {
-                flex: 1;
-                padding: 7px 8px;
-                font-size: 13px;
-                text-align: center;
-                white-space: nowrap;
-            }
-
-            .hero h1 { font-size: 26px; }
-            .hero-description { font-size: 16px; }
-            .hero-container { grid-template-columns: 1fr; }
-
-            .chapter-meta {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-
-            .lesson {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-            }
-        }
-
-        /* Video Modal */
-        .video-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .video-modal.active {
-            display: flex;
-        }
-
-        .video-modal-content {
-            position: relative;
-            width: 100%;
-            max-width: 1200px;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .video-modal-close {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 32px;
-            cursor: pointer;
-            z-index: 10;
-            padding: 10px;
-        }
-
-        .video-modal-close:hover {
-            color: var(--primary);
-        }
-
-        /* Gift Button */
-        .btn-gift {
-            width: 100%;
-            padding: 14px;
-            background: transparent;
-            color: var(--dark);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 24px;
-            padding-bottom: 14px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .btn-gift:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: rgba(255, 107, 53, 0.04);
-        }
-
-        .gift-icon {
-            font-size: 20px;
-        }
-
-        /* Gift Modal */
-        .gift-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .gift-modal.active {
-            display: flex;
-        }
-
-        .gift-modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            max-width: 480px;
-            width: 100%;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .gift-modal-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-        }
-
-        .gift-modal-close:hover {
-            background: #f0f0f0;
-            color: var(--dark);
-        }
-
-        .gift-modal-header {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-
-        .gift-modal-header .gift-emoji {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-
-        .gift-modal-header h3 {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--dark);
-            margin-bottom: 8px;
-        }
-
-        .gift-modal-header p {
-            font-size: 15px;
-            color: #666;
-        }
-
-        .gift-form-group {
-            margin-bottom: 20px;
-        }
-
-        .gift-form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: var(--dark);
-        }
-
-        .gift-form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 15px;
-            font-family: 'Outfit', sans-serif;
-            transition: border-color 0.3s;
-        }
-
-        .gift-form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .btn-gift-proceed {
-            width: 100%;
-            padding: 16px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 17px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: 'Outfit', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-gift-proceed:hover {
-            background: #ff5722;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
-        }
-
-        .video-wrapper {
-            padding: 56.25% 0 0 0;
-            position: relative;
-        }
-
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-/* AI Partner Banner */
-.ai-partner-banner {
-    display: none;
-    background: linear-gradient(135deg, #1A1A2E 0%, #004E89 100%);
-    border-radius: 16px; padding: 22px 26px; margin: 0 0 28px 0;
-    align-items: center; justify-content: space-between;
-    gap: 20px; flex-wrap: wrap;
-    box-shadow: 0 8px 30px rgba(0,78,137,0.25);
-    border: 1.5px solid rgba(255,210,63,0.2);
-    position: sticky;
-    top: var(--nav-height, 61px);
-    z-index: 999;
-}
-.ai-partner-banner.visible { display: flex; }
-.ai-banner-left { display: flex; align-items: center; gap: 14px; }
-.ai-banner-icon {
-    font-size: 1.9rem; background: rgba(255,210,63,0.15);
-    width: 50px; height: 50px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.ai-banner-text h4 { color: #FFD23F; font-size: 0.93rem; font-weight: 800; margin-bottom: 2px; }
-.ai-banner-text p { color: rgba(255,255,255,0.8); font-size: 0.8rem; line-height: 1.4; margin: 0; }
-.btn-ai-partner {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 10px 20px; background: #FFD23F; color: #1A1A2E;
-    font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.88rem;
-    border: none; border-radius: 9px; cursor: pointer;
-    transition: all 0.25s; white-space: nowrap;
-    box-shadow: 0 4px 14px rgba(255,210,63,0.4); text-decoration: none;
-}
-.btn-ai-partner:hover { background: #fff; transform: translateY(-2px); }
+            --primary: #FF6B35; --secondary: #004E89; --accent: #FFD23F;
+            --dark: #1A1A2E; --light: #F5F5F5; --border: #e0e0e0; --success: #10b981;
+        }
+        body { font-family: 'Outfit', sans-serif; color: var(--dark); background: #fff; line-height: 1.6; }
+        nav { background: white; border-bottom: 1px solid var(--border); padding: 16px 24px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-decoration: none; }
+        .nav-actions { display: flex; gap: 16px; align-items: center; }
+        .btn-back { padding: 10px 20px; background: transparent; border: 2px solid var(--primary); color: var(--primary); font-weight: 600; border-radius: 8px; cursor: pointer; text-decoration: none; transition: all 0.3s; }
+        .btn-back:hover { background: var(--primary); color: white; }
+        .hero { background: linear-gradient(135deg, var(--secondary) 0%, #003366 100%); color: white; padding: 40px 24px; }
+        .hero-container { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr; gap: 40px; align-items: center; }
+        .breadcrumb { font-size: 14px; margin-bottom: 16px; opacity: 0.9; }
+        .breadcrumb a { color: var(--accent); text-decoration: none; }
+        .hero h1 { font-size: 42px; font-weight: 900; margin-bottom: 12px; line-height: 1.2; }
+        .hero-description { font-size: 20px; margin-bottom: 20px; opacity: 0.95; }
+        .course-badges { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .badge { padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-available { background: var(--success); color: white; }
+        .badge-level { background: var(--accent); color: var(--dark); }
+        .course-meta { display: flex; gap: 24px; font-size: 15px; flex-wrap: wrap; }
+        .meta-item { display: flex; align-items: center; gap: 8px; }
+        .rating { color: var(--accent); font-weight: 700; font-size: 18px; }
+        .video-preview { background: linear-gradient(135deg, var(--accent), #f4c430); border-radius: 12px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor: pointer; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .main-content { max-width: 1400px; margin: 0 auto; padding: 40px 24px; display: grid; grid-template-columns: 2fr 1fr; gap: 40px; }
+        .content-left { min-width: 0; }
+        .section-box { background: white; border: 2px solid var(--border); border-radius: 12px; padding: 32px; margin-bottom: 32px; }
+        .section-title { font-size: 28px; font-weight: 800; margin-bottom: 24px; color: var(--dark); }
+        .learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .learn-item { display: flex; gap: 12px; font-size: 15px; line-height: 1.5; }
+        .checkmark { color: var(--success); font-size: 20px; flex-shrink: 0; }
+        .includes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .include-item { display: flex; gap: 12px; font-size: 15px; align-items: center; }
+        .icon { font-size: 20px; flex-shrink: 0; }
+        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .content-summary { font-size: 14px; color: #666; margin-bottom: 12px; }
+        .expand-all { color: var(--primary); font-weight: 600; cursor: pointer; font-size: 14px; text-decoration: none; }
+        .expand-all:hover { text-decoration: underline; }
+        .chapter { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; overflow: hidden; background: white; }
+        .chapter-header { padding: 20px 24px; background: #fafafa; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+        .chapter-header:hover { background: #f5f5f5; }
+        .chapter-title { font-weight: 700; font-size: 17px; display: flex; align-items: center; gap: 12px; }
+        .chapter-number { background: var(--primary); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+        .chapter-meta { display: flex; gap: 16px; font-size: 14px; color: #666; align-items: center; }
+        .free-badge { background: var(--success); color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .locked-badge { background: #999; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .chapter-content { display: none; padding: 0 24px 20px; background: white; }
+        .chapter.expanded .chapter-content { display: block; }
+        .chapter.expanded .chapter-header { background: #f0f0f0; }
+        .lesson { padding: 14px 0; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .lesson:last-child { border-bottom: none; }
+        .lesson-left { display: flex; gap: 12px; align-items: center; flex: 1; }
+        .lesson-icon { width: 24px; text-align: center; }
+        .lesson-title { flex: 1; }
+        .lesson-title.locked { color: #999; display: flex; align-items: center; gap: 8px; }
+        .preview-link { color: var(--primary); font-weight: 600; text-decoration: none; margin-right: 12px; }
+        .preview-link:hover { text-decoration: underline; }
+        .lesson-duration { color: #666; font-size: 13px; }
+        .lock-icon { font-size: 12px; color: #999; }
+        .sidebar { position: sticky; top: 100px; height: fit-content; }
+        .price-card { background: white; border: 2px solid var(--border); border-radius: 12px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .price-section { text-align: center; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+        .price { font-size: 48px; font-weight: 900; color: var(--primary); margin-bottom: 8px; }
+        .price-note { font-size: 13px; color: #666; }
+        .btn-enroll { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 700; cursor: pointer; margin-bottom: 12px; transition: all 0.3s; }
+        .btn-enroll:hover { background: #ff5722; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,107,53,0.4); }
+        .guarantee { text-align: center; font-size: 13px; color: #666; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+        .sidebar-includes h4 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+        .sidebar-include { display: flex; gap: 12px; margin-bottom: 14px; font-size: 14px; }
+        .explore-courses { max-width: 1400px; margin: 40px auto; padding: 0 24px 40px; }
+        .explore-courses h2 { font-size: 28px; font-weight: 800; color: var(--dark); margin-bottom: 24px; }
+        .courses-slider-wrapper { position: relative; }
+        .courses-slider { display: flex; gap: 20px; overflow-x: auto; scroll-behavior: smooth; padding: 8px 0; -ms-overflow-style: none; scrollbar-width: none; }
+        .courses-slider::-webkit-scrollbar { display: none; }
+        .slider-card { min-width: 280px; max-width: 280px; background: white; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; flex-shrink: 0; }
+        .slider-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+        .slider-card-header { padding: 20px; background: linear-gradient(135deg, var(--secondary), #003366); color: white; text-align: center; }
+        .slider-card-level { font-size: 32px; font-weight: 900; }
+        .slider-card-name { font-size: 14px; opacity: 0.9; }
+        .slider-card-body { padding: 20px; }
+        .slider-card-body p { font-size: 14px; color: #555; margin-bottom: 16px; line-height: 1.5; }
+        .slider-card-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }
+        .slider-card-badge.available { background: #d1fae5; color: #065f46; }
+        .slider-card-badge.coming { background: #fef3c7; color: #92400e; }
+        .slider-card-badge.combo { background: #fde68a; color: #78350f; }
+        .slider-card-btn { display: block; width: 100%; padding: 10px; border-radius: 8px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: none; text-align: center; transition: all 0.3s; }
+        .slider-card-btn.primary { background: var(--primary); color: white; }
+        .slider-card-btn.primary:hover { background: var(--secondary); }
+        .slider-card-btn.disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+        .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: white; border: 2px solid var(--border); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .slider-arrow:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .slider-arrow.left { left: -16px; }
+        .slider-arrow.right { right: -16px; }
+        .video-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .video-modal.active { display: flex; }
+        .video-modal-content { position: relative; width: 100%; max-width: 1200px; background: #000; border-radius: 12px; overflow: hidden; }
+        .video-modal-close { position: absolute; top: -40px; right: 0; background: none; border: none; color: white; font-size: 32px; cursor: pointer; z-index: 10; padding: 10px; }
+        .video-modal-close:hover { color: var(--primary); }
+        .btn-gift { width: 100%; padding: 14px; background: transparent; color: var(--dark); border: 2px solid var(--border); border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 24px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Outfit', sans-serif; }
+        .btn-gift:hover { border-color: var(--primary); color: var(--primary); }
+        .gift-icon { font-size: 20px; }
+        .gift-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .gift-modal.active { display: flex; }
+        .gift-modal-content { background: white; border-radius: 16px; padding: 40px; max-width: 480px; width: 100%; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .gift-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .gift-modal-header { text-align: center; margin-bottom: 28px; }
+        .gift-modal-header .gift-emoji { font-size: 48px; margin-bottom: 12px; }
+        .gift-modal-header h3 { font-size: 24px; font-weight: 800; color: var(--dark); margin-bottom: 8px; }
+        .gift-modal-header p { font-size: 15px; color: #666; }
+        .gift-form-group { margin-bottom: 20px; }
+        .gift-form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .gift-form-group input { width: 100%; padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 15px; font-family: 'Outfit', sans-serif; }
+        .gift-form-group input:focus { outline: none; border-color: var(--primary); }
+        .btn-gift-proceed { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 17px; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .video-wrapper { padding: 56.25% 0 0 0; position: relative; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .ai-partner-banner { display: none; background: linear-gradient(135deg, #1A1A2E 0%, #004E89 100%); border-radius: 16px; padding: 22px 26px; margin: 0 0 28px 0; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; box-shadow: 0 8px 30px rgba(0,78,137,0.25); border: 1.5px solid rgba(255,210,63,0.2); position: sticky; top: var(--nav-height, 61px); z-index: 999; }
+        .ai-partner-banner.visible { display: flex; }
+        .ai-banner-left { display: flex; align-items: center; gap: 14px; }
+        .ai-banner-icon { font-size: 1.9rem; background: rgba(255,210,63,0.15); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .ai-banner-text h4 { color: #FFD23F; font-size: 0.93rem; font-weight: 800; margin-bottom: 2px; }
+        .ai-banner-text p { color: rgba(255,255,255,0.8); font-size: 0.8rem; line-height: 1.4; margin: 0; }
+        .btn-ai-partner { display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px; background: #FFD23F; color: #1A1A2E; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.88rem; border: none; border-radius: 9px; cursor: pointer; transition: all 0.25s; white-space: nowrap; text-decoration: none; }
+        .btn-ai-partner:hover { background: #fff; transform: translateY(-2px); }
         @keyframes aura-orb-float { 0%,100%{transform:translateY(0) rotate(0deg)} 33%{transform:translateY(-11px) rotate(1.5deg)} 66%{transform:translateY(-5px) rotate(-1deg)} }
         @keyframes aura-orb-glow { 0%,100%{box-shadow:0 0 18px rgba(0,240,255,0.28),0 0 38px rgba(0,240,255,0.10),0 8px 22px rgba(0,0,0,0.55)} 50%{box-shadow:0 0 32px rgba(0,240,255,0.52),0 0 65px rgba(0,240,255,0.20),0 10px 28px rgba(0,0,0,0.65)} }
         .ai-fab { position:fixed; bottom:32px; right:32px; width:64px; height:64px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#0e2648,#04101f); border:1.5px solid rgba(0,240,255,0.42); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; text-decoration:none; z-index:9998; cursor:pointer; animation:aura-orb-float 3.6s ease-in-out infinite,aura-orb-glow 2.6s ease-in-out infinite; transition:width 0.35s cubic-bezier(0.175,0.885,0.32,1.275),height 0.35s cubic-bezier(0.175,0.885,0.32,1.275),border-radius 0.35s ease; overflow:hidden; white-space:nowrap; }
         .ai-fab::before { content:''; position:absolute; inset:0; border-radius:inherit; background:radial-gradient(circle at 35% 30%,rgba(0,240,255,0.18),transparent 60%); pointer-events:none; }
         .ai-fab .fab-icon { font-size:1.35rem; line-height:1; position:relative; z-index:1; }
         .ai-fab .fab-text { font-size:0.48rem; letter-spacing:0.14em; text-transform:uppercase; color:rgba(0,240,255,0.85); font-family:'Outfit',sans-serif; font-weight:700; position:relative; z-index:1; margin-top:3px; }
-        .ai-fab:hover { width:148px; height:48px; border-radius:24px; flex-direction:row; gap:8px; animation:aura-orb-glow 2.6s ease-in-out infinite; }
+        .ai-fab:hover { width:148px; height:48px; border-radius:24px; flex-direction:row; gap:8px; }
         .ai-fab:hover .fab-icon { font-size:1.1rem; }
         .ai-fab:hover .fab-text { font-size:0.78rem; letter-spacing:0.05em; color:#fff; margin-top:0; }
-        @media(max-width:768px){ .ai-fab{width:56px;height:56px;bottom:20px;right:20px} .ai-fab:hover{width:56px;height:56px;border-radius:50%;flex-direction:column;gap:0} .ai-fab:hover .fab-text{font-size:0.48rem;color:rgba(0,240,255,0.85);margin-top:3px} }
+
+        /* ===== PROGRESS TRACKER STYLES ===== */
+        /* ── PROGRESS DASHBOARD: LIGHT MODE (default) ── */
+        .gme-dash{
+          background: linear-gradient(135deg, #f8fafc 0%, #f0f4f8 100%);
+          border: 2px solid #e2e8f0;
+          border-radius:20px;padding:28px 28px 24px;
+          color: #1A1A2E;
+          position:relative;overflow:hidden;
+          box-shadow: 0 4px 20px rgba(0,78,137,0.08);
+          margin-bottom:20px;
+        }
+        .gme-dash::before{
+          content:'';position:absolute;top:-80px;right:-80px;
+          width:260px;height:260px;border-radius:50%;
+          background:rgba(255,107,53,0.05);pointer-events:none;
+        }
+        .dash-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:20px;}
+        .dash-label{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--primary);margin-bottom:4px;}
+        .dash-title{font-size:20px;font-weight:900;line-height:1.3;color:#1A1A2E;}
+        .dash-title span{color:var(--primary);}
+        .stat-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+        .stat-pill{
+          background:#fff;border:1.5px solid #e2e8f0;
+          border-radius:12px;padding:10px 16px;text-align:center;min-width:80px;
+          box-shadow:0 1px 4px rgba(0,0,0,0.05);
+        }
+        .stat-pill.highlight{background:#fff8f0;border-color:rgba(255,107,53,0.35);}
+        .stat-pill.green{background:#f0fdf4;border-color:rgba(16,185,129,0.35);}
+        .stat-val{font-size:22px;font-weight:900;color:#1A1A2E;line-height:1;}
+        .stat-val.gold{color:#d97706;}
+        .stat-val.green{color:#059669;}
+        .stat-lbl{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.7px;margin-top:3px;}
+        .ahead-badge{
+          display:none;align-items:center;gap:10px;
+          background:linear-gradient(135deg,rgba(255,210,63,0.12),rgba(255,107,53,0.10));
+          border:1.5px solid rgba(255,107,53,0.30);border-radius:12px;
+          padding:12px 16px;margin-bottom:18px;
+          animation:pop 0.4s cubic-bezier(.4,0,.2,1);
+        }
+        .ahead-badge.show{display:flex;}
+        .ahead-icon{font-size:26px;flex-shrink:0;}
+        .ahead-text h4{font-size:14px;font-weight:800;color:#d97706;margin-bottom:2px;}
+        .ahead-text p{font-size:12px;color:#64748b;line-height:1.4;}
+        .bar-section{margin-bottom:16px;}
+        .bar-meta{display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-bottom:10px;}
+        .bar-meta strong{color:#1A1A2E;}
+        /* Target line — hidden in light mode (avoids the "Target" label overlap) */
+        .bar-track{background:#e2e8f0;border-radius:999px;height:6px;position:relative;overflow:visible;}
+        .bar-target-line{
+          position:absolute;top:-4px;height:14px;width:2px;
+          background:#94a3b8;border-radius:2px;
+          transform:translateX(-50%);z-index:3;transition:left 0.4s ease;
+        }
+        /* Remove the floating "Target" pseudo-label — it collides with the heading */
+        .bar-target-line::before{ content:''; }
+        .bar-fill-wrap{position:relative;height:12px;border-radius:999px;overflow:hidden;}
+        .bar-fill-bg{position:absolute;inset:0;background:#e2e8f0;border-radius:999px;}
+        .bar-fill{
+          position:absolute;left:0;top:0;height:100%;border-radius:999px;
+          background:linear-gradient(90deg,#10b981,#FFD23F);
+          transition:width 0.7s cubic-bezier(.4,0,.2,1);
+          z-index:2;
+        }
+        .bar-fill.on-pace{background:linear-gradient(90deg,var(--primary),#FFD23F);}
+        .bar-fill.behind{background:linear-gradient(90deg,#cbd5e1,#94a3b8);}
+        .bar-fill.ahead-fill{background:linear-gradient(90deg,#FFD23F,var(--primary));}
+        .bar-fill::after{
+          content:'';position:absolute;top:2px;right:6px;
+          width:4px;height:8px;background:rgba(255,255,255,0.6);border-radius:3px;
+        }
+        .bar-hint{font-size:11px;color:#94a3b8;margin-top:6px;text-align:right;}
+        .dots-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;}
+        .dot-wrap{position:relative;}
+        .dot{
+          width:30px;height:30px;border-radius:50%;
+          display:flex;align-items:center;justify-content:center;
+          font-size:10px;font-weight:800;cursor:pointer;
+          transition:transform 0.2s,box-shadow 0.2s;border:2px solid transparent;
+        }
+        .dot:hover{transform:scale(1.18);box-shadow:0 4px 14px rgba(0,0,0,0.15);}
+        .dot.done{background:#10b981;color:white;border-color:#059669;}
+        .dot.partial{background:#FFD23F;color:#1A1A2E;border-color:#d97706;}
+        .dot.today{background:rgba(255,107,53,0.15);color:var(--primary);border-color:var(--primary);animation:pulse 2s infinite;}
+        .dot.empty{background:#f1f5f9;color:#94a3b8;border-color:#e2e8f0;}
+        .dot.ahead-dot{background:linear-gradient(135deg,#FFD23F,var(--primary));color:#1A1A2E;border-color:#d97706;}
+        @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,107,53,0.4);}50%{box-shadow:0 0 0 6px rgba(255,107,53,0);}}
+        .dot-tip{
+          position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+          background:#1A1A2E;color:white;font-size:11px;white-space:nowrap;
+          padding:5px 10px;border-radius:6px;opacity:0;pointer-events:none;
+          transition:opacity 0.2s;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.25);
+        }
+        .dot-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1A1A2E;}
+        .dot-wrap:hover .dot-tip{opacity:1;}
+
+        /* ── PROGRESS DASHBOARD: DARK MODE ── */
+        @media (prefers-color-scheme: dark) {
+          .gme-dash{
+            background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 100%) !important;
+            border-color:rgba(30,100,220,0.22) !important;
+            box-shadow:0 12px 40px rgba(0,78,137,0.35) !important;
+            color:white !important;
+          }
+          .gme-dash::before{ background:rgba(255,210,63,0.07) !important; }
+          .dash-label{ color:#FFD23F !important; }
+          .dash-title{ color:white !important; }
+          .dash-title span{ color:#FFD23F !important; }
+          .stat-pill{
+            background:rgba(255,255,255,0.08) !important;
+            border-color:rgba(255,255,255,0.12) !important;
+            box-shadow:none !important;
+          }
+          .stat-pill.highlight{ background:rgba(255,210,63,0.15) !important; border-color:rgba(255,210,63,0.4) !important; }
+          .stat-pill.green{ background:rgba(34,197,94,0.15) !important; border-color:rgba(34,197,94,0.4) !important; }
+          .stat-val{ color:white !important; }
+          .stat-val.gold{ color:#FFD23F !important; }
+          .stat-val.green{ color:#4ADE80 !important; }
+          .stat-lbl{ color:rgba(255,255,255,0.5) !important; }
+          .ahead-badge{
+            background:linear-gradient(135deg,rgba(255,210,63,0.2),rgba(255,107,53,0.2)) !important;
+            border-color:rgba(255,210,63,0.4) !important;
+          }
+          .ahead-text h4{ color:#FFD23F !important; }
+          .ahead-text p{ color:rgba(255,255,255,0.7) !important; }
+          .bar-meta{ color:rgba(255,255,255,0.5) !important; }
+          .bar-meta strong{ color:white !important; }
+          .bar-track{ background:rgba(255,255,255,0.1) !important; }
+          .bar-target-line{ background:rgba(255,255,255,0.4) !important; }
+          .bar-fill-bg{ background:rgba(255,255,255,0.1) !important; }
+          .bar-hint{ color:rgba(255,255,255,0.45) !important; }
+          .dot.empty{ background:rgba(255,255,255,0.1) !important; color:rgba(255,255,255,0.35) !important; border-color:rgba(255,255,255,0.15) !important; }
+          .dot.done{ background:#22C55E !important; border-color:#16A34A !important; }
+          .dot.today{ background:rgba(255,107,53,0.25) !important; }
+          .dot-tip{ background:#0F172A !important; box-shadow:0 4px 12px rgba(0,0,0,0.5) !important; }
+          .dot-tip::after{ border-top-color:#0F172A !important; }
+          .reset-btn{ border-color:rgba(255,255,255,0.2) !important; color:rgba(255,255,255,0.4) !important; }
+          .reset-btn:hover{ border-color:rgba(255,107,53,0.6) !important; color:#FF6B35 !important; }
+        }
+        .banner{
+          display:none;border-radius:14px;padding:14px 18px;
+          margin-bottom:16px;align-items:center;gap:12px;
+          font-weight:700;font-size:14px;animation:pop 0.4s ease;
+        }
+        .banner.show{display:flex;}
+        .banner-icon{font-size:26px;flex-shrink:0;}
+        .banner-text{flex:1;}
+        .banner-text h4{font-size:14px;font-weight:800;margin-bottom:2px;}
+        .banner-text p{font-size:12px;font-weight:400;opacity:0.8;line-height:1.4;}
+        .banner.fire{background:linear-gradient(135deg,#FF6B35,#FFD23F);color:#1A1A2E;}
+        .banner.rocket{background:linear-gradient(135deg,#6366F1,#8B5CF6);color:white;}
+        .banner.crown{background:linear-gradient(135deg,#F59E0B,#EF4444);color:white;}
+        .chapter.complete{border-color:#86EFAC;}
+        .chapter.ahead-chapter{border-color:#FFD23F;}
+        .ch-header{
+          padding:16px 22px;background:#fafafa;
+          display:flex;justify-content:space-between;align-items:center;
+          cursor:pointer;transition:background 0.2s;
+        }
+        .ch-header:hover{background:#f0f0f0;}
+        .ch-left{display:flex;align-items:center;gap:12px;}
+        .ch-num{
+          width:30px;height:30px;border-radius:50%;
+          background:var(--primary);color:white;
+          display:flex;align-items:center;justify-content:center;
+          font-size:13px;font-weight:700;flex-shrink:0;
+        }
+        .ch-num.done-num{background:#22C55E;}
+        .ch-num.ahead-num{background:linear-gradient(135deg,#FFD23F,#FF6B35);color:#1A1A2E;}
+        .ch-title-text{font-weight:700;font-size:15px;}
+        .ch-right{display:flex;align-items:center;gap:10px;font-size:12px;color:#666;}
+        .badge.free{background:#10b981;color:white;}
+        .badge.locked{background:#999;color:white;}
+        .badge.done-badge{background:#DCFCE7;color:#15803D;}
+        .badge.today-badge{background:#FF6B35;color:white;animation:pulse 2s infinite;}
+        .badge.ahead-badge-sm{background:linear-gradient(135deg,#FFD23F,#FF6B35);color:#1A1A2E;}
+        .ch-content{display:none;padding:0 20px 16px;}
+        .chapter.open .ch-content{display:block;}
+        .chapter.open .ch-header{background:#f0f0f0;}
+        .ch-progress-row{
+          display:flex;align-items:center;justify-content:space-between;
+          padding:12px 2px 10px;border-bottom:1px solid #f0f0f0;margin-bottom:4px;
+        }
+        .ch-mini-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94A3B8;}
+        .ch-mini-right{display:flex;align-items:center;gap:8px;}
+        .ch-mini-bar{width:90px;height:6px;background:#E2E8F0;border-radius:999px;overflow:hidden;}
+        .ch-mini-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#FFD23F,#FF6B35);transition:width 0.5s ease;}
+        .ch-mini-pct{font-size:12px;font-weight:700;color:#334155;}
+        .check-item{
+          display:flex;align-items:center;gap:10px;
+          padding:8px 8px;border-radius:8px;cursor:pointer;
+          transition:background 0.15s;user-select:none;
+        }
+        .check-item:hover{background:#F8FAFC;}
+        .check-item input[type="checkbox"]{
+          appearance:none;-webkit-appearance:none;
+          width:18px;height:18px;border:2px solid #CBD5E1;
+          border-radius:5px;background:white;cursor:pointer;
+          flex-shrink:0;position:relative;transition:all 0.2s;
+        }
+        .check-item input:checked{background:#22C55E;border-color:#22C55E;}
+        .check-item input:checked::after{
+          content:'';position:absolute;left:3px;top:1px;
+          width:8px;height:5px;border-left:2px solid white;
+          border-bottom:2px solid white;transform:rotate(-45deg);
+        }
+        .type-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0;}
+        .check-label{font-size:13px;color:#334155;flex:1;line-height:1.4;}
+        .check-label.crossed{text-decoration:line-through;color:#94A3B8;}
+        .ch-complete{
+          display:none;align-items:center;gap:8px;
+          padding:10px 14px;background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
+          border:1px solid #86EFAC;border-radius:10px;margin-top:10px;
+          font-size:13px;font-weight:700;color:#15803D;
+        }
+        .ch-complete.show{display:flex;animation:pop 0.4s ease;}
+        .confetti-p{position:fixed;pointer-events:none;z-index:9999;width:8px;height:8px;border-radius:2px;animation:fall 2s ease-in forwards;}
+        @keyframes fall{0%{opacity:1;transform:translateY(0) rotate(0deg);}100%{opacity:0;transform:translateY(100vh) rotate(720deg);}}
+        @keyframes pop{0%{opacity:0;transform:scale(0.85);}60%{transform:scale(1.04);}100%{opacity:1;transform:scale(1);}}
+        .reset-btn{
+          background:none;border:1px solid #cbd5e1;color:#94a3b8;
+          font-family:'Outfit',sans-serif;font-size:11px;padding:4px 10px;border-radius:6px;
+          cursor:pointer;transition:all 0.2s;float:right;margin-top:2px;
+        }
+        .reset-btn:hover{border-color:var(--primary);color:var(--primary);}
+
+        /* ===== TABLET ===== */
+        @media (max-width: 1024px) {
+          .hero-container, .main-content { grid-template-columns: 1fr; }
+          .sidebar { position: relative; top: 0; }
+          .learn-grid, .includes-grid { grid-template-columns: 1fr; }
+          .hero h1 { font-size: 32px; }
+        }
+
+        /* ===== MOBILE OVERHAUL ===== */
+        @media (max-width: 768px) {
+          body { overflow-x: hidden; }
+
+          /* NAV */
+          nav { padding: 10px 12px; }
+          .nav-container { flex-wrap: nowrap; gap: 8px; align-items: center; overflow: hidden; }
+          .logo { font-size: 15px; flex-shrink: 0; white-space: nowrap; }
+          .nav-actions {
+            display: flex; gap: 5px; align-items: center;
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; padding-bottom: 0; flex-shrink: 1;
+          }
+          .nav-actions::-webkit-scrollbar { display: none; }
+          .btn-back { padding: 6px 9px; font-size: 11px; white-space: nowrap; border-radius: 6px; flex-shrink: 0; border-width: 1.5px; }
+
+          /* HERO */
+          .hero { padding: 20px 14px; }
+          .hero-container { grid-template-columns: 1fr; gap: 16px; }
+          .hero h1 { font-size: 21px; line-height: 1.25; margin-bottom: 8px; }
+          .hero-description { font-size: 14px; margin-bottom: 12px; }
+          .breadcrumb { font-size: 12px; margin-bottom: 10px; }
+          .course-badges { gap: 6px; margin-bottom: 10px; }
+          .badge { font-size: 10px; padding: 4px 8px; }
+          .course-meta { gap: 8px 14px; font-size: 12px; }
+          .rating { font-size: 15px; }
+
+          /* MAIN LAYOUT */
+          .main-content { padding: 14px 12px; gap: 16px; }
+          .section-box { padding: 18px 14px; margin-bottom: 16px; border-radius: 10px; border-width: 1px; }
+          .section-title { font-size: 19px; margin-bottom: 14px; }
+          .learn-grid, .includes-grid { grid-template-columns: 1fr; gap: 10px; }
+          .learn-item, .include-item { font-size: 13px; gap: 8px; }
+          .checkmark { font-size: 16px; }
+          .icon { font-size: 17px; }
+
+          /* COURSE CONTENT HEADER */
+          .content-header { flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+          .section-title { margin-bottom: 0; }
+          .content-summary { font-size: 12px; margin-bottom: 10px; }
+          .expand-all { font-size: 13px; }
+
+          /* CHAPTER CARDS — compact single-row header */
+          .chapter { border-radius: 8px; margin-bottom: 8px; }
+          .chapter-header {
+            padding: 12px 12px;
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+          }
+          .chapter-title {
+            font-size: 13px; gap: 8px; line-height: 1.4;
+            display: flex; align-items: flex-start; flex: 1; min-width: 0;
+          }
+          .chapter-number { width: 26px; height: 26px; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+          .chapter-meta {
+            display: flex; flex-direction: column; align-items: flex-end;
+            gap: 3px; flex-shrink: 0;
+          }
+          .free-badge, .locked-badge { font-size: 9px; padding: 3px 7px; }
+          .chapter-meta > span:last-child { font-size: 10px; white-space: nowrap; }
+          .chapter-content { padding: 0 12px 14px; }
+
+          /* LESSONS — keep inline */
+          .lesson {
+            flex-direction: row !important; align-items: center !important;
+            padding: 10px 0; gap: 8px; flex-wrap: nowrap;
+          }
+          .lesson-left { flex: 1; gap: 8px; min-width: 0; align-items: flex-start; }
+          .lesson-icon { font-size: 14px; flex-shrink: 0; width: 20px; }
+          .lesson-title { font-size: 12px; line-height: 1.4; }
+          .lesson-duration { font-size: 11px; white-space: nowrap; flex-shrink: 0; }
+          .preview-link { font-size: 11px; margin-right: 6px; white-space: nowrap; }
+
+          /* PROGRESS DASHBOARD */
+          .gme-dash { padding: 16px 13px 14px; border-radius: 12px; margin-bottom: 14px; }
+          .dash-top { margin-bottom: 12px; gap: 8px; }
+          .dash-label { font-size: 10px; letter-spacing: 1px; margin-bottom: 2px; }
+          .dash-title { font-size: 14px; }
+          .reset-btn { font-size: 10px; padding: 3px 7px; }
+
+          /* stat pills: 3-col grid */
+          .stat-row {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px; margin-bottom: 14px;
+          }
+          #pillAhead, #pillFinish { /* show when needed */ }
+          .stat-pill { min-width: 0; padding: 8px 6px; border-radius: 8px; }
+          .stat-val { font-size: 16px; }
+          .stat-lbl { font-size: 8.5px; letter-spacing: 0.3px; }
+
+          /* ahead badge */
+          .ahead-badge { padding: 9px 11px; border-radius: 9px; gap: 8px; margin-bottom: 12px; }
+          .ahead-icon { font-size: 18px; }
+          .ahead-text h4 { font-size: 11px; }
+          .ahead-text p { font-size: 10px; }
+
+          /* bar */
+          .bar-section { margin-bottom: 10px; }
+          .bar-meta { font-size: 10px; margin-bottom: 4px; }
+          .bar-hint { font-size: 9.5px; }
+
+          /* dots */
+          .dots-row { gap: 3px; margin-top: 10px; }
+          .dot { width: 24px; height: 24px; font-size: 9px; }
+          .dot-tip { font-size: 10px; padding: 4px 8px; }
+
+          /* motivational banners */
+          .banner { padding: 11px 13px; border-radius: 10px; gap: 8px; margin-bottom: 10px; }
+          .banner-icon { font-size: 20px; }
+          .banner-text h4 { font-size: 12px; }
+          .banner-text p { font-size: 10px; }
+
+          /* chapters inside progress tracker */
+          .ch-header { padding: 12px 12px; }
+          .ch-left { gap: 8px; }
+          .ch-num { width: 26px; height: 26px; font-size: 12px; }
+          .ch-title-text { font-size: 13px; line-height: 1.4; }
+          .ch-right { gap: 6px; }
+          .ch-content { padding: 0 10px 12px; }
+          .ch-progress-row { padding: 9px 0 7px; }
+          .ch-mini-label { font-size: 9px; }
+          .ch-mini-bar { width: 60px; height: 5px; }
+          .ch-mini-pct { font-size: 11px; }
+
+          .check-item { padding: 7px 4px; gap: 8px; }
+          .check-item input[type="checkbox"] { width: 20px; height: 20px; border-radius: 4px; }
+          .type-pill { font-size: 9px; padding: 2px 5px; }
+          .check-label { font-size: 12px; }
+          .ch-complete { font-size: 12px; padding: 8px 10px; border-radius: 8px; }
+
+          /* SIDEBAR */
+          .sidebar { position: relative; top: 0; }
+          .price-card { padding: 20px 14px; border-radius: 10px; }
+          .price { font-size: 36px; }
+          .price-note { font-size: 12px; }
+          .btn-enroll { padding: 13px; font-size: 15px; border-radius: 7px; }
+          .guarantee { font-size: 12px; margin-bottom: 16px; padding-bottom: 16px; }
+          .btn-gift { padding: 11px; font-size: 14px; margin-bottom: 16px; }
+          .sidebar-includes h4 { font-size: 15px; margin-bottom: 12px; }
+          .sidebar-include { font-size: 12px; gap: 8px; margin-bottom: 8px; }
+
+          /* EXPLORE */
+          .explore-courses { padding: 0 10px 28px; margin: 20px auto; }
+          .explore-courses h2 { font-size: 18px; margin-bottom: 14px; }
+          .slider-card { min-width: 230px; max-width: 230px; }
+          .slider-card-header { padding: 14px; }
+          .slider-card-level { font-size: 24px; }
+          .slider-card-body { padding: 14px; }
+          .slider-card-body p { font-size: 12px; }
+          .slider-arrow { width: 32px; height: 32px; font-size: 14px; }
+          .slider-arrow.left { left: -10px; }
+          .slider-arrow.right { right: -10px; }
+
+          /* AI FAB */
+          .ai-fab { width: 50px; height: 50px; bottom: 18px; right: 14px; }
+          .ai-fab .fab-icon { font-size: 1.1rem; }
+          .ai-fab .fab-text { font-size: 0.42rem; }
+          .ai-fab:hover { width: 120px; height: 42px; }
+
+          /* MODALS */
+          .gift-modal-content { padding: 24px 16px; border-radius: 12px; }
+          .gift-modal-header .gift-emoji { font-size: 34px; }
+          .gift-modal-header h3 { font-size: 18px; }
+          .gift-form-group input { padding: 10px 12px; font-size: 14px; }
+          .btn-gift-proceed { padding: 13px; font-size: 15px; }
+        }
+
+        /* Extra small */
+        @media (max-width: 375px) {
+          .logo { font-size: 13px; }
+          .btn-back { padding: 5px 7px; font-size: 10px; }
+          .hero h1 { font-size: 18px; }
+          .stat-val { font-size: 14px; }
+          .dot { width: 21px; height: 21px; font-size: 8px; }
+          .chapter-title { font-size: 12px; }
+        }
     </style>
     <link rel="stylesheet" href="dark-mode.css">
 </head>
 <body>
-    <!-- Navigation -->
     <nav>
         <div class="nav-container">
             <a href="index.html" class="logo">German Made Easy</a>
@@ -1023,19 +566,6 @@
         </div>
     </nav>
 
-    <!-- AI Partner Banner: shown only to paid students via JS -->
-<div class="ai-partner-banner" id="aiPartnerBanner">
-    <div class="ai-banner-left">
-        <div class="ai-banner-icon">🤖</div>
-        <div class="ai-banner-text">
-            <h4>🇩🇪 AI Practice Partner — Your Exclusive Benefit</h4>
-            <p>Practise German anytime with AI. Real Goethe/TELC scenarios • Instant feedback • Score report.</p>
-        </div>
-    </div>
-    <a href="ai-partner.html" class="btn-ai-partner">Start Practising →</a>
-</div>
-
-    <!-- Hero Section -->
     <section class="hero">
         <div class="hero-container">
             <div>
@@ -1044,586 +574,281 @@
                     <a href="index.html#courses">Courses</a> › 
                     <span>A2 Elementary</span>
                 </div>
-
-                <h1>A2 Course - Elementary German</h1>
-                
+                <h1>A2 Course - Elementary German Mastery</h1>
                 <p class="hero-description">Master German basics with 12 comprehensive chapters. Learn to speak, read, and write German confidently in everyday situations.</p>
-
                 <div class="course-badges">
                     <span class="badge badge-available">Available Now</span>
                     <span class="badge badge-level">Level A2</span>
                 </div>
-
                 <div class="course-meta">
-                    <div class="meta-item">
-                        <span class="rating">★ 4.8</span>
-                        <span>(234 ratings)</span>
-                    </div>
-                    <div class="meta-item">
-                        <span>👥 1,247 students</span>
-                    </div>
-                    <div class="meta-item">
-                        <span>⏱️ 40+ hours</span>
-                    </div>
-                    <div class="meta-item">
-                        <span>ગુજરાતી</span>
-                    </div>
+                    <div class="meta-item"><span class="rating">★ 4.8</span><span>(234 ratings)</span></div>
+                    <div class="meta-item"><span>👥 1,247 students</span></div>
+                    <div class="meta-item"><span>⏱️ 40+ hours</span></div>
+                    <div class="meta-item"><span>ગુજરાતી</span></div>
                 </div>
             </div>
-
-            <div class="video-preview" style="background: #1c1c1c; padding: 0; position: relative; border-radius: 12px; overflow: hidden;">
-                <iframe 
-                    src="https://player.vimeo.com/video/1165138279?title=0&byline=0&portrait=0" 
-                    width="100%" 
-                    height="100%" 
-                    frameborder="0" 
-                    allow="autoplay; fullscreen; picture-in-picture" 
-                    allowfullscreen
-                    style="position:absolute;top:0;left:0;width:100%;height:100%;" 
-                    title="A2 Course Preview"
-                    loading="lazy">
-                </iframe>
+            <div class="video-preview" style="background:#1c1c1c;padding:0;position:relative;border-radius:12px;overflow:hidden;">
+                <iframe src="https://player.vimeo.com/video/1165138279?title=0&byline=0&portrait=0" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="A2 Course Preview" loading="lazy"></iframe>
             </div>
         </div>
     </section>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="content-left">
-            <!-- What You'll Learn -->
+
             <div class="section-box">
                 <h2 class="section-title">What You'll Learn</h2>
                 <div class="learn-grid">
-                    <div class="learn-item">
-                        <span class="checkmark">✓</span>
-                        <span>Speak and write German at A2 elementary level confidently</span>
-                    </div>
-                    <div class="learn-item">
-                        <span class="checkmark">✓</span>
-                        <span>Understand and use everyday German expressions</span>
-                    </div>
-                    <div class="learn-item">
-                        <span class="checkmark">✓</span>
-                        <span>Introduce yourself and others in German</span>
-                    </div>
-                    <div class="learn-item">
-                        <span class="checkmark">✓</span>
-                        <span>Master German grammar fundamentals</span>
-                    </div>
-                    <div class="learn-item">
-                        <span class="checkmark">✓</span>
-                        <span>Build vocabulary for daily life situations</span>
-                    </div>
-                    <div class="learn-item">
-                        <span class="checkmark">✓</span>
-                        <span>Prepare for Goethe-Zertifikat A2 exam</span>
-                    </div>
-                    <div class="learn-item">
-                        <span class="checkmark">✓</span>
-                        <span>Read and understand simple German texts</span>
-                    </div>
-                    <div class="learn-item">
-                        <span class="checkmark">✓</span>
-                        <span>Write basic emails and messages in German</span>
-                    </div>
+                    <div class="learn-item"><span class="checkmark">✓</span><span>Speak and write German at A2 elementary level confidently</span></div>
+                    <div class="learn-item"><span class="checkmark">✓</span><span>Understand and use everyday German expressions</span></div>
+                    <div class="learn-item"><span class="checkmark">✓</span><span>Introduce yourself and others in German</span></div>
+                    <div class="learn-item"><span class="checkmark">✓</span><span>Master German grammar fundamentals</span></div>
+                    <div class="learn-item"><span class="checkmark">✓</span><span>Build vocabulary for daily life situations</span></div>
+                    <div class="learn-item"><span class="checkmark">✓</span><span>Prepare for Goethe-Zertifikat A2 exam</span></div>
+                    <div class="learn-item"><span class="checkmark">✓</span><span>Read and understand simple German texts</span></div>
+                    <div class="learn-item"><span class="checkmark">✓</span><span>Write basic emails and messages in German</span></div>
                 </div>
             </div>
 
-            <!-- Course Includes -->
             <div class="section-box">
                 <h2 class="section-title">This Course Includes</h2>
                 <div class="includes-grid">
-                    <div class="include-item">
-                        <span class="icon">🎥</span>
-                        <span>72 video lessons (40+ hours)</span>
-                    </div>
-                    <div class="include-item">
-                        <span class="icon">📝</span>
-                        <span>12 quizzes to test your knowledge</span>
-                    </div>
-                    <div class="include-item">
-                        <span class="icon">📄</span>
-                        <span>Downloadable practice materials</span>
-                    </div>
-                    <div class="include-item">
-                        <span class="icon">✏️</span>
-                        <span>Homework exercises for each chapter</span>
-                    </div>
-                    <div class="include-item">
-                        <span class="icon">📱</span>
-                        <span>Access on mobile and desktop</span>
-                    </div>
-                    <div class="include-item">
-                        <span class="icon">♾️</span>
-                        <span>Lifetime access to all content</span>
-                    </div>
-                    <div class="include-item">
-                        <span class="icon">🏆</span>
-                        <span>Certificate of completion</span>
-                    </div>
-                    <div class="include-item">
-                        <span class="icon">💬</span>
-                        <span>Gujarati explanations included</span>
-                    </div>
+                    <div class="include-item"><span class="icon">🎥</span><span>72 video lessons (40+ hours)</span></div>
+                    <div class="include-item"><span class="icon">📝</span><span>12 quizzes to test your knowledge</span></div>
+                    <div class="include-item"><span class="icon">📄</span><span>Downloadable practice materials</span></div>
+                    <div class="include-item"><span class="icon">✏️</span><span>Homework exercises for each chapter</span></div>
+                    <div class="include-item"><span class="icon">📱</span><span>Access on mobile and desktop</span></div>
+                    <div class="include-item"><span class="icon">♾️</span><span>Lifetime access to all content</span></div>
+                    <div class="include-item"><span class="icon">🏆</span><span>Certificate of completion</span></div>
+                    <div class="include-item"><span class="icon">💬</span><span>Gujarati explanations included</span></div>
                 </div>
             </div>
 
-            <!-- Course Content -->
             <div class="section-box">
                 <div class="content-header">
-                    <h2 class="section-title" style="margin-bottom: 0;">Course Content</h2>
+                    <h2 class="section-title" style="margin-bottom:0;">Course Content</h2>
                     <a href="#" class="expand-all" onclick="expandAll(); return false;">Expand all chapters</a>
                 </div>
                 <p class="content-summary">12 chapters • 72 lectures • 40h 30m total length • First 2 chapters FREE</p>
 
-                <!-- Chapter 1 - FREE -->
+                <!-- MOTIVATIONAL BANNERS -->
+                <div class="banner fire" id="bannerFire">
+                  <span class="banner-icon">🔥</span>
+                  <div class="banner-text">
+                    <h4 id="bannerFireTitle">You're ahead of schedule!</h4>
+                    <p id="bannerFireText">Keep going — momentum is everything.</p>
+                  </div>
+                </div>
+                <div class="banner rocket" id="bannerRocket">
+                  <span class="banner-icon">🚀</span>
+                  <div class="banner-text">
+                    <h4 id="bannerRocketTitle">Flying ahead!</h4>
+                    <p id="bannerRocketText">At this pace you'll finish the A2 course way before target.</p>
+                  </div>
+                </div>
+                <div class="banner crown" id="bannerCrown">
+                  <span class="banner-icon">👑</span>
+                  <div class="banner-text">
+                    <h4>You're in the top learners!</h4>
+                    <p>Less than 10% of students get this far ahead. Wunderbar!</p>
+                  </div>
+                </div>
+
+                <!-- DASHBOARD -->
+                <div class="gme-dash" id="gmeDash">
+                  <button class="reset-btn" onclick="resetProgress()">Reset demo</button>
+                
+                  <div class="dash-top">
+                    <div>
+                      <div class="dash-label">A2 Course · Your Pace</div>
+                      <div class="dash-title" id="dashTitle">Ready to start? Let's go! 🇩🇪</div>
+                    </div>
+                  </div>
+                
+                  <div class="ahead-badge" id="aheadBadge">
+                    <span class="ahead-icon">⚡</span>
+                    <div class="ahead-text">
+                      <h4 id="aheadTitle">You're ahead!</h4>
+                      <p id="aheadText"></p>
+                    </div>
+                  </div>
+                
+                  <div class="stat-row">
+                    <div class="stat-pill">
+                      <div class="stat-val" id="statOverall">0%</div>
+                      <div class="stat-lbl">Overall</div>
+                    </div>
+                    <div class="stat-pill" id="pillChaps">
+                      <div class="stat-val" id="statChaps">0/12</div>
+                      <div class="stat-lbl">Chapters Done</div>
+                    </div>
+                    <div class="stat-pill" id="pillTarget">
+                      <div class="stat-val" id="statTarget">Day 1</div>
+                      <div class="stat-lbl">Your Target</div>
+                    </div>
+                    <div class="stat-pill highlight" id="pillAhead" style="display:none;">
+                      <div class="stat-val gold" id="statAhead">+0</div>
+                      <div class="stat-lbl">Days Ahead</div>
+                    </div>
+                    <div class="stat-pill green" id="pillFinish" style="display:none;">
+                      <div class="stat-val green" id="statFinish">~12d</div>
+                      <div class="stat-lbl">Est. Finish</div>
+                    </div>
+                  </div>
+                
+                  <div class="bar-section">
+                    <div class="bar-meta">
+                      <span>Progress vs Daily Target</span>
+                      <strong id="barPctLabel">0%</strong>
+                    </div>
+                    <div style="position:relative;">
+                      <div class="bar-track" style="height:6px;margin-bottom:8px;background:rgba(255,255,255,0.07);">
+                        <div id="targetFill" style="height:100%;border-radius:999px;background:rgba(255,255,255,0.2);width:0%;transition:width 0.6s ease;"></div>
+                        <div class="bar-target-line" id="targetLine" style="left:0%;"></div>
+                      </div>
+                      <div class="bar-fill-wrap" style="height:14px;">
+                        <div class="bar-fill-bg"></div>
+                        <div class="bar-fill on-pace" id="actualFill" style="width:0%;"></div>
+                      </div>
+                    </div>
+                    <div class="bar-hint" id="barHint">Complete Chapter 1 today to stay on track</div>
+                  </div>
+                
+                  <div class="dots-row" id="dotsRow"></div>
+                </div>
+
+                <!-- CHAPTERS (static display) -->
                 <div class="chapter expanded">
                     <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">1</span>
-                            <span>Everyday Conversations & Small Talk (Alltagsgespräche)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="free-badge">FREE PREVIEW</span>
-                            <span>6 lectures • 3h 15m</span>
-                        </div>
+                        <div class="chapter-title"><span class="chapter-number">1</span><span>Everyday Conversations & Small Talk (Alltagsgespräche)</span></div>
+                        <div class="chapter-meta"><span class="free-badge">FREE PREVIEW</span><span>6 lectures • 3h 15m</span></div>
                     </div>
                     <div class="chapter-content">
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">▶️</span>
-                                <span class="lesson-title">1.1 Introduction - How to greet in German</span>
-                            </div>
-                            <span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">28:45</span></span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">▶️</span>
-                                <span class="lesson-title">1.2 Saying your name - Ich heiße...</span>
-                            </div>
-                            <span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">32:10</span></span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">▶️</span>
-                                <span class="lesson-title">1.3 Where are you from? - Woher kommst du?</span>
-                            </div>
-                            <span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">35:20</span></span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">▶️</span>
-                                <span class="lesson-title">1.4 Asking questions - W-Fragen</span>
-                            </div>
-                            <span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">29:15</span></span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">📝</span>
-                                <span class="lesson-title">Chapter 1 Quiz</span>
-                            </div>
-                            <span class="lesson-duration">10 questions</span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">📄</span>
-                                <span class="lesson-title">Practice Materials & Homework</span>
-                            </div>
-                            <span class="lesson-duration">PDF</span>
-                        </div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">▶️</span><span class="lesson-title">1.1 Introduction - How to greet in German</span></div><span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">28:45</span></span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">▶️</span><span class="lesson-title">1.2 Saying your name - Ich heiße...</span></div><span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">32:10</span></span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">▶️</span><span class="lesson-title">1.3 Where are you from? - Woher kommst du?</span></div><span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">35:20</span></span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">▶️</span><span class="lesson-title">1.4 Asking questions - W-Fragen</span></div><span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">29:15</span></span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">📝</span><span class="lesson-title">Chapter 1 Quiz</span></div><span class="lesson-duration">10 questions</span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">📄</span><span class="lesson-title">Practice Materials & Homework</span></div><span class="lesson-duration">PDF</span></div>
                     </div>
                 </div>
 
-                <!-- Chapter 2 - FREE -->
                 <div class="chapter">
                     <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">2</span>
-                            <span>Appointments, Invitations & Social Plans (Termine und Verabredungen)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="free-badge">FREE PREVIEW</span>
-                            <span>6 lectures • 3h 25m</span>
-                        </div>
+                        <div class="chapter-title"><span class="chapter-number">2</span><span>Appointments, Invitations & Social Plans (Termine und Verabredungen)</span></div>
+                        <div class="chapter-meta"><span class="free-badge">FREE PREVIEW</span><span>6 lectures • 3h 25m</span></div>
                     </div>
                     <div class="chapter-content">
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">▶️</span>
-                                <span class="lesson-title">2.1 Family members - Familienmitglieder</span>
-                            </div>
-                            <span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">31:20</span></span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">▶️</span>
-                                <span class="lesson-title">2.2 Possessive articles - mein, dein, sein...</span>
-                            </div>
-                            <span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">38:45</span></span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">▶️</span>
-                                <span class="lesson-title">2.3 Talking about your family</span>
-                            </div>
-                            <span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">33:10</span></span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">▶️</span>
-                                <span class="lesson-title">2.4 Friends and relationships - Freunde und Beziehungen</span>
-                            </div>
-                            <span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">29:30</span></span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">📝</span>
-                                <span class="lesson-title">Chapter 2 Quiz</span>
-                            </div>
-                            <span class="lesson-duration">10 questions</span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">📄</span>
-                                <span class="lesson-title">Practice Materials & Homework</span>
-                            </div>
-                            <span class="lesson-duration">PDF</span>
-                        </div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">▶️</span><span class="lesson-title">2.1 Family members - Familienmitglieder</span></div><span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">31:20</span></span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">▶️</span><span class="lesson-title">2.2 Possessive articles - mein, dein, sein...</span></div><span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">38:45</span></span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">▶️</span><span class="lesson-title">2.3 Talking about your family</span></div><span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">33:10</span></span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">▶️</span><span class="lesson-title">2.4 Friends and relationships - Freunde und Beziehungen</span></div><span><a href="#" class="preview-link" onclick="openVideoModal('1165138279'); return false;">Preview</a><span class="lesson-duration">29:30</span></span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">📝</span><span class="lesson-title">Chapter 2 Quiz</span></div><span class="lesson-duration">10 questions</span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">📄</span><span class="lesson-title">Practice Materials & Homework</span></div><span class="lesson-duration">PDF</span></div>
                     </div>
                 </div>
 
-                <!-- Chapter 3 - LOCKED -->
                 <div class="chapter">
                     <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">3</span>
-                            <span>Housing, Rent & Utilities (Wohnen und Miete)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="locked-badge">🔒 LOCKED</span>
-                            <span>6 lectures • 3h 40m</span>
-                        </div>
+                        <div class="chapter-title"><span class="chapter-number">3</span><span>Housing, Rent & Utilities (Wohnen und Miete)</span></div>
+                        <div class="chapter-meta"><span class="locked-badge">🔒 LOCKED</span><span>6 lectures • 3h 40m</span></div>
                     </div>
                     <div class="chapter-content">
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">🔒</span>
-                                <span class="lesson-title locked">3.1 At the restaurant - Im Restaurant <span class="lock-icon">🔒</span></span>
-                            </div>
-                            <span class="lesson-duration">34:20</span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">🔒</span>
-                                <span class="lesson-title locked">3.2 Food vocabulary - Lebensmittel <span class="lock-icon">🔒</span></span>
-                            </div>
-                            <span class="lesson-duration">31:15</span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">🔒</span>
-                                <span class="lesson-title locked">3.3 Ordering food - Essen bestellen <span class="lock-icon">🔒</span></span>
-                            </div>
-                            <span class="lesson-duration">36:50</span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">🔒</span>
-                                <span class="lesson-title locked">3.4 Preferences - Was magst du? <span class="lock-icon">🔒</span></span>
-                            </div>
-                            <span class="lesson-duration">28:40</span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">🔒</span>
-                                <span class="lesson-title locked">Chapter 3 Quiz <span class="lock-icon">🔒</span></span>
-                            </div>
-                            <span class="lesson-duration">10 questions</span>
-                        </div>
-                        <div class="lesson">
-                            <div class="lesson-left">
-                                <span class="lesson-icon">🔒</span>
-                                <span class="lesson-title locked">Practice Materials & Homework <span class="lock-icon">🔒</span></span>
-                            </div>
-                            <span class="lesson-duration">PDF</span>
-                        </div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">🔒</span><span class="lesson-title locked">3.1 At the restaurant - Im Restaurant</span></div><span class="lesson-duration">34:20</span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">🔒</span><span class="lesson-title locked">3.2 Food vocabulary - Lebensmittel</span></div><span class="lesson-duration">31:15</span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">🔒</span><span class="lesson-title locked">3.3 Ordering food - Essen bestellen</span></div><span class="lesson-duration">36:50</span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">🔒</span><span class="lesson-title locked">3.4 Preferences - Was magst du?</span></div><span class="lesson-duration">28:40</span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">🔒</span><span class="lesson-title locked">Chapter 3 Quiz</span></div><span class="lesson-duration">10 questions</span></div>
+                        <div class="lesson"><div class="lesson-left"><span class="lesson-icon">🔒</span><span class="lesson-title locked">Practice Materials & Homework</span></div><span class="lesson-duration">PDF</span></div>
                     </div>
                 </div>
 
-                <!-- Chapter 4-12 collapsed by default -->
-                <div class="chapter">
-                    <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">4</span>
-                            <span>At the Doctor & Pharmacy (Beim Arzt und in der Apotheke)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="locked-badge">🔒 LOCKED</span>
-                            <span>6 lectures • 3h 20m</span>
-                        </div>
-                    </div>
-                </div>
+                <div class="chapter"><div class="chapter-header" onclick="toggleChapter(this)"><div class="chapter-title"><span class="chapter-number">4</span><span>At the Doctor & Pharmacy (Beim Arzt und in der Apotheke)</span></div><div class="chapter-meta"><span class="locked-badge">🔒 LOCKED</span><span>6 lectures • 3h 20m</span></div></div></div>
+                <div class="chapter"><div class="chapter-header" onclick="toggleChapter(this)"><div class="chapter-title"><span class="chapter-number">5</span><span>Workplace Communication Basics (Kommunikation im Beruf)</span></div><div class="chapter-meta"><span class="locked-badge">🔒 LOCKED</span><span>6 lectures • 3h 15m</span></div></div></div>
+                <div class="chapter"><div class="chapter-header" onclick="toggleChapter(this)"><div class="chapter-title"><span class="chapter-number">6</span><span>School, Courses & Formal Emails (Schule und E-Mails)</span></div><div class="chapter-meta"><span class="locked-badge">🔒 LOCKED</span><span>6 lectures • 3h 30m</span></div></div></div>
+                <div class="chapter"><div class="chapter-header" onclick="toggleChapter(this)"><div class="chapter-title"><span class="chapter-number">7</span><span>Shopping Problems, Returns & Complaints (Reklamation und Umtausch)</span></div><div class="chapter-meta"><span class="locked-badge">🔒 LOCKED</span><span>6 lectures • 3h 10m</span></div></div></div>
+                <div class="chapter"><div class="chapter-header" onclick="toggleChapter(this)"><div class="chapter-title"><span class="chapter-number">8</span><span>Travel Planning & Public Transport (Reiseplanung und Verkehr)</span></div><div class="chapter-meta"><span class="locked-badge">🔒 LOCKED</span><span>6 lectures • 3h 25m</span></div></div></div>
+                <div class="chapter"><div class="chapter-header" onclick="toggleChapter(this)"><div class="chapter-title"><span class="chapter-number">9</span><span>Past Experiences: Perfekt in Action (Erlebnisse im Perfekt)</span></div><div class="chapter-meta"><span class="locked-badge">🔒 LOCKED</span><span>6 lectures • 3h 35m</span></div></div></div>
+                <div class="chapter"><div class="chapter-header" onclick="toggleChapter(this)"><div class="chapter-title"><span class="chapter-number">10</span><span>Future Plans, Goals & Intentions (Pläne und Ziele)</span></div><div class="chapter-meta"><span class="locked-badge">🔒 LOCKED</span><span>6 lectures • 3h 15m</span></div></div></div>
+                <div class="chapter"><div class="chapter-header" onclick="toggleChapter(this)"><div class="chapter-title"><span class="chapter-number">11</span><span>Opinions, Reasons & Comparisons (Meinung und Begründung)</span></div><div class="chapter-meta"><span class="locked-badge">🔒 LOCKED</span><span>6 lectures • 3h 10m</span></div></div></div>
+                <div class="chapter"><div class="chapter-header" onclick="toggleChapter(this)"><div class="chapter-title"><span class="chapter-number">12</span><span>Goethe A2 Speaking + Writing Exam Prep (Prüfungstraining)</span></div><div class="chapter-meta"><span class="locked-badge">🔒 LOCKED</span><span>6 lectures • 4h 05m</span></div></div></div>
 
-                <div class="chapter">
-                    <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">5</span>
-                            <span>Workplace Communication Basics (Kommunikation im Beruf)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="locked-badge">🔒 LOCKED</span>
-                            <span>6 lectures • 3h 15m</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chapter">
-                    <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">6</span>
-                            <span>School, Courses & Formal Emails (Schule und E-Mails)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="locked-badge">🔒 LOCKED</span>
-                            <span>6 lectures • 3h 30m</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chapter">
-                    <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">7</span>
-                            <span>Shopping Problems, Returns & Complaints (Reklamation und Umtausch)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="locked-badge">🔒 LOCKED</span>
-                            <span>6 lectures • 3h 10m</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chapter">
-                    <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">8</span>
-                            <span>Travel Planning & Public Transport (Reiseplanung und Verkehr)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="locked-badge">🔒 LOCKED</span>
-                            <span>6 lectures • 3h 25m</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chapter">
-                    <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">9</span>
-                            <span>Past Experiences: Perfekt in Action (Erlebnisse im Perfekt)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="locked-badge">🔒 LOCKED</span>
-                            <span>6 lectures • 3h 35m</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chapter">
-                    <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">10</span>
-                            <span>Future Plans, Goals & Intentions (Pläne und Ziele)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="locked-badge">🔒 LOCKED</span>
-                            <span>6 lectures • 3h 15m</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chapter">
-                    <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">11</span>
-                            <span>Opinions, Reasons & Comparisons (Meinung und Begründung)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="locked-badge">🔒 LOCKED</span>
-                            <span>6 lectures • 3h 10m</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chapter">
-                    <div class="chapter-header" onclick="toggleChapter(this)">
-                        <div class="chapter-title">
-                            <span class="chapter-number">12</span>
-                            <span>Goethe A2 Speaking + Writing Exam Prep (Prüfungstraining)</span>
-                        </div>
-                        <div class="chapter-meta">
-                            <span class="locked-badge">🔒 LOCKED</span>
-                            <span>6 lectures • 4h 05m</span>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="price-card">
                 <div class="price-section">
                     <div class="price">₹6,000</div>
                     <p class="price-note">One-time payment • Lifetime access</p>
                 </div>
-
-                <button class="btn-enroll" onclick="window.location.href='payment.html'">
-                    Enroll in A2 Course
-                </button>
-
-                <p class="guarantee">
-                    ✓ 30-Day Money-Back Guarantee<br>
-                    ✓ First 2 Chapters FREE
-                </p>
-
-                <button class="btn-gift" onclick="openGiftModal()">
-                    <span class="gift-icon">🎁</span>
-                    Gift this course
-                </button>
-
+                <button class="btn-enroll" onclick="enrollA2()">Enroll in A2 Course</button>
+                <p class="guarantee">✓ 30-Day Money-Back Guarantee<br>✓ First 2 Chapters FREE</p>
+                <button class="btn-gift" onclick="openGiftModal()"><span class="gift-icon">🎁</span> Gift this course</button>
                 <div class="sidebar-includes">
                     <h4>This course includes:</h4>
-                    <div class="sidebar-include">
-                        <span class="icon">🎥</span>
-                        <span>72 video lessons</span>
-                    </div>
-                    <div class="sidebar-include">
-                        <span class="icon">⏱️</span>
-                        <span>40+ hours of content</span>
-                    </div>
-                    <div class="sidebar-include">
-                        <span class="icon">📝</span>
-                        <span>12 quizzes</span>
-                    </div>
-                    <div class="sidebar-include">
-                        <span class="icon">📄</span>
-                        <span>Downloadable materials</span>
-                    </div>
-                    <div class="sidebar-include">
-                        <span class="icon">✏️</span>
-                        <span>Homework for each chapter</span>
-                    </div>
-                    <div class="sidebar-include">
-                        <span class="icon">♾️</span>
-                        <span>Lifetime access</span>
-                    </div>
-                    <div class="sidebar-include">
-                        <span class="icon">📱</span>
-                        <span>Mobile & desktop access</span>
-                    </div>
-                    <div class="sidebar-include">
-                        <span class="icon">🏆</span>
-                        <span>Certificate upon completion</span>
-                    </div>
+                    <div class="sidebar-include"><span class="icon">🎥</span><span>72 video lessons</span></div>
+                    <div class="sidebar-include"><span class="icon">⏱️</span><span>40+ hours of content</span></div>
+                    <div class="sidebar-include"><span class="icon">📝</span><span>12 quizzes</span></div>
+                    <div class="sidebar-include"><span class="icon">📄</span><span>Downloadable materials</span></div>
+                    <div class="sidebar-include"><span class="icon">✏️</span><span>Homework for each chapter</span></div>
+                    <div class="sidebar-include"><span class="icon">♾️</span><span>Lifetime access</span></div>
+                    <div class="sidebar-include"><span class="icon">📱</span><span>Mobile & desktop access</span></div>
+                    <div class="sidebar-include"><span class="icon">🏆</span><span>Certificate upon completion</span></div>
                 </div>
             </div>
         </aside>
     </div>
 
-    <!-- Explore Other Courses -->
     <div class="explore-courses">
         <h2>Explore Other Courses</h2>
         <div class="courses-slider-wrapper">
             <button class="slider-arrow left" onclick="slideLeft()">❮</button>
             <div class="courses-slider" id="coursesSlider">
                 <div class="slider-card">
-                    <div class="slider-card-header">
-                        <div class="slider-card-level">A1</div>
-                        <div class="slider-card-name">Beginner</div>
-                    </div>
-                    <div class="slider-card-body">
-                        <span class="slider-card-badge available">Available Now</span>
-                        <p>Build a strong foundation in German. Master basic conversations and everyday situations.</p>
-                        <a href="course-a1.html" class="slider-card-btn primary">View Course →</a>
-                    </div>
+                    <div class="slider-card-header" style="background:linear-gradient(135deg,#FF6B35,#FF8C61);"><div class="slider-card-level">A1+A2</div><div class="slider-card-name">Bundle Offer</div></div>
+                    <div class="slider-card-body"><span class="slider-card-badge combo">🎉 Save ₹2,000</span><p>Get A1 + A2 Bundle and save big!</p><a href="index.html#courses" class="slider-card-btn primary">View Bundle →</a></div>
                 </div>
                 <div class="slider-card">
-                    <div class="slider-card-header">
-                        <div class="slider-card-level">B1</div>
-                        <div class="slider-card-name">Intermediate</div>
-                    </div>
-                    <div class="slider-card-body">
-                        <span class="slider-card-badge coming">Coming Soon</span>
-                        <p>Navigate complex situations and express opinions on familiar topics with confidence.</p>
-                        <span class="slider-card-btn disabled">Coming Soon</span>
-                    </div>
+                    <div class="slider-card-header"><div class="slider-card-level">A2</div><div class="slider-card-name">Elementary</div></div>
+                    <div class="slider-card-body"><span class="slider-card-badge coming">Coming Soon</span><p>Expand your skills to handle routine tasks effectively.</p><a href="course-a2.html" class="slider-card-btn primary">View Course →</a></div>
                 </div>
                 <div class="slider-card">
-                    <div class="slider-card-header">
-                        <div class="slider-card-level">B2</div>
-                        <div class="slider-card-name">Upper-Intermediate</div>
-                    </div>
-                    <div class="slider-card-body">
-                        <span class="slider-card-badge coming">Coming Soon</span>
-                        <p>Master complex texts and interact fluently with native German speakers.</p>
-                        <span class="slider-card-btn disabled">Coming Soon</span>
-                    </div>
+                    <div class="slider-card-header"><div class="slider-card-level">B1</div><div class="slider-card-name">Intermediate</div></div>
+                    <div class="slider-card-body"><span class="slider-card-badge coming">Coming Soon</span><p>Navigate complex situations with confidence.</p><span class="slider-card-btn disabled">Coming Soon</span></div>
                 </div>
                 <div class="slider-card">
-                    <div class="slider-card-header" style="background: linear-gradient(135deg, #FF6B35, #FF8C61);">
-                        <div class="slider-card-level">A1+A2</div>
-                        <div class="slider-card-name">Bundle Offer</div>
-                    </div>
-                    <div class="slider-card-body">
-                        <span class="slider-card-badge combo">🎉 Save ₹2,000</span>
-                        <p>Get A1 + A2 Bundle and save big! Complete beginner to elementary package.</p>
-                        <a href="index.html#courses" class="slider-card-btn primary">View Bundle →</a>
-                    </div>
+                    <div class="slider-card-header"><div class="slider-card-level">B2</div><div class="slider-card-name">Upper-Intermediate</div></div>
+                    <div class="slider-card-body"><span class="slider-card-badge coming">Coming Soon</span><p>Master complex texts and interact with native speakers.</p><span class="slider-card-btn disabled">Coming Soon</span></div>
                 </div>
             </div>
             <button class="slider-arrow right" onclick="slideRight()">❯</button>
         </div>
     </div>
 
-    <!-- Gift Modal -->
     <div class="gift-modal" id="giftModal">
         <div class="gift-modal-content">
             <button class="gift-modal-close" onclick="closeGiftModal()">×</button>
-            <div class="gift-modal-header">
-                <div class="gift-emoji">🎁</div>
-                <h3>Gift this course</h3>
-                <p>Send this course as a gift for a birthday, celebration, or just because!</p>
-            </div>
+            <div class="gift-modal-header"><div class="gift-emoji">🎁</div><h3>Gift this course</h3><p>Send this course as a gift!</p></div>
             <form id="giftForm" onsubmit="submitGiftForm(event)">
-                <div class="gift-form-group">
-                    <label>Recipient's Name *</label>
-                    <input type="text" id="giftRecipientName" placeholder="Enter their name" required>
-                </div>
-                <div class="gift-form-group">
-                    <label>Recipient's Email *</label>
-                    <input type="email" id="giftRecipientEmail" placeholder="Enter their email" required>
-                </div>
-                <button type="submit" class="btn-gift-proceed">
-                    <span>🎁</span> Proceed to Gift Payment
-                </button>
+                <div class="gift-form-group"><label>Recipient's Name *</label><input type="text" id="giftRecipientName" placeholder="Enter their name" required></div>
+                <div class="gift-form-group"><label>Recipient's Email *</label><input type="email" id="giftRecipientEmail" placeholder="Enter their email" required></div>
+                <button type="submit" class="btn-gift-proceed"><span>🎁</span> Proceed to Gift Payment</button>
             </form>
         </div>
     </div>
 
-    <!-- Video Modal -->
     <div class="video-modal" id="videoModal">
         <div class="video-modal-content">
             <button class="video-modal-close" onclick="closeVideoModal()">×</button>
-            <div class="video-wrapper" id="videoContainer">
-                <!-- Video will be loaded here -->
-            </div>
+            <div class="video-wrapper" id="videoContainer"></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
@@ -1637,133 +862,475 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // Chapter accordion
-        window.toggleChapter = function(header) {
-            header.parentElement.classList.toggle('expanded');
-        };
+        window.toggleChapter = function(header) { header.parentElement.classList.toggle('expanded'); };
+        window.expandAll = function() { document.querySelectorAll('.chapter').forEach(c => c.classList.add('expanded')); };
+        window.slideLeft = function() { document.getElementById('coursesSlider').scrollBy({ left: -300, behavior: 'smooth' }); };
+        window.slideRight = function() { document.getElementById('coursesSlider').scrollBy({ left: 300, behavior: 'smooth' }); };
 
-        window.expandAll = function() {
-            document.querySelectorAll('.chapter').forEach(chapter => {
-                chapter.classList.add('expanded');
-            });
-        };
-
-        // Courses Slider
-        window.slideLeft = function() {
-            document.getElementById('coursesSlider').scrollBy({ left: -300, behavior: 'smooth' });
-        };
-        window.slideRight = function() {
-            document.getElementById('coursesSlider').scrollBy({ left: 300, behavior: 'smooth' });
-        };
-
-        // Video Modal
         window.openVideoModal = function(videoId) {
             const modal = document.getElementById('videoModal');
             const container = document.getElementById('videoContainer');
-            
-            // Create video embed
-            container.innerHTML = `
-                <iframe src="https://player.vimeo.com/video/${videoId}?h=&badge=0&autopause=0" 
-                        frameborder="0" 
-                        allow="autoplay; fullscreen; picture-in-picture" 
-                        allowfullscreen
-                        style="position:absolute;top:0;left:0;width:100%;height:100%;" 
-                        title="Lesson Video">
-                </iframe>
-            `;
-            
+            const safeVideoId = String(videoId).replace(/[^0-9]/g, '');
+            if (!safeVideoId) return;
+            const iframe = document.createElement('iframe');
+            iframe.src = 'https://player.vimeo.com/video/' + safeVideoId + '?h=&badge=0&autopause=0';
+            iframe.frameBorder = '0';
+            iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+            iframe.allowFullscreen = true;
+            iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
+            container.innerHTML = '';
+            container.appendChild(iframe);
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
         };
 
         window.closeVideoModal = function() {
-            const modal = document.getElementById('videoModal');
-            const container = document.getElementById('videoContainer');
-            
-            // Clear video to stop playback
-            container.innerHTML = '';
-            
-            modal.classList.remove('active');
+            document.getElementById('videoContainer').innerHTML = '';
+            document.getElementById('videoModal').classList.remove('active');
             document.body.style.overflow = 'auto';
         };
 
-        // Close modal on escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeVideoModal();
-            }
-        });
-
-        // Close modal on background click
-        document.getElementById('videoModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeVideoModal();
-            }
-        });
-
-        // Gift Modal
-        window.openGiftModal = function() {
-            document.getElementById('giftModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        };
-
-        window.closeGiftModal = function() {
-            document.getElementById('giftModal').classList.remove('active');
-            document.body.style.overflow = 'auto';
-        };
-
-        window.submitGiftForm = function(e) {
-            e.preventDefault();
-            const recipientName = document.getElementById('giftRecipientName').value;
-            const recipientEmail = document.getElementById('giftRecipientEmail').value;
-
-            if (!recipientName || !recipientEmail) return;
-
-            // Store gift details and course info in sessionStorage
-            sessionStorage.setItem('giftMode', 'true');
-            sessionStorage.setItem('giftRecipientName', recipientName);
-            sessionStorage.setItem('giftRecipientEmail', recipientEmail);
-            sessionStorage.setItem('enrollCourse', 'A2 Course - Elementary German');
+        window.enrollA2 = function() {
+            const user = auth.currentUser;
+            if (!user) { alert('Please login or sign up first.'); window.location.href = 'login.html'; return; }
+            sessionStorage.setItem('enrollCourse', 'A2 Course - Elementary German Mastery');
             sessionStorage.setItem('enrollAmount', '6000');
-
             window.location.href = 'payment.html';
         };
 
-        // Close gift modal on escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeGiftModal();
-            }
-        });
+        window.openGiftModal = function() { document.getElementById('giftModal').classList.add('active'); document.body.style.overflow = 'hidden'; };
+        window.closeGiftModal = function() { document.getElementById('giftModal').classList.remove('active'); document.body.style.overflow = 'auto'; };
 
-        // Close gift modal on background click
-        document.getElementById('giftModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeGiftModal();
-            }
-        });
+        window.submitGiftForm = function(e) {
+            e.preventDefault();
+            const name = document.getElementById('giftRecipientName').value;
+            const email = document.getElementById('giftRecipientEmail').value;
+            if (!name || !email) return;
+            sessionStorage.setItem('giftMode', 'true');
+            sessionStorage.setItem('giftRecipientName', name);
+            sessionStorage.setItem('giftRecipientEmail', email);
+            sessionStorage.setItem('enrollCourse', 'A2 Course - Elementary German Mastery');
+            sessionStorage.setItem('enrollAmount', '6000');
+            window.location.href = 'payment.html';
+        };
 
-        // Show AI Partner banner for paid students
-onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-    document.getElementById('aiPartnerBanner')?.classList.add('visible');
-});
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeVideoModal(); closeGiftModal(); } });
+        document.getElementById('videoModal').addEventListener('click', function(e) { if (e.target === this) closeVideoModal(); });
+        document.getElementById('giftModal').addEventListener('click', function(e) { if (e.target === this) closeGiftModal(); });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return;
+            document.getElementById('aiPartnerBanner')?.classList.add('visible');
+            try {
+                const snap = await getDoc(doc(db, 'progress', user.uid + '_a2'));
+                if (snap.exists()) {
+                    var saved = snap.data().state;
+                    if (saved) {
+                        _gmeMemState = JSON.stringify(saved);
+                        loadState();
+                        buildChapters();
+                        updateDashboard();
+                    }
+                }
+            } catch(e) {}
+        });
     </script>
-<script>
-(function() {
-    function setNavHeight() {
-        var nav = document.querySelector('nav');
-        if (nav) document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
+
+    <script>
+        (function() {
+            function setNavHeight() {
+                var nav = document.querySelector('nav');
+                if (nav) document.documentElement.style.setProperty('--nav-height', nav.offsetHeight + 'px');
+            }
+            setNavHeight();
+            document.addEventListener('DOMContentLoaded', setNavHeight);
+            window.addEventListener('resize', setNavHeight);
+        })();
+    </script>
+
+    <!-- PROGRESS TRACKER JS -->
+    <script>
+var _gmeMemState = null;
+
+var CHAPTERS = [
+  { id:1,  title:'Greetings & Introductions',   free:true,  items:[
+    {id:'1-v1',type:'video',    label:'1.1 How to greet in German'},
+    {id:'1-v2',type:'video',    label:'1.2 Saying your name - Ich heisse...'},
+    {id:'1-v3',type:'video',    label:'1.3 Where are you from?'},
+    {id:'1-v4',type:'video',    label:'1.4 Asking questions (W-Fragen)'},
+    {id:'1-q1',type:'quiz',     label:'Chapter 1 Quiz'},
+    {id:'1-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:2,  title:'Family and Friends',           free:true,  items:[
+    {id:'2-v1',type:'video',    label:'2.1 Family members'},
+    {id:'2-v2',type:'video',    label:'2.2 Possessive articles'},
+    {id:'2-v3',type:'video',    label:'2.3 Talking about your family'},
+    {id:'2-v4',type:'video',    label:'2.4 Friends and relationships'},
+    {id:'2-q1',type:'quiz',     label:'Chapter 2 Quiz'},
+    {id:'2-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:3,  title:'Food and Drinks',              free:false, items:[
+    {id:'3-v1',type:'video',    label:'3.1 At the restaurant'},
+    {id:'3-v2',type:'video',    label:'3.2 Food vocabulary'},
+    {id:'3-v3',type:'video',    label:'3.3 Ordering food'},
+    {id:'3-v4',type:'video',    label:'3.4 Preferences'},
+    {id:'3-q1',type:'quiz',     label:'Chapter 3 Quiz'},
+    {id:'3-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:4,  title:'Home and Living',              free:false, items:[
+    {id:'4-v1',type:'video',    label:'4.1 Rooms in a house'},
+    {id:'4-v2',type:'video',    label:'4.2 Furniture vocabulary'},
+    {id:'4-v3',type:'video',    label:'4.3 Describing your home'},
+    {id:'4-v4',type:'video',    label:'4.4 Renting an apartment'},
+    {id:'4-q1',type:'quiz',     label:'Chapter 4 Quiz'},
+    {id:'4-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:5,  title:'Daily Routine',                free:false, items:[
+    {id:'5-v1',type:'video',    label:'5.1 Morning routine'},
+    {id:'5-v2',type:'video',    label:'5.2 Telling the time'},
+    {id:'5-v3',type:'video',    label:'5.3 Days and months'},
+    {id:'5-v4',type:'video',    label:'5.4 Making plans'},
+    {id:'5-q1',type:'quiz',     label:'Chapter 5 Quiz'},
+    {id:'5-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:6,  title:'Hobbies and Free Time',        free:false, items:[
+    {id:'6-v1',type:'video',    label:'6.1 Sports and activities'},
+    {id:'6-v2',type:'video',    label:'6.2 Modal verbs (mogen, wollen)'},
+    {id:'6-v3',type:'video',    label:'6.3 Expressing preferences'},
+    {id:'6-v4',type:'video',    label:'6.4 Weekend plans'},
+    {id:'6-q1',type:'quiz',     label:'Chapter 6 Quiz'},
+    {id:'6-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:7,  title:'Shopping',                     free:false, items:[
+    {id:'7-v1',type:'video',    label:'7.1 At the shop'},
+    {id:'7-v2',type:'video',    label:'7.2 Prices and numbers'},
+    {id:'7-v3',type:'video',    label:'7.3 Colours and sizes'},
+    {id:'7-v4',type:'video',    label:'7.4 Asking for help'},
+    {id:'7-q1',type:'quiz',     label:'Chapter 7 Quiz'},
+    {id:'7-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:8,  title:'Work and Education',           free:false, items:[
+    {id:'8-v1',type:'video',    label:'8.1 Jobs and professions'},
+    {id:'8-v2',type:'video',    label:'8.2 Workplace phrases'},
+    {id:'8-v3',type:'video',    label:'8.3 School and university'},
+    {id:'8-v4',type:'video',    label:'8.4 Writing a CV intro'},
+    {id:'8-q1',type:'quiz',     label:'Chapter 8 Quiz'},
+    {id:'8-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:9,  title:'Travel and Directions',        free:false, items:[
+    {id:'9-v1',type:'video',    label:'9.1 Transport types'},
+    {id:'9-v2',type:'video',    label:'9.2 Asking for directions'},
+    {id:'9-v3',type:'video',    label:'9.3 At the hotel'},
+    {id:'9-v4',type:'video',    label:'9.4 Travel phrases'},
+    {id:'9-q1',type:'quiz',     label:'Chapter 9 Quiz'},
+    {id:'9-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:10, title:'Health and Body',              free:false, items:[
+    {id:'10-v1',type:'video',    label:'10.1 Body parts'},
+    {id:'10-v2',type:'video',    label:'10.2 At the doctor'},
+    {id:'10-v3',type:'video',    label:'10.3 Describing symptoms'},
+    {id:'10-v4',type:'video',    label:'10.4 Healthy lifestyle'},
+    {id:'10-q1',type:'quiz',     label:'Chapter 10 Quiz'},
+    {id:'10-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:11, title:'Weather and Seasons',          free:false, items:[
+    {id:'11-v1',type:'video',    label:'11.1 Weather vocabulary'},
+    {id:'11-v2',type:'video',    label:'11.2 Seasons and temperature'},
+    {id:'11-v3',type:'video',    label:'11.3 Talking about weather'},
+    {id:'11-v4',type:'video',    label:'11.4 Planning by weather'},
+    {id:'11-q1',type:'quiz',     label:'Chapter 11 Quiz'},
+    {id:'11-e1',type:'exercise', label:'Practice Materials & Homework'}
+  ]},
+  { id:12, title:'Review and Exam Preparation',  free:false, items:[
+    {id:'12-v1',type:'video',    label:'12.1 Full grammar review'},
+    {id:'12-v2',type:'video',    label:'12.2 Vocabulary revision'},
+    {id:'12-v3',type:'video',    label:'12.3 Mock speaking test'},
+    {id:'12-v4',type:'video',    label:'12.4 Exam strategies'},
+    {id:'12-q1',type:'quiz',     label:'Final Practice Quiz'},
+    {id:'12-e1',type:'exercise', label:'Exam Practice Pack'}
+  ]}
+];
+
+var TYPE_STYLE = {
+  video:    {bg:'#EEF2FF', color:'#4338CA', icon:'&#9654;'},
+  quiz:     {bg:'#FFF7ED', color:'#C2410C', icon:'&#128221;'},
+  exercise: {bg:'#F0FDF4', color:'#166534', icon:'&#128196;'}
+};
+
+var TOTAL_CHAPTERS = 12;
+var SIM_START_DAY = 1;
+var state = {};
+
+function loadState() {
+  if (_gmeMemState) {
+    try { state = JSON.parse(_gmeMemState) || {}; } catch(e) { state = {}; }
+  }
+}
+
+function saveState() {
+  try { _gmeMemState = JSON.stringify(state); } catch(e) {}
+}
+
+function chapDone(chap) {
+  var count = 0;
+  for (var i = 0; i < chap.items.length; i++) { if (state[chap.items[i].id]) count++; }
+  return count;
+}
+function chapTotal(chap) { return chap.items.length; }
+function chapPct(chap) { return Math.round(chapDone(chap) / chapTotal(chap) * 100); }
+function chapComplete(chap) { return chapDone(chap) === chapTotal(chap); }
+
+function totalChapsCompleted() {
+  var count = 0;
+  for (var i = 0; i < CHAPTERS.length; i++) { if (chapComplete(CHAPTERS[i])) count++; }
+  return count;
+}
+
+function overallPct() {
+  var done = 0, total = 0;
+  for (var i = 0; i < CHAPTERS.length; i++) { done += chapDone(CHAPTERS[i]); total += chapTotal(CHAPTERS[i]); }
+  return Math.round(done / total * 100);
+}
+
+function buildChapters() {
+  var container = document.getElementById('chaptersContainer');
+  if (!container) return;
+  var html = '';
+  var chapsDoneCount = totalChapsCompleted();
+
+  for (var idx = 0; idx < CHAPTERS.length; idx++) {
+    var chap = CHAPTERS[idx];
+    var done = chapDone(chap);
+    var total = chapTotal(chap);
+    var pct = chapPct(chap);
+    var complete = chapComplete(chap);
+    var isToday = !complete && chap.id === chapsDoneCount + 1;
+    var isAhead = chap.id > chapsDoneCount + 1 && done > 0;
+
+    var numCls = '';
+    if (complete) numCls = 'done-num';
+    else if (isAhead) numCls = 'ahead-num';
+
+    var badgeHTML = '';
+    if (complete)      badgeHTML = '<span class="badge done-badge">Done</span>';
+    else if (isToday)  badgeHTML = '<span class="badge today-badge">Today</span>';
+    else if (chap.free) badgeHTML = '<span class="badge free">Free</span>';
+    else if (isAhead)  badgeHTML = '<span class="badge ahead-badge-sm">Ahead!</span>';
+    else               badgeHTML = '<span class="badge locked">Locked</span>';
+
+    var chapClass = 'chapter';
+    if (complete) chapClass += ' complete';
+    if (isAhead)  chapClass += ' ahead-chapter';
+    if (isToday || chap.free || idx === 0) chapClass += ' open';
+
+    var rows = '';
+    for (var j = 0; j < chap.items.length; j++) {
+      var item = chap.items[j];
+      var checked = !!state[item.id];
+      var s = TYPE_STYLE[item.type];
+      rows += '<label class="check-item">' +
+        '<input type="checkbox" data-item="' + item.id + '" data-chap="' + chap.id + '"' +
+        (checked ? ' checked' : '') + ' onchange="onTick(this)">' +
+        '<span class="type-pill" style="background:' + s.bg + ';color:' + s.color + ';">' + s.icon + ' ' + item.type.charAt(0).toUpperCase() + item.type.slice(1) + '</span>' +
+        '<span class="check-label' + (checked ? ' crossed' : '') + '" id="lbl-' + item.id + '">' + item.label + '</span>' +
+        '</label>';
     }
-    setNavHeight();
-    document.addEventListener('DOMContentLoaded', setNavHeight);
-    window.addEventListener('resize', setNavHeight);
-})();
-</script>
-<a href="ai-partner.html" class="ai-fab" id="aiFab" aria-label="Open Aura AI German companion">
-  <span class="fab-icon">✦</span>
-  <span class="fab-text">AURA</span>
-</a>
+
+    html += '<div class="' + chapClass + '" id="chap-' + chap.id + '">' +
+      '<div class="ch-header" onclick="toggleChap(' + chap.id + ')">' +
+        '<div class="ch-left"><div class="ch-num ' + numCls + '">' + (complete ? '&#10003;' : chap.id) + '</div><div class="ch-title-text">' + chap.title + '</div></div>' +
+        '<div class="ch-right">' + badgeHTML + '<span style="font-size:11px;color:#999;">' + total + ' items</span></div>' +
+      '</div>' +
+      '<div class="ch-content">' +
+        '<div class="ch-progress-row"><span class="ch-mini-label">Progress</span><div class="ch-mini-right"><div class="ch-mini-bar"><div class="ch-mini-fill" id="mini-' + chap.id + '" style="width:' + pct + '%"></div></div><span class="ch-mini-pct" id="pct-' + chap.id + '">' + pct + '%</span></div></div>' +
+        rows +
+        '<div class="ch-complete' + (complete ? ' show' : '') + '" id="cbadge-' + chap.id + '">&#127881; Chapter ' + chap.id + ' complete - Sehr gut!</div>' +
+      '</div>' +
+    '</div>';
+  }
+  container.innerHTML = html;
+}
+
+function toggleChap(id) {
+  var el = document.getElementById('chap-' + id);
+  if (el) el.classList.toggle('open');
+}
+
+function onTick(cb) {
+  var itemId = cb.getAttribute('data-item');
+  var chapId = parseInt(cb.getAttribute('data-chap'), 10);
+  state[itemId] = cb.checked;
+  saveState();
+
+  var lbl = document.getElementById('lbl-' + itemId);
+  if (lbl) lbl.classList.toggle('crossed', cb.checked);
+
+  var chap = null;
+  for (var i = 0; i < CHAPTERS.length; i++) { if (CHAPTERS[i].id === chapId) { chap = CHAPTERS[i]; break; } }
+
+  if (chap) {
+    var pct = chapPct(chap);
+    var mini = document.getElementById('mini-' + chapId);
+    var pctEl = document.getElementById('pct-' + chapId);
+    if (mini) mini.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
+
+    if (chapComplete(chap)) {
+      var badge = document.getElementById('cbadge-' + chapId);
+      if (badge) badge.classList.add('show');
+      launchConfetti();
+      setTimeout(function() { buildChapters(); updateDashboard(); }, 500);
+    } else {
+      var badge2 = document.getElementById('cbadge-' + chapId);
+      if (badge2) badge2.classList.remove('show');
+    }
+  }
+  updateDashboard();
+}
+
+function updateDashboard() {
+  var chapsDone  = totalChapsCompleted();
+  var overall    = overallPct();
+  var currentDay = SIM_START_DAY;
+  var targetChaps = Math.min(currentDay, TOTAL_CHAPTERS);
+  var daysAhead  = chapsDone - targetChaps;
+  var targetPct  = Math.round((targetChaps / TOTAL_CHAPTERS) * 100);
+
+  document.getElementById('statOverall').textContent = overall + '%';
+  document.getElementById('statChaps').textContent   = chapsDone + '/' + TOTAL_CHAPTERS;
+  document.getElementById('statTarget').textContent  = 'Day ' + currentDay;
+  document.getElementById('barPctLabel').textContent = overall + '%';
+
+  document.getElementById('actualFill').style.width = overall + '%';
+  document.getElementById('targetFill').style.width = targetPct + '%';
+  document.getElementById('targetLine').style.left  = targetPct + '%';
+
+  var fill = document.getElementById('actualFill');
+  if (daysAhead > 0)        fill.className = 'bar-fill ahead-fill';
+  else if (daysAhead === 0) fill.className = 'bar-fill on-pace';
+  else                      fill.className = 'bar-fill behind';
+
+  var pillAhead  = document.getElementById('pillAhead');
+  var pillFinish = document.getElementById('pillFinish');
+  if (daysAhead > 0) {
+    pillAhead.style.display  = 'block';
+    pillFinish.style.display = 'block';
+    document.getElementById('statAhead').textContent  = '+' + daysAhead + ' day' + (daysAhead > 1 ? 's' : '');
+    document.getElementById('statFinish').textContent = '~' + (currentDay + TOTAL_CHAPTERS - chapsDone) + 'd';
+  } else {
+    pillAhead.style.display  = 'none';
+    pillFinish.style.display = 'none';
+  }
+
+  var aheadBadge = document.getElementById('aheadBadge');
+  if (daysAhead > 0) {
+    aheadBadge.classList.add('show');
+    document.getElementById('aheadTitle').textContent = 'You are ' + daysAhead + ' day' + (daysAhead > 1 ? 's' : '') + ' ahead!';
+    document.getElementById('aheadText').textContent = 'Target: ' + TOTAL_CHAPTERS + ' days. Your pace: ~' + (currentDay + TOTAL_CHAPTERS - chapsDone) + ' days. Keep going!';
+  } else {
+    aheadBadge.classList.remove('show');
+  }
+
+  var titleEl = document.getElementById('dashTitle');
+  if (overall === 100) titleEl.innerHTML = '&#127881; Course complete! Du bist ein Star!';
+  else if (daysAhead >= 3) titleEl.innerHTML = '&#128081; Crushing it - <span>' + daysAhead + ' days ahead!</span>';
+  else if (daysAhead > 0) titleEl.innerHTML = '&#128293; Ahead by <span>' + daysAhead + ' day' + (daysAhead > 1 ? 's' : '') + '</span>!';
+  else if (chapsDone === 0) titleEl.innerHTML = "Ready to start? Let's go! \uD83C\uDDE9\uD83C\uDDEA";
+  else {
+    var nc = null;
+    for (var i = 0; i < CHAPTERS.length; i++) { if (!chapComplete(CHAPTERS[i])) { nc = CHAPTERS[i]; break; } }
+    titleEl.innerHTML = nc ? 'Today: <span>Ch ' + nc.id + ' - ' + nc.title + '</span>' : 'Almost there!';
+  }
+
+  var hint = document.getElementById('barHint');
+  if (daysAhead > 0) hint.textContent = chapsDone + ' chapters done. Target was ' + targetChaps + '. Keep it up!';
+  else if (daysAhead < 0) hint.textContent = Math.abs(daysAhead) + ' day(s) behind — one chapter gets you back!';
+  else {
+    var nc2 = null;
+    for (var i = 0; i < CHAPTERS.length; i++) { if (!chapComplete(CHAPTERS[i])) { nc2 = CHAPTERS[i]; break; } }
+    hint.textContent = nc2 ? 'On track! Complete Ch ' + nc2.id + ' today.' : 'All done!';
+  }
+
+  var bFire   = document.getElementById('bannerFire');
+  var bRocket = document.getElementById('bannerRocket');
+  var bCrown  = document.getElementById('bannerCrown');
+  bFire.classList.toggle('show',   daysAhead === 1);
+  bRocket.classList.toggle('show', daysAhead === 2);
+  bCrown.classList.toggle('show',  daysAhead >= 3);
+
+  if (daysAhead === 1) {
+    document.getElementById('bannerFireTitle').textContent = '1 day ahead!';
+    document.getElementById('bannerFireText').textContent  = chapsDone + ' chapters done. Do one more to be 2 days ahead!';
+  }
+  if (daysAhead >= 2) {
+    document.getElementById('bannerRocketTitle').textContent = daysAhead + ' days ahead!';
+    document.getElementById('bannerRocketText').textContent  = (TOTAL_CHAPTERS - chapsDone) + ' chapters left. Almost there!';
+  }
+
+  buildDots(chapsDone, targetChaps);
+}
+
+function buildDots(chapsDone, targetChaps) {
+  var row = document.getElementById('dotsRow');
+  var html = '';
+  for (var i = 0; i < CHAPTERS.length; i++) {
+    var c = CHAPTERS[i];
+    var done = chapDone(c);
+    var total = chapTotal(c);
+    var complete = done === total;
+    var partial  = done > 0 && !complete;
+    var isAhead  = c.id > targetChaps && (complete || partial);
+    var cls = 'empty', label = '' + c.id;
+    if (complete && isAhead) { cls = 'ahead-dot'; label = '&#10003;'; }
+    else if (complete)       { cls = 'done';      label = '&#10003;'; }
+    else if (partial)        { cls = 'partial'; }
+    else if (c.id === chapsDone + 1) { cls = 'today'; }
+    var pct = Math.round(done / total * 100);
+    html += '<div class="dot-wrap"><div class="dot ' + cls + '" onclick="scrollToChap(' + c.id + ')">' + label + '</div><div class="dot-tip">Ch ' + c.id + ': ' + pct + '% done</div></div>';
+  }
+  row.innerHTML = html;
+}
+
+function scrollToChap(id) {
+  var el = document.getElementById('chap-' + id);
+  if (el) { el.classList.add('open'); el.scrollIntoView({behavior:'smooth', block:'center'}); }
+}
+
+function resetProgress() {
+  if (confirm('Reset all progress?')) { state = {}; _gmeMemState = null; buildChapters(); updateDashboard(); }
+}
+
+function launchConfetti() {
+  var colors = ['#FFD23F','#FF6B35','#22C55E','#6366F1','#F472B6'];
+  for (var i = 0; i < 35; i++) {
+    (function(delay) {
+      setTimeout(function() {
+        var el = document.createElement('div');
+        el.className = 'confetti-p';
+        el.style.left = (Math.random() * 100) + 'vw';
+        el.style.top  = (Math.random() * 20) + 'vh';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        document.body.appendChild(el);
+        setTimeout(function() { el.parentNode && el.parentNode.removeChild(el); }, 3000);
+      }, delay);
+    })(i * 25);
+  }
+}
+
+// ahead-fill color defined in stylesheet
+
+loadState();
+buildChapters();
+updateDashboard();
+    </script>
+
+    <a href="ai-partner.html" class="ai-fab" id="aiFab" aria-label="Open Aura AI German companion">
+        <span class="fab-icon">✦</span>
+        <span class="fab-text">AURA</span>
+    </a>
 </body>
 </html>

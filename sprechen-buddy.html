@@ -110,10 +110,16 @@
         .ai-fab.visible { display: flex; }
         .ai-fab:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(255,107,53,0.5); color: #1A1A2E; }
         @media (max-width: 768px) { .ai-fab { bottom: 20px; right: 16px; padding: 12px 16px; font-size: 13px; } .ai-fab .fab-text { display: none; } }
-
-        /* ── NEW: permission checking state styles ── */
         .perm-checking { text-align: center; padding: 20px 0; color: #666; font-size: 15px; margin-bottom: 15px; }
         .perm-checking .spinner { width: 32px; height: 32px; border-width: 4px; margin: 0 auto 10px; }
+
+        /* ── START SCREEN ── */
+        .start-screen { text-align: center; padding: 50px 20px; }
+        .start-screen .camera-icon { font-size: 80px; margin-bottom: 20px; }
+        .start-screen h2 { font-size: 28px; font-weight: 800; color: #1A1A2E; margin-bottom: 12px; }
+        .start-screen p { color: #666; font-size: 16px; margin-bottom: 30px; line-height: 1.6; }
+        .btn-start { padding: 18px 48px; background: linear-gradient(135deg, #FF6B35, #004E89); color: white; border: none; border-radius: 16px; font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-start:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,53,0.4); }
     </style>
     <link rel="stylesheet" href="dark-mode.css">
 </head>
@@ -123,6 +129,16 @@
         <div class="header">
             <h1>🗣️ Sprechen Buddy</h1>
             <p>Practice speaking German with real students</p>
+        </div>
+
+        <!-- ── NEW: Start screen — camera requested on button click (user gesture) ── -->
+        <div id="startState" class="state active">
+            <div class="start-screen">
+                <div class="camera-icon">📹</div>
+                <h2>Ready to Practice?</h2>
+                <p>Click below to allow camera & microphone access, then we'll find you a partner.</p>
+                <button class="btn-start" onclick="handleStartClick()">🎙️ Start Practicing</button>
+            </div>
         </div>
 
         <div id="cameraErrorState" class="state">
@@ -138,19 +154,18 @@
                         <li>Click <strong>Retry</strong> below</li>
                     </ol>
                 </div>
-                <!-- Retry spinner shown while checking -->
                 <div class="perm-checking" id="retryChecking" style="display:none;">
                     <div class="spinner"></div>
                     Checking camera access...
                 </div>
                 <div class="controls" id="cameraErrorControls">
-                    <button class="btn btn-primary" onclick="retryCameraAccess()">🔄 Retry</button>
+                    <button class="btn btn-primary" onclick="handleStartClick()">🔄 Retry</button>
                     <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
                 </div>
             </div>
         </div>
 
-        <div id="waitingState" class="state active">
+        <div id="waitingState" class="state">
             <div class="waiting-animation">
                 <div class="spinner"></div>
                 <div class="waiting-text">Finding your practice partner...</div>
@@ -310,9 +325,8 @@ let partnerDisplayName = 'Partner', peerConnection = null, localStream = null, r
 let sessionTimer = null, sessionDuration = 1200, timeRemaining = 1200, timerPaused = false;
 let timeExtensionUsed = false, currentTask = null, partnerId = null;
 let evaluationScores = { fluency: 0, vocabulary: 0, grammar: 0, taskCompletion: 0 };
-
-// ── Track whether the camera error was hit during initial load or during a session ──
-let cameraErrorContext = 'init'; // 'init' | 'session'
+let cameraErrorContext = 'init';
+let userReady = false; // wait for both auth + button click
 
 const rtcConfig = {
     iceServers: [
@@ -336,7 +350,6 @@ const tasks = {
 
 function getUserDisplayName() { return userData.name || currentUser.displayName || currentUser.email.split('@')[0]; }
 
-// ── OS / browser detection for smart error messages ──────────────
 function getOSName() {
     const ua = navigator.userAgent;
     if (/Windows/.test(ua)) return 'windows';
@@ -347,7 +360,7 @@ function getOSName() {
 }
 function getBrowserName() {
     const ua = navigator.userAgent;
-    if (navigator.brave || /Brave/.test(ua)) return 'Brave';
+    if (navigator.brave) return 'Brave';
     if (/Edg\//.test(ua)) return 'Microsoft Edge';
     if (/OPR|Opera/.test(ua)) return 'Opera';
     if (/Chrome/.test(ua)) return 'Chrome';
@@ -356,7 +369,6 @@ function getBrowserName() {
     return 'your browser';
 }
 
-// ── Smart camera error steps based on OS + browser ───────────────
 function getCameraSteps(errorType) {
     const os = getOSName();
     const browser = getBrowserName();
@@ -396,7 +408,6 @@ function getCameraSteps(errorType) {
     ];
 }
 
-// ── IMPROVED: showCameraError now records context so retry knows where to go back ──
 function showCameraError(title, msg, steps, context = 'init') {
     cameraErrorContext = context;
     document.getElementById('cameraErrorIcon').textContent = '📷';
@@ -410,125 +421,70 @@ function showCameraError(title, msg, steps, context = 'init') {
     showState('cameraErrorState');
 }
 
-// ── FIXED retryCameraAccess: uses Permissions API to pre-check, then attempts getUserMedia ──
-// On Mac, even with browser permission toggled on, the OS may still block it.
-// We try getUserMedia directly (most reliable test) with a clear loading state.
-window.retryCameraAccess = async function() {
-    // Show checking UI
+// ── THE KEY FIX: single entry point called by button click (user gesture) ──
+window.handleStartClick = async function() {
     document.getElementById('retryChecking').style.display = 'block';
-    document.getElementById('cameraErrorControls').style.display = 'none';
+    document.getElementById('cameraErrorControls') && (document.getElementById('cameraErrorControls').style.display = 'none');
 
-    // ── Step 1: Use Permissions API if available to get a hint ──
-    let camPermState = 'prompt', micPermState = 'prompt';
+    // Stop any existing tracks
+    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+
     try {
-        const [camPerm, micPerm] = await Promise.all([
-            navigator.permissions.query({ name: 'camera' }),
-            navigator.permissions.query({ name: 'microphone' })
-        ]);
-        camPermState = camPerm.state;
-        micPermState = micPerm.state;
-        console.log('Permissions API → camera:', camPermState, 'mic:', micPermState);
-    } catch(e) {
-        // Permissions API not supported (older browsers) — just proceed
-        console.warn('Permissions API not available, proceeding to getUserMedia');
-    }
+        // Simple constraints — no ideal width/height that Brave rejects
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 
-    // If Permissions API says 'denied', we know the browser (or OS) is blocking it.
-    // We can still try getUserMedia — if it was the browser toggle, it may now work.
-    // If both say 'granted' but we're still on the error screen, it's almost certainly
-    // a macOS System Preferences block (Brave not listed / not allowed in Privacy & Security).
-    if (camPermState === 'granted' && micPermState === 'granted') {
-        // Browser says granted — OS-level block (Windows or macOS System Settings)
-        const browser = getBrowserName(), os = getOSName();
-        const osIcon = os === 'windows' ? '🪟' : '🍎';
-        const osName = os === 'windows' ? 'Windows' : 'macOS';
-        const osSteps = os === 'windows'
-            ? ['Open <strong>Windows Settings → Privacy &amp; Security → Camera</strong>',
-               `Make sure <strong>Camera access</strong> and <strong>${browser}</strong> are toggled <strong>On</strong>`,
-               `Check <strong>Microphone</strong> the same way`,
-               `Reload the page and click <strong>Retry</strong>`]
-            : [`Open <strong>System Settings → Privacy &amp; Security → Camera</strong>`,
-               `Enable the toggle next to <strong>${browser}</strong>`,
-               `Also enable <strong>${browser}</strong> under <strong>Microphone</strong>`,
-               `Quit &amp; reopen ${browser}, then click <strong>Retry</strong>`];
-        document.getElementById('cameraErrorIcon').textContent = osIcon;
-        document.getElementById('cameraErrorTitle').textContent = `${osName} is Blocking Camera Access`;
-        document.getElementById('cameraErrorMsg').textContent = `${browser} has permission, but ${osName} System Settings is blocking camera/microphone access.`;
-        document.getElementById('cameraErrorSteps').innerHTML = osSteps.map(s => '<li>' + s + '</li>').join('');
+        // Got camera — now proceed
         document.getElementById('retryChecking').style.display = 'none';
-        document.getElementById('cameraErrorControls').style.display = 'flex';
-        // Still attempt getUserMedia in case the user already fixed it
-    }
 
-    // ── Step 2: Actually try to get the stream ──
-    try {
-        // Stop any existing tracks first to release the device
-        if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-
-        // Try with ideal constraints, fall back to basic
-        try {
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-} catch(basicErr) {
-    throw basicErr;
-}
-
-        // ── SUCCESS ──
-        console.log('✅ Camera access granted on retry');
-        document.getElementById('retryChecking').style.display = 'none';
-        document.getElementById('cameraErrorControls').style.display = 'flex';
-
-        // Route back to the correct state
-        if (cameraErrorContext === 'session' && matchId) {
-            // Was in a session — go back and set up WebRTC with existing stream
-            showState('sessionState');
-            const lv = document.getElementById('localVideo');
-            lv.srcObject = localStream;
-            lv.play().catch(() => {});
-            await setupWebRTC(true); // true = stream already acquired
-        } else {
-            // Was on initial load — restart matching flow
-            showState('waitingState');
+        if (currentUser && userData) {
             await startMatching();
+        } else {
+            // Auth not ready yet — show waiting, auth callback will call startMatching
+            showState('waitingState');
+            userReady = true;
         }
 
     } catch(error) {
-        console.error('Retry camera error:', error.name, error.message);
+        console.error('Camera error:', error.name, error.message);
         document.getElementById('retryChecking').style.display = 'none';
-        document.getElementById('cameraErrorControls').style.display = 'flex';
+        document.getElementById('cameraErrorControls') && (document.getElementById('cameraErrorControls').style.display = 'flex');
 
         const browser = getBrowserName(), os = getOSName();
+
         if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-            if (camPermState === 'granted') {
+            // Check if browser says granted (meaning OS is blocking)
+            let camState = 'prompt';
+            try { camState = (await navigator.permissions.query({ name: 'camera' })).state; } catch(e) {}
+
+            if (camState === 'granted') {
                 const osIcon = os === 'windows' ? '🪟' : '🍎';
                 const osName = os === 'windows' ? 'Windows' : 'macOS';
                 const osSteps = os === 'windows'
                     ? ['Open <strong>Windows Settings → Privacy &amp; Security → Camera</strong>',
                        `Toggle <strong>Camera access</strong> and <strong>${browser}</strong> to <strong>On</strong>`,
-                       `Same for <strong>Microphone</strong>`,
-                       `Reload and click <strong>Retry</strong>`]
+                       'Same for <strong>Microphone</strong>',
+                       'Reload the page and click <strong>Retry</strong>']
                     : [`Open <strong>System Settings → Privacy &amp; Security → Camera</strong>`,
-                       `Enable <strong>${browser}</strong>, do same for Microphone`,
+                       `Enable the toggle next to <strong>${browser}</strong>`,
+                       `Also enable <strong>${browser}</strong> under <strong>Microphone</strong>`,
                        `Quit &amp; reopen ${browser}, then click <strong>Retry</strong>`];
-                document.getElementById('cameraErrorIcon').textContent = osIcon;
-                document.getElementById('cameraErrorTitle').textContent = `${osName} is Blocking Camera`;
-                document.getElementById('cameraErrorMsg').textContent = `${browser} has permission but ${osName} System Settings is blocking camera/microphone access.`;
-                document.getElementById('cameraErrorSteps').innerHTML = osSteps.map(s => '<li>' + s + '</li>').join('');
+                showCameraError(`${osIcon} ${osName} is Blocking Camera Access`,
+                    `${browser} has permission, but ${osName} System Settings is blocking camera/microphone access.`,
+                    osSteps, 'init');
             } else {
-                document.getElementById('cameraErrorIcon').textContent = '🚫';
-                document.getElementById('cameraErrorTitle').textContent = 'Camera Access Denied';
-                document.getElementById('cameraErrorMsg').textContent = `${browser} needs permission to use your camera and microphone.`;
-                document.getElementById('cameraErrorSteps').innerHTML = getCameraSteps('denied').map(s => '<li>' + s + '</li>').join('');
+                showCameraError('🚫 Camera Access Denied',
+                    `${browser} needs permission to use your camera and microphone. Click Allow when the browser asks.`,
+                    getCameraSteps('denied'), 'init');
             }
         } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-            document.getElementById('cameraErrorIcon').textContent = '🔌';
-            document.getElementById('cameraErrorTitle').textContent = 'No Camera Found';
-            document.getElementById('cameraErrorMsg').textContent = 'No camera or microphone was detected. Please connect a device and try again.';
-            document.getElementById('cameraErrorSteps').innerHTML = getCameraSteps('notfound').map(s => '<li>' + s + '</li>').join('');
+            showCameraError('🔌 No Camera Found', 'No camera or microphone was detected. Please connect a device and try again.',
+                getCameraSteps('notfound'), 'init');
         } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-            document.getElementById('cameraErrorIcon').textContent = '⚠️';
-            document.getElementById('cameraErrorTitle').textContent = 'Camera In Use';
-            document.getElementById('cameraErrorMsg').textContent = 'Your camera or microphone is being used by another app. Close it and try again.';
-            document.getElementById('cameraErrorSteps').innerHTML = getCameraSteps('inuse').map(s => '<li>' + s + '</li>').join('');
+            showCameraError('⚠️ Camera In Use', 'Your camera is being used by another app. Close it and try again.',
+                getCameraSteps('inuse'), 'init');
+        } else {
+            showCameraError('📷 Camera Error', 'Could not access camera: ' + error.message,
+                getCameraSteps('other'), 'init');
         }
     }
 };
@@ -545,9 +501,12 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     userData = userDoc.data();
-    // Show AI FAB for all logged-in users (free trial available to everyone)
     document.getElementById('aiFab')?.classList.add('visible');
-    startMatching();
+    // Only auto-start if user already clicked the button (e.g. on practiceAgain reload)
+    if (userReady && localStream) {
+        await startMatching();
+    }
+    // Otherwise wait for button click
 });
 
 let queueHeartbeat = null;
@@ -570,55 +529,7 @@ async function startMatching() {
     showState('waitingState');
     matchHandled = false;
 
-    // ── Request camera permission UPFRONT so user sees the prompt immediately ──
-    // This is the key fix for desktop: on mobile the OS prompt is hard to miss,
-    // but on desktop it shows as a small browser dropdown that can be dismissed.
-    // By requesting early (in the waiting state), the user grants/denies before matching.
-    if (!localStream) {
-        try {
-            try {
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-} catch(basicErr) {
-    throw basicErr;
-}
-        } catch(error) {
-            console.error('Early camera request failed:', error.name, error.message);
-            cameraErrorContext = 'init';
-            let camState = 'unknown';
-            try { camState = (await navigator.permissions.query({ name: 'camera' })).state; } catch(e) {}
-            const browser = getBrowserName(), os = getOSName();
-            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                if (camState === 'granted') {
-                    const osIcon = os === 'windows' ? '🪟' : '🍎';
-                    const osName = os === 'windows' ? 'Windows' : 'macOS';
-                    const osSteps = os === 'windows'
-                        ? ['Open <strong>Windows Settings → Privacy &amp; Security → Camera</strong>',
-                           `Toggle <strong>Camera access</strong> and <strong>${browser}</strong> to <strong>On</strong>`,
-                           `Same for <strong>Microphone</strong>`, `Reload and click <strong>Retry</strong>`]
-                        : [`Open <strong>System Settings → Privacy &amp; Security → Camera</strong>`,
-                           `Enable <strong>${browser}</strong>`, `Same for Microphone`,
-                           `Quit &amp; reopen ${browser}, click <strong>Retry</strong>`];
-                    showCameraError(`${osIcon} ${osName} is Blocking Camera`,
-                        `${browser} has permission but ${osName} System Settings is blocking camera/microphone access.`,
-                        osSteps, 'init');
-                } else {
-                    showCameraError('🚫 Camera Access Denied',
-                        `${browser} needs permission to use your camera and microphone.`,
-                        getCameraSteps('denied'), 'init');
-                }
-            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                showCameraError('🔌 No Camera Found', 'No camera or microphone was detected.',
-                    getCameraSteps('notfound'), 'init');
-            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-                showCameraError('⚠️ Camera In Use', 'Your camera is being used by another app. Close it and retry.',
-                    getCameraSteps('inuse'), 'init');
-            } else {
-                showCameraError('📷 Camera Error', 'Could not access camera: ' + error.message,
-                    getCameraSteps('other'), 'init');
-            }
-            return; // Stop matching — user needs to fix camera first
-        }
-    }
+    // localStream already acquired by handleStartClick — no camera request here
 
     try { await deleteDoc(doc(db, 'match_queue', currentUser.uid)); } catch(e) {}
 
@@ -701,7 +612,6 @@ async function findMatch() {
                 else deleteDoc(doc(db, 'match_queue', d.id)).catch(() => {});
             }
         });
-
         if (candidates.length > 0 && !matchId && !matchHandled) {
             const partner = candidates[0];
             const newMatchId = `match_${Date.now()}_${currentUser.uid.substring(0,6)}`;
@@ -731,13 +641,11 @@ async function updateQueueCount() {
 async function handleMatchFound() {
     showState('matchFoundState');
     document.getElementById('matchStatusText').textContent = 'Connecting to your partner...';
-
     const matchSnap = await getDoc(doc(db, 'matches', matchId));
     const matchData = matchSnap.data();
     partnerId = matchData.users.find(id => id !== currentUser.uid);
     partnerDisplayName = matchData.userNames?.[partnerId] || 'Student';
     let partnerLevel = matchData.level || 'A1', partnerStreak = 1;
-
     try {
         const pq = await getDoc(doc(db, 'match_queue', partnerId));
         if (pq.exists()) {
@@ -747,7 +655,6 @@ async function handleMatchFound() {
             if (pd.streak) partnerStreak = pd.streak;
         }
     } catch(e) {}
-
     document.getElementById('partnerName').textContent = partnerDisplayName;
     document.getElementById('partnerLevel').textContent = partnerLevel;
     document.getElementById('partnerStreak').textContent = partnerStreak;
@@ -760,7 +667,6 @@ async function startSession(matchData) {
     currentTask = matchData.task;
     displayTask(currentTask);
     document.getElementById('taskLevel').textContent = userData.level || 'A1';
-
     onSnapshot(doc(db, 'matches', matchId), (snap) => {
         const data = snap.data();
         if (data?.task && data?.taskChangedAt && JSON.stringify(data.task) !== JSON.stringify(currentTask)) {
@@ -773,9 +679,8 @@ async function startSession(matchData) {
             showToast('⏰ Partner added 10 minutes');
         }
     });
-
     startTimer();
-    await setupWebRTC(false);
+    await setupWebRTC();
 }
 
 function displayTask(task) {
@@ -811,82 +716,21 @@ function updateRemoteStatus(state) {
     dot.style.background = color; text.textContent = label;
 }
 
-// ── setupWebRTC: skips camera if already acquired by startMatching() or retryCameraAccess() ──
-async function setupWebRTC(streamAlreadyAcquired = false) {
-    // Step 1: Acquire media (skip if already acquired — reuse stream from startMatching)
-    if (!localStream) {
-        try {
-            try {
-    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-} catch(basicErr) {
-    throw basicErr;
-}
-        
-        } catch(error) {
-            console.error('Media access error:', error.name, error.message);
-            cameraErrorContext = matchId ? 'session' : 'init';
-
-            // ── Check Permissions API to give smarter error message ──
-            let camState = 'unknown';
-            try { camState = (await navigator.permissions.query({ name: 'camera' })).state; } catch(e) {}
-
-            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                const browser = getBrowserName(), os = getOSName();
-                if (camState === 'granted') {
-                    // Browser says granted → OS-level block (Windows or macOS system settings)
-                    const osSteps = os === 'windows'
-                        ? ['Open <strong>Windows Settings → Privacy &amp; Security → Camera</strong>',
-                           `Make sure <strong>Camera access</strong> and <strong>${browser}</strong> are toggled <strong>On</strong>`,
-                           `Also check <strong>Microphone</strong> settings the same way`,
-                           `Reload the page and click <strong>Retry</strong>`]
-                        : [`Open <strong>System Settings → Privacy &amp; Security → Camera</strong>`,
-                           `Enable the toggle next to <strong>${browser}</strong>`,
-                           `Also enable <strong>${browser}</strong> under <strong>Microphone</strong>`,
-                           `Quit &amp; reopen ${browser}, then click <strong>Retry</strong>`];
-                    const osIcon = os === 'windows' ? '🪟' : '🍎';
-                    const osName = os === 'windows' ? 'Windows' : 'macOS';
-                    showCameraError(
-                        `${osIcon} ${osName} is Blocking Camera Access`,
-                        `${browser} has permission, but ${osName} System Settings is blocking camera/microphone access.`,
-                        osSteps, cameraErrorContext
-                    );
-                } else {
-                    showCameraError('🚫 Camera Access Denied',
-                        `${browser} needs permission to use your camera and microphone.`,
-                        getCameraSteps('denied'), cameraErrorContext);
-                }
-            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                showCameraError('🔌 No Camera Found', 'No camera or microphone was detected. Please connect a device and try again.',
-                    getCameraSteps('notfound'), cameraErrorContext);
-            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-                showCameraError('⚠️ Camera In Use', 'Your camera or microphone is being used by another app. Close it and try again.',
-                    getCameraSteps('inuse'), cameraErrorContext);
-            } else {
-                showCameraError('📷 Camera Error', 'Could not start camera/microphone: ' + error.message,
-                    getCameraSteps('other'), cameraErrorContext);
-            }
-            return;
-        }
-    }
-
-    // Step 2: WebRTC peer connection setup
+async function setupWebRTC() {
+    // localStream already acquired — just set it up
     try {
         const lv = document.getElementById('localVideo'); lv.srcObject = localStream; lv.play().catch(() => {});
-
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
-
         const rv = document.getElementById('remoteVideo');
         peerConnection.ontrack = (e) => {
             if (e.streams?.[0]) { rv.srcObject = e.streams[0]; remoteStream = e.streams[0]; }
             else { if (!remoteStream) { remoteStream = new MediaStream(); rv.srcObject = remoteStream; } remoteStream.addTrack(e.track); }
             rv.play().catch(() => { document.addEventListener('click', function p() { rv.play().catch(()=>{}); document.removeEventListener('click',p); }, {once:true}); });
         };
-
         peerConnection.onicecandidate = async (e) => {
             if (e.candidate) { try { await addDoc(collection(db,'matches',matchId,'candidates_'+currentUser.uid), e.candidate.toJSON()); } catch(err) {} }
         };
-
         peerConnection.oniceconnectionstatechange = () => {
             const s = peerConnection.iceConnectionState; updateRemoteStatus(s);
             if (s === 'disconnected') setTimeout(() => { if (peerConnection?.iceConnectionState === 'disconnected') handlePartnerDisconnection(); }, 3000);
@@ -897,14 +741,12 @@ async function setupWebRTC(streamAlreadyAcquired = false) {
             if (s === 'connected') { updateRemoteStatus('connected'); if (rv.srcObject) rv.play().catch(()=>{}); }
             if (s === 'failed' || s === 'closed') handlePartnerDisconnection();
         };
-
         let iceCandidateBuffer = [], isRemoteDescSet = false;
         async function flushBuffer() {
             isRemoteDescSet = true;
             for (const c of iceCandidateBuffer) { try { await peerConnection.addIceCandidate(new RTCIceCandidate(c)); } catch(e) {} }
             iceCandidateBuffer = [];
         }
-
         const connTimeout = setTimeout(() => {
             if (peerConnection && !['connected','completed'].includes(peerConnection.iceConnectionState)) {
                 showToast('Connection timeout — retrying...');
@@ -914,12 +756,10 @@ async function setupWebRTC(streamAlreadyAcquired = false) {
         peerConnection.addEventListener('iceconnectionstatechange', () => {
             if (['connected','completed'].includes(peerConnection.iceConnectionState)) clearTimeout(connTimeout);
         });
-
         const matchSnap = await getDoc(doc(db,'matches',matchId));
         const users = matchSnap.data().users;
         partnerId = users.find(id => id !== currentUser.uid);
         document.getElementById('remoteLabel').textContent = partnerDisplayName || 'Partner';
-
         onSnapshot(query(collection(db,'matches',matchId,'candidates_'+partnerId)), (snap) => {
             snap.docChanges().forEach(async (change) => {
                 if (change.type === 'added') {
@@ -929,7 +769,6 @@ async function setupWebRTC(streamAlreadyAcquired = false) {
                 }
             });
         });
-
         if (users[0] === currentUser.uid) {
             const offer = await peerConnection.createOffer({ offerToReceiveAudio:true, offerToReceiveVideo:true });
             await peerConnection.setLocalDescription(offer);
@@ -971,17 +810,13 @@ async function handlePartnerDisconnection() {
         if (peerConnection) { peerConnection.close(); peerConnection = null; }
         if (remoteStream) { remoteStream.getTracks().forEach(t=>t.stop()); remoteStream = null; document.getElementById('remoteVideo').srcObject = null; }
         if (matchId) { try { await updateDoc(doc(db,'matches',matchId), {status:'completed'}); } catch(e) {} }
-
         matchId = null; matchHandled = false; partnerId = null;
-
         const seenIds = new Set();
         const q = query(collection(db,'matches'), where('users','array-contains',currentUser.uid));
         (await getDocs(q)).forEach(d => seenIds.add(d.id));
-
         const queueRef = doc(db,'match_queue',currentUser.uid);
         await setDoc(queueRef, { userId:currentUser.uid, level:userData.level||'A1', streak:userData.streakDays||1, displayName:getUserDisplayName(), timestamp:serverTimestamp(), lastSeen:serverTimestamp(), status:'waiting' });
         startQueueHeartbeat();
-
         let unsubM;
         const unsubQ = onSnapshot(queueRef, async (snap) => {
             const d = snap.data();
@@ -1040,7 +875,6 @@ window.endSession = () => {
     showState('evaluationState');
     setupEvaluationListeners();
 };
-
 function setupEvaluationListeners() {
     document.querySelectorAll('.rating-buttons').forEach(container => {
         const criteria = container.dataset.criteria;
@@ -1054,7 +888,6 @@ function setupEvaluationListeners() {
         });
     });
 }
-
 window.submitEvaluation = async () => {
     await updateDoc(doc(db,'matches',matchId), { [`evaluations.${currentUser.uid}`]:evaluationScores, [`completed.${currentUser.uid}`]:true, status:'completed' });
     await updateDoc(doc(db,'users',currentUser.uid), { totalScore:(userData.totalScore||0)+50, weeklyScore:(userData.weeklyScore||0)+50, sessionsCompleted:(userData.sessionsCompleted||0)+1 });
@@ -1071,7 +904,11 @@ window.cancelMatching = async () => {
     await deleteDoc(doc(db,'match_queue',currentUser.uid));
     window.location.href = 'dashboard.html';
 };
-window.practiceAgain = () => { evaluationScores={fluency:0,vocabulary:0,grammar:0,taskCompletion:0}; matchId=null; matchHandled=false; partnerDisplayName='Partner'; location.reload(); };
+window.practiceAgain = () => {
+    evaluationScores={fluency:0,vocabulary:0,grammar:0,taskCompletion:0};
+    matchId=null; matchHandled=false; partnerDisplayName='Partner';
+    location.reload();
+};
 window.backToDashboard = () => { window.location.href='dashboard.html'; };
 
 window.addEventListener('beforeunload', async () => {

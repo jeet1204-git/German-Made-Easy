@@ -927,12 +927,31 @@ let pronunciationNotes = [];
 let errorPatterns = {};
 
 // ── iOS Safari TTS unlock ────────────────────────────────────────
+// Shared AudioContext — created once, resumed on every user gesture.
+// Chrome blocks audio until a gesture fires. We unlock on startSession click
+// (and any mic/send interaction) so TTS works from the very first AI message.
+let _sharedAC = null;
+function getAudioContext() {
+  if (!_sharedAC) {
+    try { _sharedAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  return _sharedAC;
+}
+
 let audioUnlocked = false;
 function unlockAudio() {
-  if (audioUnlocked || !window.speechSynthesis) return;
-  const silent = new SpeechSynthesisUtterance('');
-  silent.volume = 0;
-  window.speechSynthesis.speak(silent);
+  if (audioUnlocked) return;
+  const ac = getAudioContext();
+  if (!ac) return;
+  if (ac.state === 'suspended') ac.resume().catch(() => {});
+  // Play a silent buffer — this satisfies Chrome's gesture requirement
+  try {
+    const buf = ac.createBuffer(1, 1, 22050);
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    src.connect(ac.destination);
+    src.start(0);
+  } catch(e) {}
   audioUnlocked = true;
 }
 
@@ -1243,9 +1262,15 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
   } catch(err) {
     removeThinking();
     setMicState('idle');
-    appendMessage('ai', 'Entschuldigung! Bitte versuche es nochmal. 🙏');
+    // Log the full error so you can see it in browser DevTools → Console
+    console.error('🔴 sendAIMessage failed:', err);
+    // Show a more useful error message during development
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const errorMsg = isDev
+      ? `Dev error: ${err.message}`
+      : 'Entschuldigung! Bitte versuche es nochmal. 🙏';
+    appendMessage('ai', errorMsg);
     setAISpeaking(false);
-    console.error(err);
   }
 }
 
@@ -1493,7 +1518,9 @@ function getTTSAudio() {
   return _ttsAudio;
 }
 
-// Core TTS function — sends text to worker, plays returned audio
+// Core TTS function — sends text to worker, plays returned WAV audio
+// Uses Web Audio API (AudioContext) instead of <audio> element so it works
+// immediately after unlockAudio() is called on the startSession gesture.
 async function playGeminiTTS(text, lang = 'de') {
   if (!text || !text.trim()) return;
   try {
@@ -1509,26 +1536,28 @@ async function playGeminiTTS(text, lang = 'de') {
 
     if (!res.ok) throw new Error('TTS fetch failed: ' + res.status);
 
-    // Get audio blob and create object URL to play
-    const audioBlob = await res.blob();
-    const audioUrl = URL.createObjectURL(audioBlob);
+    const arrayBuffer = await res.arrayBuffer();
+    const ac = getAudioContext();
+
+    // Ensure AudioContext is running (may have been suspended between calls)
+    if (ac.state === 'suspended') await ac.resume();
 
     return new Promise((resolve) => {
-      const audio = getTTSAudio();
-      // Clean up previous object URL
-      if (audio.src && audio.src.startsWith('blob:')) {
-        URL.revokeObjectURL(audio.src);
-      }
-      audio.src = audioUrl;
-      audio.onended = () => resolve();
-      audio.onerror = () => resolve(); // fail silently, never crash
-      audio.play().catch(() => resolve());
-      // Safety timeout — in case onended doesn't fire
-      setTimeout(() => resolve(), Math.max(4000, text.length * 80));
+      ac.decodeAudioData(arrayBuffer, (decodedBuffer) => {
+        const source = ac.createBufferSource();
+        source.buffer = decodedBuffer;
+        source.connect(ac.destination);
+        source.onended = () => resolve();
+        source.start(0);
+        // Safety timeout in case onended doesn't fire
+        setTimeout(() => resolve(), Math.max(4000, text.length * 80));
+      }, (err) => {
+        console.warn('decodeAudioData failed:', err);
+        resolve(); // don't crash, just skip
+      });
     });
 
   } catch (err) {
-    // If Gemini TTS fails for any reason, fall back to browser voice silently
     console.warn('Gemini TTS failed, falling back to browser voice:', err.message);
     return fallbackBrowserTTS(text, lang);
   }
@@ -1985,7 +2014,8 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
     } else { soundPlayed = true; playIntroSound(introAC); }
   }
 
-  tryPlayIntroSound();
+  // Don't auto-attempt intro sound — Chrome blocks it before a gesture.
+  // It will play naturally when the user clicks/taps the intro screen.
   const introEl = document.getElementById('aura-intro');
   introEl.addEventListener('touchstart', tryPlayIntroSound, { once: true, passive: true });
   introEl.addEventListener('click', tryPlayIntroSound, { once: true });
@@ -2003,7 +2033,6 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
     e.stopPropagation(); tryPlayIntroSound(); skipIntro();
   });
   introEl.addEventListener('click', skipIntro);
-})();
-</script>
+})();</script>
 </body>
 </html>

@@ -1471,7 +1471,11 @@ Respond ONLY with this exact JSON (no text before or after):
   };
 }
 
-// ── TTS ───────────────────────────────────────────────────────────
+// ── TTS — Gemini AI Voice (replaces robotic browser voice) ───────
+// Uses Gemini 2.5 Flash TTS with Aoede voice — warm, sweet, natural
+// Called via Cloudflare Worker /gemini-tts route
+// ─────────────────────────────────────────────────────────────────
+
 function setAISpeaking(speaking) {
   isSpeaking = speaking;
   document.getElementById('ai-speaking-banner').classList.toggle('visible', speaking);
@@ -1479,65 +1483,86 @@ function setAISpeaking(speaking) {
   else setMicState('idle');
 }
 
-function speakText(text) {
+// Shared audio element — reused for all TTS playback
+let _ttsAudio = null;
+function getTTSAudio() {
+  if (!_ttsAudio) {
+    _ttsAudio = new Audio();
+    _ttsAudio.preload = 'auto';
+  }
+  return _ttsAudio;
+}
+
+// Core TTS function — sends text to worker, plays returned audio
+async function playGeminiTTS(text, lang = 'de') {
+  if (!text || !text.trim()) return;
+  try {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`${PROXY_BASE}/gemini-tts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ text, lang })
+    });
+
+    if (!res.ok) throw new Error('TTS fetch failed: ' + res.status);
+
+    // Get audio blob and create object URL to play
+    const audioBlob = await res.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+
+    return new Promise((resolve) => {
+      const audio = getTTSAudio();
+      // Clean up previous object URL
+      if (audio.src && audio.src.startsWith('blob:')) {
+        URL.revokeObjectURL(audio.src);
+      }
+      audio.src = audioUrl;
+      audio.onended = () => resolve();
+      audio.onerror = () => resolve(); // fail silently, never crash
+      audio.play().catch(() => resolve());
+      // Safety timeout — in case onended doesn't fire
+      setTimeout(() => resolve(), Math.max(4000, text.length * 80));
+    });
+
+  } catch (err) {
+    // If Gemini TTS fails for any reason, fall back to browser voice silently
+    console.warn('Gemini TTS failed, falling back to browser voice:', err.message);
+    return fallbackBrowserTTS(text, lang);
+  }
+}
+
+// Fallback: browser voice if Gemini TTS fails
+function fallbackBrowserTTS(text, lang = 'de') {
   return new Promise((resolve) => {
     if (!window.speechSynthesis) { resolve(); return; }
     window.speechSynthesis.cancel();
-    setAISpeaking(true);
     const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = 'de-DE';
+    utt.lang = lang === 'de' ? 'de-DE' : 'en-GB';
     utt.rate = 0.88;
-    utt.pitch = 1.0;
-    const doSpeak = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const germanVoice =
-        voices.find(v => v.lang.startsWith('de') && /Anna|Marlene|Vicki/.test(v.name)) ||
-        voices.find(v => v.lang.startsWith('de') && /Natural|Neural|Enhanced|Premium/.test(v.name)) ||
-        voices.find(v => v.lang.startsWith('de') && v.name.includes('Helena')) ||
-        voices.find(v => v.lang.startsWith('de') && v.name.includes('Markus')) ||
-        voices.find(v => v.lang.startsWith('de') && !v.name.toLowerCase().includes('compact')) ||
-        voices.find(v => v.lang.startsWith('de'));
-      if (germanVoice) utt.voice = germanVoice;
-      utt.onend = () => { setAISpeaking(false); resolve(); };
-      utt.onerror = () => { setAISpeaking(false); resolve(); };
-      window.speechSynthesis.speak(utt);
-      const estimatedMs = Math.max(3000, text.length * 70);
-      setTimeout(() => { setAISpeaking(false); resolve(); }, estimatedMs);
-    };
-    setTimeout(() => {
-      if (window.speechSynthesis.getVoices().length > 0) doSpeak();
-      else { window.speechSynthesis.onvoiceschanged = doSpeak; }
-    }, 150);
+    utt.onend = () => resolve();
+    utt.onerror = () => resolve();
+    window.speechSynthesis.speak(utt);
+    setTimeout(() => resolve(), Math.max(3000, text.length * 70));
   });
 }
 
+// speakText — plays German AI reply with Aura's voice
+async function speakText(text) {
+  setAISpeaking(true);
+  await playGeminiTTS(text, 'de');
+  setAISpeaking(false);
+}
+
 // ── Speak English feedback aloud ─────────────────────────────────
-// Called after German reply to voice corrections like a real teacher
-function speakEnglish(text) {
-  return new Promise((resolve) => {
-    if (!window.speechSynthesis) { resolve(); return; }
-    // Small pause before speaking correction — feels natural
-    setTimeout(() => {
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.lang = 'en-GB'; // British English sounds clear and teacherly
-      utt.rate = 0.9;
-      utt.pitch = 1.0;
-      const doSpeak = () => {
-        const voices = window.speechSynthesis.getVoices();
-        const engVoice =
-          voices.find(v => v.lang === 'en-GB' && /Natural|Neural|Enhanced|Premium/.test(v.name)) ||
-          voices.find(v => v.lang === 'en-GB') ||
-          voices.find(v => v.lang.startsWith('en'));
-        if (engVoice) utt.voice = engVoice;
-        utt.onend = () => resolve();
-        utt.onerror = () => resolve();
-        window.speechSynthesis.speak(utt);
-        setTimeout(() => resolve(), Math.max(2000, text.length * 65));
-      };
-      if (window.speechSynthesis.getVoices().length > 0) doSpeak();
-      else { window.speechSynthesis.onvoiceschanged = doSpeak; }
-    }, 600); // 600ms pause after German reply before English correction
-  });
+// Same Aoede voice, now speaking English correction — feels like same teacher
+async function speakEnglish(text) {
+  if (!text || text === 'null') return;
+  // Small natural pause between German reply and English correction
+  await new Promise(r => setTimeout(r, 600));
+  await playGeminiTTS(text, 'en');
 }
 
 // ── UI helpers ────────────────────────────────────────────────────
@@ -1978,6 +2003,7 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
     e.stopPropagation(); tryPlayIntroSound(); skipIntro();
   });
   introEl.addEventListener('click', skipIntro);
-})();</script>
+})();
+</script>
 </body>
 </html>

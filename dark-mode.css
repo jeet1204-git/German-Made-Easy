@@ -212,4 +212,78 @@
   .reset-btn        { border-color: rgba(255, 255, 255, 0.2) !important; color: rgba(255, 255, 255, 0.4) !important; }
   .reset-btn:hover  { border-color: rgba(255, 107, 53, 0.6) !important; color: #FF6B35 !important; }
 
+
+  /* Bundle/Catalog consistency fixes for dark mode */
+  .course-catalog .catalog-card,
+  .catalog-card {
+    background: #0c1221 !important;
+    border-color: rgba(30, 100, 220, 0.30) !important;
+    box-shadow: 0 4px 20px rgba(0, 50, 160, 0.16) !important;
+  }
+  .catalog-title,
+  .catalog-name,
+  .courses-subtitle,
+  .ad-banner h4,
+  .combo-offer .combo-tagline,
+  .combo-pill,
+  .course-bundle-subtitle {
+    color: #edf2ff !important;
+  }
+  .catalog-desc,
+  .catalog-pill,
+  .ad-banner p,
+  .combo-highlight,
+  .strike,
+  .item,
+  .meta span {
+    color: #b8ceed !important;
+  }
+  .catalog-badge.available,
+  .catalog-badge.coming,
+  .badge.b1,
+  .badge.b2 {
+    color: #0b1324 !important;
+  }
+  .catalog-cta.wait,
+  .slider-card-btn.disabled {
+    background: rgba(255,255,255,0.14) !important;
+    color: #b8ceed !important;
+    border-color: rgba(255,255,255,0.18) !important;
+  }
+  .ad-banner {
+    background: linear-gradient(135deg, #13203a, #0f315e) !important;
+    border: 1px solid rgba(30, 100, 220, 0.35) !important;
+  }
+  .ad-banner a {
+    background: #FFD23F !important;
+    color: #1A1A2E !important;
+  }
+
+  /* course-bundle page readability */
+  .hero p,
+  .course-bundle p,
+  .main .item span,
+  .main .item b,
+  .card .list,
+  .save {
+    color: #e6efff !important;
+  }
+  .card {
+    background: #0c1221 !important;
+    border-color: rgba(30, 100, 220, 0.30) !important;
+  }
+  .price-card {
+    background: #0f1a31 !important;
+    border: 1px solid rgba(30, 100, 220, 0.35) !important;
+  }
+  .price,
+  .enroll,
+  .course-head h3,
+  .card h2 {
+    color: #edf2ff !important;
+  }
+  .enroll {
+    background: linear-gradient(135deg, #FF6B35, #004E89) !important;
+  }
+
 }

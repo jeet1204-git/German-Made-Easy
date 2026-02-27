@@ -1,73 +1,26 @@
 /*
  * Dark Mode — German Made Easy
  * "Midnight Quest" — Gamified night theme
- * Activates automatically based on the user's OS/browser preference
- * (prefers-color-scheme: dark)
- *
- * Design language: midnight adventure / quest RPG — derived from brand palette
- *
- *   Base backgrounds  (midnight navy, not purple):
- *     --dm-bg          #05080f   deep midnight navy-black
- *     --dm-surface     #0c1221   dark navy surface
- *     --dm-surface-2   #13203a   mid-depth navy
- *     --dm-surface-3   #1a2e50   lifted navy (hover/active)
- *
- *   Text:
- *     --dm-text        #edf2ff   crisp cool white
- *     --dm-text-soft   #adc4e0   secondary text
- *     --dm-muted       #6b8cad   muted steel-blue
- *     --dm-dim         #2d4a6e   disabled / locked
- *
- *   Brand accents (exact light-mode colours, just with glow):
- *     --dm-orange      #FF6B35   fire / energy / primary CTA
- *     --dm-blue-brand  #004E89   brand navy-blue (mid-tones)
- *     --dm-blue-elec   #38bdf8   electric sky-blue (links, timer, processing)
- *     --dm-yellow      #FFD23F   achievement gold / rank 1
- *     --dm-green       #10b981   success / badge / access
- *
- *   Glow tokens:
- *     --dm-glow-orange rgba(255, 107,  53, 0.30)
- *     --dm-glow-blue   rgba( 30, 100, 220, 0.22)
- *     --dm-glow-yellow rgba(255, 210,  63, 0.40)
- *     --dm-glow-green  rgba( 16, 185, 129, 0.30)
- *
- *   Borders:
- *     --dm-border-soft rgba( 30, 100, 220, 0.22)   default card edges
- *     --dm-border-act  rgba(255, 107,  53, 0.45)   active / selected
  */
 
 @media (prefers-color-scheme: dark) {
 
-  /* ================================================
-     CSS VARIABLE OVERRIDES
-     ================================================ */
   :root {
     --dark:   #edf2ff !important;
     --light:  #05080f !important;
     --white:  #0c1221 !important;
     --border: #1a3a6e;
-
-    /* ai-partner.html design tokens */
     --ink:        #edf2ff;
     --parchment:  #05080f;
     --cream:      #13203a;
     --muted:      #6b8cad;
     --shadow:     rgba(0, 0, 0, 0.80);
     --gold-pale:  #101a2e;
-
-    /* Gold / yellow tokens — warm amber glow */
     --gold:       #c98a00;
     --gold-light: #FFD23F;
     --accent:     #FF6B35;
   }
 
-
-  /* ================================================
-     BODY & PAGE BACKGROUND
-     ================================================
-     Night sky: deep navy-black with soft brand-blue nebula
-     on top-left and a warm orange ember at bottom-right.
-  */
   body {
     background: #05080f !important;
     background-image:
@@ -78,767 +31,185 @@
     color: #edf2ff !important;
   }
 
+  nav { background: rgba(5, 8, 20, 0.97) !important; border-bottom: 1px solid rgba(30, 100, 220, 0.18) !important; box-shadow: 0 2px 24px rgba(0, 50, 160, 0.22) !important; }
+  .nav-links a { color: #b8ceed !important; }
+  .nav-links a:hover { color: #FF6B35 !important; }
+  .user-email { color: #b8ceed !important; }
+  .topbar { background: rgba(5, 8, 20, 0.97) !important; border-bottom: 1px solid rgba(30, 100, 220, 0.18) !important; }
 
-  /* ================================================
-     NAVIGATION
-     ================================================ */
-  nav {
-    background: rgba(5, 8, 20, 0.97) !important;
-    border-bottom: 1px solid rgba(30, 100, 220, 0.18) !important;
-    box-shadow: 0 2px 24px rgba(0, 50, 160, 0.22) !important;
-  }
-
-  .nav-links a {
-    color: #b8ceed !important;
-  }
-
-  .nav-links a:hover {
-    color: #FF6B35 !important;
-  }
-
-  .user-email {
-    color: #b8ceed !important;
-  }
-
-  /* ai-partner topbar */
-  .topbar {
-    background: rgba(5, 8, 20, 0.97) !important;
-    border-bottom: 1px solid rgba(30, 100, 220, 0.18) !important;
-  }
-
-
-  /* ================================================
-     MAIN CARDS & CONTAINERS
-     ================================================ */
-  .login-container,
-  .signup-container,
-  .payment-container,
-  .card,
-  .leaderboard-card,
-  .course-card,
-  .empty-state,
-  .tab-switcher,
-  .reconnecting-card,
-  .sprechen-card-active,
-  .section-box,
-  .price-card,
-  .chapter,
-  .chapter-content,
-  .setup-card,
-  .conversation-box,
-  .method-card {
-    background: #0c1221 !important;
-    color: #edf2ff !important;
+  .login-container, .signup-container, .payment-container,
+  .card, .leaderboard-card, .course-card, .empty-state,
+  .tab-switcher, .reconnecting-card, .sprechen-card-active,
+  .section-box, .price-card, .chapter, .chapter-content,
+  .setup-card, .conversation-box, .method-card {
+    background: #0c1221 !important; color: #edf2ff !important;
     border-color: rgba(30, 100, 220, 0.26) !important;
     box-shadow: 0 4px 32px rgba(0, 50, 160, 0.18), 0 1px 0 rgba(60, 130, 255, 0.06) inset !important;
   }
+  .course-card:hover { border-color: rgba(255, 107, 53, 0.42) !important; box-shadow: 0 8px 44px rgba(255, 107, 53, 0.22), 0 0 0 1px rgba(255, 107, 53, 0.42) !important; }
+  .container { background: #0c1221 !important; color: #edf2ff !important; }
+  #access-denied { background: #05080f !important; }
 
-  .course-card:hover {
-    border-color: rgba(255, 107, 53, 0.42) !important;
-    box-shadow: 0 8px 44px rgba(255, 107, 53, 0.22), 0 0 0 1px rgba(255, 107, 53, 0.42) !important;
+  .stat-box, .course-details, .partner-info, .evaluation-form,
+  .feedback-section, .course-stat, .task-questions,
+  .criteria-item, .chapter-header, .method-tag { background: #13203a !important; color: #edf2ff !important; }
+  .chapter-header:hover, .chapter.expanded .chapter-header { background: #1a2e50 !important; box-shadow: inset 3px 0 0 #FF6B35 !important; }
+
+  h1, h2, h3, h4, h5, h6 { color: #edf2ff !important; text-shadow: 0 0 28px rgba(30, 100, 255, 0.16) !important; }
+  p { color: #adc4e0 !important; }
+  label { color: #c8daee !important; }
+  .course-description, .sprechen-description, .leaderboard-note, .leaderboard-empty-text,
+  .footer-note, .page-subtitle, .timer-label, .level-switcher-label, .lb-motivational-badge,
+  .lb-streak, .stat-label, .scenario-gujarati, .waiting-subtext, .content-summary,
+  .chapter-meta, .lesson-duration, .price-note, .method-desc, .signup-link,
+  .back-home, .back-link { color: #6b8cad !important; }
+  .lb-name, .lb-stat, .lb-rank, .course-title, .feature-text strong,
+  .waiting-text, .match-text, .results-title, .criteria-label,
+  .welcome-header h1, .section-heading, .chapter-title, .lesson-title,
+  .page-title, .course-name { color: #edf2ff !important; }
+  .stat-number { color: #FF6B35 !important; text-shadow: 0 0 18px rgba(255, 107, 53, 0.45) !important; }
+  .lesson-title.locked { color: #2d4a6e !important; }
+  .back-home a, .back-link a { color: #38bdf8 !important; }
+  .signup-link a, .login-link a { color: #FF6B35 !important; text-shadow: 0 0 10px rgba(255, 107, 53, 0.50) !important; }
+
+  input[type="text"], input[type="email"], input[type="password"],
+  input[type="tel"], input[type="number"], textarea, select, .scenario-select {
+    background: #13203a !important; color: #edf2ff !important; border-color: rgba(30, 100, 220, 0.35) !important;
   }
+  input::placeholder, textarea::placeholder { color: #2d4a6e !important; }
+  input:focus, textarea:focus, select:focus, .scenario-select:focus { border-color: #FF6B35 !important; box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.20), 0 0 14px rgba(255, 107, 53, 0.14) !important; }
 
-  /* Document pages */
-  .container {
-    background: #0c1221 !important;
-    color: #edf2ff !important;
-  }
+  .btn-google { background: #13203a !important; color: #edf2ff !important; border-color: rgba(30, 100, 220, 0.35) !important; }
+  .btn-nav-link, .btn-leaderboard { background: transparent !important; border-color: #FF6B35 !important; color: #FF6B35 !important; box-shadow: 0 0 10px rgba(255, 107, 53, 0.18) !important; }
+  .btn-nav-link:hover, .btn-leaderboard:hover { background: #FF6B35 !important; color: #fff !important; box-shadow: 0 0 24px rgba(255, 107, 53, 0.50) !important; }
+  .btn-secondary { background: transparent !important; color: #FF6B35 !important; border-color: #FF6B35 !important; box-shadow: 0 0 10px rgba(255, 107, 53, 0.15) !important; }
+  .btn-secondary:hover { background: rgba(255, 107, 53, 0.18) !important; box-shadow: 0 0 22px rgba(255, 107, 53, 0.34) !important; }
+  .rating-btn { background: #13203a !important; border-color: rgba(30, 100, 220, 0.35) !important; color: #edf2ff !important; }
+  .rating-btn:hover { border-color: #FF6B35 !important; background: rgba(255, 107, 53, 0.14) !important; box-shadow: 0 0 16px rgba(255, 107, 53, 0.28) !important; }
+  .level-tab:not(.active), .mode-tab:not(.active) { background: #13203a !important; color: #6b8cad !important; border-color: rgba(30, 100, 220, 0.26) !important; }
+  .level-tab.active, .mode-tab.active { box-shadow: 0 0 18px rgba(255, 107, 53, 0.42) !important; }
+  .level-btn:not(.active) { background: #0c1221 !important; border-color: rgba(30, 100, 220, 0.26) !important; color: #6b8cad !important; }
+  .tab-btn:not(.active) { color: #6b8cad !important; }
+  .tab-btn.active { box-shadow: 0 0 16px rgba(255, 107, 53, 0.32) !important; }
+  .method-card { border-color: rgba(30, 100, 220, 0.26) !important; }
+  .method-card.selected { background: rgba(255, 107, 53, 0.10) !important; border-color: #FF6B35 !important; box-shadow: 0 0 24px rgba(255, 107, 53, 0.28) !important; }
 
-  /* ai-partner access-denied overlay */
-  #access-denied {
-    background: #05080f !important;
-  }
+  .divider::before, .divider::after, .or-divider-line { background: rgba(30, 100, 220, 0.18) !important; }
+  .divider { color: #2d4a6e !important; }
+  .or-divider-text { background: #0c1221 !important; color: #2d4a6e !important; }
+  .info-row { border-bottom-color: rgba(30, 100, 220, 0.14) !important; }
+  .lesson { border-bottom-color: rgba(30, 100, 220, 0.12) !important; }
+  .price-section { border-bottom-color: rgba(30, 100, 220, 0.14) !important; }
 
+  .progress-bar { background: rgba(30, 100, 220, 0.16) !important; }
+  .loading-spinner, .spinner { border-color: rgba(30, 100, 220, 0.20) !important; border-top-color: #FF6B35 !important; filter: drop-shadow(0 0 6px rgba(255, 107, 53, 0.60)) !important; }
 
-  /* ================================================
-     INNER SURFACES (nested cards, detail panels)
-     ================================================ */
-  .stat-box,
-  .course-details,
-  .partner-info,
-  .evaluation-form,
-  .feedback-section,
-  .course-stat,
-  .task-questions,
-  .criteria-item,
-  .chapter-header,
-  .method-tag {
-    background: #13203a !important;
-    color: #edf2ff !important;
-  }
+  .leaderboard-row:nth-child(odd) { background: rgba(12, 25, 50, 0.58) !important; }
+  .leaderboard-row.current-user { background: rgba(255, 107, 53, 0.12) !important; border-color: #FF6B35 !important; box-shadow: inset 0 0 20px rgba(255, 107, 53, 0.08) !important; }
+  .lb-rank.gold { color: #FFD23F !important; text-shadow: 0 0 12px rgba(255, 210, 63, 0.55) !important; }
+  .lb-rank.silver { color: #94b8d4 !important; }
+  .lb-rank.bronze { color: #cd7f32 !important; }
+  .lb-score { color: #FF6B35 !important; text-shadow: 0 0 10px rgba(255, 107, 53, 0.35) !important; }
 
-  .chapter-header:hover,
-  .chapter.expanded .chapter-header {
-    background: #1a2e50 !important;
-    box-shadow: inset 3px 0 0 #FF6B35 !important;
-  }
+  .stat-chip { background: rgba(255, 107, 53, 0.14) !important; border-color: rgba(255, 107, 53, 0.35) !important; box-shadow: 0 0 8px rgba(255, 107, 53, 0.12) !important; }
+  .access-badge { box-shadow: 0 0 12px rgba(16, 185, 129, 0.38) !important; }
+  .alert-error { background: rgba(42, 8, 8, 0.92) !important; color: #ff9090 !important; border-color: rgba(180, 40, 40, 0.60) !important; box-shadow: 0 0 16px rgba(180, 40, 40, 0.16) !important; }
+  .alert-success { background: rgba(5, 28, 18, 0.92) !important; color: #7de8a0 !important; border-color: rgba(16, 185, 129, 0.50) !important; box-shadow: 0 0 16px rgba(16, 185, 129, 0.14) !important; }
 
+  .queue-info { background: rgba(255, 107, 53, 0.10) !important; border-color: #FF6B35 !important; box-shadow: 0 0 18px rgba(255, 107, 53, 0.16) !important; }
+  .task-card { background: rgba(255, 107, 53, 0.07) !important; border-color: rgba(255, 107, 53, 0.38) !important; }
+  .points-earned { background: rgba(255, 107, 53, 0.10) !important; border-color: #FF6B35 !important; box-shadow: 0 0 24px rgba(255, 107, 53, 0.24) !important; }
+  .video-container { background: #020409 !important; }
 
-  /* ================================================
-     TEXT COLOURS
-     ================================================ */
-  h1, h2, h3, h4, h5, h6 {
-    color: #edf2ff !important;
-    text-shadow: 0 0 28px rgba(30, 100, 255, 0.16) !important;
-  }
+  .role-card { background: linear-gradient(135deg, #0c1e38, #0a1828) !important; border: 1px solid rgba(56, 189, 248, 0.22) !important; box-shadow: 0 4px 28px rgba(0, 50, 160, 0.26) !important; }
+  .msg.ai .msg-bubble { background: #13203a !important; color: #edf2ff !important; border: 1px solid rgba(30, 100, 220, 0.26) !important; }
+  .msg.user .msg-bubble { background: rgba(0, 100, 65, 0.22) !important; color: #edf2ff !important; border: 1px solid rgba(16, 185, 129, 0.32) !important; }
+  .processing-status { background: rgba(5, 14, 48, 0.88) !important; border-color: rgba(56, 189, 248, 0.42) !important; color: #38bdf8 !important; box-shadow: 0 0 14px rgba(56, 189, 248, 0.14) !important; }
+  .recording-status { background: rgba(40, 8, 18, 0.88) !important; border-color: rgba(200, 50, 80, 0.50) !important; color: #ff8090 !important; box-shadow: 0 0 14px rgba(200, 50, 80, 0.16) !important; }
+  .session-timer { color: #38bdf8 !important; text-shadow: 0 0 18px rgba(56, 189, 248, 0.45) !important; }
+  .ai-speaking-banner { background: #0c1e38 !important; border-color: rgba(56, 189, 248, 0.28) !important; color: #38bdf8 !important; }
+  .score-circle { box-shadow: 0 0 40px rgba(255, 107, 53, 0.38), 0 0 80px rgba(255, 107, 53, 0.18), 0 0 120px rgba(0, 78, 137, 0.15) !important; }
+  .criteria-fill { box-shadow: 0 0 10px rgba(255, 107, 53, 0.45) !important; }
+  .trial-modal-card { background: #0c1221 !important; border: 1px solid rgba(255, 107, 53, 0.32) !important; box-shadow: 0 8px 48px rgba(255, 107, 53, 0.22), 0 0 80px rgba(0, 50, 160, 0.20) !important; }
+  .trial-badge { background: rgba(255, 107, 53, 0.14) !important; color: #FF6B35 !important; border: 1px solid rgba(255, 107, 53, 0.35) !important; }
+  .hero-eyebrow { color: #38bdf8 !important; text-shadow: 0 0 14px rgba(56, 189, 248, 0.45) !important; }
+  .trial-counter-badge { background: rgba(30, 100, 220, 0.12) !important; border-color: rgba(30, 100, 220, 0.30) !important; color: #6b8cad !important; }
+  #text-input { background: #13203a !important; color: #edf2ff !important; border-color: rgba(30, 100, 220, 0.35) !important; }
+  #text-input:focus { border-color: #FF6B35 !important; box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.18), 0 0 14px rgba(255, 107, 53, 0.12) !important; }
+  .feedback-inline { background: rgba(16, 100, 60, 0.14) !important; border-left-color: #10b981 !important; color: #b0f0d0 !important; }
+  .feedback-inline strong { color: #10b981 !important; }
+  .feedback-pronunciation { background: rgba(30, 100, 220, 0.10) !important; border-left-color: #38bdf8 !important; color: #adc4e0 !important; }
+  .thinking-dot { background: #6b8cad !important; }
 
-  p {
-    color: #adc4e0 !important;
-  }
+  .slider-card { background: #0c1221 !important; border-color: rgba(30, 100, 220, 0.26) !important; box-shadow: 0 4px 24px rgba(0, 50, 160, 0.18) !important; }
+  .slider-card-body p { color: #6b8cad !important; }
+  .slider-arrow { background: #13203a !important; border-color: rgba(30, 100, 220, 0.35) !important; color: #edf2ff !important; }
+  .slider-arrow:hover { border-color: #FF6B35 !important; box-shadow: 0 0 16px rgba(255, 107, 53, 0.30) !important; }
+  .slider-card-btn.disabled { background: rgba(30, 100, 220, 0.10) !important; color: #2d4a6e !important; }
+  .gift-modal-content, .nav-confirmation-modal { background: #0c1221 !important; color: #edf2ff !important; border: 1px solid rgba(30, 100, 220, 0.35) !important; box-shadow: 0 8px 44px rgba(0, 50, 160, 0.35) !important; }
+  .gift-modal-close:hover { background: rgba(30, 100, 220, 0.18) !important; }
+  .lesson.locked { opacity: 0.42 !important; }
 
-  label {
-    color: #c8daee !important;
-  }
+  .payment-method { background: #13203a !important; color: #6b8cad !important; }
+  .gift-banner { background: rgba(255, 107, 53, 0.10) !important; border-color: #FF6B35 !important; box-shadow: 0 0 20px rgba(255, 107, 53, 0.14) !important; }
+  .gift-recipient-details { background: rgba(16, 185, 129, 0.08) !important; border-color: rgba(16, 185, 129, 0.40) !important; box-shadow: 0 0 16px rgba(16, 185, 129, 0.08) !important; }
+  .gift-recipient-details h4 { color: #6ee7b7 !important; }
+  .gift-recipient-row { color: #a0e0c0 !important; }
 
-  /* Secondary / muted text */
-  .course-description,
-  .sprechen-description,
-  .leaderboard-note,
-  .leaderboard-empty-text,
-  .footer-note,
-  .page-subtitle,
-  .timer-label,
-  .level-switcher-label,
-  .lb-motivational-badge,
-  .lb-streak,
-  .stat-label,
-  .scenario-gujarati,
-  .waiting-subtext,
-  .content-summary,
-  .chapter-meta,
-  .lesson-duration,
-  .price-note,
-  .method-desc,
-  .signup-link,
-  .back-home,
-  .back-link {
-    color: #6b8cad !important;
-  }
+  .features, .testimonials { background: #060b18 !important; }
+  .contact-container, .modal-content { background: #0c1221 !important; color: #edf2ff !important; border: 1px solid rgba(30, 100, 220, 0.26) !important; }
+  .mobile-menu-overlay { background: #060b18 !important; }
+  .faq-item, .testimonial-card, .feature-card, .instructor-card, .step-card { background: #0c1221 !important; border-color: rgba(30, 100, 220, 0.22) !important; box-shadow: 0 4px 24px rgba(0, 50, 160, 0.14) !important; }
+  .faq-item:hover, .testimonial-card:hover, .feature-card:hover { border-color: rgba(255, 107, 53, 0.42) !important; box-shadow: 0 6px 32px rgba(255, 107, 53, 0.16) !important; }
+  .faq-answer { background: #13203a !important; }
+  .faq-question { background: #0c1221 !important; color: #edf2ff !important; }
+  .pricing-card { background: #0c1221 !important; border-color: rgba(30, 100, 220, 0.26) !important; box-shadow: 0 4px 32px rgba(0, 50, 160, 0.18) !important; }
+  footer { background: #020408 !important; border-top: 1px solid rgba(30, 100, 220, 0.16) !important; }
+  .section-white, .bg-white { background: #0c1221 !important; }
 
-  /* Primary text elements */
-  .lb-name,
-  .lb-stat,
-  .lb-rank,
-  .course-title,
-  .feature-text strong,
-  .waiting-text,
-  .match-text,
-  .results-title,
-  .criteria-label,
-  .welcome-header h1,
-  .section-heading,
-  .chapter-title,
-  .lesson-title,
-  .page-title,
-  .course-name {
-    color: #edf2ff !important;
-  }
-
-  /* Stat numbers — orange fire with glow */
-  .stat-number {
-    color: #FF6B35 !important;
-    text-shadow: 0 0 18px rgba(255, 107, 53, 0.45) !important;
-  }
-
-  .lesson-title.locked {
-    color: #2d4a6e !important;
-  }
-
-  /* Links */
-  .back-home a,
-  .back-link a {
-    color: #38bdf8 !important;
-  }
-
-  .signup-link a,
-  .login-link a {
-    color: #FF6B35 !important;
-    text-shadow: 0 0 10px rgba(255, 107, 53, 0.50) !important;
-  }
-
-
-  /* ================================================
-     FORM INPUTS
-     ================================================ */
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  input[type="tel"],
-  input[type="number"],
-  textarea,
-  select,
-  .scenario-select {
-    background: #13203a !important;
-    color: #edf2ff !important;
-    border-color: rgba(30, 100, 220, 0.35) !important;
-  }
-
-  input::placeholder,
-  textarea::placeholder {
-    color: #2d4a6e !important;
-  }
-
-  input:focus,
-  textarea:focus,
-  select:focus,
-  .scenario-select:focus {
-    border-color: #FF6B35 !important;
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.20), 0 0 14px rgba(255, 107, 53, 0.14) !important;
-  }
-
+  .ai-banner-text h4 { color: #FFD23F !important; text-shadow: 0 0 14px rgba(255, 210, 63, 0.50) !important; }
+  .btn-ai-partner { background: linear-gradient(135deg, #FF6B35, #004E89) !important; color: #fff !important; box-shadow: 0 4px 18px rgba(255, 107, 53, 0.42) !important; }
+  .btn-ai-partner:hover { box-shadow: 0 6px 30px rgba(255, 107, 53, 0.58) !important; transform: translateY(-1px) !important; color: #fff !important; }
+  .ai-banner-icon { background: rgba(255, 107, 53, 0.16) !important; }
+  .ai-fab { background: radial-gradient(circle at 35% 35%, #0e2648, #04101f) !important; border-color: rgba(0, 240, 255, 0.55) !important; color: #fff !important; }
+  .ai-fab:hover { color: #fff !important; }
 
   /* ================================================
-     SPECIAL BUTTONS
+     PROGRESS DASHBOARD (gme-dash) — DARK MODE
+     Restores "Midnight Quest" dark look
      ================================================ */
-  .btn-google {
-    background: #13203a !important;
-    color: #edf2ff !important;
-    border-color: rgba(30, 100, 220, 0.35) !important;
-  }
-
-  .btn-nav-link,
-  .btn-leaderboard {
-    background: transparent !important;
-    border-color: #FF6B35 !important;
-    color: #FF6B35 !important;
-    box-shadow: 0 0 10px rgba(255, 107, 53, 0.18) !important;
-  }
-
-  .btn-nav-link:hover,
-  .btn-leaderboard:hover {
-    background: #FF6B35 !important;
-    color: #fff !important;
-    box-shadow: 0 0 24px rgba(255, 107, 53, 0.50) !important;
-  }
-
-  .btn-secondary {
-    background: transparent !important;
-    color: #FF6B35 !important;
-    border-color: #FF6B35 !important;
-    box-shadow: 0 0 10px rgba(255, 107, 53, 0.15) !important;
-  }
-
-  .btn-secondary:hover {
-    background: rgba(255, 107, 53, 0.18) !important;
-    box-shadow: 0 0 22px rgba(255, 107, 53, 0.34) !important;
-  }
-
-  /* rating buttons (sprechen-buddy) */
-  .rating-btn {
-    background: #13203a !important;
-    border-color: rgba(30, 100, 220, 0.35) !important;
-    color: #edf2ff !important;
-  }
-
-  .rating-btn:hover {
-    border-color: #FF6B35 !important;
-    background: rgba(255, 107, 53, 0.14) !important;
-    box-shadow: 0 0 16px rgba(255, 107, 53, 0.28) !important;
-  }
-
-  /* level-tab / mode-tab (ai-partner) — inactive */
-  .level-tab:not(.active),
-  .mode-tab:not(.active) {
-    background: #13203a !important;
-    color: #6b8cad !important;
-    border-color: rgba(30, 100, 220, 0.26) !important;
-  }
-
-  /* level-tab / mode-tab — active: brand orange glow */
-  .level-tab.active,
-  .mode-tab.active {
-    box-shadow: 0 0 18px rgba(255, 107, 53, 0.42) !important;
-  }
-
-  /* level-btn (leaderboard) — inactive */
-  .level-btn:not(.active) {
-    background: #0c1221 !important;
-    border-color: rgba(30, 100, 220, 0.26) !important;
-    color: #6b8cad !important;
-  }
-
-  /* tab-btn (leaderboard) — inactive */
-  .tab-btn:not(.active) {
-    color: #6b8cad !important;
-  }
-
-  /* tab-btn — active */
-  .tab-btn.active {
-    box-shadow: 0 0 16px rgba(255, 107, 53, 0.32) !important;
-  }
-
-  /* method-card (payment) */
-  .method-card {
-    border-color: rgba(30, 100, 220, 0.26) !important;
-  }
-
-  .method-card.selected {
-    background: rgba(255, 107, 53, 0.10) !important;
-    border-color: #FF6B35 !important;
-    box-shadow: 0 0 24px rgba(255, 107, 53, 0.28) !important;
-  }
-
-
-  /* ================================================
-     DIVIDERS & BORDERS
-     ================================================ */
-  .divider::before,
-  .divider::after,
-  .or-divider-line {
-    background: rgba(30, 100, 220, 0.18) !important;
-  }
-
-  .divider {
-    color: #2d4a6e !important;
-  }
-
-  .or-divider-text {
-    background: #0c1221 !important;
-    color: #2d4a6e !important;
-  }
-
-  .info-row {
-    border-bottom-color: rgba(30, 100, 220, 0.14) !important;
-  }
-
-  .lesson {
-    border-bottom-color: rgba(30, 100, 220, 0.12) !important;
-  }
-
-  .price-section {
-    border-bottom-color: rgba(30, 100, 220, 0.14) !important;
-  }
-
-
-  /* ================================================
-     PROGRESS BAR TRACK
-     ================================================ */
-  .progress-bar {
-    background: rgba(30, 100, 220, 0.16) !important;
-  }
-
-
-  /* ================================================
-     LOADING SPINNER
-     ================================================ */
-  .loading-spinner,
-  .spinner {
-    border-color: rgba(30, 100, 220, 0.20) !important;
-    border-top-color: #FF6B35 !important;
-    filter: drop-shadow(0 0 6px rgba(255, 107, 53, 0.60)) !important;
-  }
-
-
-  /* ================================================
-     LEADERBOARD ROWS
-     ================================================ */
-  .leaderboard-row:nth-child(odd) {
-    background: rgba(12, 25, 50, 0.58) !important;
-  }
-
-  .leaderboard-row.current-user {
-    background: rgba(255, 107, 53, 0.12) !important;
-    border-color: #FF6B35 !important;
-    box-shadow: inset 0 0 20px rgba(255, 107, 53, 0.08) !important;
-  }
-
-  /* Leaderboard gold rank — glowing achievement */
-  .lb-rank.gold {
-    color: #FFD23F !important;
-    text-shadow: 0 0 12px rgba(255, 210, 63, 0.55) !important;
-  }
-
-  .lb-rank.silver {
-    color: #94b8d4 !important;
-  }
-
-  .lb-rank.bronze {
-    color: #cd7f32 !important;
-  }
-
-  .lb-score {
-    color: #FF6B35 !important;
-    text-shadow: 0 0 10px rgba(255, 107, 53, 0.35) !important;
-  }
-
-
-  /* ================================================
-     CHIPS & BADGES
-     ================================================ */
-  .stat-chip {
-    background: rgba(255, 107, 53, 0.14) !important;
-    border-color: rgba(255, 107, 53, 0.35) !important;
-    box-shadow: 0 0 8px rgba(255, 107, 53, 0.12) !important;
-  }
-
-  .access-badge {
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.38) !important;
-  }
-
-
-  /* ================================================
-     ALERT BOXES
-     ================================================ */
-  .alert-error {
-    background: rgba(42, 8, 8, 0.92) !important;
-    color: #ff9090 !important;
-    border-color: rgba(180, 40, 40, 0.60) !important;
-    box-shadow: 0 0 16px rgba(180, 40, 40, 0.16) !important;
-  }
-
-  .alert-success {
-    background: rgba(5, 28, 18, 0.92) !important;
-    color: #7de8a0 !important;
-    border-color: rgba(16, 185, 129, 0.50) !important;
-    box-shadow: 0 0 16px rgba(16, 185, 129, 0.14) !important;
-  }
-
-
-  /* ================================================
-     SPRECHEN-BUDDY SPECIFIC
-     ================================================ */
-  .queue-info {
-    background: rgba(255, 107, 53, 0.10) !important;
-    border-color: #FF6B35 !important;
-    box-shadow: 0 0 18px rgba(255, 107, 53, 0.16) !important;
-  }
-
-  .task-card {
-    background: rgba(255, 107, 53, 0.07) !important;
-    border-color: rgba(255, 107, 53, 0.38) !important;
-  }
-
-  .points-earned {
-    background: rgba(255, 107, 53, 0.10) !important;
-    border-color: #FF6B35 !important;
-    box-shadow: 0 0 24px rgba(255, 107, 53, 0.24) !important;
-  }
-
-  .video-container {
-    background: #020409 !important;
-  }
-
-
-  /* ================================================
-     AI PARTNER SPECIFIC
-     ================================================ */
-
-  /* Role card — the "character you are speaking to" panel */
-  .role-card {
-    background: linear-gradient(135deg, #0c1e38, #0a1828) !important;
-    border: 1px solid rgba(56, 189, 248, 0.22) !important;
-    box-shadow: 0 4px 28px rgba(0, 50, 160, 0.26) !important;
-  }
-
-  /* AI message bubble — cool navy depth */
-  .msg.ai .msg-bubble {
-    background: #13203a !important;
-    color: #edf2ff !important;
-    border: 1px solid rgba(30, 100, 220, 0.26) !important;
-  }
-
-  /* User message bubble — brand green (success/correct) */
-  .msg.user .msg-bubble {
-    background: rgba(0, 100, 65, 0.22) !important;
-    color: #edf2ff !important;
-    border: 1px solid rgba(16, 185, 129, 0.32) !important;
-  }
-
-  /* Processing / thinking status */
-  .processing-status {
-    background: rgba(5, 14, 48, 0.88) !important;
-    border-color: rgba(56, 189, 248, 0.42) !important;
-    color: #38bdf8 !important;
-    box-shadow: 0 0 14px rgba(56, 189, 248, 0.14) !important;
-  }
-
-  /* Recording live status */
-  .recording-status {
-    background: rgba(40, 8, 18, 0.88) !important;
-    border-color: rgba(200, 50, 80, 0.50) !important;
-    color: #ff8090 !important;
-    box-shadow: 0 0 14px rgba(200, 50, 80, 0.16) !important;
-  }
-
-  /* Session countdown timer — electric sky-blue */
-  .session-timer {
-    color: #38bdf8 !important;
-    text-shadow: 0 0 18px rgba(56, 189, 248, 0.45) !important;
-  }
-
-  /* AI speaking banner */
-  .ai-speaking-banner {
-    background: #0c1e38 !important;
-    border-color: rgba(56, 189, 248, 0.28) !important;
-    color: #38bdf8 !important;
-  }
-
-  /* Score circle — blazing orange halo */
-  .score-circle {
-    box-shadow:
-      0 0  40px rgba(255, 107,  53, 0.38),
-      0 0  80px rgba(255, 107,  53, 0.18),
-      0 0 120px rgba(  0,  78, 137, 0.15) !important;
-  }
-
-  /* Criteria progress bars — energised fill */
-  .criteria-fill {
-    box-shadow: 0 0 10px rgba(255, 107, 53, 0.45) !important;
-  }
-
-  /* Trial modal */
-  .trial-modal-card {
-    background: #0c1221 !important;
-    border: 1px solid rgba(255, 107, 53, 0.32) !important;
-    box-shadow:
-      0 8px 48px rgba(255, 107,  53, 0.22),
-      0 0  80px rgba(  0,  50, 160, 0.20) !important;
-  }
-
-  /* Trial badge pill */
-  .trial-badge {
-    background: rgba(255, 107, 53, 0.14) !important;
-    color: #FF6B35 !important;
-    border: 1px solid rgba(255, 107, 53, 0.35) !important;
-  }
-
-  /* Hero eyebrow (ai-partner top label) */
-  .hero-eyebrow {
-    color: #38bdf8 !important;
-    text-shadow: 0 0 14px rgba(56, 189, 248, 0.45) !important;
-  }
-
-  /* Trial counter badge */
-  .trial-counter-badge {
-    background: rgba(30, 100, 220, 0.12) !important;
-    border-color: rgba(30, 100, 220, 0.30) !important;
-    color: #6b8cad !important;
-  }
-
-  /* Text input area */
-  #text-input {
-    background: #13203a !important;
-    color: #edf2ff !important;
-    border-color: rgba(30, 100, 220, 0.35) !important;
-  }
-
-  #text-input:focus {
-    border-color: #FF6B35 !important;
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.18), 0 0 14px rgba(255, 107, 53, 0.12) !important;
-  }
-
-  /* Inline grammar feedback block */
-  .feedback-inline {
-    background: rgba(16, 100, 60, 0.14) !important;
-    border-left-color: #10b981 !important;
-    color: #b0f0d0 !important;
-  }
-
-  .feedback-inline strong {
-    color: #10b981 !important;
-  }
-
-  /* Pronunciation tip block */
-  .feedback-pronunciation {
-    background: rgba(30, 100, 220, 0.10) !important;
-    border-left-color: #38bdf8 !important;
-    color: #adc4e0 !important;
-  }
-
-  /* Thinking dots */
-  .thinking-dot {
-    background: #6b8cad !important;
-  }
-
-
-  /* ================================================
-     COURSE PAGE (A1 / A2) SPECIFIC
-     ================================================ */
-
-  /* Slider cards */
-  .slider-card {
-    background: #0c1221 !important;
-    border-color: rgba(30, 100, 220, 0.26) !important;
-    box-shadow: 0 4px 24px rgba(0, 50, 160, 0.18) !important;
-  }
-
-  .slider-card-body p {
-    color: #6b8cad !important;
-  }
-
-  /* Slider arrow button */
-  .slider-arrow {
-    background: #13203a !important;
-    border-color: rgba(30, 100, 220, 0.35) !important;
-    color: #edf2ff !important;
-  }
-
-  .slider-arrow:hover {
-    border-color: #FF6B35 !important;
-    box-shadow: 0 0 16px rgba(255, 107, 53, 0.30) !important;
-  }
-
-  /* Disabled slider card btn */
-  .slider-card-btn.disabled {
-    background: rgba(30, 100, 220, 0.10) !important;
-    color: #2d4a6e !important;
-  }
-
-  /* Gift & nav-confirmation modal */
-  .gift-modal-content,
-  .nav-confirmation-modal {
-    background: #0c1221 !important;
-    color: #edf2ff !important;
-    border: 1px solid rgba(30, 100, 220, 0.35) !important;
-    box-shadow: 0 8px 44px rgba(0, 50, 160, 0.35) !important;
-  }
-
-  .gift-modal-close:hover {
-    background: rgba(30, 100, 220, 0.18) !important;
-  }
-
-  /* Locked lesson */
-  .lesson.locked {
-    opacity: 0.42 !important;
-  }
-
-
-  /* ================================================
-     PAYMENT PAGE SPECIFIC
-     ================================================ */
-  .payment-method {
-    background: #13203a !important;
-    color: #6b8cad !important;
-  }
-
-  .gift-banner {
-    background: rgba(255, 107, 53, 0.10) !important;
-    border-color: #FF6B35 !important;
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.14) !important;
-  }
-
-  .gift-recipient-details {
-    background: rgba(16, 185, 129, 0.08) !important;
-    border-color: rgba(16, 185, 129, 0.40) !important;
-    box-shadow: 0 0 16px rgba(16, 185, 129, 0.08) !important;
-  }
-
-  .gift-recipient-details h4 {
-    color: #6ee7b7 !important;
-  }
-
-  .gift-recipient-row {
-    color: #a0e0c0 !important;
-  }
-
-
-  /* ================================================
-     INDEX PAGE SPECIFIC
-     ================================================ */
-
-  /* Full-width section alternates */
-  .features,
-  .testimonials {
-    background: #060b18 !important;
-  }
-
-  /* Contact form & modal */
-  .contact-container,
-  .modal-content {
-    background: #0c1221 !important;
-    color: #edf2ff !important;
-    border: 1px solid rgba(30, 100, 220, 0.26) !important;
-  }
-
-  /* Mobile menu overlay */
-  .mobile-menu-overlay {
-    background: #060b18 !important;
-  }
-
-  /* Testimonial / FAQ / feature / instructor / step cards */
-  .faq-item,
-  .testimonial-card,
-  .feature-card,
-  .instructor-card,
-  .step-card {
-    background: #0c1221 !important;
+  .gme-dash {
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%) !important;
     border-color: rgba(30, 100, 220, 0.22) !important;
-    box-shadow: 0 4px 24px rgba(0, 50, 160, 0.14) !important;
+    box-shadow: 0 12px 40px rgba(0, 78, 137, 0.35) !important;
+    color: white !important;
   }
-
-  .faq-item:hover,
-  .testimonial-card:hover,
-  .feature-card:hover {
-    border-color: rgba(255, 107, 53, 0.42) !important;
-    box-shadow: 0 6px 32px rgba(255, 107, 53, 0.16) !important;
-  }
-
-  .faq-answer {
-    background: #13203a !important;
-  }
-
-  .faq-question {
-    background: #0c1221 !important;
-    color: #edf2ff !important;
-  }
-
-  /* Pricing cards */
-  .pricing-card {
-    background: #0c1221 !important;
-    border-color: rgba(30, 100, 220, 0.26) !important;
-    box-shadow: 0 4px 32px rgba(0, 50, 160, 0.18) !important;
-  }
-
-  /* Footer */
-  footer {
-    background: #020408 !important;
-    border-top: 1px solid rgba(30, 100, 220, 0.16) !important;
-  }
-
-  /* Section overrides */
-  .section-white,
-  .bg-white {
-    background: #0c1221 !important;
-  }
-
-
-  /* ================================================
-     DASHBOARD — AI PARTNER BANNER & FAB
-     ================================================ */
-
-  /* AI partner banner heading — keep yellow, add glow */
-  .ai-banner-text h4 {
-    color: #FFD23F !important;
-    text-shadow: 0 0 14px rgba(255, 210, 63, 0.50) !important;
-  }
-
-  /* AI partner CTA button — brand gradient with glow */
-  .btn-ai-partner {
-    background: linear-gradient(135deg, #FF6B35, #004E89) !important;
-    color: #fff !important;
-    box-shadow: 0 4px 18px rgba(255, 107, 53, 0.42) !important;
-  }
-
-  .btn-ai-partner:hover {
-    box-shadow: 0 6px 30px rgba(255, 107, 53, 0.58) !important;
-    transform: translateY(-1px) !important;
-    color: #fff !important;
-  }
-
-  /* AI banner icon background */
-  .ai-banner-icon {
-    background: rgba(255, 107, 53, 0.16) !important;
-  }
-
-  /* Floating Aura Orb — keep its own dark design, just enhance glow */
-  .ai-fab {
-    background: radial-gradient(circle at 35% 35%, #0e2648, #04101f) !important;
-    border-color: rgba(0, 240, 255, 0.55) !important;
-    color: #fff !important;
-  }
-
-  .ai-fab:hover {
-    color: #fff !important;
-  }
+  .gme-dash::before { background: rgba(255, 210, 63, 0.07) !important; }
+  .dash-label       { color: #FFD23F !important; }
+  .dash-title       { color: white !important; }
+  .dash-title span  { color: #FFD23F !important; }
+  .stat-pill        { background: rgba(255, 255, 255, 0.08) !important; border-color: rgba(255, 255, 255, 0.12) !important; box-shadow: none !important; }
+  .stat-pill.highlight { background: rgba(255, 210, 63, 0.15) !important; border-color: rgba(255, 210, 63, 0.4) !important; }
+  .stat-pill.green     { background: rgba(34, 197, 94, 0.15) !important; border-color: rgba(34, 197, 94, 0.4) !important; }
+  .stat-val            { color: white !important; }
+  .stat-val.gold       { color: #FFD23F !important; }
+  .stat-val.green      { color: #4ADE80 !important; }
+  .stat-lbl            { color: rgba(255, 255, 255, 0.5) !important; }
+  .ahead-badge { background: linear-gradient(135deg, rgba(255, 210, 63, 0.2), rgba(255, 107, 53, 0.2)) !important; border-color: rgba(255, 210, 63, 0.4) !important; }
+  .ahead-text h4    { color: #FFD23F !important; }
+  .ahead-text p     { color: rgba(255, 255, 255, 0.7) !important; }
+  .bar-meta         { color: rgba(255, 255, 255, 0.5) !important; }
+  .bar-meta strong  { color: white !important; }
+  .bar-track        { background: rgba(255, 255, 255, 0.1) !important; }
+  .bar-target-line  { background: rgba(255, 255, 255, 0.4) !important; }
+  .bar-fill-bg      { background: rgba(255, 255, 255, 0.1) !important; }
+  .bar-hint         { color: rgba(255, 255, 255, 0.45) !important; }
+  .dot.empty        { background: rgba(255, 255, 255, 0.1) !important; color: rgba(255, 255, 255, 0.35) !important; border-color: rgba(255, 255, 255, 0.15) !important; }
+  .dot.done         { background: #22C55E !important; border-color: #16A34A !important; }
+  .dot.today        { background: rgba(255, 107, 53, 0.25) !important; color: #FF6B35 !important; }
+  .dot-tip          { background: #0F172A !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important; }
+  .dot-tip::after   { border-top-color: #0F172A !important; }
+  .reset-btn        { border-color: rgba(255, 255, 255, 0.2) !important; color: rgba(255, 255, 255, 0.4) !important; }
+  .reset-btn:hover  { border-color: rgba(255, 107, 53, 0.6) !important; color: #FF6B35 !important; }
 
 }

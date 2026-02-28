@@ -1951,6 +1951,8 @@ async function playTTSBatch(segments) {
     for (const seg of sorted) {
       if (!seg.audio) continue;
       const bytes = Uint8Array.from(atob(seg.audio), c => c.charCodeAt(0));
+      const ac = getAudioContext();
+      if (ac && ac.state === 'suspended') await ac.resume();
       await playAudioBuffer({ buffer: bytes.buffer, lang: seg.lang });
       await new Promise(r => setTimeout(r, 280));
     }
@@ -1959,6 +1961,8 @@ async function playTTSBatch(segments) {
     // use playGeminiTTS directly to avoid speakEnglish re-splitting [[ ]] markers.
     for (const seg of segments) {
       if (!seg.text?.trim()) continue;
+      const ac = getAudioContext();
+      if (ac && ac.state === 'suspended') await ac.resume();
       await playGeminiTTS(seg.text, seg.lang);
     }
   }

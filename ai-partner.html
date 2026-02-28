@@ -1352,23 +1352,12 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     resetAudioRouting();
 
     // ── TTS PLAYBACK ─────────────────────────────────────────────
-    // 1. Speak the main reply in the correct language for the current mode.
-    // 2. Speak ONLY the short spokenSummary if provided.
-    //    The correction box already shows the full written note — reading it
-    //    aloud again would be redundant. spokenSummary is max 12 words.
-    // NEVER speak feedback.note or feedback.pronunciationNote directly.
+    // buildTTSJobs assembles all segments with correct language routing.
+    // playTTSBatch sends them in one batch call; falls back to sequential.
     setAISpeaking(true);
     try {
-      if (mode === 'tutor') {
-        await speakEnglish(aiText);
-      } else {
-        await speakText(aiText);
-      }
-      const spokenSummary = feedback?.spokenSummary;
-      if (spokenSummary && spokenSummary !== 'null' && spokenSummary.trim()) {
-        await new Promise(r => setTimeout(r, 400));
-        await speakEnglish(spokenSummary);
-      }
+      const jobs = buildTTSJobs(aiText, feedback, mode);
+      if (jobs.length > 0) await playTTSBatch(jobs);
     } finally {
       setAISpeaking(false);
     }
@@ -1831,30 +1820,105 @@ async function playAudioBuffer(item) {
   });
 }
 
+// ── Strip emoji characters before passing text to TTS ─────────────
+// TTS APIs reject or mispronounce emoji — strip them all first.
+function stripEmojisForTTS(text) {
+  if (!text) return '';
+  return text
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')  // emoji ranges
+    .replace(/[\u{2600}-\u{27BF}]/gu, '')     // misc symbols (❌ ✅ ⚠️ etc.)
+    .replace(/[\u{FE00}-\u{FE0F}]/gu, '')     // variation selectors
+    .replace(/\s{2,}/g, ' ')                   // collapse double-spaces left behind
+    .trim();
+}
+
+// ── Parse [[ ]] German-word markers into language-tagged segments ──
+// Shared by buildTTSJobs and speakEnglish — single source of truth for this format.
+// Input:  "Article yaad rakho — [[einen]], not [[ein]] here."
+// Output: [{text:'Article yaad rakho — ', lang:'en'}, {text:'einen', lang:'de'}, ...]
+function parseGermanMarkers(text) {
+  const segments = [];
+  for (const part of text.split(/(\[\[.*?\]\])/g)) {
+    if (!part.trim()) continue;
+    const m = part.match(/^\[\[(.*?)\]\]$/);
+    segments.push({ text: m ? m[1] : part.trim(), lang: m ? 'de' : 'en' });
+  }
+  return segments;
+}
+
 // Pure logic: decide what TTS segments are needed for this AI response.
-// Returns [{text, lang}, ...] ready to be passed to fetchTTSBuffer.
+// Returns [{text, lang}, ...] ready for playTTSBatch or sequential fallback.
 function buildTTSJobs(aiText, feedback, mode) {
   const jobs = [];
-  // 1. Speak the reply — in English for tutor mode, German for practice mode.
-  if (aiText?.trim()) jobs.push({ text: aiText, lang: mode === 'tutor' ? 'en' : 'de' });
 
-  // 2. English correction OR English pronunciation tip (not both — avoids audio overload).
-  if (feedback?.error === true && feedback?.note && feedback.note !== 'null') {
-    const corrText = `Correction: ${feedback.corrected || ''}. ${feedback.note}`;
-    if (corrText.trim()) jobs.push({ text: corrText, lang: 'en' });
-  } else if (feedback?.pronunciationWord && feedback.pronunciationWord !== 'null'
-             && feedback?.pronunciationNote && feedback.pronunciationNote !== 'null') {
-    jobs.push({ text: feedback.pronunciationNote, lang: 'en' });
+  // 1. Main reply — German in practice mode, English in tutor mode.
+  if (aiText?.trim()) {
+    jobs.push({ text: stripEmojisForTTS(aiText), lang: mode === 'tutor' ? 'en' : 'de' });
   }
 
-  // 3. Always add Gujarati coaching note when available.
-  if (ENABLE_GUJARATI_PRONUNCIATION_GUIDANCE
-      && feedback?.pronunciationGujaratiNote
-      && feedback.pronunciationGujaratiNote !== 'null') {
-    jobs.push({ text: feedback.pronunciationGujaratiNote, lang: 'gu' });
+  if (feedback) {
+    // 2. Correction: corrected phrase spoken in German, explanatory note in English.
+    if (feedback.error === true && feedback.corrected && feedback.corrected !== 'null') {
+      jobs.push({ text: stripEmojisForTTS(feedback.corrected), lang: 'de' });
+      if (feedback.note && feedback.note !== 'null') {
+        jobs.push({ text: stripEmojisForTTS(feedback.note), lang: 'en' });
+      }
+    }
+
+    // 3. Pronunciation: word in German, coaching note in English.
+    if (feedback.pronunciationWord && feedback.pronunciationWord !== 'null'
+        && feedback.pronunciationNote && feedback.pronunciationNote !== 'null') {
+      jobs.push({ text: stripEmojisForTTS(feedback.pronunciationWord), lang: 'de' });
+      jobs.push({ text: stripEmojisForTTS(feedback.pronunciationNote), lang: 'en' });
+    }
+
+    // 4. Spoken summary — delegate [[ ]] parsing to shared helper.
+    const summary = feedback.spokenSummary;
+    if (summary && summary !== 'null' && summary.trim()) {
+      for (const seg of parseGermanMarkers(summary)) {
+        const clean = stripEmojisForTTS(seg.text);
+        if (clean) jobs.push({ text: clean, lang: seg.lang });
+      }
+    }
   }
 
-  return jobs;
+  // Drop any segment that became empty after emoji stripping.
+  return jobs.filter(j => j.text && j.text.trim().length > 0);
+}
+
+// ── Batch TTS — sends all segments in one call, falls back to sequential ─
+// The /gemini-tts-batch route returns all audio in a single round-trip.
+// If the batch call fails, each segment is played sequentially as fallback.
+async function playTTSBatch(segments) {
+  const token = await currentUser.getIdToken();
+  let batchResult = null;
+  try {
+    const res = await fetch(`${PROXY_BASE}/gemini-tts-batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ segments })
+    });
+    if (res.ok) batchResult = await res.json();
+  } catch (e) {
+    console.warn('[TTS Batch] batch call failed, falling back to sequential:', e.message);
+  }
+
+  if (batchResult?.segments) {
+    const sorted = batchResult.segments.sort((a, b) => a.index - b.index);
+    for (const seg of sorted) {
+      if (!seg.audio) continue;
+      const bytes = Uint8Array.from(atob(seg.audio), c => c.charCodeAt(0));
+      await playAudioBuffer({ buffer: bytes.buffer, lang: seg.lang });
+      await new Promise(r => setTimeout(r, 280));
+    }
+  } else {
+    // Sequential fallback: seg.lang is already resolved by buildTTSJobs —
+    // use playGeminiTTS directly to avoid speakEnglish re-splitting [[ ]] markers.
+    for (const seg of segments) {
+      if (!seg.text?.trim()) continue;
+      await playGeminiTTS(seg.text, seg.lang);
+    }
+  }
 }
 
 // Core TTS function — sends text to worker, plays returned WAV audio
@@ -1968,16 +2032,8 @@ async function speakText(text) {
 async function speakEnglish(text) {
   if (!text || text === 'null') return;
   await new Promise(r => setTimeout(r, 600));
-  // Split on [[ ]] markers; if none found, entire text plays in English.
-  const segments = text.split(/(\[\[.*?\]\])/g);
-  for (const segment of segments) {
-    if (!segment.trim()) continue;
-    const germanMatch = segment.match(/^\[\[(.*?)\]\]$/);
-    if (germanMatch) {
-      await playGeminiTTS(germanMatch[1], 'de');
-    } else {
-      await playGeminiTTS(segment, 'en');
-    }
+  for (const seg of parseGermanMarkers(text)) {
+    await playGeminiTTS(seg.text, seg.lang);
   }
 }
 

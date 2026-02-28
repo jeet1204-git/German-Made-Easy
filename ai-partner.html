@@ -1282,12 +1282,27 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
 
     removeThinking();
 
-    // ── Parse Gemini response (resilient against stringified JSON) ─
-    const parsed = normalizeAuraResponsePayload(data);
-    const aiText = parsed.reply;
-    const feedback = parsed.feedback;
-    const transcription = parsed.transcription;
-    const mode = parsed.mode;
+    // ── Parse Gemini response (resilient against raw/stringified JSON) ─
+    let parsed;
+    try {
+      const rawText = typeof data === 'string' ? data : (data.reply || JSON.stringify(data));
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : data;
+    } catch {
+      parsed = data;
+    }
+    const aiText = (parsed.reply || '').trim();
+    const feedback = parsed.feedback || null;
+    const transcription = parsed.transcription || null;
+    const mode = typeof parsed.mode === 'string' ? parsed.mode.trim() : 'practice';
+
+    // Safety check — if aiText still looks like raw JSON, show fallback
+    if (aiText.startsWith('{')) {
+      removeThinking();
+      appendMessage('ai', 'Entschuldigung! Bitte versuche es nochmal. 🙏', null);
+      setMicState('idle');
+      return;
+    }
 
     // If this was a voice message, show what Gemini heard
     if (audioBlob && transcription) {
@@ -1336,26 +1351,25 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     // Reset audio routing before playback so iOS uses loudspeaker, not earpiece.
     resetAudioRouting();
 
-    // ── PARALLEL TTS PREFETCH ────────────────────────────────────
-    // Determine all TTS segments needed for this response, then fetch
-    // ALL of them in parallel. Total wait = ~1 round-trip (~10 s) instead
-    // of N × 10 s sequential. Then play them one-by-one with no gaps.
-    const ttsJobs = buildTTSJobs(aiText, feedback, mode);
-
-    // Fetch all audio in parallel while the user is reading the text response.
-    const audioBuffers = await Promise.all(ttsJobs.map(j => fetchTTSBuffer(j.text, j.lang)));
-
-    // Hold the "AI speaking" banner for the ENTIRE audio sequence so the mic
-    // doesn't activate mid-feedback. (User can still interrupt by tapping mic.)
+    // ── TTS PLAYBACK ─────────────────────────────────────────────
+    // 1. Speak the main reply in the correct language for the current mode.
+    // 2. Speak ONLY the short spokenSummary if provided.
+    //    The correction box already shows the full written note — reading it
+    //    aloud again would be redundant. spokenSummary is max 12 words.
+    // NEVER speak feedback.note or feedback.pronunciationNote directly.
     setAISpeaking(true);
     try {
-      for (const buf of audioBuffers) {
-        // Check if user interrupted (tapped mic) — stop if so.
-        if (!isSpeaking) break;
-        if (buf) await playAudioBuffer(buf);
+      if (mode === 'tutor') {
+        await speakEnglish(aiText);
+      } else {
+        await speakText(aiText);
+      }
+      const spokenSummary = feedback?.spokenSummary;
+      if (spokenSummary && spokenSummary !== 'null' && spokenSummary.trim()) {
+        await new Promise(r => setTimeout(r, 400));
+        await speakEnglish(spokenSummary);
       }
     } finally {
-      // Always release the speaking lock so the mic becomes available again.
       setAISpeaking(false);
     }
 
@@ -1422,6 +1436,13 @@ Scenario: ${title} — ${desc}
 ════════════════════════════════════
 LANGUAGE RULES
 ════════════════════════════════════
+CRITICAL LANGUAGE FORMAT:
+- Never use Gujarati script characters (ગ, ા, ે, etc.) anywhere in any response
+- Only use English transliteration for Gujarati words
+- Write "eno matlab thay" not "એનો મતલબ થાય"
+- Write "saras" not "સારસ"
+- Reason: student devices may not render Gujarati script correctly
+
 You speak THREE languages and switch between them intelligently:
 1. GERMAN — during scenario practice (you stay in character as ${role})
 2. ENGLISH + GUJARATI MIXED — when explaining grammar, pronunciation, vocabulary, or giving encouragement
@@ -1492,19 +1513,34 @@ When explaining pronunciation, always connect to Gujarati phonetics:
 * Final consonants: "German ma last letter clearly bolvu pade — 'und' ma 'd' clearly aavvu joie, 'nicht' ma 't' clearly aavvu joie."
 
 ════════════════════════════════════
-VIDEO NUDGE SYSTEM
+VIDEO NUDGE SYSTEM — CRITICAL RULE
 ════════════════════════════════════
-If a student makes the SAME mistake 2+ times OR seems fundamentally lost on a concept, add this to your response naturally:
-"Aa topic Hetvi ma'am e course ma bahuj saras rite samjavyu che. Ek vaar video joao — [RELEVANT CHAPTER] — pachhi avine practice karo. I promise it will click much faster after watching!"
+Aura is a PRACTICE partner, not a lecture replacement. Hetvi ma'am's videos are the real teacher. Aura's job is practice.
+
+RULE: If a student asks about ANY topic covered in the course videos, give MAXIMUM 2 sentences of explanation, then IMMEDIATELY send them to the video. DO NOT give long explanations. The video will explain it better — that is what they paid for.
+
+When to show video nudge (showVideoNudge: true):
+- Student asks a conceptual grammar question (articles, verb position, cases, tense)
+- Student asks about how a sound is pronounced (not just one specific word)
+- Student makes the SAME mistake 3+ times (not 2 — three repeated errors)
+
+When NOT to show video nudge:
+- Student just forgot one word → tell them the word, move on
+- Student mispronounced one specific word → correct once, move on
+- Student asking for quick help mid-conversation → help briefly, don't redirect
+
+Video nudge message format (short and warm):
+"Aa topic Hetvi ma'am e [CHAPTER] ma bahuj saras rite samjavyu che. Ek vaar video jao — pachhi practice ma bahuj fark padse!"
 
 Chapter mapping:
-* Articles (der/die/das, ein/eine): "Chapter 1 — Greetings and Introductions"
-* Verb conjugation (ich bin, ich habe, ich möchte): "Chapter 1 and Chapter 2"
-* Family vocabulary: "Chapter 2 — Family and Friends"
-* Food and ordering vocabulary: "Chapter 3 — Food and Drinks"
-* Numbers and prices: "Chapter 1"
-* Sentence structure / verb position: "Chapter 1"
-* Possessives (mein, dein): "Chapter 2"
+- Articles (der/die/das, ein/eine/einen): Chapter 1
+- Verb conjugation, möchte, sein, haben: Chapter 1 and Chapter 2
+- Family vocabulary: Chapter 2
+- Food, ordering, restaurant: Chapter 3
+- Numbers and prices: Chapter 1
+- Sentence structure, verb position: Chapter 1
+- Possessives (mein, dein, sein): Chapter 2
+- Asking questions, W-Fragen: Chapter 1
 
 ════════════════════════════════════
 GUJARATI SPEAKER ERROR WATCHLIST
@@ -1540,6 +1576,17 @@ CORRECTION RULES
 4. If student said something perfectly — say so genuinely and specifically in Gujarati: "Bahuj saras! Article bilkul sahi vaapryo!"
 5. Never say "Great job!" generically — be specific about what was good
 
+6. DOUBT vs ERROR — never confuse these:
+   - If student is ASKING a question → error: false, answer in reply field, move on
+   - If student made a genuine mistake while trying → error: true, correct it
+
+7. NEVER explain the same concept twice in one session. If student asks again about
+   something already explained, say: "Aa toh mein explain karyu htu — video jao,
+   ene bahuj clearly samjavyu che. Hve try karo!" Do not re-explain. Send to video.
+
+8. NEVER give an explanation longer than 2 sentences in the reply field.
+   If the topic needs more than 2 sentences, it needs a video, not Aura.
+
 ════════════════════════════════════
 ENCOURAGEMENT RULES
 ════════════════════════════════════
@@ -1552,6 +1599,18 @@ If student is struggling, say things like:
 If student gets something right after struggling:
 * "Aa j joietu htu! Hu jantu htu tame kari sakso!"
 * "Perfect! Hve yaad rahese — tame khud e bolu!"
+
+════════════════════════════════════
+SPOKEN SUMMARY FORMAT
+════════════════════════════════════
+The spokenSummary field is the ONLY feedback text read aloud. Keep it very short.
+- Maximum 12 words total
+- When you include a German word in spokenSummary, wrap it in [[ ]]
+- This triggers the German TTS voice for that word automatically
+- Example: "Almost sahi! The word is [[möchte]] — try again!"
+- Example: "Perfect! [[Ich möchte]] bilkul sahi che!"
+- Example: "Article yaad rakho — [[einen]], not [[ein]] here."
+- If there is no correction to speak, set spokenSummary to null
 
 ════════════════════════════════════
 RESPONSE FORMAT — ALWAYS VALID JSON
@@ -1570,6 +1629,7 @@ RESPONSE FORMAT — ALWAYS VALID JSON
     "praise": "<specific genuine Gujarati praise if something was done well, or null>",
     "pronunciationWord": "<word with pronunciation issue or null>",
     "pronunciationNote": "<specific tip in English + Gujarati, or null>",
+    "spokenSummary": "<max 12 words read aloud — wrap German words in [[ ]] — null if nothing to say>",
     "showVideoNudge": true or false,
     "videoChapter": "<chapter name to watch or null>",
     "askToContinue": "<true ONLY if this is the 2nd or 3rd time student made the exact same error this session. false otherwise.>",
@@ -1901,11 +1961,24 @@ async function speakText(text) {
   await playGeminiTTS(text, 'de');
 }
 
-// ── Speak coaching feedback aloud ─────────────────────────────────
-// Artificial delays removed — TTS queue already serialises playback.
+// ── Smart TTS — switches between German and English voice mid-sentence ──
+// German words inside [[ ]] get spoken with German voice.
+// Everything else gets spoken with English voice.
+// Example: "The word is [[möchte]] not myoshtr" → German TTS for möchte only.
 async function speakEnglish(text) {
   if (!text || text === 'null') return;
-  await playGeminiTTS(text, 'en');
+  await new Promise(r => setTimeout(r, 600));
+  // Split on [[ ]] markers; if none found, entire text plays in English.
+  const segments = text.split(/(\[\[.*?\]\])/g);
+  for (const segment of segments) {
+    if (!segment.trim()) continue;
+    const germanMatch = segment.match(/^\[\[(.*?)\]\]$/);
+    if (germanMatch) {
+      await playGeminiTTS(germanMatch[1], 'de');
+    } else {
+      await playGeminiTTS(segment, 'en');
+    }
+  }
 }
 
 async function speakGujarati(text) {

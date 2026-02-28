@@ -266,6 +266,19 @@
   }
   .aura-skip-btn:hover { border-color: rgba(0,240,255,0.5); color: rgba(0,240,255,0.9); }
 
+  /* ── Explanation Card (tutor-mode Gujarati/English teaching) ── */
+  .explanation-card {
+    background: rgba(123,97,255,0.1);
+    border-left: 3px solid rgba(123,97,255,0.6);
+    border-radius: 0 8px 8px 0;
+    padding: 0.65rem 0.9rem;
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: #d8d0ff;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
   /* ── Correction Card (prominent grammar feedback) ── */
   .feedback-correction-card {
     background: rgba(201,150,58,0.08); border: 1.5px solid var(--gold);
@@ -1295,6 +1308,9 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     const feedback = parsed.feedback || null;
     const transcription = parsed.transcription || null;
     const mode = typeof parsed.mode === 'string' ? parsed.mode.trim() : 'practice';
+    const explanation = (parsed.explanation && parsed.explanation !== 'null')
+      ? parsed.explanation.trim()
+      : null;
 
     // Safety check — if aiText still looks like raw JSON, show fallback
     if (aiText.startsWith('{')) {
@@ -1317,7 +1333,7 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     }
 
     conversationHistory.push({ role: 'assistant', content: aiText });
-    appendMessage('ai', aiText, feedback);
+    appendMessage('ai', aiText, feedback, false, explanation);
 
     // ── Track errors and patterns ────────────────────────────────
     if (feedback?.error && feedback?.corrected) {
@@ -1352,11 +1368,10 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     resetAudioRouting();
 
     // ── TTS PLAYBACK ─────────────────────────────────────────────
-    // buildTTSJobs assembles all segments with correct language routing.
-    // playTTSBatch sends them in one batch call; falls back to sequential.
+    // Segment 1: reply (always German). Segment 2: explanation (Gujarati/English, tutor only).
     setAISpeaking(true);
     try {
-      const jobs = buildTTSJobs(aiText, feedback, mode);
+      const jobs = buildTTSJobs(aiText, feedback, mode, explanation);
       if (jobs.length > 0) await playTTSBatch(jobs);
     } finally {
       setAISpeaking(false);
@@ -1625,26 +1640,53 @@ entirely German so no markers are needed.
 RESPONSE FORMAT — ALWAYS VALID JSON
 ════════════════════════════════════
 {
-  "reply": "<German response as ${role} OR English+Gujarati explanation if in tutor mode>",
-  "transcription": "<what you heard the student say>",
+  "reply": "<ONLY pure German — the in-character response as ${role} in practice mode,
+             OR only the short German word/phrase/example in tutor mode.
+             Maximum 2 sentences. Zero Gujarati. Zero English. Pure German only.>",
+  "explanation": "<ONLY in tutor mode: the full Gujarati + English explanation —
+                   encouragement, doubt answer, grammar rule, pronunciation tip.
+                   Everything non-German goes here. Write freely, no length limit.
+                   In practice mode where no explanation is needed, set to null.>",
+  "transcription": "<what you heard the student say — voice input only, else null>",
   "mode": "<'practice' or 'tutor'>",
   "feedback": ${inlineFeedbackOn ? `{
     "error": true or false,
     "errorType": "<article | verb-position | conjugation | case | vocabulary | pronunciation | tense | other>",
     "originalSaid": "<exactly what student said that was wrong>",
-    "corrected": "<corrected full phrase>",
-    "note": "<explanation in English + Gujarati mixed — never German only>",
+    "corrected": "<corrected German phrase only>",
+    "note": "<brief explanation in English + Gujarati>",
     "isRepeatedMistake": true or false,
-    "praise": "<specific genuine Gujarati praise if something was done well, or null>",
-    "pronunciationWord": "<word with pronunciation issue or null>",
-    "pronunciationNote": "<specific tip in English + Gujarati, or null>",
-    "spokenSummary": "<max 12 words read aloud — wrap German words in [[ ]] — null if nothing to say>",
+    "praise": "<specific Gujarati praise if something was done well, or null>",
+    "pronunciationWord": "<German word with pronunciation issue or null>",
+    "pronunciationNote": "<tip in English + Gujarati or null>",
     "showVideoNudge": true or false,
-    "videoChapter": "<chapter name to watch or null>",
+    "videoChapter": "<chapter name or null>",
     "askToContinue": "<true ONLY if this is the 2nd or 3rd time student made the exact same error this session. false otherwise.>",
     "practiceWord": "<the specific word or phrase to drill if askToContinue is true, otherwise null>"
   }` : 'null'}
 }
+
+CRITICAL RULES:
+- reply: ALWAYS pure German only. No Gujarati, no English, ever.
+- explanation: ALWAYS pure Gujarati + English only. Never full German sentences here —
+  German words used as examples are fine but keep them short and in quotes.
+- Practice mode, no correction needed: explanation = null
+- Practice mode, with correction: explanation = null (correction goes in feedback.note)
+- Tutor mode: reply has the short German example, explanation has the full Gujarati teaching
+
+Examples:
+Tutor mode (student asked about einen vs ein):
+reply: "Ich möchte einen Apfel."
+explanation: "Saras sawal! Simple rule — 'einen' use karo jyare masculine noun hoy ane tame koi vastu MANGTA ho. Jema Apfel masculine che, so 'einen Apfel'. Yaad rakho: ein → einen jyare tame want karo. Hve tame try karo!"
+
+Practice mode, no error:
+reply: "Ja, natürlich! Möchten Sie noch etwas?"
+explanation: null
+
+Practice mode, student made error:
+reply: "Fast richtig! Aber: ein Brot, nicht einen Brot."
+explanation: null
+(correction details go in feedback.note as text card on screen)
 
 ${isOpening ? `Opening: Greet the student warmly as ${role} in German, then add one encouraging line in Gujarati so they feel at home. Keep it short and friendly.` : ''}
 IMPORTANT: Return ONLY the JSON. No text before or after.`;
@@ -1868,51 +1910,22 @@ function parseGermanMarkers(text) {
 
 // Pure logic: decide what TTS segments are needed for this AI response.
 // Returns [{text, lang}, ...] ready for playTTSBatch or sequential fallback.
-function buildTTSJobs(aiText, feedback, mode) {
+// reply is always pure German (lang:'de'); explanation is always Gujarati/English (lang:'gu').
+function buildTTSJobs(aiText, feedback, mode, explanation) {
   const jobs = [];
 
-  // 1. Main reply — tutor mode may contain [[ ]] markers for German words embedded in
-  //    English+Gujarati text; practice mode reply is entirely German, no markers needed.
+  // Segment 1: German reply — always pure German, always German voice.
   if (aiText?.trim()) {
-    if (mode === 'tutor') {
-      // parseGermanMarkers splits on [[ ]] — German phrases get German voice, rest English.
-      for (const seg of parseGermanMarkers(aiText)) {
-        const clean = stripEmojisForTTS(seg.text);
-        if (clean) jobs.push({ text: clean, lang: seg.lang });
-      }
-    } else {
-      jobs.push({ text: stripEmojisForTTS(aiText), lang: 'de' });
-    }
+    jobs.push({ text: stripEmojisForTTS(aiText), lang: 'de' });
   }
 
-  if (feedback) {
-    // 2. Correction: corrected phrase spoken in German, explanatory note in English.
-    if (feedback.error === true && feedback.corrected && feedback.corrected !== 'null') {
-      jobs.push({ text: stripEmojisForTTS(feedback.corrected), lang: 'de' });
-      if (feedback.note && feedback.note !== 'null') {
-        jobs.push({ text: stripEmojisForTTS(feedback.note), lang: 'en' });
-      }
-    }
-
-    // 3. Pronunciation: word in German, coaching note in English.
-    if (feedback.pronunciationWord && feedback.pronunciationWord !== 'null'
-        && feedback.pronunciationNote && feedback.pronunciationNote !== 'null') {
-      jobs.push({ text: stripEmojisForTTS(feedback.pronunciationWord), lang: 'de' });
-      jobs.push({ text: stripEmojisForTTS(feedback.pronunciationNote), lang: 'en' });
-    }
-
-    // 4. Spoken summary — delegate [[ ]] parsing to shared helper.
-    const summary = feedback.spokenSummary;
-    if (summary && summary !== 'null' && summary.trim()) {
-      for (const seg of parseGermanMarkers(summary)) {
-        const clean = stripEmojisForTTS(seg.text);
-        if (clean) jobs.push({ text: clean, lang: seg.lang });
-      }
-    }
+  // Segment 2: Gujarati/English explanation — only in tutor mode.
+  // Always pure Gujarati+English, so no language switching inside it.
+  if (explanation?.trim()) {
+    jobs.push({ text: stripEmojisForTTS(explanation), lang: 'gu' });
   }
 
-  // Drop any segment that became empty after emoji stripping.
-  return jobs.filter(j => j.text && j.text.trim().length > 0);
+  return jobs;
 }
 
 // ── Batch TTS — sends all segments in one call, falls back to sequential ─
@@ -2073,7 +2086,7 @@ async function speakGujarati(text) {
 
 // ── UI helpers ────────────────────────────────────────────────────
 // UPGRADED: supports isTranscription flag for voice input display
-function appendMessage(who, text, feedback, isTranscription = false) {
+function appendMessage(who, text, feedback, isTranscription = false, explanation = null) {
   const box = document.getElementById('conversation-box');
   const div = document.createElement('div');
   div.className = `msg ${who}`;
@@ -2086,6 +2099,12 @@ function appendMessage(who, text, feedback, isTranscription = false) {
     : '';
 
   let fb = '';
+
+  // Explanation card — tutor-mode Gujarati/English teaching, shown above feedback cards
+  if (explanation && who === 'ai') {
+    fb += `<div class="explanation-card">${escHtml(explanation)}</div>`;
+  }
+
   if (feedback && inlineFeedbackOn && who === 'ai') {
 
     // Show correction card ONLY if error is true AND corrected is a real string (not null)

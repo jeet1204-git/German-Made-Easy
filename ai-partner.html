@@ -1374,6 +1374,35 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
   }
 }
 
+// ── Practice drill — student chose to repeat the problematic word ─
+window.startPracticeDrill = async (word) => {
+  document.getElementById('input-area').classList.add('awaiting-ack');
+  await speakEnglish(`Chalo — repeat after me 3 times. ${word}`);
+  appendMessage('ai',
+    `🔁 Drill mode! Say "${word}" 3 times clearly. Tap the mic after each attempt.`,
+    null
+  );
+  window._drillWord = word;
+  window._drillCount = 0;
+  window._isDrilling = true;
+  document.getElementById('input-area').classList.remove('awaiting-ack');
+  conversationHistory.push({
+    role: 'assistant',
+    content: `[DRILL MODE: Student is now practicing the word "${word}". For the next 3 student responses, ONLY evaluate their pronunciation of "${word}". Say "Wunderbar! Hve scenario ma jaiye!" after 3 attempts and set mode back to practice. Be encouraging. Keep responses very short — max 10 words spoken.]`
+  });
+};
+
+// ── Move on — student chose to skip drilling this word ────────────
+window.moveOnFromError = (word) => {
+  if (!window._skippedWords) window._skippedWords = [];
+  window._skippedWords.push(word);
+  conversationHistory.push({
+    role: 'assistant',
+    content: `[Student chose to move on from practicing "${word}". Continue the scenario normally. Do not bring up this word again during the session. It will be flagged in the final report.]`
+  });
+  toast(`➡️ "${word}" flagged for end report — moving on!`);
+};
+
 // ════════════════════════════════════════════════════════════════
 // WORLD-CLASS SYSTEM PROMPT
 // This is the heart of what makes Aura better than every other
@@ -1542,7 +1571,9 @@ RESPONSE FORMAT — ALWAYS VALID JSON
     "pronunciationWord": "<word with pronunciation issue or null>",
     "pronunciationNote": "<specific tip in English + Gujarati, or null>",
     "showVideoNudge": true or false,
-    "videoChapter": "<chapter name to watch or null>"
+    "videoChapter": "<chapter name to watch or null>",
+    "askToContinue": "<true ONLY if this is the 2nd or 3rd time student made the exact same error this session. false otherwise.>",
+    "practiceWord": "<the specific word or phrase to drill if askToContinue is true, otherwise null>"
   }` : 'null'}
 }
 
@@ -1570,6 +1601,10 @@ function buildEvaluationPrompt() {
     .map(([type, count]) => `${type} (${count}x)`)
     .join(', ') || 'none';
 
+  const skippedWords = window._skippedWords?.length
+    ? `Student chose to skip practicing: ${window._skippedWords.join(', ')}. Flag these specifically in the report.`
+    : '';
+
   return {
     system: `You are an expert Goethe-Institut and TELC examiner evaluating a ${selectedScenario.level} German speaking exam.
     
@@ -1594,6 +1629,7 @@ Be honest. Do not inflate scores. Students need accurate feedback to know if the
 PRONUNCIATION ISSUES NOTED DURING SESSION: ${pronNotesText}
 REPEATED ERROR PATTERNS: ${repeatedErrorsText}
 GERMAN WORDS STUDENT USED: ${wordList}
+${skippedWords}
 
 Respond ONLY with this exact JSON (no text before or after):
 {
@@ -1925,6 +1961,19 @@ function appendMessage(who, text, feedback, isTranscription = false) {
     if (feedback.showVideoNudge && feedback.videoChapter && feedback.videoChapter !== 'null') {
       fb += `<div style="background:rgba(0,245,255,0.08); border:1px solid rgba(0,245,255,0.3); border-radius:8px; padding:0.75rem 1rem; margin-top:0.5rem; font-size:0.85rem;">
         📚 <strong>Watch this first:</strong> ${escHtml(feedback.videoChapter)} — pachhi avine try karo, it will click!
+      </div>`;
+    }
+
+    if (feedback.askToContinue === true && feedback.practiceWord && feedback.practiceWord !== 'null') {
+      fb += `<div style="margin-top:0.75rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+        <button onclick="startPracticeDrill('${escHtml(feedback.practiceWord)}')"
+          style="padding:0.55rem 1.1rem; background:rgba(0,245,255,0.15); border:1px solid rgba(0,245,255,0.4); color:#a4f9ff; border-radius:8px; cursor:pointer; font-size:0.85rem; font-family:'Space Grotesk',sans-serif;">
+          🔁 Practice this
+        </button>
+        <button onclick="moveOnFromError('${escHtml(feedback.practiceWord)}')"
+          style="padding:0.55rem 1.1rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#a0aec0; border-radius:8px; cursor:pointer; font-size:0.85rem; font-family:'Space Grotesk',sans-serif;">
+          ➡️ Move on
+        </button>
       </div>`;
     }
   }

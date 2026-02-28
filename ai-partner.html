@@ -974,6 +974,25 @@ function resetAudioRouting() {
   } catch(e) {}
 }
 
+// Immediately stops all in-flight TTS audio and clears the playback queue.
+// Used when the user presses the mic button while AURA is speaking — lets them
+// interrupt naturally rather than waiting for AURA to finish.
+function stopAllAudio() {
+  // Stop shared HTMLAudioElement
+  if (_ttsAudio) {
+    try { _ttsAudio.pause(); _ttsAudio.src = ''; } catch(e) {}
+  }
+  // Stop WebAudio source node
+  if (activeTTSSource) {
+    try { activeTTSSource.stop(); } catch(e) {}
+    activeTTSSource = null;
+  }
+  // Reset the Promise queue so no queued-but-not-started segments play later
+  ttsQueue = Promise.resolve();
+  // Cancel browser fallback synthesis
+  window.speechSynthesis?.cancel();
+}
+
 // ── Auth ─────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
   if (!user) { showAccessDenied(); return; }
@@ -1126,7 +1145,13 @@ window.toggleMic = async () => {
   playUISound('mic');
   unlockAudio();
 
-  if (isSpeaking) { toast('⏳ Wait for Aura to finish speaking...'); return; }
+  // If AURA is speaking, interrupt immediately and start listening.
+  // This matches the ChatGPT/Gemini voice-mode feel of natural turn-taking.
+  if (isSpeaking) {
+    stopAllAudio();
+    setAISpeaking(false);
+    // Fall through to start recording below.
+  }
   if (isRecording) { mediaRecorder.stop(); return; }
 
   try {
@@ -1309,32 +1334,23 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     // Reset audio routing before playback so iOS uses loudspeaker, not earpiece.
     resetAudioRouting();
 
-    // Hold the "AI speaking" banner for the ENTIRE audio sequence:
-    // German reply + English correction/pronunciation + Gujarati note.
-    // This prevents the mic from activating mid-feedback.
+    // ── PARALLEL TTS PREFETCH ────────────────────────────────────
+    // Determine all TTS segments needed for this response, then fetch
+    // ALL of them in parallel. Total wait = ~1 round-trip (~10 s) instead
+    // of N × 10 s sequential. Then play them one-by-one with no gaps.
+    const ttsJobs = buildTTSJobs(aiText, feedback);
+
+    // Fetch all audio in parallel while the user is reading the text response.
+    const audioBuffers = await Promise.all(ttsJobs.map(j => fetchTTSBuffer(j.text, j.lang)));
+
+    // Hold the "AI speaking" banner for the ENTIRE audio sequence so the mic
+    // doesn't activate mid-feedback. (User can still interrupt by tapping mic.)
     setAISpeaking(true);
     try {
-      // 1. Play the German reply.
-      await speakText(aiText);
-
-      // 2. Speak English correction OR English pronunciation note (not both — avoids overload).
-      if (feedback?.error === true && feedback?.note && feedback.note !== 'null') {
-        // Grammar error: read out the correction.
-        const correctionSpeech = `Correction: ${feedback.corrected || ''}. ${feedback.note}`;
-        await speakEnglish(correctionSpeech);
-      } else if (feedback?.pronunciationWord && feedback.pronunciationWord !== 'null'
-                 && feedback?.pronunciationNote && feedback.pronunciationNote !== 'null') {
-        // No grammar error but a pronunciation issue: read the English tip.
-        await speakEnglish(feedback.pronunciationNote);
-      }
-
-      // 3. ALWAYS speak Gujarati pronunciation guidance when the AI provides it.
-      //    (Previously this only fired in the else-branch — now it fires regardless
-      //    of whether there was also a grammar error, so students always hear the
-      //    Gujarati coaching even after a correction.)
-      if (feedback?.pronunciationGujaratiNote
-          && feedback.pronunciationGujaratiNote !== 'null') {
-        await speakGujarati(feedback.pronunciationGujaratiNote);
+      for (const buf of audioBuffers) {
+        // Check if user interrupted (tapped mic) — stop if so.
+        if (!isSpeaking) break;
+        if (buf) await playAudioBuffer(buf);
       }
     } finally {
       // Always release the speaking lock so the mic becomes available again.
@@ -1471,6 +1487,38 @@ SCENARIO & CONVERSATION RULES
 - Ask natural follow-up questions to keep the conversation flowing.
 - React realistically: if student orders coffee, describe the coffee; if they ask price, give a price.
 - Never rush through the scenario. One realistic exchange at a time.
+
+════════════════════════════════════
+A1 STUDENT SUPPORT — LENIENCY, MIXED LANGUAGE & ENCOURAGEMENT
+════════════════════════════════════
+A1 students do NOT have a full German vocabulary yet. They WILL mix in English
+or Gujarati words mid-sentence. This is completely normal — do not treat it as failure.
+
+WHEN STUDENT USES AN ENGLISH OR GUJARATI WORD (e.g. "Ich möchte potato kaufen"):
+- Do NOT scold them or stop the scene.
+- React naturally as ${role} — incorporate the correct German word in your reply
+  so the student HEARS it through TTS ("...die Kartoffeln...").
+- In feedback.note, gently supply the German word:
+  "The German word for 'potato' is 'Kartoffel' (pl. Kartoffeln) — try it next time!"
+- Keep errorType as "vocabulary" and set error: true so they see the correction card.
+- Keep the conversation flowing forward — don't make them feel bad.
+
+WHEN STUDENT IS CLEARLY STRUGGLING (very short / blank / confused responses,
+same mistake 3+ times, or explicitly says they don't know):
+- Stay warm: "Kein Problem! Take your time."
+- In feedback.note add (ONCE per session, not every turn):
+  "If you're finding the vocabulary tricky, I'd recommend going back to the course
+  videos where the words for this scenario are explained — then come back and practise
+  again. You're already making great progress by trying!"
+- Keep your German reply short and simple to give them a gentler prompt.
+
+WHEN STUDENT USES GUJARATI IN THEIR RESPONSE:
+- Acknowledge warmly in feedback.note (never in the German reply).
+- Give the German equivalent.
+- Encourage: "Try saying it in German next time — you can do it!"
+
+CORE PRINCIPLE: You are a patient, encouraging older sibling helping them practise
+— not an examiner judging them. Progress > Perfection. Every attempt counts.
 
 ════════════════════════════════════
 CORRECTION RULES — NEVER BREAK THESE
@@ -1635,6 +1683,106 @@ function getTTSAudio() {
     _ttsAudio.volume = 1.0;
   }
   return _ttsAudio;
+}
+
+// ── PARALLEL TTS ARCHITECTURE ─────────────────────────────────────
+// The old model (fetch→play, fetch→play, fetch→play) caused ~10 s gaps
+// between each audio segment because every Cloudflare Worker/Gemini TTS
+// round-trip is sequential.
+//
+// The new model:
+//   1. fetchTTSBuffer()  – pure network fetch, returns {buffer, lang} or null
+//   2. playAudioBuffer() – pure playback of a pre-fetched buffer
+//   3. buildTTSJobs()    – decides WHAT to say (pure logic, no I/O)
+//
+// sendAIMessage calls Promise.all(jobs.map(fetchTTSBuffer)) to get all audio
+// in parallel (~10 s total instead of 10 s × N), then plays in sequence.
+// ─────────────────────────────────────────────────────────────────
+
+// Fetch one TTS segment — returns {buffer: ArrayBuffer, lang} or null on failure.
+async function fetchTTSBuffer(text, lang = 'de') {
+  if (!text || !text.trim()) return null;
+  const token = await currentUser.getIdToken();
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(`${PROXY_BASE}/gemini-tts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ text, lang })
+      });
+      if (res.ok) return { buffer: await res.arrayBuffer(), lang };
+    } catch(e) { if (attempt === 3) return null; }
+    await new Promise(r => setTimeout(r, attempt * 300));
+  }
+  return null;
+}
+
+// Play a pre-fetched {buffer, lang} object.
+// Mirrors the HTMLAudioElement → WebAudio fallback chain in playGeminiTTS.
+async function playAudioBuffer(item) {
+  if (!item) return;
+  const { buffer, lang } = item;
+
+  // HTMLAudioElement path (preferred — stable iOS speaker routing).
+  try {
+    const audioUrl = URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
+    const el = getTTSAudio();
+    el.pause();
+    el.currentTime = 0;
+    el.src = audioUrl;
+    el.muted = false;
+    el.volume = 1;
+    await new Promise((resolve, reject) => {
+      const timeoutMs = Math.max(5000, buffer.byteLength / 16); // rough duration estimate
+      const timeout = setTimeout(() => reject(new Error('audio timeout')), timeoutMs);
+      el.onended = () => { clearTimeout(timeout); URL.revokeObjectURL(audioUrl); resolve(); };
+      el.onerror = () => { clearTimeout(timeout); URL.revokeObjectURL(audioUrl); reject(new Error('audio element failed')); };
+      el.play().catch(reject);
+    });
+    return;
+  } catch(_) { /* fall through to WebAudio */ }
+
+  // WebAudio decode fallback.
+  const ac = getAudioContext();
+  if (!ac) return;
+  if (ac.state === 'suspended') await ac.resume();
+  await new Promise((resolve) => {
+    ac.decodeAudioData(buffer.slice(0), (decoded) => {
+      if (activeTTSSource) { try { activeTTSSource.stop(); } catch(e) {} }
+      const src = ac.createBufferSource();
+      activeTTSSource = src;
+      src.buffer = decoded;
+      src.connect(ac.destination);
+      src.onended = () => { if (activeTTSSource === src) activeTTSSource = null; resolve(); };
+      src.start(0);
+    }, () => resolve());
+  });
+}
+
+// Pure logic: decide what TTS segments are needed for this AI response.
+// Returns [{text, lang}, ...] ready to be passed to fetchTTSBuffer.
+function buildTTSJobs(aiText, feedback) {
+  const jobs = [];
+  // 1. Always speak the German reply.
+  if (aiText?.trim()) jobs.push({ text: aiText, lang: 'de' });
+
+  // 2. English correction OR English pronunciation tip (not both — avoids audio overload).
+  if (feedback?.error === true && feedback?.note && feedback.note !== 'null') {
+    const corrText = `Correction: ${feedback.corrected || ''}. ${feedback.note}`;
+    if (corrText.trim()) jobs.push({ text: corrText, lang: 'en' });
+  } else if (feedback?.pronunciationWord && feedback.pronunciationWord !== 'null'
+             && feedback?.pronunciationNote && feedback.pronunciationNote !== 'null') {
+    jobs.push({ text: feedback.pronunciationNote, lang: 'en' });
+  }
+
+  // 3. Always add Gujarati coaching note when available.
+  if (ENABLE_GUJARATI_PRONUNCIATION_GUIDANCE
+      && feedback?.pronunciationGujaratiNote
+      && feedback.pronunciationGujaratiNote !== 'null') {
+    jobs.push({ text: feedback.pronunciationGujaratiNote, lang: 'gu' });
+  }
+
+  return jobs;
 }
 
 // Core TTS function — sends text to worker, plays returned WAV audio

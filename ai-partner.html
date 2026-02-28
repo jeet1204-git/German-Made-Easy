@@ -1372,6 +1372,7 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     setAISpeaking(true);
     try {
       const jobs = buildTTSJobs(aiText, feedback, mode, explanation);
+      console.log('[TTS] jobs built:', jobs.length);
       if (jobs.length > 0) await playTTSBatch(jobs);
     } finally {
       setAISpeaking(false);

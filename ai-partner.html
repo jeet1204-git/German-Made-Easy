@@ -920,6 +920,9 @@ let audioChunks = [];
 let grammarErrors = [];
 let wordsUsed = new Set();
 let pronunciationNotes = [];
+let ttsQueue = Promise.resolve();
+let activeTTSSource = null;
+const ENABLE_GUJARATI_PRONUNCIATION_GUIDANCE = true;
 
 // ── NEW: Error pattern tracking ──────────────────────────────────
 // Tracks how many times each error type appeared this session
@@ -1141,6 +1144,44 @@ window.toggleMic = async () => {
   }
 };
 
+function parseJSONStringSafely(raw) {
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+  if (!trimmed) return null;
+  try { return JSON.parse(trimmed); } catch (_) {}
+
+  const first = trimmed.indexOf('{');
+  const last = trimmed.lastIndexOf('}');
+  if (first !== -1 && last > first) {
+    const sliced = trimmed.slice(first, last + 1);
+    try { return JSON.parse(sliced); } catch (_) {}
+  }
+  return null;
+}
+
+function normalizeAuraResponsePayload(raw) {
+  let payload = raw;
+  if (typeof payload === 'string') {
+    payload = parseJSONStringSafely(payload) || { reply: payload };
+  }
+  if (!payload || typeof payload !== 'object') payload = { reply: '' };
+
+  if (typeof payload.reply === 'string') {
+    const nested = parseJSONStringSafely(payload.reply);
+    if (nested && nested.reply) payload = { ...payload, ...nested };
+  }
+
+  if (typeof payload.feedback === 'string') {
+    payload.feedback = parseJSONStringSafely(payload.feedback) || null;
+  }
+
+  return {
+    reply: typeof payload.reply === 'string' ? payload.reply.trim() : '',
+    transcription: typeof payload.transcription === 'string' ? payload.transcription.trim() : null,
+    feedback: payload.feedback && typeof payload.feedback === 'object' ? payload.feedback : null
+  };
+}
+
 // ── sendAIMessage — CORE FUNCTION (heavily upgraded) ─────────────
 // Now handles 3 cases:
 //   { isOpening: true }          → opening line (text to /gemini-text)
@@ -1196,11 +1237,11 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
 
     removeThinking();
 
-    // ── Parse Gemini response ────────────────────────────────────
-    // data should already be parsed JSON from the worker
-    const aiText = data.reply || '';
-    const feedback = data.feedback || null;
-    const transcription = data.transcription || null; // NEW: Gemini tells us what it heard
+    // ── Parse Gemini response (resilient against stringified JSON) ─
+    const parsed = normalizeAuraResponsePayload(data);
+    const aiText = parsed.reply;
+    const feedback = parsed.feedback;
+    const transcription = parsed.transcription;
 
     // If this was a voice message, show what Gemini heard
     if (audioBlob && transcription) {
@@ -1257,6 +1298,9 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     } else if (feedback?.pronunciationWord && feedback.pronunciationWord !== 'null'
                && feedback?.pronunciationNote && feedback.pronunciationNote !== 'null') {
       await speakEnglish(feedback.pronunciationNote);
+      if (feedback?.pronunciationGujaratiNote && feedback.pronunciationGujaratiNote !== 'null') {
+        await speakGujarati(feedback.pronunciationGujaratiNote);
+      }
     }
 
   } catch(err) {
@@ -1299,6 +1343,7 @@ LANGUAGE RULES — CRITICAL
 ════════════════════════════════════
 - Your German REPLY field: always in German (you are playing the role)
 - ALL feedback fields (note, praise, pronunciationNote): ALWAYS in ENGLISH only
+- Optional feedback field pronunciationGujaratiNote: in Gujarati only (ગુજરાતી script or simple Gujarati Latin transliteration)
 - NEVER write feedback, corrections, or pronunciation tips in German
 - The student is A1/A2 level — they cannot understand German explanations
 
@@ -1386,6 +1431,8 @@ When you receive audio input, listen VERY carefully for these specific issues:
 - Give a tip in plain simple English. Be specific and actionable.
 - ALWAYS write pronunciationNote in ENGLISH, never German.
 - If pronunciation was genuinely good, write "Good pronunciation ✓" in pronunciationNote.
+- TRANSCRIPTION MUST BE LITERAL: never auto-correct or beautify what the student said. If the student says "ikh mokhte", keep it as "ikh mokhte" in transcription and originalSaid.
+- If confidence is low, keep best-effort raw words and mention uncertainty in note — but never silently fix grammar/spelling.
 
 ════════════════════════════════════
 RESPONSE FORMAT — ALWAYS RETURN VALID JSON
@@ -1402,7 +1449,8 @@ RESPONSE FORMAT — ALWAYS RETURN VALID JSON
     "isRepeatedMistake": true or false,
     "praise": "<optional: one specific genuine compliment if something was done well>",
     "pronunciationWord": "<the one word with a pronunciation issue, or null>",
-    "pronunciationNote": "<specific actionable tip for Gujarati speakers, or 'Good pronunciation ✓' if correct>"
+    "pronunciationNote": "<specific actionable tip for Gujarati speakers, or 'Good pronunciation ✓' if correct>",
+    "pronunciationGujaratiNote": "<optional Gujarati explanation for pronunciation coaching only, otherwise null>"
   }` : 'null'}
 }
 
@@ -1514,84 +1562,106 @@ function getTTSAudio() {
   if (!_ttsAudio) {
     _ttsAudio = new Audio();
     _ttsAudio.preload = 'auto';
+    _ttsAudio.setAttribute('playsinline', 'true');
   }
   return _ttsAudio;
 }
 
 // Core TTS function — sends text to worker, plays returned WAV audio
-// Uses Web Audio API (AudioContext) instead of <audio> element so it works
-// immediately after unlockAudio() is called on the startSession gesture.
+// Improvements for smooth UX:
+// 1) retries Gemini TTS once on transient failure
+// 2) serializes playback with queue (prevents overlap/race conditions)
+// 3) uses same WebAudio output path to avoid device routing shifts
 async function playGeminiTTS(text, lang = 'de') {
   if (!text || !text.trim()) return;
-  try {
-    const token = await currentUser.getIdToken();
-    const res = await fetch(`${PROXY_BASE}/gemini-tts`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ text, lang })
-    });
 
-    if (!res.ok) throw new Error('TTS fetch failed: ' + res.status);
+  const doPlayback = async () => {
+    const token = await currentUser.getIdToken();
+    let res;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      res = await fetch(`${PROXY_BASE}/gemini-tts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ text, lang })
+      });
+      if (res.ok) break;
+      if (attempt === 2) throw new Error('TTS fetch failed: ' + res.status);
+      await new Promise(r => setTimeout(r, 220));
+    }
 
     const arrayBuffer = await res.arrayBuffer();
-    const ac = getAudioContext();
 
-    // Ensure AudioContext is running (may have been suspended between calls)
+    // Prefer HTMLAudioElement for iOS speaker routing stability.
+    try {
+      const audioUrl = URL.createObjectURL(new Blob([arrayBuffer], { type: 'audio/wav' }));
+      const el = getTTSAudio();
+      el.pause();
+      el.currentTime = 0;
+      el.src = audioUrl;
+      el.muted = false;
+      el.volume = 1;
+
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('audio playback timeout')), Math.max(5000, text.length * 95));
+        el.onended = () => { clearTimeout(timeout); URL.revokeObjectURL(audioUrl); resolve(); };
+        el.onerror = () => { clearTimeout(timeout); URL.revokeObjectURL(audioUrl); reject(new Error('audio element failed')); };
+        el.play().catch(reject);
+      });
+      return;
+    } catch (_) {
+      // fallback to WebAudio decode path
+    }
+
+    const ac = getAudioContext();
+    if (!ac) throw new Error('No audio context available');
     if (ac.state === 'suspended') await ac.resume();
 
     return new Promise((resolve) => {
-      ac.decodeAudioData(arrayBuffer, (decodedBuffer) => {
+      ac.decodeAudioData(arrayBuffer.slice(0), (decodedBuffer) => {
+        if (activeTTSSource) {
+          try { activeTTSSource.stop(); } catch (e) {}
+        }
         const source = ac.createBufferSource();
+        activeTTSSource = source;
         source.buffer = decodedBuffer;
         source.connect(ac.destination);
-        source.onended = () => resolve();
+        source.onended = () => {
+          if (activeTTSSource === source) activeTTSSource = null;
+          resolve();
+        };
         source.start(0);
-        // Safety timeout in case onended doesn't fire
-        setTimeout(() => resolve(), Math.max(4000, text.length * 80));
-      }, (err) => {
-        console.warn('decodeAudioData failed:', err);
-        resolve(); // don't crash, just skip
-      });
+      }, () => resolve());
     });
+  };
 
-  } catch (err) {
-    console.warn('Gemini TTS failed, falling back to browser voice:', err.message);
-    return fallbackBrowserTTS(text, lang);
-  }
-}
-
-// Fallback: browser voice if Gemini TTS fails
-function fallbackBrowserTTS(text, lang = 'de') {
-  return new Promise((resolve) => {
-    if (!window.speechSynthesis) { resolve(); return; }
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = lang === 'de' ? 'de-DE' : 'en-GB';
-    utt.rate = 0.88;
-    utt.onend = () => resolve();
-    utt.onerror = () => resolve();
-    window.speechSynthesis.speak(utt);
-    setTimeout(() => resolve(), Math.max(3000, text.length * 70));
+  ttsQueue = ttsQueue.then(doPlayback).catch((err) => {
+    console.warn('Gemini TTS failed:', err?.message || err);
   });
+  return ttsQueue;
 }
 
 // speakText — plays German AI reply with Aura's voice
 async function speakText(text) {
   setAISpeaking(true);
+  await new Promise(r => setTimeout(r, 180));
   await playGeminiTTS(text, 'de');
   setAISpeaking(false);
 }
 
-// ── Speak English feedback aloud ─────────────────────────────────
-// Same Aoede voice, now speaking English correction — feels like same teacher
+// ── Speak coaching feedback aloud ─────────────────────────────────
 async function speakEnglish(text) {
   if (!text || text === 'null') return;
-  // Small natural pause between German reply and English correction
-  await new Promise(r => setTimeout(r, 600));
+  await new Promise(r => setTimeout(r, 350));
   await playGeminiTTS(text, 'en');
+}
+
+async function speakGujarati(text) {
+  if (!ENABLE_GUJARATI_PRONUNCIATION_GUIDANCE || !text || text === 'null') return;
+  await new Promise(r => setTimeout(r, 150));
+  await playGeminiTTS(text, 'gu');
 }
 
 // ── UI helpers ────────────────────────────────────────────────────
@@ -1633,7 +1703,10 @@ function appendMessage(who, text, feedback, isTranscription = false) {
     // Show pronunciation tip ONLY if both word and note are real strings (not null)
     if (feedback.pronunciationWord && feedback.pronunciationWord !== 'null'
       && feedback.pronunciationNote && feedback.pronunciationNote !== 'null') {
-      fb += `<div class="feedback-pronunciation">🗣️ <strong>${escHtml(feedback.pronunciationWord)}:</strong> ${escHtml(feedback.pronunciationNote)}</div>`;
+      const gujNote = feedback.pronunciationGujaratiNote && feedback.pronunciationGujaratiNote !== 'null'
+        ? `<div style="margin-top:0.35rem;color:#9fe9ff;">ગુજરાતી: ${escHtml(feedback.pronunciationGujaratiNote)}</div>`
+        : '';
+      fb += `<div class="feedback-pronunciation">🗣️ <strong>${escHtml(feedback.pronunciationWord)}:</strong> ${escHtml(feedback.pronunciationNote)}${gujNote}</div>`;
     }
   }
 
@@ -2014,9 +2087,12 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
     } else { soundPlayed = true; playIntroSound(introAC); }
   }
 
-  // Don't auto-attempt intro sound — Chrome blocks it before a gesture.
-  // It will play naturally when the user clicks/taps the intro screen.
+  // Attempt immediately for browsers that allow autoplay, then keep gesture fallback.
   const introEl = document.getElementById('aura-intro');
+  setTimeout(tryPlayIntroSound, 0);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') tryPlayIntroSound();
+  }, { once: true });
   introEl.addEventListener('touchstart', tryPlayIntroSound, { once: true, passive: true });
   introEl.addEventListener('click', tryPlayIntroSound, { once: true });
 

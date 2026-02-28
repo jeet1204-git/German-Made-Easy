@@ -1144,6 +1144,44 @@ window.toggleMic = async () => {
   }
 };
 
+function parseJSONStringSafely(raw) {
+  if (typeof raw !== 'string') return null;
+  const trimmed = raw.trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+  if (!trimmed) return null;
+  try { return JSON.parse(trimmed); } catch (_) {}
+
+  const first = trimmed.indexOf('{');
+  const last = trimmed.lastIndexOf('}');
+  if (first !== -1 && last > first) {
+    const sliced = trimmed.slice(first, last + 1);
+    try { return JSON.parse(sliced); } catch (_) {}
+  }
+  return null;
+}
+
+function normalizeAuraResponsePayload(raw) {
+  let payload = raw;
+  if (typeof payload === 'string') {
+    payload = parseJSONStringSafely(payload) || { reply: payload };
+  }
+  if (!payload || typeof payload !== 'object') payload = { reply: '' };
+
+  if (typeof payload.reply === 'string') {
+    const nested = parseJSONStringSafely(payload.reply);
+    if (nested && nested.reply) payload = { ...payload, ...nested };
+  }
+
+  if (typeof payload.feedback === 'string') {
+    payload.feedback = parseJSONStringSafely(payload.feedback) || null;
+  }
+
+  return {
+    reply: typeof payload.reply === 'string' ? payload.reply.trim() : '',
+    transcription: typeof payload.transcription === 'string' ? payload.transcription.trim() : null,
+    feedback: payload.feedback && typeof payload.feedback === 'object' ? payload.feedback : null
+  };
+}
+
 // ── sendAIMessage — CORE FUNCTION (heavily upgraded) ─────────────
 // Now handles 3 cases:
 //   { isOpening: true }          → opening line (text to /gemini-text)
@@ -1199,11 +1237,11 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
 
     removeThinking();
 
-    // ── Parse Gemini response ────────────────────────────────────
-    // data should already be parsed JSON from the worker
-    const aiText = data.reply || '';
-    const feedback = data.feedback || null;
-    const transcription = data.transcription || null; // NEW: Gemini tells us what it heard
+    // ── Parse Gemini response (resilient against stringified JSON) ─
+    const parsed = normalizeAuraResponsePayload(data);
+    const aiText = parsed.reply;
+    const feedback = parsed.feedback;
+    const transcription = parsed.transcription;
 
     // If this was a voice message, show what Gemini heard
     if (audioBlob && transcription) {
@@ -1555,6 +1593,28 @@ async function playGeminiTTS(text, lang = 'de') {
     }
 
     const arrayBuffer = await res.arrayBuffer();
+
+    // Prefer HTMLAudioElement for iOS speaker routing stability.
+    try {
+      const audioUrl = URL.createObjectURL(new Blob([arrayBuffer], { type: 'audio/wav' }));
+      const el = getTTSAudio();
+      el.pause();
+      el.currentTime = 0;
+      el.src = audioUrl;
+      el.muted = false;
+      el.volume = 1;
+
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('audio playback timeout')), Math.max(5000, text.length * 95));
+        el.onended = () => { clearTimeout(timeout); URL.revokeObjectURL(audioUrl); resolve(); };
+        el.onerror = () => { clearTimeout(timeout); URL.revokeObjectURL(audioUrl); reject(new Error('audio element failed')); };
+        el.play().catch(reject);
+      });
+      return;
+    } catch (_) {
+      // fallback to WebAudio decode path
+    }
+
     const ac = getAudioContext();
     if (!ac) throw new Error('No audio context available');
     if (ac.state === 'suspended') await ac.resume();
@@ -1573,26 +1633,7 @@ async function playGeminiTTS(text, lang = 'de') {
           resolve();
         };
         source.start(0);
-        setTimeout(() => {
-          if (activeTTSSource === source) {
-            try { source.stop(); } catch (e) {}
-            activeTTSSource = null;
-          }
-          resolve();
-        }, Math.max(5000, text.length * 90));
-      }, async () => {
-        try {
-          // Decode fallback path through audio element for broader codec support
-          const audioUrl = URL.createObjectURL(new Blob([arrayBuffer], { type: 'audio/wav' }));
-          const el = getTTSAudio();
-          el.src = audioUrl;
-          el.onended = () => { URL.revokeObjectURL(audioUrl); resolve(); };
-          await el.play();
-        } catch (err) {
-          console.warn('TTS decode/play failed:', err?.message || err);
-          resolve();
-        }
-      });
+      }, () => resolve());
     });
   };
 
@@ -1605,6 +1646,7 @@ async function playGeminiTTS(text, lang = 'de') {
 // speakText — plays German AI reply with Aura's voice
 async function speakText(text) {
   setAISpeaking(true);
+  await new Promise(r => setTimeout(r, 180));
   await playGeminiTTS(text, 'de');
   setAISpeaking(false);
 }

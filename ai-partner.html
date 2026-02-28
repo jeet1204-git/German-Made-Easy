@@ -1601,6 +1601,26 @@ The spokenSummary field is the ONLY feedback text read aloud. Keep it very short
 - Example: "Article yaad rakho — [[einen]], not [[ein]] here."
 - If there is no correction to speak, set spokenSummary to null
 
+════════════════════════════════════════════════════════════════
+TUTOR MODE REPLY FORMAT — GERMAN WORDS IN MIXED TEXT
+════════════════════════════════════════════════════════════════
+When you are in tutor mode (explaining in English + Gujarati), your reply field will contain
+German words mixed into the explanation. You MUST wrap every German word or phrase in the
+reply field with [[ ]] markers so the text-to-speech system can route them to the correct voice.
+
+Examples:
+WRONG: "Ich möchte thi shuru karo — eno matlab thay I would like"
+RIGHT: "[[Ich möchte]] thi shuru karo — eno matlab thay I would like"
+
+WRONG: "der, die, das — aa teen articles che German ma"
+RIGHT: "[[der]], [[die]], [[das]] — aa teen articles che German ma"
+
+WRONG: "einen use karo jyare masculine accusative hoy, dakhla tarike: Ich möchte einen Apfel"
+RIGHT: "einen use karo jyare masculine accusative hoy, dakhla tarike: [[Ich möchte einen Apfel]]"
+
+This applies ONLY to the reply field when mode is tutor. In practice mode, the reply is
+entirely German so no markers are needed.
+
 ════════════════════════════════════
 RESPONSE FORMAT — ALWAYS VALID JSON
 ════════════════════════════════════
@@ -1851,9 +1871,18 @@ function parseGermanMarkers(text) {
 function buildTTSJobs(aiText, feedback, mode) {
   const jobs = [];
 
-  // 1. Main reply — German in practice mode, English in tutor mode.
+  // 1. Main reply — tutor mode may contain [[ ]] markers for German words embedded in
+  //    English+Gujarati text; practice mode reply is entirely German, no markers needed.
   if (aiText?.trim()) {
-    jobs.push({ text: stripEmojisForTTS(aiText), lang: mode === 'tutor' ? 'en' : 'de' });
+    if (mode === 'tutor') {
+      // parseGermanMarkers splits on [[ ]] — German phrases get German voice, rest English.
+      for (const seg of parseGermanMarkers(aiText)) {
+        const clean = stripEmojisForTTS(seg.text);
+        if (clean) jobs.push({ text: clean, lang: seg.lang });
+      }
+    } else {
+      jobs.push({ text: stripEmojisForTTS(aiText), lang: 'de' });
+    }
   }
 
   if (feedback) {

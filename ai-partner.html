@@ -515,6 +515,20 @@
     color: #f9fcff;
   }
   .msg-time { color: #95a2b8; }
+  /* Improve correction card readability on dark theme */
+  .feedback-correction-card {
+    background: linear-gradient(145deg, rgba(28,33,46,0.96), rgba(18,24,38,0.92));
+    border-color: rgba(224,178,76,0.9);
+  }
+  .feedback-correction-card .corr-label { color: #ffd98b; }
+  .feedback-correction-wrong { color: #ff8a8a; }
+  .feedback-correction-right { color: #7df0a7; }
+  .feedback-correction-note {
+    color: #e8eefb;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    padding: 0.42rem 0.55rem;
+  }
   #text-input {
     color: #f2f6ff;
     background: rgba(13,19,30,0.95);
@@ -1226,6 +1240,29 @@ function safeParseAIResponse(raw) {
     feedback: null,
     transcription: null
   };
+}
+
+
+function hasSpeakableText(spokenSummary) {
+  if (!spokenSummary) return false;
+  if (typeof spokenSummary === 'string') return !!spokenSummary.trim();
+  if (typeof spokenSummary === 'object') {
+    return !!(spokenSummary.de?.trim?.() || spokenSummary.en?.trim?.());
+  }
+  return false;
+}
+
+function normalizeSpokenSummary(spokenSummary, aiText) {
+  // Preferred: backend-provided spokenSummary (new object format or legacy string)
+  if (typeof spokenSummary === 'string' && spokenSummary.trim()) return spokenSummary.trim();
+  if (spokenSummary && typeof spokenSummary === 'object') {
+    const de = typeof spokenSummary.de === 'string' ? spokenSummary.de.trim() : null;
+    const en = typeof spokenSummary.en === 'string' ? spokenSummary.en.trim() : null;
+    if (de || en) return { de, en };
+  }
+  // Fallback: speak visible AI reply so Aura is never silent
+  if (typeof aiText === 'string' && aiText.trim()) return aiText.trim();
+  return null;
 }
 
 

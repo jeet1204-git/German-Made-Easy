@@ -339,7 +339,7 @@
         }
         
         .btn-secondary:hover {
-            background: white;
+            background: rgba(5, 10, 24, 0.98);
             color: var(--secondary);
             transform: translateY(-5px);
         }
@@ -680,7 +680,7 @@
         
         .testimonial-card:hover {
             transform: translateX(10px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 18px 38px rgba(0, 6, 24, 0.42);
         }
         
         .testimonial-header {
@@ -934,6 +934,191 @@
             animation: slideUp 0.3s;
         }
 
+        /* Sarvam-inspired visual refresh */
+        body {
+            background:
+                radial-gradient(1100px 700px at -12% -18%, rgba(0, 195, 255, 0.16), transparent 60%),
+                radial-gradient(1000px 650px at 105% -10%, rgba(121, 95, 255, 0.17), transparent 58%),
+                linear-gradient(180deg, #030815 0%, #060d1f 38%, #070f22 100%);
+            color: #e8efff;
+        }
+
+        nav {
+            background: rgba(5, 10, 24, 0.78);
+            border-bottom: 1px solid rgba(135, 168, 255, 0.22);
+            box-shadow: 0 14px 32px rgba(2, 6, 20, 0.42);
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #8cf4ff, #8ba3ff 50%, #d8d4ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links a { color: rgba(236, 242, 255, 0.9); }
+        .nav-links a:hover { color: #89ddff; }
+
+        .btn-login {
+            color: #89ddff;
+            border-color: rgba(137, 221, 255, 0.65);
+            background: rgba(9, 18, 39, 0.68);
+        }
+        .btn-login:hover {
+            background: rgba(137, 221, 255, 0.16);
+            color: #e8f4ff;
+        }
+
+        .btn-signup,
+        .btn-dashboard {
+            background: linear-gradient(135deg, #2e9bff, #6f66ff 55%, #9f7bff 100%);
+            border-color: transparent;
+            box-shadow: 0 10px 30px rgba(84, 137, 255, 0.35);
+        }
+
+        .hero {
+            background:
+                radial-gradient(900px 420px at 15% 5%, rgba(80, 173, 255, 0.23), transparent 60%),
+                radial-gradient(800px 420px at 85% 12%, rgba(148, 109, 255, 0.26), transparent 60%),
+                linear-gradient(160deg, #050c1f 0%, #081833 45%, #0a2142 100%);
+        }
+
+        .hero::before {
+            opacity: 0.45;
+            background: radial-gradient(circle, rgba(157, 227, 255, 0.42) 1px, transparent 1px);
+            background-size: 34px 34px;
+            animation-duration: 32s;
+        }
+
+        .hero-content {
+            background: rgba(8, 18, 40, 0.58);
+            border: 1px solid rgba(139, 178, 255, 0.26);
+            border-radius: 28px;
+            padding: clamp(28px, 4vw, 54px);
+            box-shadow: 0 28px 90px rgba(2, 8, 25, 0.48);
+            backdrop-filter: blur(8px);
+        }
+
+        .hero h1 {
+            background: linear-gradient(135deg, #f4f8ff 0%, #c8d8ff 47%, #9de8ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-gujarati { color: #9fe8ff; }
+        .hero p { color: rgba(226, 235, 255, 0.9); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #5ecfff, #6e73ff 58%, #9c72ff 100%);
+            color: #f8fbff;
+            box-shadow: 0 16px 36px rgba(72, 130, 255, 0.4);
+        }
+        .btn-primary:hover { box-shadow: 0 22px 44px rgba(72, 130, 255, 0.52); }
+
+        .btn-secondary {
+            color: #d8ecff;
+            border-color: rgba(165, 204, 255, 0.58);
+            background: rgba(9, 20, 45, 0.55);
+        }
+        .btn-secondary:hover {
+            background: rgba(130, 203, 255, 0.2);
+            color: #f3f8ff;
+        }
+
+        .features,
+        .stats,
+        .courses,
+        .testimonials,
+        .contact {
+            background: transparent;
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, #eaf2ff 8%, #a8d5ff 42%, #c4b7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle { color: rgba(200, 215, 245, 0.84); }
+
+        .feature-card,
+        .course-card,
+        .combo-offer,
+        .testimonial-card,
+        .contact-container {
+            background: linear-gradient(160deg, rgba(16, 30, 60, 0.86), rgba(10, 22, 45, 0.78));
+            border: 1px solid rgba(126, 164, 255, 0.22);
+            box-shadow: 0 24px 48px rgba(0, 6, 24, 0.46);
+            backdrop-filter: blur(8px);
+            color: #e8efff;
+        }
+
+        .feature-card p,
+        .course-description,
+        .testimonial-text,
+        .stat-item p,
+        .testimonial-info p,
+        .course-features li,
+        .contact p,
+        .form-group label {
+            color: rgba(208, 223, 252, 0.88);
+        }
+
+        .feature-icon,
+        .testimonial-avatar {
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
+        }
+
+        .stat-item h2,
+        .price,
+        .course-level,
+        .course-name {
+            color: #ecf5ff;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            background: rgba(9, 18, 38, 0.78);
+            border-color: rgba(132, 171, 255, 0.35);
+            color: #e8f0ff;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #7acfff;
+            box-shadow: 0 0 0 4px rgba(122, 207, 255, 0.16);
+        }
+
+        footer {
+            background: #020611;
+            border-top: 1px solid rgba(137, 180, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                background: rgba(5, 10, 24, 0.98);
+                border-top: 1px solid rgba(137, 168, 255, 0.24);
+            }
+
+            .nav-links.active .mobile-auth-links,
+            .mobile-logout-link.logged-in {
+                border-top: 1px solid rgba(137, 168, 255, 0.24);
+            }
+
+            .mobile-menu-btn {
+                background: rgba(10, 20, 44, 0.92);
+                color: #dfeaff;
+                border: 1px solid rgba(137, 168, 255, 0.3);
+            }
+
+            .hero-content {
+                padding: 28px 22px;
+                border-radius: 22px;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .nav-links {
@@ -942,10 +1127,10 @@
                 top: 100%;
                 left: 0;
                 right: 0;
-                background: white;
+                background: rgba(5, 10, 24, 0.98);
                 flex-direction: column;
                 padding: 20px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 18px 38px rgba(0, 6, 24, 0.42);
                 gap: 20px;
                 z-index: 999;
             }
@@ -965,7 +1150,7 @@
                 flex-direction: column;
                 gap: 10px;
                 padding-top: 10px;
-                border-top: 1px solid #eee;
+                border-top: 1px solid rgba(137, 168, 255, 0.24);
                 width: 100%;
             }
 
@@ -988,7 +1173,7 @@
                 display: block !important;
                 width: 100%;
                 padding-top: 10px;
-                border-top: 1px solid #eee;
+                border-top: 1px solid rgba(137, 168, 255, 0.24);
             }
 
             .mobile-menu-btn {
@@ -998,8 +1183,10 @@
                 font-size: 22px;
                 min-width: 48px;
                 min-height: 48px;
-                background: #f0f0f0;
+                background: rgba(10, 20, 44, 0.92);
                 border-radius: 10px;
+                border: 1px solid rgba(137, 168, 255, 0.3);
+                color: #dfeaff;
                 padding: 0;
             }
 

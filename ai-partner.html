@@ -1201,43 +1201,54 @@ window.toggleMic = async () => {
   }
 };
 
-function parseJSONStringSafely(raw) {
-  if (typeof raw !== 'string') return null;
-  const trimmed = raw.trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
-  if (!trimmed) return null;
-  try { return JSON.parse(trimmed); } catch (_) {}
+function safeParseAIResponse(raw) {
+  if (typeof raw === 'object' && raw !== null) return raw;
 
-  const first = trimmed.indexOf('{');
-  const last = trimmed.lastIndexOf('}');
-  if (first !== -1 && last > first) {
-    const sliced = trimmed.slice(first, last + 1);
-    try { return JSON.parse(sliced); } catch (_) {}
+  const cleaned = (raw || '')
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim();
+
+  // Tier 1: direct parse
+  try { return JSON.parse(cleaned); } catch (_) {}
+
+  // Tier 2: extract first {...} block
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if (match) {
+    try { return JSON.parse(match[0]); } catch (_) {}
   }
-  return null;
+
+  // Tier 3: safe fallback — never show raw JSON in chat bubble
+  return {
+    reply: 'Entschuldigung, kein Problem — bitte nochmal versuchen!',
+    spokenSummary: null,
+    feedback: null,
+    transcription: null
+  };
 }
 
-function normalizeAuraResponsePayload(raw) {
-  let payload = raw;
-  if (typeof payload === 'string') {
-    payload = parseJSONStringSafely(payload) || { reply: payload };
-  }
-  if (!payload || typeof payload !== 'object') payload = { reply: '' };
 
-  if (typeof payload.reply === 'string') {
-    const nested = parseJSONStringSafely(payload.reply);
-    if (nested && nested.reply) payload = { ...payload, ...nested };
+function hasSpeakableText(spokenSummary) {
+  if (!spokenSummary) return false;
+  if (typeof spokenSummary === 'string') return !!spokenSummary.trim();
+  if (typeof spokenSummary === 'object') {
+    return !!(spokenSummary.de?.trim?.() || spokenSummary.en?.trim?.());
   }
+  return false;
+}
 
-  if (typeof payload.feedback === 'string') {
-    payload.feedback = parseJSONStringSafely(payload.feedback) || null;
+function normalizeSpokenSummary(spokenSummary, aiText) {
+  // Preferred: backend-provided spokenSummary (new object format or legacy string)
+  if (typeof spokenSummary === 'string' && spokenSummary.trim()) return spokenSummary.trim();
+  if (spokenSummary && typeof spokenSummary === 'object') {
+    const de = typeof spokenSummary.de === 'string' ? spokenSummary.de.trim() : null;
+    const en = typeof spokenSummary.en === 'string' ? spokenSummary.en.trim() : null;
+    if (de || en) return { de, en };
   }
-
-  return {
-    reply: typeof payload.reply === 'string' ? payload.reply.trim() : '',
-    transcription: typeof payload.transcription === 'string' ? payload.transcription.trim() : null,
-    feedback: payload.feedback && typeof payload.feedback === 'object' ? payload.feedback : null,
-    mode: typeof payload.mode === 'string' ? payload.mode.trim() : 'practice'
-  };
+  // Fallback: speak visible AI reply so Aura is never silent
+  if (typeof aiText === 'string' && aiText.trim()) return aiText.trim();
+  return null;
 }
 
 // ── sendAIMessage — CORE FUNCTION (heavily upgraded) ─────────────
@@ -1296,21 +1307,27 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     removeThinking();
 
     // ── Parse Gemini response (resilient against raw/stringified JSON) ─
-    let parsed;
-    try {
-      const rawText = typeof data === 'string' ? data : (data.reply || JSON.stringify(data));
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : data;
-    } catch {
-      parsed = data;
+    let parsed = safeParseAIResponse(data);
+    if (typeof parsed?.reply === 'string') {
+      const replyText = parsed.reply.trim();
+      if (replyText.startsWith('{') || replyText.startsWith('```')) {
+        const nested = safeParseAIResponse(replyText);
+        if (nested && typeof nested === 'object') parsed = { ...parsed, ...nested };
+      }
     }
-    const aiText = (parsed.reply || '').trim();
+    const aiText = typeof parsed.reply === 'string' ? parsed.reply.trim() : '';
     const feedback = parsed.feedback || null;
     const transcription = parsed.transcription || null;
     const mode = typeof parsed.mode === 'string' ? parsed.mode.trim() : 'practice';
     const explanation = (parsed.explanation && parsed.explanation !== 'null')
       ? parsed.explanation.trim()
       : null;
+    const spokenSummary = normalizeSpokenSummary(parsed.spokenSummary, aiText);
+    const isDoubtTurn = parsed?.type === 'doubt'
+      || parsed?.isDubt === true
+      || feedback?.type === 'doubt'
+      || feedback?.isDubt === true
+      || feedback?.errorType === 'doubt';
 
     // Safety check — if aiText still looks like raw JSON, show fallback
     if (aiText.startsWith('{')) {
@@ -1336,7 +1353,7 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     appendMessage('ai', aiText, feedback, false, explanation);
 
     // ── Track errors and patterns ────────────────────────────────
-    if (feedback?.error && feedback?.corrected) {
+    if (!isDoubtTurn && feedback?.error && feedback?.corrected) {
       const errorKey = feedback.errorType || 'grammar';
 
       // Track pattern: same error type appearing multiple times
@@ -1368,14 +1385,14 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     resetAudioRouting();
 
     // ── TTS PLAYBACK ─────────────────────────────────────────────
-    // Segment 1: reply (always German). Segment 2: explanation (Gujarati/English, tutor only).
-    setAISpeaking(true);
-    try {
-      const jobs = buildTTSJobs(aiText, feedback, mode, explanation);
-      console.log('[TTS] jobs built:', jobs.length);
-      if (jobs.length > 0) await playTTSBatch(jobs);
-    } finally {
-      setAISpeaking(false);
+    // Speak only spokenSummary (object or legacy string), never feedback fields.
+    if (hasSpeakableText(spokenSummary)) {
+      setAISpeaking(true);
+      try {
+        await speakSpokenSummary(spokenSummary);
+      } finally {
+        setAISpeaking(false);
+      }
     }
 
   } catch(err) {
@@ -1606,51 +1623,19 @@ If student gets something right after struggling:
 * "Perfect! Hve yaad rahese — tame khud e bolu!"
 
 ════════════════════════════════════
-SPOKEN SUMMARY FORMAT
-════════════════════════════════════
-The spokenSummary field is the ONLY feedback text read aloud. Keep it very short.
-- Maximum 12 words total
-- When you include a German word in spokenSummary, wrap it in [[ ]]
-- This triggers the German TTS voice for that word automatically
-- Example: "Almost sahi! The word is [[möchte]] — try again!"
-- Example: "Perfect! [[Ich möchte]] bilkul sahi che!"
-- Example: "Article yaad rakho — [[einen]], not [[ein]] here."
-- If there is no correction to speak, set spokenSummary to null
-
-════════════════════════════════════════════════════════════════
-TUTOR MODE REPLY FORMAT — GERMAN WORDS IN MIXED TEXT
-════════════════════════════════════════════════════════════════
-When you are in tutor mode (explaining in English + Gujarati), your reply field will contain
-German words mixed into the explanation. You MUST wrap every German word or phrase in the
-reply field with [[ ]] markers so the text-to-speech system can route them to the correct voice.
-
-Examples:
-WRONG: "Ich möchte thi shuru karo — eno matlab thay I would like"
-RIGHT: "[[Ich möchte]] thi shuru karo — eno matlab thay I would like"
-
-WRONG: "der, die, das — aa teen articles che German ma"
-RIGHT: "[[der]], [[die]], [[das]] — aa teen articles che German ma"
-
-WRONG: "einen use karo jyare masculine accusative hoy, dakhla tarike: Ich möchte einen Apfel"
-RIGHT: "einen use karo jyare masculine accusative hoy, dakhla tarike: [[Ich möchte einen Apfel]]"
-
-This applies ONLY to the reply field when mode is tutor. In practice mode, the reply is
-entirely German so no markers are needed.
-
-════════════════════════════════════
 RESPONSE FORMAT — ALWAYS VALID JSON
 ════════════════════════════════════
 {
-  "reply": "<ONLY pure German — the in-character response as ${role} in practice mode,
-             OR only the short German word/phrase/example in tutor mode.
+  "reply": "<ONLY pure German — the in-character response as ${role} in practice mode, 
+             OR only the short German word/phrase/example in tutor mode. 
              Maximum 2 sentences. Zero Gujarati. Zero English. Pure German only.>",
-  "explanation": "<ONLY in tutor mode: the full Gujarati + English explanation —
+  "explanation": "<ONLY in tutor mode: the full Gujarati + English explanation — 
                    encouragement, doubt answer, grammar rule, pronunciation tip.
                    Everything non-German goes here. Write freely, no length limit.
                    In practice mode where no explanation is needed, set to null.>",
   "transcription": "<what you heard the student say — voice input only, else null>",
   "mode": "<'practice' or 'tutor'>",
-  "feedback": ${inlineFeedbackOn ? `{
+  "feedback": {
     "error": true or false,
     "errorType": "<article | verb-position | conjugation | case | vocabulary | pronunciation | tense | other>",
     "originalSaid": "<exactly what student said that was wrong>",
@@ -1661,10 +1646,8 @@ RESPONSE FORMAT — ALWAYS VALID JSON
     "pronunciationWord": "<German word with pronunciation issue or null>",
     "pronunciationNote": "<tip in English + Gujarati or null>",
     "showVideoNudge": true or false,
-    "videoChapter": "<chapter name or null>",
-    "askToContinue": "<true ONLY if this is the 2nd or 3rd time student made the exact same error this session. false otherwise.>",
-    "practiceWord": "<the specific word or phrase to drill if askToContinue is true, otherwise null>"
-  }` : 'null'}
+    "videoChapter": "<chapter name or null>"
+  }
 }
 
 CRITICAL RULES:
@@ -1909,6 +1892,88 @@ function parseGermanMarkers(text) {
   return segments;
 }
 
+/**
+ * Speaks the spokenSummary from an AI response.
+ * Handles both new object format { de, en } and legacy string format.
+ * Plays German clip first (Aoede voice), then English clip (Puck voice).
+ * Pre-fetches the English clip while German is playing — zero gap between them.
+ */
+async function speakSpokenSummary(spokenSummary) {
+  if (!spokenSummary) return;
+
+  // Legacy: plain string (old format) — treat as German
+  if (typeof spokenSummary === 'string') {
+    if (spokenSummary.trim()) await playSingleTTS(spokenSummary.trim(), 'de');
+    return;
+  }
+
+  const { de, en } = spokenSummary;
+
+  // Start fetching the English clip immediately (non-blocking)
+  // so it's ready the moment the German clip finishes
+  const enFetchPromise = (en && en.trim())
+    ? fetchTTSBlob(en.trim(), 'en')
+    : Promise.resolve(null);
+
+  // Play German clip first
+  if (de && de.trim()) {
+    await playSingleTTS(de.trim(), 'de');
+  }
+
+  // English clip should already be buffered or close to it
+  const enBlob = await enFetchPromise;
+  if (enBlob) {
+    await playAudioBlob(enBlob);
+  }
+}
+
+/**
+ * Fetches a TTS audio blob from the worker without playing it yet.
+ * Returns null on error (never throws).
+ */
+async function fetchTTSBlob(text, lang) {
+  try {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`${PROXY_BASE}/gemini-tts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ text, lang })
+    });
+    if (!res.ok) {
+      console.warn('TTS fetch failed with status:', res.status);
+      return null;
+    }
+    return await res.blob();
+  } catch (e) {
+    console.warn('TTS fetch failed:', e.message);
+    return null;
+  }
+}
+
+/**
+ * Plays a single TTS segment — fetches then plays, waits until done.
+ */
+async function playSingleTTS(text, lang) {
+  const blob = await fetchTTSBlob(text, lang);
+  if (blob) await playAudioBlob(blob);
+}
+
+/**
+ * Plays an audio Blob and returns a Promise that resolves when playback ends.
+ */
+function playAudioBlob(blob) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.onended = () => { URL.revokeObjectURL(url); resolve(); };
+    audio.onerror = () => { URL.revokeObjectURL(url); resolve(); };
+    audio.play().catch(resolve);
+  });
+}
+
 // Pure logic: decide what TTS segments are needed for this AI response.
 // Returns [{text, lang}, ...] ready for playTTSBatch or sequential fallback.
 // reply is always pure German (lang:'de'); explanation is always Gujarati/English (lang:'gu').
@@ -1948,17 +2013,32 @@ async function playTTSBatch(segments) {
 
   if (batchResult?.segments) {
     const sorted = batchResult.segments.sort((a, b) => a.index - b.index);
+    let playedFromBatch = false;
     for (const seg of sorted) {
       if (!seg.audio) continue;
       const bytes = Uint8Array.from(atob(seg.audio), c => c.charCodeAt(0));
+      const ac = getAudioContext();
+      if (ac && ac.state === 'suspended') await ac.resume();
       await playAudioBuffer({ buffer: bytes.buffer, lang: seg.lang });
+      playedFromBatch = true;
       await new Promise(r => setTimeout(r, 280));
+    }
+    if (!playedFromBatch) {
+      console.warn('[TTS Batch] batch returned no playable audio; falling back to sequential TTS');
+      for (const seg of segments) {
+        if (!seg.text?.trim()) continue;
+        const ac = getAudioContext();
+        if (ac && ac.state === 'suspended') await ac.resume();
+        await playGeminiTTS(seg.text, seg.lang);
+      }
     }
   } else {
     // Sequential fallback: seg.lang is already resolved by buildTTSJobs —
     // use playGeminiTTS directly to avoid speakEnglish re-splitting [[ ]] markers.
     for (const seg of segments) {
       if (!seg.text?.trim()) continue;
+      const ac = getAudioContext();
+      if (ac && ac.state === 'suspended') await ac.resume();
       await playGeminiTTS(seg.text, seg.lang);
     }
   }
@@ -2136,7 +2216,9 @@ function appendMessage(who, text, feedback, isTranscription = false, explanation
       fb += `<div class="feedback-pronunciation">🗣️ <strong>${escHtml(feedback.pronunciationWord)}:</strong> ${escHtml(feedback.pronunciationNote)}${gujNote}</div>`;
     }
 
-    if (feedback.showVideoNudge && feedback.videoChapter && feedback.videoChapter !== 'null') {
+    const videoErrorKey = feedback.errorType || 'grammar';
+    const repeatCount = errorPatterns[videoErrorKey] || 0;
+    if (feedback.showVideoNudge && repeatCount >= 3 && feedback.videoChapter && feedback.videoChapter !== 'null') {
       fb += `<div style="background:rgba(0,245,255,0.08); border:1px solid rgba(0,245,255,0.3); border-radius:8px; padding:0.75rem 1rem; margin-top:0.5rem; font-size:0.85rem;">
         📚 <strong>Watch this first:</strong> ${escHtml(feedback.videoChapter)} — pachhi avine try karo, it will click!
       </div>`;

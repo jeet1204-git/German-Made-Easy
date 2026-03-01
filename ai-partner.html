@@ -1228,6 +1228,29 @@ function safeParseAIResponse(raw) {
   };
 }
 
+
+function hasSpeakableText(spokenSummary) {
+  if (!spokenSummary) return false;
+  if (typeof spokenSummary === 'string') return !!spokenSummary.trim();
+  if (typeof spokenSummary === 'object') {
+    return !!(spokenSummary.de?.trim?.() || spokenSummary.en?.trim?.());
+  }
+  return false;
+}
+
+function normalizeSpokenSummary(spokenSummary, aiText) {
+  // Preferred: backend-provided spokenSummary (new object format or legacy string)
+  if (typeof spokenSummary === 'string' && spokenSummary.trim()) return spokenSummary.trim();
+  if (spokenSummary && typeof spokenSummary === 'object') {
+    const de = typeof spokenSummary.de === 'string' ? spokenSummary.de.trim() : null;
+    const en = typeof spokenSummary.en === 'string' ? spokenSummary.en.trim() : null;
+    if (de || en) return { de, en };
+  }
+  // Fallback: speak visible AI reply so Aura is never silent
+  if (typeof aiText === 'string' && aiText.trim()) return aiText.trim();
+  return null;
+}
+
 // ── sendAIMessage — CORE FUNCTION (heavily upgraded) ─────────────
 // Now handles 3 cases:
 //   { isOpening: true }          → opening line (text to /gemini-text)
@@ -1299,7 +1322,7 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     const explanation = (parsed.explanation && parsed.explanation !== 'null')
       ? parsed.explanation.trim()
       : null;
-    const spokenSummary = parsed.spokenSummary || null;
+    const spokenSummary = normalizeSpokenSummary(parsed.spokenSummary, aiText);
     const isDoubtTurn = parsed?.type === 'doubt'
       || parsed?.isDubt === true
       || feedback?.type === 'doubt'
@@ -1363,11 +1386,13 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
 
     // ── TTS PLAYBACK ─────────────────────────────────────────────
     // Speak only spokenSummary (object or legacy string), never feedback fields.
-    setAISpeaking(true);
-    try {
-      await speakSpokenSummary(spokenSummary);
-    } finally {
-      setAISpeaking(false);
+    if (hasSpeakableText(spokenSummary)) {
+      setAISpeaking(true);
+      try {
+        await speakSpokenSummary(spokenSummary);
+      } finally {
+        setAISpeaking(false);
+      }
     }
 
   } catch(err) {

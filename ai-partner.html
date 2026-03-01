@@ -1934,11 +1934,20 @@ async function playSingleTTS(text, lang) {
  */
 function playAudioBlob(blob) {
   return new Promise((resolve) => {
-    const url = URL.createObjectURL(blob);
+    // Force correct MIME type
+    const fixedBlob = new Blob([blob], { type: 'audio/wav' });
+    const url = URL.createObjectURL(fixedBlob);
     const audio = new Audio(url);
     audio.onended = () => { URL.revokeObjectURL(url); resolve(); };
-    audio.onerror = () => { URL.revokeObjectURL(url); resolve(); };
-    audio.play().catch(resolve);
+    audio.onerror = (e) => { 
+      console.warn('Audio element error:', e);
+      URL.revokeObjectURL(url); 
+      resolve(); 
+    };
+    audio.play().catch(e => {
+      console.warn('play() failed:', e.message);
+      resolve();
+    });
   });
 }
 

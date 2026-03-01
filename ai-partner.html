@@ -1943,8 +1943,8 @@ async function fetchTTSBlob(text, lang) {
       body: JSON.stringify({ text, lang })
     });
     if (!res.ok) {
-      console.warn('TTS fetch failed with status:', res.status);
-      return null;
+      console.warn('TTS fetch failed with status:', res.status, '— trying batch fallback');
+      return await fetchTTSBlobViaBatch(text, lang, token);
     }
 
     const contentType = (res.headers.get('content-type') || '').toLowerCase();
@@ -1976,7 +1976,34 @@ async function fetchTTSBlob(text, lang) {
     const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
     return pcm16ToWavBlob(bytes, sampleRate);
   } catch (e) {
-    console.warn('TTS fetch failed:', e.message);
+    console.warn('TTS fetch failed:', e.message, '— trying batch fallback');
+    try {
+      const token = await currentUser.getIdToken();
+      return await fetchTTSBlobViaBatch(text, lang, token);
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+async function fetchTTSBlobViaBatch(text, lang, token) {
+  try {
+    const res = await fetch(`${PROXY_BASE}/gemini-tts-batch`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ segments: [{ text, lang }] })
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const seg = data?.segments?.[0];
+    if (!seg?.audio) return null;
+    const bytes = Uint8Array.from(atob(seg.audio), c => c.charCodeAt(0));
+    return new Blob([bytes], { type: 'audio/wav' });
+  } catch (e) {
+    console.warn('TTS batch fallback failed:', e.message);
     return null;
   }
 }
@@ -2372,7 +2399,10 @@ function getUIAudioCtx() {
 function playUISound(type) {
   try {
     const ac = getUIAudioCtx();
-    if (ac.state === 'suspended') ac.resume();
+    if (ac.state !== 'running') {
+      ac.resume().catch(() => {});
+      if (ac.state !== 'running') return;
+    }
     const now = ac.currentTime;
     if (type === 'start') {
       [[440, 0.05], [554, 0.04], [660, 0.04]].forEach(([freq, g], i) => {
@@ -2657,18 +2687,20 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
 
   let soundPlayed = false;
   let introAC = null;
-  try { introAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
 
   function tryPlayIntroSound() {
-    if (soundPlayed || !introAC) return;
+    if (soundPlayed) return;
+    if (!introAC) {
+      try { introAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; }
+    }
     if (introAC.state === 'suspended') {
       introAC.resume().then(() => { if (!soundPlayed) { soundPlayed = true; playIntroSound(introAC); } }).catch(() => {});
-    } else { soundPlayed = true; playIntroSound(introAC); }
+    } else if (introAC.state === 'running') {
+      soundPlayed = true; playIntroSound(introAC);
+    }
   }
 
-  // Attempt immediately — works on browsers without strict autoplay enforcement.
   const introEl = document.getElementById('aura-intro');
-  setTimeout(tryPlayIntroSound, 0);
 
   // Desktop: any mouse movement fires the sound (feels fully automatic to the user).
   document.addEventListener('pointermove', tryPlayIntroSound, { once: true, passive: true });

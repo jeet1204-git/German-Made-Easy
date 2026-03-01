@@ -1914,13 +1914,24 @@ async function playTTSBatch(segments) {
 
   if (batchResult?.segments) {
     const sorted = batchResult.segments.sort((a, b) => a.index - b.index);
+    let playedFromBatch = false;
     for (const seg of sorted) {
       if (!seg.audio) continue;
       const bytes = Uint8Array.from(atob(seg.audio), c => c.charCodeAt(0));
       const ac = getAudioContext();
       if (ac && ac.state === 'suspended') await ac.resume();
       await playAudioBuffer({ buffer: bytes.buffer, lang: seg.lang });
+      playedFromBatch = true;
       await new Promise(r => setTimeout(r, 280));
+    }
+    if (!playedFromBatch) {
+      console.warn('[TTS Batch] batch returned no playable audio; falling back to sequential TTS');
+      for (const seg of segments) {
+        if (!seg.text?.trim()) continue;
+        const ac = getAudioContext();
+        if (ac && ac.state === 'suspended') await ac.resume();
+        await playGeminiTTS(seg.text, seg.lang);
+      }
     }
   } else {
     // Sequential fallback: seg.lang is already resolved by buildTTSJobs —

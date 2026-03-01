@@ -1201,42 +1201,30 @@ window.toggleMic = async () => {
   }
 };
 
-function parseJSONStringSafely(raw) {
-  if (typeof raw !== 'string') return null;
-  const trimmed = raw.trim().replace(/^```json\s*/i, '').replace(/^```/, '').replace(/```$/, '').trim();
-  if (!trimmed) return null;
-  try { return JSON.parse(trimmed); } catch (_) {}
+function safeParseAIResponse(raw) {
+  if (typeof raw === 'object' && raw !== null) return raw;
 
-  const first = trimmed.indexOf('{');
-  const last = trimmed.lastIndexOf('}');
-  if (first !== -1 && last > first) {
-    const sliced = trimmed.slice(first, last + 1);
-    try { return JSON.parse(sliced); } catch (_) {}
-  }
-  return null;
-}
+  const cleaned = (raw || '')
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim();
 
-function normalizeAuraResponsePayload(raw) {
-  let payload = raw;
-  if (typeof payload === 'string') {
-    payload = parseJSONStringSafely(payload) || { reply: payload };
-  }
-  if (!payload || typeof payload !== 'object') payload = { reply: '' };
+  // Tier 1: direct parse
+  try { return JSON.parse(cleaned); } catch (_) {}
 
-  if (typeof payload.reply === 'string') {
-    const nested = parseJSONStringSafely(payload.reply);
-    if (nested && nested.reply) payload = { ...payload, ...nested };
+  // Tier 2: extract first {...} block
+  const match = cleaned.match(/\{[\s\S]*\}/);
+  if (match) {
+    try { return JSON.parse(match[0]); } catch (_) {}
   }
 
-  if (typeof payload.feedback === 'string') {
-    payload.feedback = parseJSONStringSafely(payload.feedback) || null;
-  }
-
+  // Tier 3: safe fallback — never show raw JSON in chat bubble
   return {
-    reply: typeof payload.reply === 'string' ? payload.reply.trim() : '',
-    transcription: typeof payload.transcription === 'string' ? payload.transcription.trim() : null,
-    feedback: payload.feedback && typeof payload.feedback === 'object' ? payload.feedback : null,
-    mode: typeof payload.mode === 'string' ? payload.mode.trim() : 'practice'
+    reply: 'Entschuldigung, kein Problem — bitte nochmal versuchen!',
+    spokenSummary: null,
+    feedback: null,
+    transcription: null
   };
 }
 
@@ -1296,21 +1284,27 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     removeThinking();
 
     // ── Parse Gemini response (resilient against raw/stringified JSON) ─
-    let parsed;
-    try {
-      const rawText = typeof data === 'string' ? data : (data.reply || JSON.stringify(data));
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : data;
-    } catch {
-      parsed = data;
+    let parsed = safeParseAIResponse(data);
+    if (typeof parsed?.reply === 'string') {
+      const replyText = parsed.reply.trim();
+      if (replyText.startsWith('{') || replyText.startsWith('```')) {
+        const nested = safeParseAIResponse(replyText);
+        if (nested && typeof nested === 'object') parsed = { ...parsed, ...nested };
+      }
     }
-    const aiText = (parsed.reply || '').trim();
+    const aiText = typeof parsed.reply === 'string' ? parsed.reply.trim() : '';
     const feedback = parsed.feedback || null;
     const transcription = parsed.transcription || null;
     const mode = typeof parsed.mode === 'string' ? parsed.mode.trim() : 'practice';
     const explanation = (parsed.explanation && parsed.explanation !== 'null')
       ? parsed.explanation.trim()
       : null;
+    const spokenSummary = parsed.spokenSummary || null;
+    const isDoubtTurn = parsed?.type === 'doubt'
+      || parsed?.isDubt === true
+      || feedback?.type === 'doubt'
+      || feedback?.isDubt === true
+      || feedback?.errorType === 'doubt';
 
     // Safety check — if aiText still looks like raw JSON, show fallback
     if (aiText.startsWith('{')) {
@@ -1336,7 +1330,7 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     appendMessage('ai', aiText, feedback, false, explanation);
 
     // ── Track errors and patterns ────────────────────────────────
-    if (feedback?.error && feedback?.corrected) {
+    if (!isDoubtTurn && feedback?.error && feedback?.corrected) {
       const errorKey = feedback.errorType || 'grammar';
 
       // Track pattern: same error type appearing multiple times
@@ -1368,12 +1362,10 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
     resetAudioRouting();
 
     // ── TTS PLAYBACK ─────────────────────────────────────────────
-    // Segment 1: reply (always German). Segment 2: explanation (Gujarati/English, tutor only).
+    // Speak only spokenSummary (object or legacy string), never feedback fields.
     setAISpeaking(true);
     try {
-      const jobs = buildTTSJobs(aiText, feedback, mode, explanation);
-      console.log('[TTS] jobs built:', jobs.length);
-      if (jobs.length > 0) await playTTSBatch(jobs);
+      await speakSpokenSummary(spokenSummary);
     } finally {
       setAISpeaking(false);
     }
@@ -1875,6 +1867,81 @@ function parseGermanMarkers(text) {
   return segments;
 }
 
+/**
+ * Speaks the spokenSummary from an AI response.
+ * Handles both new object format { de, en } and legacy string format.
+ * Plays German clip first (Aoede voice), then English clip (Puck voice).
+ * Pre-fetches the English clip while German is playing — zero gap between them.
+ */
+async function speakSpokenSummary(spokenSummary) {
+  if (!spokenSummary) return;
+
+  // Legacy: plain string (old format) — treat as German
+  if (typeof spokenSummary === 'string') {
+    if (spokenSummary.trim()) await playSingleTTS(spokenSummary.trim(), 'de');
+    return;
+  }
+
+  const { de, en } = spokenSummary;
+
+  // Start fetching the English clip immediately (non-blocking)
+  // so it's ready the moment the German clip finishes
+  const enFetchPromise = (en && en.trim())
+    ? fetchTTSBlob(en.trim(), 'en')
+    : Promise.resolve(null);
+
+  // Play German clip first
+  if (de && de.trim()) {
+    await playSingleTTS(de.trim(), 'de');
+  }
+
+  // English clip should already be buffered or close to it
+  const enBlob = await enFetchPromise;
+  if (enBlob) {
+    await playAudioBlob(enBlob);
+  }
+}
+
+/**
+ * Fetches a TTS audio blob from the worker without playing it yet.
+ * Returns null on error (never throws).
+ */
+async function fetchTTSBlob(text, lang) {
+  try {
+    const res = await fetch('https://ai-proxy.jeetupadhyay1204.workers.dev/gemini-tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, lang })
+    });
+    if (!res.ok) return null;
+    return await res.blob();
+  } catch (e) {
+    console.warn('TTS fetch failed:', e.message);
+    return null;
+  }
+}
+
+/**
+ * Plays a single TTS segment — fetches then plays, waits until done.
+ */
+async function playSingleTTS(text, lang) {
+  const blob = await fetchTTSBlob(text, lang);
+  if (blob) await playAudioBlob(blob);
+}
+
+/**
+ * Plays an audio Blob and returns a Promise that resolves when playback ends.
+ */
+function playAudioBlob(blob) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.onended = () => { URL.revokeObjectURL(url); resolve(); };
+    audio.onerror = () => { URL.revokeObjectURL(url); resolve(); };
+    audio.play().catch(resolve);
+  });
+}
+
 // Pure logic: decide what TTS segments are needed for this AI response.
 // Returns [{text, lang}, ...] ready for playTTSBatch or sequential fallback.
 // reply is always pure German (lang:'de'); explanation is always Gujarati/English (lang:'gu').
@@ -2117,7 +2184,9 @@ function appendMessage(who, text, feedback, isTranscription = false, explanation
       fb += `<div class="feedback-pronunciation">🗣️ <strong>${escHtml(feedback.pronunciationWord)}:</strong> ${escHtml(feedback.pronunciationNote)}${gujNote}</div>`;
     }
 
-    if (feedback.showVideoNudge && feedback.videoChapter && feedback.videoChapter !== 'null') {
+    const videoErrorKey = feedback.errorType || 'grammar';
+    const repeatCount = errorPatterns[videoErrorKey] || 0;
+    if (feedback.showVideoNudge && repeatCount >= 3 && feedback.videoChapter && feedback.videoChapter !== 'null') {
       fb += `<div style="background:rgba(0,245,255,0.08); border:1px solid rgba(0,245,255,0.3); border-radius:8px; padding:0.75rem 1rem; margin-top:0.5rem; font-size:0.85rem;">
         📚 <strong>Watch this first:</strong> ${escHtml(feedback.videoChapter)} — pachhi avine try karo, it will click!
       </div>`;

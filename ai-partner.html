@@ -1908,12 +1908,19 @@ async function speakSpokenSummary(spokenSummary) {
  */
 async function fetchTTSBlob(text, lang) {
   try {
-    const res = await fetch('https://ai-proxy.jeetupadhyay1204.workers.dev/gemini-tts', {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`${PROXY_BASE}/gemini-tts`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ text, lang })
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.warn('TTS fetch failed with status:', res.status);
+      return null;
+    }
     return await res.blob();
   } catch (e) {
     console.warn('TTS fetch failed:', e.message);
@@ -1934,20 +1941,11 @@ async function playSingleTTS(text, lang) {
  */
 function playAudioBlob(blob) {
   return new Promise((resolve) => {
-    // Force correct MIME type
-    const fixedBlob = new Blob([blob], { type: 'audio/wav' });
-    const url = URL.createObjectURL(fixedBlob);
+    const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
     audio.onended = () => { URL.revokeObjectURL(url); resolve(); };
-    audio.onerror = (e) => { 
-      console.warn('Audio element error:', e);
-      URL.revokeObjectURL(url); 
-      resolve(); 
-    };
-    audio.play().catch(e => {
-      console.warn('play() failed:', e.message);
-      resolve();
-    });
+    audio.onerror = () => { URL.revokeObjectURL(url); resolve(); };
+    audio.play().catch(resolve);
   });
 }
 

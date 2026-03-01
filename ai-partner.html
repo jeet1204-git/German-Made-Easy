@@ -1606,51 +1606,19 @@ If student gets something right after struggling:
 * "Perfect! Hve yaad rahese — tame khud e bolu!"
 
 ════════════════════════════════════
-SPOKEN SUMMARY FORMAT
-════════════════════════════════════
-The spokenSummary field is the ONLY feedback text read aloud. Keep it very short.
-- Maximum 12 words total
-- When you include a German word in spokenSummary, wrap it in [[ ]]
-- This triggers the German TTS voice for that word automatically
-- Example: "Almost sahi! The word is [[möchte]] — try again!"
-- Example: "Perfect! [[Ich möchte]] bilkul sahi che!"
-- Example: "Article yaad rakho — [[einen]], not [[ein]] here."
-- If there is no correction to speak, set spokenSummary to null
-
-════════════════════════════════════════════════════════════════
-TUTOR MODE REPLY FORMAT — GERMAN WORDS IN MIXED TEXT
-════════════════════════════════════════════════════════════════
-When you are in tutor mode (explaining in English + Gujarati), your reply field will contain
-German words mixed into the explanation. You MUST wrap every German word or phrase in the
-reply field with [[ ]] markers so the text-to-speech system can route them to the correct voice.
-
-Examples:
-WRONG: "Ich möchte thi shuru karo — eno matlab thay I would like"
-RIGHT: "[[Ich möchte]] thi shuru karo — eno matlab thay I would like"
-
-WRONG: "der, die, das — aa teen articles che German ma"
-RIGHT: "[[der]], [[die]], [[das]] — aa teen articles che German ma"
-
-WRONG: "einen use karo jyare masculine accusative hoy, dakhla tarike: Ich möchte einen Apfel"
-RIGHT: "einen use karo jyare masculine accusative hoy, dakhla tarike: [[Ich möchte einen Apfel]]"
-
-This applies ONLY to the reply field when mode is tutor. In practice mode, the reply is
-entirely German so no markers are needed.
-
-════════════════════════════════════
 RESPONSE FORMAT — ALWAYS VALID JSON
 ════════════════════════════════════
 {
-  "reply": "<ONLY pure German — the in-character response as ${role} in practice mode,
-             OR only the short German word/phrase/example in tutor mode.
+  "reply": "<ONLY pure German — the in-character response as ${role} in practice mode, 
+             OR only the short German word/phrase/example in tutor mode. 
              Maximum 2 sentences. Zero Gujarati. Zero English. Pure German only.>",
-  "explanation": "<ONLY in tutor mode: the full Gujarati + English explanation —
+  "explanation": "<ONLY in tutor mode: the full Gujarati + English explanation — 
                    encouragement, doubt answer, grammar rule, pronunciation tip.
                    Everything non-German goes here. Write freely, no length limit.
                    In practice mode where no explanation is needed, set to null.>",
   "transcription": "<what you heard the student say — voice input only, else null>",
   "mode": "<'practice' or 'tutor'>",
-  "feedback": ${inlineFeedbackOn ? `{
+  "feedback": {
     "error": true or false,
     "errorType": "<article | verb-position | conjugation | case | vocabulary | pronunciation | tense | other>",
     "originalSaid": "<exactly what student said that was wrong>",
@@ -1661,10 +1629,8 @@ RESPONSE FORMAT — ALWAYS VALID JSON
     "pronunciationWord": "<German word with pronunciation issue or null>",
     "pronunciationNote": "<tip in English + Gujarati or null>",
     "showVideoNudge": true or false,
-    "videoChapter": "<chapter name or null>",
-    "askToContinue": "<true ONLY if this is the 2nd or 3rd time student made the exact same error this session. false otherwise.>",
-    "practiceWord": "<the specific word or phrase to drill if askToContinue is true, otherwise null>"
-  }` : 'null'}
+    "videoChapter": "<chapter name or null>"
+  }
 }
 
 CRITICAL RULES:
@@ -1951,6 +1917,8 @@ async function playTTSBatch(segments) {
     for (const seg of sorted) {
       if (!seg.audio) continue;
       const bytes = Uint8Array.from(atob(seg.audio), c => c.charCodeAt(0));
+      const ac = getAudioContext();
+      if (ac && ac.state === 'suspended') await ac.resume();
       await playAudioBuffer({ buffer: bytes.buffer, lang: seg.lang });
       await new Promise(r => setTimeout(r, 280));
     }
@@ -1959,6 +1927,8 @@ async function playTTSBatch(segments) {
     // use playGeminiTTS directly to avoid speakEnglish re-splitting [[ ]] markers.
     for (const seg of segments) {
       if (!seg.text?.trim()) continue;
+      const ac = getAudioContext();
+      if (ac && ac.state === 'suspended') await ac.resume();
       await playGeminiTTS(seg.text, seg.lang);
     }
   }

@@ -1265,6 +1265,31 @@ function normalizeSpokenSummary(spokenSummary, aiText) {
   return null;
 }
 
+
+function hasSpeakableText(spokenSummary) {
+  if (!spokenSummary) return false;
+  if (typeof spokenSummary === 'string') return !!spokenSummary.trim();
+  if (typeof spokenSummary === 'object') {
+    return !!(spokenSummary.de?.trim?.() || spokenSummary.en?.trim?.());
+  }
+  return false;
+}
+
+function normalizeSpokenSummary(spokenSummary, aiText) {
+  if (typeof spokenSummary === 'string' && spokenSummary.trim()) return spokenSummary.trim();
+  if (spokenSummary && typeof spokenSummary === 'object') {
+    const de = typeof spokenSummary.de === 'string' ? spokenSummary.de.trim() : null;
+    const en = typeof spokenSummary.en === 'string' ? spokenSummary.en.trim() : null;
+    if (de || en) return { de, en };
+  }
+  // CHANGED: only speak aiText if it's short and pure German (no Gujarati/English)
+  // If aiText is longer than 80 chars, it's probably a mixed explanation — don't speak it
+  if (typeof aiText === 'string' && aiText.trim() && aiText.trim().length < 80) {
+    return aiText.trim();
+  }
+  return null;
+}
+
 // ── sendAIMessage — CORE FUNCTION (heavily upgraded) ─────────────
 // Now handles 3 cases:
 //   { isOpening: true }          → opening line (text to /gemini-text)

@@ -1982,7 +1982,7 @@ window.endSession = async () => {
   document.getElementById('score-scenario-label').textContent =
     `${selectedScenario.title} · ${selectedScenario.level} · AI Partner`;
 
-  const   // Evaluation via Gemini text API
+   // Evaluation via Gemini text API
   document.getElementById('overall-feedback-text').textContent = 'Aura is reviewing your session...';
   try {
     const evalPrompt = buildEvaluationPrompt();

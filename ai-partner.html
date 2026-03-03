@@ -2233,18 +2233,30 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
   introEl.addEventListener('click', tryPlayIntroSound, { once: true });
 
   function skipIntro() {
-    const intro = document.getElementById('aura-intro');
-    if (!intro || intro.classList.contains('fade-out')) return;
-    cancelAnimationFrame(animId);
-    intro.classList.add('fade-out');
-    setTimeout(() => intro.remove(), 720);
-  }
-  window.skipIntro = skipIntro;
-  setTimeout(skipIntro, 4600);
-  document.getElementById('aura-skip-btn').addEventListener('click', e => {
-    e.stopPropagation(); tryPlayIntroSound(); skipIntro();
+  const intro = document.getElementById('aura-intro');
+  if (!intro || intro.classList.contains('fade-out')) return;
+
+  if (typeof animId !== 'undefined') cancelAnimationFrame(animId);
+
+  intro.classList.add('fade-out');
+  setTimeout(() => intro.remove(), 720);
+}
+
+window.skipIntro = skipIntro;
+setTimeout(skipIntro, 4600);
+
+const skipBtn = document.getElementById('aura-skip-btn');
+if (skipBtn) {
+  skipBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    tryPlayIntroSound();
+    skipIntro();
   });
-  introEl.addEventListener('click', skipIntro);
-})();</script>
+}
+
+const introEl = document.getElementById('aura-intro');
+if (introEl) introEl.addEventListener('click', skipIntro);
+  
+</script>
 </body>
 </html>

@@ -1519,11 +1519,14 @@ function handleLiveSocketMessage(event) {
 async function sendAIMessage({ isOpening = false, text = null } = {}) {
   const userText = (text || '').trim();
   if (!isOpening && !userText) return;
-
   showThinking();
   try {
     await ensureLiveSocketOpen(buildSystemPrompt(isOpening));
     if (isOpening) await new Promise(resolve => setTimeout(resolve, 500));
+    if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN) {
+      removeThinking();
+      return;
+    }
     liveSocket.send(JSON.stringify({
       client_content: {
         turns: [{

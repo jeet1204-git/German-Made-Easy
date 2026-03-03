@@ -1106,6 +1106,11 @@ window.startSession = async () => {
   }
 
   unlockAudio();
+  // Initialize liveAudioContext on session start so audio playback works for text turns
+if (!liveAudioContext) {
+  liveAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+}
+if (liveAudioContext.state === 'suspended') liveAudioContext.resume().catch(() => {});
 
   const sel = document.getElementById('scenario-select');
   const opt = sel.options[sel.selectedIndex];
@@ -1309,14 +1314,13 @@ function sendLiveAudioFrame() {
   const base64 = bytesToBase64(new Uint8Array(pcm16.buffer));
 
   liveSocket.send(JSON.stringify({
-    realtime_input: {
-      media_chunks: [{
-        mime_type: 'audio/pcm;rate=16000',
-        data: base64
-      }]
-    }
-  }));
-}
+  realtimeInput: {
+    mediaChunks: [{
+      mimeType: 'audio/pcm;rate=16000',
+      data: base64
+    }]
+  }
+}));
 
 function pullInputSamples(count) {
   const out = new Float32Array(count);
@@ -1429,8 +1433,7 @@ function extractTextFromLiveResponse(response) {
 
 function isLiveTurnComplete(response) {
   return response?.serverContent?.turnComplete === true
-    || response?.serverContent?.generationComplete === true
-    || response?.turn_complete === true;
+    || response?.serverContent?.generationComplete === true;
 }
 
 async function ensureLiveSocketOpen(systemPromptText = null) {
@@ -1479,15 +1482,15 @@ function sendLiveSetup(systemPromptText) {
   liveSocket.send(JSON.stringify({
     setup: {
       model: 'models/gemini-2.5-flash-native-audio-latest',
-      generation_config: {
-        response_modalities: ['AUDIO', 'TEXT'],
-        speech_config: {
-          voice_config: {
-            prebuilt_voice_config: { voice_name: 'Aoede' }
+      generationConfig: {
+        responseModalities: ['AUDIO', 'TEXT'],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName: 'Aoede' }
           }
         }
       },
-      system_instruction: { parts: [{ text: systemPromptText }] }
+      systemInstruction: { parts: [{ text: systemPromptText }] }
     }
   }));
   liveSetupSent = true;
@@ -1500,16 +1503,21 @@ function handleLiveSocketMessage(event) {
   const textChunk = extractTextFromLiveResponse(response);
   if (textChunk) liveAssistantTextBuffer += textChunk;
 
-  const base64 = response?.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
-  if (base64) {
-    if (!liveFirstChunkLogged) {
-      console.log('AURA first audio chunk received');
-      liveFirstChunkLogged = true;
-    }
-    document.getElementById('processing-status').classList.remove('visible');
-    const pcmBytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-    livePlaybackQueue.push(pcm16BytesToFloat32(pcmBytes));
-    processLivePlaybackQueue();
+  const parts = response?.serverContent?.modelTurn?.parts;
+  if (Array.isArray(parts)) {
+    parts.forEach(part => {
+      const base64 = part?.inlineData?.data;
+      if (base64) {
+        if (!liveFirstChunkLogged) {
+          console.log('AURA first audio chunk received');
+          liveFirstChunkLogged = true;
+        }
+        document.getElementById('processing-status').classList.remove('visible');
+        const pcmBytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+        livePlaybackQueue.push(pcm16BytesToFloat32(pcmBytes));
+        processLivePlaybackQueue();
+      }
+    });
   }
 
   if (isLiveTurnComplete(response)) {
@@ -1522,7 +1530,7 @@ function handleLiveSocketMessage(event) {
     removeThinking();
   }
 }
-
+  
 async function sendAIMessage({ isOpening = false, text = null } = {}) {
   const userText = (text || '').trim();
   if (!isOpening && !userText) return;
@@ -1535,12 +1543,12 @@ async function sendAIMessage({ isOpening = false, text = null } = {}) {
       return;
     }
     liveSocket.send(JSON.stringify({
-      client_content: {
+      clientContent: {
         turns: [{
           role: 'user',
           parts: [{ text: isOpening ? 'Please start the conversation now by greeting the student in character.' : userText }]
         }],
-        turn_complete: true
+        turnComplete: true
       }
     }));
   } catch (err) {
@@ -1984,20 +1992,35 @@ window.endSession = async () => {
   document.getElementById('score-scenario-label').textContent =
     `${selectedScenario.title} · ${selectedScenario.level} · AI Partner`;
 
-  const disabledEval = {
-    overall: 0,
-    vocabulary: 0,
-    grammar: 0,
-    fluency: 0,
-    taskCompletion: 0,
-    overallFeedback: 'Evaluation temporarily disabled in Live mode.',
-    examReadiness: 'Evaluation temporarily disabled in Live mode',
-    top3fixes: ['Evaluation temporarily disabled in Live mode.'],
-    whatWentWell: 'Evaluation temporarily disabled in Live mode.'
-  };
-  displayScore(disabledEval);
+  document.getElementById('overall-feedback-text').textContent = 'Aura is reviewing your session...';
+  try {
+    const evalPrompt = buildEvaluationPrompt();
+    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: evalPrompt.system }] },
+        contents: evalPrompt.messages.map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }]
+        })),
+        generationConfig: { temperature: 0.2, maxOutputTokens: 2000 }
+      })
+    });
+    const d = await r.json();
+    const raw = d.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const cleaned = raw.replace(/```json\s*/i, '').replace(/```\s*/i, '').replace(/```\s*$/, '').trim();
+    let ev;
+    try { ev = JSON.parse(cleaned); } catch (_) {
+      const m = cleaned.match(/\{[\s\S]*\}/);
+      ev = m ? JSON.parse(m[0]) : null;
+    }
+    displayScore(ev || { overall: 65, overallFeedback: 'Session complete! Keep practising every day.' });
+    if (ev) await saveSession(ev);
+  } catch (err) {
+    displayScore({ overall: 65, overallFeedback: 'Session complete! Great effort today.' });
+  }
 };
-
 // ── displayScore — UPGRADED with exam readiness + top 3 fixes ────
 function displayScore(e) {
   const o = e.overall ?? 65;

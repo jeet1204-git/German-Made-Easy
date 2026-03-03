@@ -1480,24 +1480,17 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
 
 function sendLiveSetup(systemPromptText) {
   if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN || liveSetupSent) return;
-  console.log('AURA setup payload:', JSON.stringify({ setup: { model: 'models/gemini-2.5-flash-native-audio-latest', generationConfig: { responseModalities: ['AUDIO', 'TEXT'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Aoede' } } } }, systemInstruction: { parts: [{ text: systemPromptText }] } } }));
   liveSocket.send(JSON.stringify({
     setup: {
       model: 'models/gemini-2.5-flash-native-audio-latest',
       generationConfig: {
-        responseModalities: ['AUDIO', 'TEXT'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Aoede' }
-          }
-        }
+        responseModalities: ['AUDIO']
       },
       systemInstruction: { parts: [{ text: systemPromptText }] }
     }
   }));
   liveSetupSent = true;
 }
-
 function handleLiveSocketMessage(event) {
   let response;
   try { response = JSON.parse(event.data); } catch (_) { return; }

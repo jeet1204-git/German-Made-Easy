@@ -1433,9 +1433,9 @@ function isLiveTurnComplete(response) {
     || response?.turn_complete === true;
 }
 
-async function ensureLiveSocketOpen(systemPromptText = null) {
+async function ensureLiveSocketOpen(systemPromptText = null, isOpening = false) {
   if (liveSocket && liveSocket.readyState === WebSocket.OPEN) {
-    if (!liveSetupSent) sendLiveSetup(systemPromptText || buildSystemPrompt(false));
+    if (!liveSetupSent) sendLiveSetup(systemPromptText || buildSystemPrompt(false), isOpening);
     return;
   }
   if (liveSocketOpeningPromise) {
@@ -1450,7 +1450,7 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
 
     ws.onopen = () => {
       console.log("AURA live ws open", { url: LIVE_WS_URL });
-      sendLiveSetup(systemPromptText || buildSystemPrompt(false));
+      sendLiveSetup(systemPromptText || buildSystemPrompt(false), isOpening);
       ws.onmessage = handleLiveSocketMessage;
       resolve();
     };
@@ -1474,18 +1474,35 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
   await liveSocketOpeningPromise;
 }
 
-function sendLiveSetup(systemPromptText) {
+function sendLiveSetup(systemPromptText, isOpening = false) {
   if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN || liveSetupSent) return;
   liveSocket.send(JSON.stringify({
     setup: {
-model: 'models/gemini-2.5-flash-native-audio-preview-12-2025',
-      generation_config: {
-  response_modalities: ['audio'],
-},
+      model: 'models/gemini-2.0-flash-exp',
+      generation_config: { response_modalities: ['audio', 'text'] },
+      speech_config: {
+        voice_config: {
+          prebuilt_voice_config: {
+            voice_name: 'Aoede'
+          }
+        }
+      },
       system_instruction: { parts: [{ text: systemPromptText }] }
     }
   }));
   liveSetupSent = true;
+
+  if (isOpening) {
+    liveSocket.send(JSON.stringify({
+      client_content: {
+        turns: [{
+          role: 'user',
+          parts: [{ text: 'Please start the conversation now by greeting the student in character.' }]
+        }],
+        turn_complete: true
+      }
+    }));
+  }
 }
 
 function handleLiveSocketMessage(event) {
@@ -1519,7 +1536,18 @@ function handleLiveSocketMessage(event) {
 }
 
 async function sendAIMessage({ isOpening = false, text = null } = {}) {
-  const userText = isOpening ? 'START_CONVERSATION' : (text || '').trim();
+  const userText = (text || '').trim();
+  if (isOpening) {
+    showThinking();
+    try {
+      await ensureLiveSocketOpen(buildSystemPrompt(true), true);
+    } catch (err) {
+      removeThinking();
+      console.error('sendAIMessage failed:', err);
+      appendMessage('ai', 'Entschuldigung! Bitte versuche es nochmal. 🙏');
+    }
+    return;
+  }
   if (!userText) return;
 
   showThinking();
@@ -1975,21 +2003,18 @@ window.endSession = async () => {
   document.getElementById('score-scenario-label').textContent =
     `${selectedScenario.title} · ${selectedScenario.level} · AI Partner`;
 
-   // Evaluation via Gemini text API
-  document.getElementById('overall-feedback-text').textContent = 'Aura is reviewing your session...';
-  try {
-    const evalPrompt = buildEvaluationPrompt();
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system_instruction: { parts: [{ text: evalPrompt.system }] }, contents: evalPrompt.messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })), generationConfig: { temperature: 0.2, maxOutputTokens: 2000 } })
-    });
-    const d = await r.json();
-    const raw = d.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    const cleaned = raw.replace(/```json\s*/i,'').replace(/```\s*/i,'').replace(/```\s*$/,'').trim();
-    let ev; try { ev = JSON.parse(cleaned); } catch(_) { const m = cleaned.match(/\{[\s\S]*\}/); ev = m ? JSON.parse(m[0]) : null; }
-    displayScore(ev || { overall: 65, overallFeedback: 'Session complete! Keep practising every day.' });
-    if (ev) await saveSession(ev);
-  } catch(err) { displayScore({ overall: 65, overallFeedback: 'Session complete! Great effort today.' }); }
+  const disabledEval = {
+    overall: 0,
+    vocabulary: 0,
+    grammar: 0,
+    fluency: 0,
+    taskCompletion: 0,
+    overallFeedback: 'Evaluation temporarily disabled in Live mode.',
+    examReadiness: 'Evaluation temporarily disabled in Live mode',
+    top3fixes: ['Evaluation temporarily disabled in Live mode.'],
+    whatWentWell: 'Evaluation temporarily disabled in Live mode.'
+  };
+  displayScore(disabledEval);
 };
 
 // ── displayScore — UPGRADED with exam readiness + top 3 fixes ────

@@ -1449,20 +1449,20 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
     liveSocket = ws;
 
     ws.onopen = () => {
-      console.log('AURA live ws open');
+      console.log("AURA live ws open", { url: LIVE_WS_URL });
       sendLiveSetup(systemPromptText || buildSystemPrompt(false));
       ws.onmessage = handleLiveSocketMessage;
       resolve();
     };
 
-    ws.onerror = (event) => {
-      console.error('AURA live ws error', event);
+    ws.onerror = (e) => {
+      console.error("AURA live ws error", e);
       reject(new Error('Live socket error'));
       if (isRecording) stopLiveSession(true);
     };
 
-    ws.onclose = () => {
-      console.log('AURA live ws close');
+    ws.onclose = (e) => {
+      console.warn("AURA live ws close", { code: e.code, reason: e.reason, wasClean: e.wasClean });
       liveSocket = null;
       liveSetupSent = false;
       if (!liveManualClose && isRecording) stopLiveSession(true);

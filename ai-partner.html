@@ -1433,9 +1433,9 @@ function isLiveTurnComplete(response) {
     || response?.turn_complete === true;
 }
 
-async function ensureLiveSocketOpen(systemPromptText = null, isOpening = false) {
+async function ensureLiveSocketOpen(systemPromptText = null) {
   if (liveSocket && liveSocket.readyState === WebSocket.OPEN) {
-    if (!liveSetupSent) sendLiveSetup(systemPromptText || buildSystemPrompt(false), isOpening);
+    if (!liveSetupSent) sendLiveSetup(systemPromptText || buildSystemPrompt(false));
     return;
   }
   if (liveSocketOpeningPromise) {
@@ -1450,7 +1450,7 @@ async function ensureLiveSocketOpen(systemPromptText = null, isOpening = false) 
 
     ws.onopen = () => {
       console.log("AURA live ws open", { url: LIVE_WS_URL });
-      sendLiveSetup(systemPromptText || buildSystemPrompt(false), isOpening);
+      sendLiveSetup(systemPromptText || buildSystemPrompt(false));
       ws.onmessage = handleLiveSocketMessage;
       resolve();
     };
@@ -1474,7 +1474,7 @@ async function ensureLiveSocketOpen(systemPromptText = null, isOpening = false) 
   await liveSocketOpeningPromise;
 }
 
-function sendLiveSetup(systemPromptText, isOpening = false) {
+function sendLiveSetup(systemPromptText) {
   if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN || liveSetupSent) return;
   liveSocket.send(JSON.stringify({
     setup: {
@@ -1491,18 +1491,6 @@ function sendLiveSetup(systemPromptText, isOpening = false) {
     }
   }));
   liveSetupSent = true;
-
-  if (isOpening) {
-    liveSocket.send(JSON.stringify({
-      client_content: {
-        turns: [{
-          role: 'user',
-          parts: [{ text: 'Please start the conversation now by greeting the student in character.' }]
-        }],
-        turn_complete: true
-      }
-    }));
-  }
 }
 
 function handleLiveSocketMessage(event) {
@@ -1537,27 +1525,17 @@ function handleLiveSocketMessage(event) {
 
 async function sendAIMessage({ isOpening = false, text = null } = {}) {
   const userText = (text || '').trim();
-  if (isOpening) {
-    showThinking();
-    try {
-      await ensureLiveSocketOpen(buildSystemPrompt(true), true);
-    } catch (err) {
-      removeThinking();
-      console.error('sendAIMessage failed:', err);
-      appendMessage('ai', 'Entschuldigung! Bitte versuche es nochmal. 🙏');
-    }
-    return;
-  }
-  if (!userText) return;
+  if (!isOpening && !userText) return;
 
   showThinking();
   try {
     await ensureLiveSocketOpen(buildSystemPrompt(isOpening));
+    if (isOpening) await new Promise(resolve => setTimeout(resolve, 500));
     liveSocket.send(JSON.stringify({
       client_content: {
         turns: [{
           role: 'user',
-          parts: [{ text: userText }]
+          parts: [{ text: isOpening ? 'Please start the conversation now by greeting the student in character.' : userText }]
         }],
         turn_complete: true
       }

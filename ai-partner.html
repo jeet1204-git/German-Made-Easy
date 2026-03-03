@@ -881,10 +881,10 @@
  * <script type="module"> block in ai-partner.html)
  *
  * WHAT CHANGED vs original:
- *   1. PROXY_URL routes updated (/gemini-voice, /gemini-text, /gemini-evaluate)
+ *   1. PROXY_URL routes updated (/gemini-text, /gemini-evaluate)
  *   2. transcribeWithDeeogram() → REMOVED
  *   3. toggleMic() onstop → sends audio directly to Gemini (no Deepgram)
- *   4. sendAIMessage() → supports audio blob natively
+ *   4. sendAIMessage() → text-only for opening + typed turns
  *   5. buildSystemPrompt() → world-class Aura prompt
  *   6. buildEvaluationPrompt() → detailed Goethe/TELC exam report
  *   7. appendMessage() → shows transcription under user bubble
@@ -917,9 +917,9 @@ const firebaseConfig = {
 
 // ── NEW: Updated routes — all Gemini now, no Deepgram ────────────
 const PROXY_BASE = 'https://ai-proxy.jeetupadhyay1204.workers.dev';
-const PROXY_VOICE = `${PROXY_BASE}/gemini-voice`;    // audio → Gemini
 const PROXY_TEXT  = `${PROXY_BASE}/gemini-text`;     // text  → Gemini
 const PROXY_EVAL  = `${PROXY_BASE}/gemini-evaluate`; // scoring → Gemini
+const LIVE_WS_URL = 'wss://aura-worker.jeetupadhyay1204.workers.dev/live';
 
 const MAX_TRIAL_CONVERSATIONS = 2;
 
@@ -942,8 +942,6 @@ let addTimeUsed = false;
 let inlineFeedbackOn = true;
 let isSpeaking = false;
 let isRecording = false;
-let mediaRecorder = null;
-let audioChunks = [];
 let grammarErrors = [];
 let wordsUsed = new Set();
 let pronunciationNotes = [];
@@ -955,6 +953,20 @@ const ENABLE_GUJARATI_PRONUNCIATION_GUIDANCE = true;
 // Tracks how many times each error type appeared this session
 // Key: error category string, Value: count
 let errorPatterns = {};
+
+let liveSocket = null;
+let liveAudioContext = null;
+let liveMicStream = null;
+let liveMicSource = null;
+let liveMicProcessor = null;
+let liveSendInterval = null;
+let liveInputChunks = [];
+let liveInputSamples = 0;
+let liveInputSampleRate = 48000;
+let livePlaybackQueue = [];
+let livePlaybackActive = false;
+let livePlaybackDrainTimer = null;
+let liveFirstChunkLogged = false;
 
 // ── iOS Safari TTS unlock ────────────────────────────────────────
 // Shared AudioContext — created once, resumed on every user gesture.
@@ -1167,7 +1179,7 @@ window.sendMessage = async () => {
   await sendAIMessage({ text });
 };
 
-// ── MIC — UPGRADED: audio goes directly to Gemini ────────────────
+// ── MIC — Live WebSocket streaming (low-latency) ─────────────────
 window.toggleMic = async () => {
   playUISound('mic');
   unlockAudio();
@@ -1177,43 +1189,270 @@ window.toggleMic = async () => {
   if (isSpeaking) {
     stopAllAudio();
     setAISpeaking(false);
-    // Fall through to start recording below.
   }
-  if (isRecording) { mediaRecorder.stop(); return; }
+  if (isRecording) {
+    stopLiveSession();
+    return;
+  }
 
+  await startLiveSession();
+};
+
+async function startLiveSession() {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-      ? 'audio/webm;codecs=opus'
-      : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        channelCount: 1,
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
 
-    mediaRecorder = new MediaRecorder(stream, { mimeType });
-    audioChunks = [];
+    liveAudioContext = liveAudioContext || new (window.AudioContext || window.webkitAudioContext)();
+    if (liveAudioContext.state === 'suspended') await liveAudioContext.resume();
 
-    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+    liveMicStream = stream;
+    liveMicSource = liveAudioContext.createMediaStreamSource(stream);
+    liveMicProcessor = liveAudioContext.createScriptProcessor(4096, 1, 1);
+    liveInputSampleRate = liveAudioContext.sampleRate || 48000;
+    liveInputChunks = [];
+    liveInputSamples = 0;
+    livePlaybackQueue = [];
+    livePlaybackActive = false;
+    liveFirstChunkLogged = false;
 
-    // ── NEW: onstop sends audio DIRECTLY to Gemini ───────────────
-    // No Deepgram. Gemini hears it natively.
-    mediaRecorder.onstop = async () => {
-      stream.getTracks().forEach(t => t.stop());
-      isRecording = false;
-      setMicState('processing'); // Shows "🧠 Aura is listening & thinking..."
-      // Reset the shared audio element so iOS re-routes to loudspeaker (not earpiece).
-      _ttsAudio = null;
-      resetAudioRouting();
-      const audioBlob = new Blob(audioChunks, { type: mimeType });
-      await sendAIMessage({ audioBlob, mimeType });
+    liveMicProcessor.onaudioprocess = (event) => {
+      if (!isRecording) return;
+      const input = event.inputBuffer.getChannelData(0);
+      const copy = new Float32Array(input.length);
+      copy.set(input);
+      liveInputChunks.push(copy);
+      liveInputSamples += copy.length;
     };
 
-    mediaRecorder.start();
+    liveMicSource.connect(liveMicProcessor);
+    liveMicProcessor.connect(liveAudioContext.destination);
+
+    liveSocket = new WebSocket(LIVE_WS_URL);
+    liveSocket.onopen = () => {
+      console.log('AURA live ws open');
+      liveSocket.send(JSON.stringify({
+        setup: {
+          model: 'models/gemini-2.0-flash-exp',
+          generation_config: { response_modalities: ['audio'] },
+          system_instruction: {
+            parts: [{
+              text: 'You are AURA, an expert German teacher. Respond in native German for the roleplay, but provide help and grammar corrections in Gujarati. Keep responses concise for Goethe A1/A2 level.'
+            }]
+          }
+        }
+      }));
+    };
+
+    liveSocket.onmessage = handleLiveSocketMessage;
+    liveSocket.onerror = (event) => {
+      console.error('AURA live ws error', event);
+      stopLiveSession(true);
+    };
+    liveSocket.onclose = () => {
+      console.log('AURA live ws close');
+      stopLiveSession(true);
+    };
+
+    liveSendInterval = setInterval(sendLiveAudioFrame, 100);
     isRecording = true;
     setMicState('recording');
+    console.log('Mic streaming started');
 
-  } catch(err) {
+  } catch (err) {
+    stopLiveSession(true);
     if (err.name === 'NotAllowedError') toast('🎙️ Microphone permission denied.');
     else toast('Mic error: ' + err.message);
   }
-};
+}
+
+function stopLiveSession(fromSocketEvent = false) {
+  if (liveSendInterval) {
+    clearInterval(liveSendInterval);
+    liveSendInterval = null;
+  }
+
+  if (liveMicProcessor) {
+    try { liveMicProcessor.disconnect(); } catch (_) {}
+    liveMicProcessor.onaudioprocess = null;
+    liveMicProcessor = null;
+  }
+  if (liveMicSource) {
+    try { liveMicSource.disconnect(); } catch (_) {}
+    liveMicSource = null;
+  }
+  if (liveMicStream) {
+    liveMicStream.getTracks().forEach(t => t.stop());
+    liveMicStream = null;
+  }
+
+  liveInputChunks = [];
+  liveInputSamples = 0;
+
+  if (livePlaybackDrainTimer) {
+    clearTimeout(livePlaybackDrainTimer);
+    livePlaybackDrainTimer = null;
+  }
+  livePlaybackQueue = [];
+  livePlaybackActive = false;
+  setLiveSpeakingUI(false);
+
+  const ws = liveSocket;
+  liveSocket = null;
+  if (!fromSocketEvent && ws) {
+    try { ws.close(); } catch (_) {}
+  }
+
+  if (liveAudioContext && liveAudioContext.state === 'running') {
+    liveAudioContext.suspend().catch(() => {});
+  }
+
+  isRecording = false;
+  setMicState('idle');
+  console.log('Mic streaming stopped');
+}
+
+function sendLiveAudioFrame() {
+  if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN) return;
+
+  const frameSamples = Math.max(1, Math.floor(liveInputSampleRate * 0.1));
+  if (liveInputSamples < frameSamples) return;
+
+  const chunk = pullInputSamples(frameSamples);
+  const pcm16 = floatToPCM16(resampleTo16k(chunk, liveInputSampleRate));
+  const base64 = bytesToBase64(new Uint8Array(pcm16.buffer));
+
+  liveSocket.send(JSON.stringify({
+    realtime_input: {
+      media_chunks: [{
+        mime_type: 'audio/pcm;rate=16000',
+        data: base64
+      }]
+    }
+  }));
+}
+
+function pullInputSamples(count) {
+  const out = new Float32Array(count);
+  let offset = 0;
+
+  while (offset < count && liveInputChunks.length) {
+    const first = liveInputChunks[0];
+    const take = Math.min(first.length, count - offset);
+    out.set(first.subarray(0, take), offset);
+    offset += take;
+
+    if (take === first.length) {
+      liveInputChunks.shift();
+    } else {
+      liveInputChunks[0] = first.subarray(take);
+    }
+  }
+
+  liveInputSamples = Math.max(0, liveInputSamples - offset);
+  return out;
+}
+
+function resampleTo16k(float32Data, inputRate) {
+  if (inputRate === 16000) return float32Data;
+  const ratio = inputRate / 16000;
+  const outLength = Math.max(1, Math.round(float32Data.length / ratio));
+  const output = new Float32Array(outLength);
+  for (let i = 0; i < outLength; i++) {
+    const index = i * ratio;
+    const i0 = Math.floor(index);
+    const i1 = Math.min(i0 + 1, float32Data.length - 1);
+    const frac = index - i0;
+    output[i] = float32Data[i0] + (float32Data[i1] - float32Data[i0]) * frac;
+  }
+  return output;
+}
+
+function floatToPCM16(float32Data) {
+  const out = new Int16Array(float32Data.length);
+  for (let i = 0; i < float32Data.length; i++) {
+    const s = Math.max(-1, Math.min(1, float32Data[i]));
+    out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+  }
+  return out;
+}
+
+function bytesToBase64(bytes) {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+}
+
+function handleLiveSocketMessage(event) {
+  let response;
+  try { response = JSON.parse(event.data); } catch (_) { return; }
+
+  const base64 = response?.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
+  if (!base64) return;
+
+  if (!liveFirstChunkLogged) {
+    console.log('AURA first audio chunk received');
+    liveFirstChunkLogged = true;
+  }
+
+  document.getElementById('processing-status').classList.remove('visible');
+
+  const pcmBytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+  livePlaybackQueue.push(pcm16BytesToFloat32(pcmBytes));
+  processLivePlaybackQueue();
+}
+
+function pcm16BytesToFloat32(bytes) {
+  const sampleCount = Math.floor(bytes.length / 2);
+  const out = new Float32Array(sampleCount);
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  for (let i = 0; i < sampleCount; i++) {
+    out[i] = view.getInt16(i * 2, true) / 0x8000;
+  }
+  return out;
+}
+
+function processLivePlaybackQueue() {
+  if (!liveAudioContext || livePlaybackActive || !livePlaybackQueue.length) return;
+
+  const chunk = livePlaybackQueue.shift();
+  const buffer = liveAudioContext.createBuffer(1, chunk.length, 16000);
+  buffer.copyToChannel(chunk, 0);
+
+  const src = liveAudioContext.createBufferSource();
+  src.buffer = buffer;
+  src.connect(liveAudioContext.destination);
+  livePlaybackActive = true;
+  setLiveSpeakingUI(true);
+
+  src.onended = () => {
+    livePlaybackActive = false;
+    if (livePlaybackQueue.length) {
+      processLivePlaybackQueue();
+      return;
+    }
+    if (livePlaybackDrainTimer) clearTimeout(livePlaybackDrainTimer);
+    livePlaybackDrainTimer = setTimeout(() => {
+      if (!livePlaybackActive && livePlaybackQueue.length === 0) setLiveSpeakingUI(false);
+    }, 300);
+  };
+
+  src.start();
+}
+
+function setLiveSpeakingUI(active) {
+  document.getElementById('ai-speaking-banner').classList.toggle('visible', active);
+}
 
 function safeParseAIResponse(raw) {
   if (typeof raw === 'object' && raw !== null) return raw;
@@ -1270,40 +1509,17 @@ function normalizeSpokenSummary(spokenSummary, aiText) {
 }
 
 // ── sendAIMessage — CORE FUNCTION (heavily upgraded) ─────────────
-// Now handles 3 cases:
+// Now handles 2 cases:
 //   { isOpening: true }          → opening line (text to /gemini-text)
 //   { text: "..." }              → typed input (text to /gemini-text)
-//   { audioBlob, mimeType }      → voice input (audio to /gemini-voice)
-async function sendAIMessage({ isOpening = false, text = null, audioBlob = null, mimeType = null } = {}) {
+async function sendAIMessage({ isOpening = false, text = null } = {}) {
   showThinking();
 
   try {
     const token = await currentUser.getIdToken();
     let data;
 
-    if (audioBlob) {
-      // ── VOICE PATH: send audio blob directly to Gemini ──────────
-      // Gemini 2.5 Flash hears the audio natively
-      // It transcribes + evaluates pronunciation + grammar all in one call
-      const formData = new FormData();
-      formData.append('audio', new Blob([audioBlob], { type: mimeType }), 'speech.webm');
-      formData.append('meta', JSON.stringify({
-        systemPrompt: buildSystemPrompt(false),
-        conversationHistory,
-        token,
-        userId: currentUser.uid
-      }));
-
-      const res = await fetch(PROXY_VOICE, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      });
-      if (!res.ok) throw new Error('Voice proxy error ' + res.status);
-      data = await res.json();
-
-    } else {
-      // ── TEXT PATH: opening line or typed input ──────────────────
+    // ── TEXT PATH: opening line or typed input ──────────────────
       const messages = isOpening
         ? [{ role: 'user', content: 'START_CONVERSATION' }]
         : [...conversationHistory];
@@ -1320,7 +1536,6 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
       });
       if (!res.ok) throw new Error('Text proxy error ' + res.status);
       data = await res.json();
-    }
 
     removeThinking();
 
@@ -1353,18 +1568,6 @@ async function sendAIMessage({ isOpening = false, text = null, audioBlob = null,
       appendMessage('ai', 'Entschuldigung! Bitte versuche es nochmal. 🙏', null);
       setMicState('idle');
       return;
-    }
-
-    // If this was a voice message, show what Gemini heard
-    if (audioBlob && transcription) {
-      appendMessage('user', transcription, null, true); // true = isTranscription
-      conversationHistory.push({ role: 'user', content: transcription });
-
-      // Track words from transcription
-      transcription.toLowerCase().split(/\s+/).forEach(w => {
-        const c = w.replace(/[^a-zäöüß]/gi, '');
-        if (c.length > 2) wordsUsed.add(c);
-      });
     }
 
     conversationHistory.push({ role: 'assistant', content: aiText });
@@ -2401,7 +2604,7 @@ window.goBackToSetup = () => {
   setAISpeaking(false);
   document.getElementById('correction-ack-wrap').style.display = 'none';
   document.getElementById('input-area').classList.remove('awaiting-ack');
-  if (isRecording && mediaRecorder) { try { mediaRecorder.stop(); } catch(e) {} }
+  if (isRecording) stopLiveSession();
   document.getElementById('session-panel').style.display = 'none';
   document.getElementById('score-panel').style.display = 'none';
   document.getElementById('setup-panel').style.display = 'block';
@@ -2493,7 +2696,7 @@ window.endSession = async () => {
   clearInterval(sessionTimerInterval);
   window.speechSynthesis?.cancel();
   setAISpeaking(false);
-  if (isRecording && mediaRecorder) mediaRecorder.stop();
+  if (isRecording) stopLiveSession();
 
   document.getElementById('session-panel').style.display = 'none';
   document.getElementById('score-panel').style.display = 'block';

@@ -1480,13 +1480,6 @@ function sendLiveSetup(systemPromptText) {
     setup: {
       model: 'models/gemini-2.0-flash-exp',
       generation_config: { response_modalities: ['audio', 'text'] },
-      speech_config: {
-        voice_config: {
-          prebuilt_voice_config: {
-            voice_name: 'Aoede'
-          }
-        }
-      },
       system_instruction: { parts: [{ text: systemPromptText }] }
     }
   }));

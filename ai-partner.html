@@ -1479,7 +1479,14 @@ function sendLiveSetup(systemPromptText) {
   liveSocket.send(JSON.stringify({
     setup: {
       model: 'models/gemini-2.5-flash-native-audio-latest',
-      generation_config: { response_modalities: ['audio', 'text'] },
+      generation_config: {
+        response_modalities: ['AUDIO', 'TEXT'],
+        speech_config: {
+          voice_config: {
+            prebuilt_voice_config: { voice_name: 'Aoede' }
+          }
+        }
+      },
       system_instruction: { parts: [{ text: systemPromptText }] }
     }
   }));

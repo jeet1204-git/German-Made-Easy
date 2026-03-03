@@ -2238,8 +2238,8 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
                         setTimeout(() => intro.remove(), 720); } window.skipIntro = skipIntro; 
   setTimeout(skipIntro, 4600); document.getElementById('aura-skip-btn').addEventListener('click', e => { e.stopPropagation(); 
 tryPlayIntroSound(); skipIntro(); }); 
-  introEl.addEventListener('click', skipIntro); 
-});
+ introEl.addEventListener('click', skipIntro); 
+})();
   
 </script>
 </body>

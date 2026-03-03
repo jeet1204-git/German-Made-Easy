@@ -1045,7 +1045,7 @@ onAuthStateChanged(auth, async (user) => {
     }
     showApp();
   } catch(e) { showAccessDenied(); }
-});
+})();
 
 function showAccessDenied() {
   document.getElementById('auth-overlay').style.display = 'none';
@@ -1321,6 +1321,7 @@ function sendLiveAudioFrame() {
     }]
   }
 }));
+}
 
 function pullInputSamples(count) {
   const out = new Float32Array(count);
@@ -2238,7 +2239,7 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
                         setTimeout(() => intro.remove(), 720); } window.skipIntro = skipIntro; 
   setTimeout(skipIntro, 4600); document.getElementById('aura-skip-btn').addEventListener('click', e => { e.stopPropagation(); 
 tryPlayIntroSound(); skipIntro(); }); 
- introEl.addEventListener('click', skipIntro); 
+  introEl.addEventListener('click', skipIntro); 
 })();
   
 </script>

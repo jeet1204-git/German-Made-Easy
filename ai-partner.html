@@ -1045,7 +1045,7 @@ onAuthStateChanged(auth, async (user) => {
     }
     showApp();
   } catch(e) { showAccessDenied(); }
-}));
+});
 
 function showAccessDenied() {
   document.getElementById('auth-overlay').style.display = 'none';

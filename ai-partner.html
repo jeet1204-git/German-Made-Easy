@@ -512,57 +512,214 @@ body::after {
 .role-info h3 { font-family: 'Space Grotesk', sans-serif; font-size: 0.92rem; font-weight: 600; color: #ffe2a2; margin-bottom: 0.2rem; }
 .role-info p  { font-size: 0.8rem; line-height: 1.6; color: rgba(255,220,160,0.55); }
 
-/* ── THE BOARD — Live Transcript ── */
-.board-outer {
+/* ════════════════════════════════════════════════════════
+   LIVE SESSION — ORB INTERFACE
+════════════════════════════════════════════════════════ */
+
+/* ── ORB STAGE ── */
+.orb-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding: 2rem 0 1rem;
+  background: radial-gradient(ellipse 80% 50% at 50% 60%, rgba(0,245,255,0.04) 0%, transparent 70%);
+}
+
+/* Canvas orb */
+#orb-canvas {
+  display: block;
+  width: 220px; height: 220px;
+  cursor: pointer;
+  filter: drop-shadow(0 0 40px rgba(0,245,255,0.18));
+  transition: filter 0.4s ease;
+}
+.orb-stage.aura-active  #orb-canvas { filter: drop-shadow(0 0 60px rgba(0,245,255,0.45)); }
+.orb-stage.user-active  #orb-canvas { filter: drop-shadow(0 0 60px rgba(123,97,255,0.45)); }
+.orb-stage.idle         #orb-canvas { filter: drop-shadow(0 0 24px rgba(255,255,255,0.08)); }
+
+/* State label below orb */
+.orb-state-label {
+  margin-top: 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text3);
+  transition: color 0.3s, opacity 0.3s;
+  min-height: 1.2rem;
+  text-align: center;
+}
+.orb-stage.aura-active  .orb-state-label { color: var(--cyan); }
+.orb-stage.user-active  .orb-state-label { color: #c4b8ff; }
+.orb-stage.thinking     .orb-state-label { color: var(--gold); }
+
+/* Mic mute ring — visible ring around orb when muted */
+.orb-mute-ring {
+  position: absolute;
+  top: calc(2rem + 0px); left: 50%;
+  transform: translateX(-50%);
+  width: 236px; height: 236px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255,92,92,0.5);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.orb-stage.muted .orb-mute-ring { opacity: 1; }
+
+/* Tap-to-mute hint */
+.orb-mic-hint {
+  position: absolute;
+  bottom: 0.4rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text3); opacity: 0.5;
+  pointer-events: none;
+  text-align: center;
+}
+
+/* ── AURA TRANSCRIPT STRIP ── */
+.aura-transcript-wrap {
   position: relative;
   background: linear-gradient(160deg, rgba(8,12,22,0.99), rgba(6,10,18,0.98));
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  border: 1px solid rgba(0,245,255,0.12);
+  border-radius: 18px;
   overflow: hidden;
-  margin-bottom: 1.1rem;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+  margin-bottom: 1rem;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(0,245,255,0.06);
+  transition: border-color 0.3s;
+}
+.aura-transcript-wrap.glowing {
+  border-color: rgba(0,245,255,0.3);
+  box-shadow: 0 6px 32px rgba(0,0,0,0.4), 0 0 40px rgba(0,245,255,0.07);
 }
 
-/* Ambient glow effect on board when AI is speaking */
-.board-outer.aura-speaking {
-  border-color: rgba(0,245,255,0.25);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,245,255,0.1), inset 0 0 60px rgba(0,245,255,0.03);
-}
-.board-outer.user-speaking {
-  border-color: rgba(123,97,255,0.3);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(123,97,255,0.12), inset 0 0 60px rgba(123,97,255,0.03);
-}
-
-/* Status bar inside board */
-.board-status {
+.transcript-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0.7rem 1.2rem;
-  border-bottom: 1px solid var(--border);
-  background: rgba(255,255,255,0.02);
+  padding: 0.6rem 1.1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  background: rgba(0,245,255,0.03);
 }
-.board-status-left { display: flex; align-items: center; gap: 0.75rem; }
-.status-badge {
-  display: none; align-items: center; gap: 0.5rem;
+.transcript-label {
+  display: flex; align-items: center; gap: 0.5rem;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
-  padding: 0.28rem 0.7rem; border-radius: 20px;
+  font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(0,245,255,0.5);
 }
-.status-badge.active { display: flex; }
+.transcript-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 6px var(--cyan);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.aura-transcript-wrap.glowing .transcript-dot { opacity: 1; animation: pulse-dot 1.2s ease infinite; }
 
-.status-badge.aura-badge {
-  background: rgba(0,245,255,0.08); color: var(--cyan);
-  border: 1px solid rgba(0,245,255,0.25);
-}
-.status-badge.user-badge-s {
-  background: rgba(123,97,255,0.08); color: #c4b8ff;
-  border: 1px solid rgba(123,97,255,0.25);
-}
-.status-badge.thinking-badge {
-  background: rgba(232,184,75,0.08); color: var(--gold);
-  border: 1px solid rgba(232,184,75,0.25);
-}
+.transcript-turns { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; color: var(--text3); }
 
-/* Wave bars */
+.transcript-scroll {
+  height: 200px; overflow-y: auto; padding: 1rem 1.2rem;
+  scroll-behavior: smooth;
+}
+.transcript-scroll::-webkit-scrollbar { width: 3px; }
+.transcript-scroll::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.12); border-radius: 3px; }
+
+/* Individual transcript entries */
+.t-entry {
+  display: flex; gap: 0.7rem; margin-bottom: 0.9rem;
+  animation: tIn 0.35s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes tIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:none; } }
+
+.t-avatar {
+  width: 26px; height: 26px; min-width: 26px;
+  background: rgba(0,245,255,0.08);
+  border: 1px solid rgba(0,245,255,0.2);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem;
+  margin-top: 1px;
+}
+.t-body { flex: 1; }
+.t-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(0,245,255,0.5); margin-bottom: 0.2rem;
+}
+.t-text {
+  font-size: 0.88rem; line-height: 1.65; color: #c8dff2;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.t-text.streaming::after {
+  content: '▋';
+  display: inline-block; color: var(--cyan);
+  animation: blink 0.7s step-end infinite;
+  margin-left: 2px;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+/* ── CORRECTION CARD ── */
+#correction-card {
+  position: fixed;
+  bottom: 2rem; right: 1.5rem;
+  width: 320px; max-width: calc(100vw - 3rem);
+  background: linear-gradient(145deg, rgba(10,14,22,0.98), rgba(14,10,26,0.97));
+  border: 1px solid rgba(255,92,92,0.3);
+  border-radius: 18px;
+  padding: 1.1rem 1.3rem;
+  z-index: 500;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,92,92,0.1), 0 0 30px rgba(255,92,92,0.08);
+  transform: translateY(120%) scale(0.95);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease;
+  pointer-events: none;
+}
+#correction-card.visible {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.cc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.cc-badge {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: #ff9a9a;
+  background: rgba(255,92,92,0.08);
+  border: 1px solid rgba(255,92,92,0.2);
+  padding: 0.2rem 0.65rem; border-radius: 20px;
+}
+.cc-badge-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #ff5c5c; box-shadow: 0 0 6px #ff5c5c;
+  animation: pulse-dot 1.5s ease infinite;
+}
+.cc-close {
+  background: transparent; border: none;
+  color: var(--text3); font-size: 1.1rem; cursor: pointer;
+  line-height: 1; padding: 0.1rem;
+  transition: color 0.2s;
+}
+.cc-close:hover { color: var(--text); }
+
+.cc-row {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+.cc-row-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.56rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text3); min-width: 46px; margin-top: 0.18rem;
+}
+.cc-wrong  { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; color: #ff8b8b; text-decoration: line-through; text-decoration-color: rgba(255,92,92,0.5); }
+.cc-right  { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; color: #8deeff; }
+.cc-arrow  { color: var(--text3); font-size: 0.75rem; margin-top: 0.15rem; }
+.cc-note   { font-size: 0.8rem; color: var(--text2); line-height: 1.55; margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px solid var(--border); }
+
+/* Wave bars (reused in transcript header) */
 .wave-bars { display: flex; gap: 2px; align-items: center; height: 14px; }
 .wave-bars span {
   display: inline-block; width: 2.5px; border-radius: 2px;
@@ -575,75 +732,6 @@ body::after {
 .wave-bars span:nth-child(4) { height: 12px; animation-delay: 0.08s; }
 .wave-bars span:nth-child(5) { height: 5px; animation-delay: 0.18s; }
 @keyframes waveBar { 0%,100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
-
-.board-status-right { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text3); }
-
-/* Messages inside board */
-.conversation-box {
-  height: 360px; overflow-y: auto; padding: 1.25rem;
-  scroll-behavior: smooth;
-}
-.conversation-box::-webkit-scrollbar { width: 4px; }
-.conversation-box::-webkit-scrollbar-track { background: transparent; }
-.conversation-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
-
-/* Message bubbles */
-.msg { display: flex; gap: 0.75rem; margin-bottom: 1.1rem; animation: msgIn 0.3s cubic-bezier(0.16,1,0.3,1) both; }
-.msg.user { flex-direction: row-reverse; }
-@keyframes msgIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
-
-.msg-avatar {
-  width: 32px; height: 32px; min-width: 32px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.85rem; font-weight: 700;
-}
-.msg.ai   .msg-avatar { background: rgba(0,245,255,0.1); border: 1px solid rgba(0,245,255,0.25); color: var(--cyan); }
-.msg.user .msg-avatar { background: rgba(123,97,255,0.15); border: 1px solid rgba(123,97,255,0.3); color: #c4b8ff; }
-
-.msg-content { max-width: 78%; display: flex; flex-direction: column; }
-.msg.user .msg-content { align-items: flex-end; }
-
-.msg-bubble {
-  padding: 0.75rem 1rem; border-radius: 14px;
-  font-size: 0.9rem; line-height: 1.65;
-}
-.msg.ai .msg-bubble {
-  background: rgba(13,23,40,0.97);
-  border: 1px solid rgba(0,245,255,0.14);
-  border-top-left-radius: 4px;
-  color: #d8ecff;
-}
-.msg.user .msg-bubble {
-  background: linear-gradient(135deg, rgba(123,97,255,0.22), rgba(0,245,255,0.14));
-  border: 1px solid rgba(123,97,255,0.25);
-  border-top-right-radius: 4px;
-  color: #eff4ff;
-}
-
-/* Streaming indicator — text appearing in real time */
-.msg-bubble.streaming::after {
-  content: '▋';
-  display: inline-block;
-  color: var(--cyan);
-  animation: blink 0.8s step-end infinite;
-  margin-left: 2px;
-}
-@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
-
-.msg-time { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text3); margin-top: 0.3rem; }
-.msg.user .msg-time { text-align: right; }
-
-/* Thinking dots */
-.thinking-wrap { display: flex; gap: 0.4rem; align-items: center; padding: 0.55rem 0; }
-.thinking-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--text3);
-  animation: bounce 1.2s ease infinite;
-}
-.thinking-dot:nth-child(2) { animation-delay: 0.18s; }
-.thinking-dot:nth-child(3) { animation-delay: 0.36s; }
-@keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity:0.4; } 40% { transform: scale(1); opacity:1; } }
 
 /* ── INPUT AREA ── */
 .input-area {
@@ -806,7 +894,7 @@ body::after {
   .container { padding: 1.5rem 1rem 4rem; }
   .session-controls { gap: 0.5rem; }
   .ctrl-btn { font-size: 0.73rem; padding: 0.5rem 0.75rem; }
-  .conversation-box { height: 300px; }
+  .transcript-scroll { height: 220px; }
 }
 </style>
 </head>
@@ -930,6 +1018,8 @@ body::after {
 
     <!-- ══ SESSION PANEL ══ -->
     <div id="session-panel">
+
+      <!-- Top bar: scenario info + timer -->
       <div class="session-header">
         <div class="session-info">
           <h2 id="session-title">At the Supermarket</h2>
@@ -941,41 +1031,41 @@ body::after {
         <div class="session-timer" id="session-timer">20:00</div>
       </div>
 
+      <!-- Role chip — compact -->
       <div class="role-card">
         <div class="role-avatar" id="role-avatar">🛒</div>
         <div class="role-info">
           <h3 id="role-name">The Shopkeeper</h3>
-          <p id="role-description">AURA is playing a German shopkeeper. Speak or type in German. She'll respond live and correct you gently in Gujarati and English.</p>
+          <p id="role-description">Just speak naturally in German. AURA listens, responds live, and corrects you in Gujarati and English.</p>
         </div>
       </div>
 
-      <!-- THE BOARD — Live transcript -->
-      <div class="board-outer" id="board-outer">
-        <div class="board-status">
-          <div class="board-status-left">
-            <div class="status-badge aura-badge" id="aura-speaking-badge">
-              <div class="wave-bars"><span></span><span></span><span></span><span></span><span></span></div>
-              AURA Speaking
-            </div>
-            <div class="status-badge user-badge-s" id="user-speaking-badge">
-              <div class="wave-bars"><span></span><span></span><span></span></div>
-              You
-            </div>
-            <div class="status-badge thinking-badge" id="thinking-badge">
-              Thinking...
-            </div>
+      <!-- ORB STAGE — the living, breathing core of the session -->
+      <div class="orb-stage idle" id="orb-stage">
+        <div class="orb-mute-ring"></div>
+        <canvas id="orb-canvas" width="440" height="440" onclick="toggleMic()"></canvas>
+        <div class="orb-state-label" id="orb-state-label">tap orb to mute</div>
+        <div class="orb-mic-hint">tap orb · mute mic</div>
+      </div>
+
+      <!-- AURA TRANSCRIPT — only AURA's words, real-time -->
+      <div class="aura-transcript-wrap" id="aura-transcript-wrap">
+        <div class="transcript-header">
+          <div class="transcript-label">
+            <span class="transcript-dot" id="transcript-dot"></span>
+            AURA says
           </div>
-          <div class="board-status-right" id="msg-count">0 turns</div>
+          <div class="transcript-turns" id="transcript-turns">0 turns</div>
         </div>
-        <div class="conversation-box" id="conversation-box"></div>
+        <div class="transcript-scroll" id="transcript-scroll"></div>
       </div>
 
+      <!-- Text input (shown when mode includes typing) -->
       <div class="input-area" id="input-area">
         <div class="text-input-wrap">
-          <textarea id="text-input" placeholder="Type in German... or tap 🎙️ to speak live" rows="1"
+          <textarea id="text-input" placeholder="Or type in German here..." rows="1"
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTextMessage();}"></textarea>
         </div>
-        <button class="action-btn mic-btn" id="mic-btn" onclick="toggleMic()" title="Tap to mute/unmute mic">🎙️</button>
         <button class="action-btn send-btn" onclick="sendTextMessage()">➤</button>
       </div>
 
@@ -984,6 +1074,17 @@ body::after {
         <button class="ctrl-btn" onclick="changeScenario()">🔄 Change Task</button>
         <button class="ctrl-btn" onclick="addTime()" id="add-time-btn">⏱️ +10 min</button>
         <button class="ctrl-btn danger" onclick="endSession()">🏁 End &amp; Get Score</button>
+      </div>
+    </div>
+
+    <!-- ══ CORRECTION CARD (floating, fixed) ══ -->
+    <div id="correction-card">
+      <div class="cc-header">
+        <div class="cc-badge"><span class="cc-badge-dot"></span> Correction</div>
+        <button class="cc-close" onclick="dismissCorrection()">✕</button>
+      </div>
+      <div id="cc-body">
+        <!-- filled dynamically -->
       </div>
     </div>
 
@@ -1169,8 +1270,172 @@ let conversationHistory = [], wordsUsed = new Set(), errorPatterns = {};
 let sessionTimerInterval = null, sessionSeconds = 20 * 60, addTimeUsed = false;
 let ws = null, audioCtx = null, micCtx = null, micStream = null, workletNode = null, playbackNode = null;
 let sessionActive = false, micMuted = false;
-let currentAiText = '', currentAiMsgEl = null;
+let currentAiText = '', currentAiEntryEl = null;
 let turnCount = 0;
+let correctionTimeout = null;
+
+// ── ORB ENGINE ─────────────────────────────────────────────────────────────
+let orbState = 'idle'; // 'idle' | 'listening' | 'thinking' | 'speaking'
+let orbAnim = null;
+let orbParticles = [];
+
+function initOrb() {
+  const canvas = document.getElementById('orb-canvas');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width  = 440 * dpr;
+  canvas.height = 440 * dpr;
+  canvas.style.width  = '220px';
+  canvas.style.height = '220px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = 220, H = 220, cx = W/2, cy = H/2;
+
+  // Particle system
+  orbParticles = Array.from({length: 60}, (_, i) => ({
+    angle: (i / 60) * Math.PI * 2,
+    radius: 70 + Math.random() * 18,
+    baseRadius: 70 + Math.random() * 18,
+    speed: 0.003 + Math.random() * 0.006,
+    size: Math.random() * 2.2 + 0.5,
+    opacity: Math.random() * 0.7 + 0.1,
+    hue: Math.random() > 0.55 ? 0 : Math.random() > 0.5 ? 1 : 2, // 0=cyan 1=violet 2=gold
+    phase: Math.random() * Math.PI * 2,
+    active: Math.random() > 0.3,
+  }));
+
+  let time = 0;
+  let breathe = 0;
+  let energyLevel = 0;
+  let targetEnergy = 0;
+
+  function getOrbColors() {
+    switch(orbState) {
+      case 'speaking':  return { core: [0,245,255],   glow: [0,245,255],   outer: [123,97,255] };
+      case 'listening': return { core: [123,97,255],  glow: [123,97,255],  outer: [0,245,255]  };
+      case 'thinking':  return { core: [232,184,75],  glow: [232,184,75],  outer: [200,140,40] };
+      default:          return { core: [80,100,140],  glow: [60,80,120],   outer: [40,55,90]   };
+    }
+  }
+
+  function drawFrame() {
+    ctx.clearRect(0, 0, W, H);
+    time += 0.016;
+    breathe += 0.022;
+
+    // Ease energy toward target
+    targetEnergy = orbState === 'speaking' ? 0.9 : orbState === 'listening' ? 0.65 : orbState === 'thinking' ? 0.4 : 0.12;
+    energyLevel += (targetEnergy - energyLevel) * 0.04;
+
+    const col = getOrbColors();
+    const pulse = Math.sin(breathe) * 0.12 * (1 + energyLevel);
+    const orbR = 58 + pulse * 12 * energyLevel;
+
+    // ── Outer glow rings ──
+    for (let r = 3; r >= 1; r--) {
+      const ringR = orbR + r * 22 * energyLevel;
+      const alpha = (0.04 - r * 0.01) * energyLevel;
+      const grad = ctx.createRadialGradient(cx, cy, orbR*0.4, cx, cy, ringR);
+      grad.addColorStop(0, `rgba(${col.glow.join(',')},0)`);
+      grad.addColorStop(1, `rgba(${col.glow.join(',')},${alpha})`);
+      ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI*2);
+      ctx.fillStyle = grad; ctx.fill();
+    }
+
+    // ── Main orb body ──
+    const bodyGrad = ctx.createRadialGradient(cx - orbR*0.3, cy - orbR*0.35, orbR*0.05, cx, cy, orbR);
+    const cAlpha = 0.55 + energyLevel * 0.35;
+    bodyGrad.addColorStop(0,   `rgba(255,255,255,${0.18 + energyLevel*0.1})`);
+    bodyGrad.addColorStop(0.3, `rgba(${col.core.join(',')},${cAlpha})`);
+    bodyGrad.addColorStop(0.7, `rgba(${col.outer.join(',')},${cAlpha * 0.7})`);
+    bodyGrad.addColorStop(1,   `rgba(10,12,20,0.95)`);
+    ctx.beginPath(); ctx.arc(cx, cy, orbR, 0, Math.PI*2);
+    ctx.fillStyle = bodyGrad; ctx.fill();
+
+    // ── Inner shimmer ──
+    const shimGrad = ctx.createRadialGradient(cx - orbR*0.25, cy - orbR*0.3, 0, cx - orbR*0.1, cy - orbR*0.15, orbR*0.55);
+    shimGrad.addColorStop(0, `rgba(255,255,255,${0.2 + energyLevel*0.15})`);
+    shimGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.beginPath(); ctx.arc(cx, cy, orbR, 0, Math.PI*2);
+    ctx.fillStyle = shimGrad; ctx.fill();
+
+    // ── Sound wave rings (only when speaking/thinking) ──
+    if (orbState === 'speaking' || orbState === 'thinking') {
+      const numRings = orbState === 'speaking' ? 4 : 2;
+      for (let i = 0; i < numRings; i++) {
+        const phase = (time * (0.8 + i*0.3) + i * 0.7) % 1;
+        const ringR2 = orbR + phase * 55 * energyLevel;
+        const ringA  = (1 - phase) * 0.22 * energyLevel;
+        ctx.beginPath(); ctx.arc(cx, cy, ringR2, 0, Math.PI*2);
+        ctx.strokeStyle = `rgba(${col.core.join(',')},${ringA})`;
+        ctx.lineWidth = 1.5 - phase;
+        ctx.stroke();
+      }
+    }
+
+    // ── Particles ──
+    orbParticles.forEach((p, idx) => {
+      if (!p.active && orbState === 'idle') return;
+      p.angle += p.speed * (1 + energyLevel * 2);
+      const wobble = Math.sin(time * 1.8 + p.phase) * 8 * energyLevel;
+      const r = p.baseRadius + wobble + (orbR - 58);
+      const x = cx + Math.cos(p.angle) * r;
+      const y = cy + Math.sin(p.angle) * r;
+      const colors = [[0,245,255],[123,97,255],[232,184,75]];
+      const [pr,pg,pb] = colors[p.hue];
+      const pAlpha = p.opacity * (0.3 + energyLevel * 0.6) * (0.5 + 0.5 * Math.sin(time * 2 + p.phase));
+      ctx.beginPath(); ctx.arc(x, y, p.size * (0.5 + energyLevel * 0.8), 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${pr},${pg},${pb},${pAlpha})`;
+      ctx.fill();
+    });
+
+    // ── Muted indicator ──
+    if (micMuted) {
+      ctx.font = `bold ${18}px sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(255,92,92,0.85)';
+      ctx.fillText('🔇', cx, cy + orbR + 10);
+    }
+
+    orbAnim = requestAnimationFrame(drawFrame);
+  }
+  if (orbAnim) cancelAnimationFrame(orbAnim);
+  orbAnim = requestAnimationFrame(drawFrame);
+}
+
+function setOrbState(state) {
+  orbState = state;
+  const stage = document.getElementById('orb-stage');
+  const label = document.getElementById('orb-state-label');
+  const wrap   = document.getElementById('aura-transcript-wrap');
+  const dot    = document.getElementById('transcript-dot');
+  if (!stage) return;
+
+  stage.classList.remove('aura-active','user-active','thinking','idle','muted');
+  wrap?.classList.remove('glowing');
+  if (dot) dot.style.opacity = '0';
+
+  switch(state) {
+    case 'speaking':
+      stage.classList.add('aura-active');
+      wrap?.classList.add('glowing');
+      if (dot) dot.style.opacity = '1';
+      if (label) label.textContent = 'AURA is speaking';
+      break;
+    case 'listening':
+      stage.classList.add('user-active');
+      if (label) label.textContent = micMuted ? 'mic muted — tap to unmute' : 'listening to you';
+      break;
+    case 'thinking':
+      stage.classList.add('thinking');
+      if (label) label.textContent = 'AURA is thinking...';
+      break;
+    default:
+      stage.classList.add('idle');
+      if (label) label.textContent = micMuted ? 'mic muted — tap orb to unmute' : 'tap orb to mute mic';
+  }
+  if (micMuted) stage.classList.add('muted');
+}
 
 // ── FIREBASE AUTH ──────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
@@ -1318,19 +1583,25 @@ async function _doStartSession() {
   document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
   document.getElementById('role-description').textContent = selectedScenario.desc;
   document.getElementById('add-time-btn').disabled = false;
-  document.getElementById('conversation-box').innerHTML = '';
+  document.getElementById('transcript-scroll').innerHTML = '';
   updateTimer();
-  updateMsgCount();
+  updateTurnCount();
 
-  const micBtn = document.getElementById('mic-btn');
+  // Init the orb
+  initOrb();
+  setOrbState('idle');
+
   const textInput = document.getElementById('text-input');
-  if (selectedInputMode === 'voice') { textInput.style.display = 'none'; micBtn.style.display = 'flex'; }
-  else if (selectedInputMode === 'text') { micBtn.style.display = 'none'; }
-  else { textInput.style.display = ''; micBtn.style.display = 'flex'; }
+  const inputArea = document.getElementById('input-area');
+  if (selectedInputMode === 'voice') {
+    if (inputArea) inputArea.style.display = 'none';
+  } else {
+    if (inputArea) inputArea.style.display = 'flex';
+  }
 
   sessionTimerInterval = setInterval(() => { sessionSeconds--; updateTimer(); if (sessionSeconds <= 0) endSession(); }, 1000);
 
-  setStatusBadge('thinking');
+  setOrbState('thinking');
   try {
     if (!micStream) micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
     await ensurePlaybackWorklet();
@@ -1367,7 +1638,7 @@ async function _doStartSession() {
     ws.onerror = () => toast('Connection error. Please retry.');
     ws.onclose = (e) => { if (sessionActive) { toast(`Connection closed (${e.code}). Session ended.`); cleanupLive(); } };
   } catch(err) {
-    setStatusBadge('none');
+    setOrbState('idle');
     toast(err.message || 'Failed to start. Please retry.');
     goBackToSetup();
   }
@@ -1415,7 +1686,7 @@ function enqueueAudio(pcmB64) {
 // ── HANDLE GEMINI MESSAGES ─────────────────────────────────────────────────
 function handleServerMessage(msg) {
   if (msg.setupComplete !== undefined) {
-    setStatusBadge('none');
+    setOrbState('thinking');
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({
         clientContent: {
@@ -1423,7 +1694,6 @@ function handleServerMessage(msg) {
           turnComplete: true
         }
       }));
-      setStatusBadge('thinking');
     }
   }
 
@@ -1434,102 +1704,168 @@ function handleServerMessage(msg) {
     if (sc.modelTurn?.parts) {
       sc.modelTurn.parts.forEach(part => {
         if (part.inlineData?.mimeType?.startsWith('audio/')) {
-          setStatusBadge('aura');
-          setBoardGlow('aura');
+          setOrbState('speaking');
           enqueueAudio(part.inlineData.data);
         }
       });
     }
 
-    // Output transcription → stream text in real time to board
+    // Output transcription — stream AURA's words in real time
     if (sc.outputTranscription?.text) {
       const chunk = sc.outputTranscription.text;
       currentAiText += chunk;
-      // Create or update a streaming bubble
-      if (!currentAiMsgEl) {
-        currentAiMsgEl = createStreamingBubble('ai');
-      }
-      updateStreamingBubble(currentAiMsgEl, currentAiText);
+      if (!currentAiEntryEl) currentAiEntryEl = createTranscriptEntry();
+      updateTranscriptEntry(currentAiEntryEl, currentAiText);
     }
 
-    // Input transcription → student's spoken words
-    if (sc.inputTranscription?.text) {
-      const spoken = sc.inputTranscription.text.trim();
-      if (spoken) {
-        setStatusBadge('user');
-        setBoardGlow('user');
-        appendMessage('user', spoken);
-        conversationHistory.push({ role: 'user', content: spoken });
-        spoken.toLowerCase().split(/\s+/).forEach(w => {
-          const c = w.replace(/[^a-zäöüß]/gi,''); if (c.length > 2) wordsUsed.add(c);
-        });
-        updateMsgCount();
-      }
-    }
+    // Input transcription — REMOVED (unreliable, multilingual mess)
+    // We intentionally do NOT display user speech transcription
 
     if (sc.turnComplete) {
       if (currentAiText.trim()) {
-        // Finalise the streaming bubble
-        if (currentAiMsgEl) {
-          finaliseStreamingBubble(currentAiMsgEl, currentAiText.trim());
-          currentAiMsgEl = null;
-        } else {
-          appendMessage('ai', currentAiText.trim());
-        }
+        if (currentAiEntryEl) finaliseTranscriptEntry(currentAiEntryEl);
+        currentAiEntryEl = null;
         conversationHistory.push({ role: 'assistant', content: currentAiText.trim() });
+
+        // Detect corrections in AURA's text and show correction card
+        detectAndShowCorrection(currentAiText.trim());
+
         currentAiText = '';
         turnCount++;
-        updateMsgCount();
+        updateTurnCount();
       }
-      setStatusBadge('none');
-      setBoardGlow('none');
+      setOrbState(micMuted ? 'idle' : 'listening');
     }
 
     if (sc.interrupted) {
-      setStatusBadge('none');
-      setBoardGlow('none');
+      setOrbState(micMuted ? 'idle' : 'listening');
     }
   }
   if (msg.error) toast('API Error: ' + (msg.error.message || JSON.stringify(msg.error)));
 }
 
-// ── REAL-TIME STREAMING BUBBLES ────────────────────────────────────────────
-function createStreamingBubble(role) {
-  const box  = document.getElementById('conversation-box');
-  const div  = document.createElement('div');
-  div.className = 'msg ' + role;
-  const avatar = role === 'ai' ? (selectedScenario?.emoji || '🤖') : '👤';
-  const now  = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+// ── TRANSCRIPT HELPERS ─────────────────────────────────────────────────────
+function createTranscriptEntry() {
+  const scroll = document.getElementById('transcript-scroll');
+  if (!scroll) return null;
+  const div = document.createElement('div');
+  div.className = 't-entry';
+  const emoji = selectedScenario?.emoji || '🤖';
   div.innerHTML = `
-    <div class="msg-avatar">${avatar}</div>
-    <div class="msg-content">
-      <div class="msg-bubble streaming"></div>
-      <div class="msg-time">${now}</div>
+    <div class="t-avatar">${emoji}</div>
+    <div class="t-body">
+      <div class="t-name">AURA</div>
+      <div class="t-text streaming"></div>
     </div>`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
+  scroll.appendChild(div);
+  scroll.scrollTop = scroll.scrollHeight;
   return div;
 }
 
-function updateStreamingBubble(el, text) {
-  const bubble = el.querySelector('.msg-bubble');
-  if (bubble) { bubble.textContent = text; bubble.classList.add('streaming'); }
-  const box = document.getElementById('conversation-box');
-  box.scrollTop = box.scrollHeight;
+function updateTranscriptEntry(el, text) {
+  const t = el?.querySelector('.t-text');
+  if (t) { t.textContent = text; t.classList.add('streaming'); }
+  const scroll = document.getElementById('transcript-scroll');
+  if (scroll) scroll.scrollTop = scroll.scrollHeight;
 }
 
-function finaliseStreamingBubble(el, text) {
-  const bubble = el.querySelector('.msg-bubble');
-  if (bubble) { bubble.textContent = text; bubble.classList.remove('streaming'); }
+function finaliseTranscriptEntry(el) {
+  const t = el?.querySelector('.t-text');
+  if (t) t.classList.remove('streaming');
 }
+
+function updateTurnCount() {
+  const el = document.getElementById('transcript-turns');
+  if (el) el.textContent = turnCount + ' turn' + (turnCount !== 1 ? 's' : '');
+}
+
+// ── CORRECTION CARD ────────────────────────────────────────────────────────
+const CORRECTION_TRIGGERS = [
+  /nicht (.+?),?\s+(?:sondern|aber)\s+(.+)/i,
+  /sollte(?:st)?\s+(.+?)\s+statt\s+(.+)/i,
+  /richtig\s+(?:ist|wäre)\s*[:\-]?\s*["»]?(.+?)["«]?(?:\s*,|\s*\.|\s*nicht\s)/i,
+  /korrekt\s+(?:ist|wäre)\s*[:\-]?\s*["»]?(.+?)["«]?/i,
+  /sagen\s+(?:wir|man)\s*[:\-]?\s*["»]?(.+?)["«]?/i,
+  /gemeint\s+ist\s*[:\-]?\s*["»]?(.+?)["«]?/i,
+];
+
+function detectAndShowCorrection(text) {
+  // Simple heuristic: look for correction patterns AND the presence of a German word + fix
+  const hasCorrection = CORRECTION_TRIGGERS.some(r => r.test(text)) ||
+    /(?:falsch|Fehler|korrigier|verbessern|artikel|akkusativ|dativ|verb)/i.test(text);
+
+  if (!hasCorrection) return;
+
+  // Extract wrong → right pairs when possible
+  let wrong = '', right = '', note = '';
+
+  // Pattern: "nicht X, sondern Y"
+  const m1 = text.match(/nicht\s+["»]?([^,»"]+)["«]?,?\s+sondern\s+["»]?([^.!»"]+)["«]?/i);
+  if (m1) { wrong = m1[1].trim(); right = m1[2].trim(); }
+
+  // Pattern: "richtig ist: X"
+  if (!wrong) {
+    const m2 = text.match(/richtig(?:\s+ist|\s+wäre)\s*[:\-]?\s*["»]?([^.!»"]{3,40})["«]?/i);
+    if (m2) { right = m2[1].trim(); }
+  }
+
+  // Pattern: "statt X → Y"  or "X statt Y"
+  if (!wrong) {
+    const m3 = text.match(/["»]([^"»]{2,30})["«]\s+statt\s+["»]([^"»]{2,30})["«]/i);
+    if (m3) { right = m3[1].trim(); wrong = m3[2].trim(); }
+  }
+
+  // Extract a short explanatory sentence as the note
+  const sentences = text.split(/[.!?]/);
+  const noteSentence = sentences.find(s =>
+    /(?:artikel|verb|dativ|akkusativ|position|ending|regel|falsch|fehler|korrekt)/i.test(s) && s.trim().length > 10
+  );
+  note = noteSentence ? noteSentence.trim() : '';
+
+  // Only show card if we have at least something
+  if (!right && !note) return;
+
+  const body = document.getElementById('cc-body');
+  if (!body) return;
+  let html = '';
+  if (wrong || right) {
+    html += `<div class="cc-row">
+      <div class="cc-row-label">Said</div>
+      <div class="cc-wrong">${escHtml(wrong || '?')}</div>
+      <div class="cc-arrow">→</div>
+      <div class="cc-right">${escHtml(right || '?')}</div>
+    </div>`;
+  }
+  if (note) html += `<div class="cc-note">${escHtml(note)}</div>`;
+  body.innerHTML = html;
+
+  const card = document.getElementById('correction-card');
+  if (card) {
+    card.classList.add('visible');
+    clearTimeout(correctionTimeout);
+    correctionTimeout = setTimeout(() => dismissCorrection(), 8000);
+  }
+}
+
+window.dismissCorrection = () => {
+  document.getElementById('correction-card')?.classList.remove('visible');
+  clearTimeout(correctionTimeout);
+};
 
 // ── MIC TOGGLE ─────────────────────────────────────────────────────────────
 window.toggleMic = () => {
   micMuted = !micMuted;
-  const btn = document.getElementById('mic-btn');
-  if (micMuted) { btn.textContent = '🔇'; btn.classList.add('muted'); }
-  else          { btn.textContent = '🎙️'; btn.classList.remove('muted'); }
+  // Orb state reflects mute
+  if (micMuted) {
+    setOrbState('idle');
+  } else {
+    setOrbState(orbState === 'speaking' ? 'speaking' : 'listening');
+  }
+  const stage = document.getElementById('orb-stage');
+  if (stage) stage.classList.toggle('muted', micMuted);
 };
+
+function updateTurnCountLegacy() { /* replaced by updateTurnCount */ }
 
 // ── SEND TEXT ──────────────────────────────────────────────────────────────
 window.sendTextMessage = () => {
@@ -1538,9 +1874,8 @@ window.sendTextMessage = () => {
   if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
   inp.value = '';
   text.toLowerCase().split(/\s+/).forEach(w => { const c = w.replace(/[^a-zäöüß]/gi,''); if (c.length > 2) wordsUsed.add(c); });
-  appendMessage('user', text);
   conversationHistory.push({ role: 'user', content: text });
-  setStatusBadge('thinking');
+  setOrbState('thinking');
   ws.send(JSON.stringify({ clientContent: { turns: [{ role:'user', parts:[{ text }] }], turnComplete: true } }));
 };
 
@@ -1552,9 +1887,7 @@ function updateTimer() {
   el.textContent = `${m}:${s}`;
   el.classList.toggle('warning', sessionSeconds < 120);
 }
-function updateMsgCount() {
-  document.getElementById('msg-count').textContent = turnCount + ' turn' + (turnCount !== 1 ? 's' : '');
-}
+// updateMsgCount is replaced by updateTurnCount in the orb system
 
 window.addTime = () => {
   if (addTimeUsed) { toast('You can only add time once.'); return; }
@@ -1575,11 +1908,11 @@ window.changeScenario = async () => {
   document.getElementById('role-avatar').textContent = selectedScenario.emoji;
   document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
   document.getElementById('role-description').textContent = selectedScenario.desc;
-  document.getElementById('conversation-box').innerHTML = '';
-  updateMsgCount();
+  document.getElementById('transcript-scroll').innerHTML = '';
+  updateTurnCount();
   toast(`🔄 New scenario: ${selectedScenario.title}`);
   if (ws && ws.readyState === WebSocket.OPEN) {
-    setStatusBadge('thinking');
+    setOrbState('thinking');
     ws.send(JSON.stringify({ clientContent: { turns: [{ role:'user', parts:[{ text: `New scenario! You are now: ${selectedScenario.role}. Scenario: ${selectedScenario.title} — ${selectedScenario.desc}. Level: ${selectedScenario.level}. Greet and restart.` }] }], turnComplete: true } }));
   }
 };
@@ -1601,10 +1934,10 @@ function cleanupLive() {
   if (playbackNode){ try { playbackNode.disconnect(); } catch(e) {} playbackNode = null; }
   if (audioCtx)    { try { audioCtx.close(); } catch(e) {}    audioCtx = null; }
   if (micCtx)      { try { micCtx.close(); } catch(e) {}      micCtx = null; }
-  currentAiText = ''; currentAiMsgEl = null; micMuted = false;
-  const btn = document.getElementById('mic-btn');
-  if (btn) { btn.textContent = '🎙️'; btn.classList.remove('muted'); }
-  setStatusBadge('none'); setBoardGlow('none');
+  currentAiText = ''; currentAiEntryEl = null; micMuted = false;
+  if (orbAnim) { cancelAnimationFrame(orbAnim); orbAnim = null; }
+  setOrbState('idle');
+  dismissCorrection();
 }
 
 // ── END SESSION + EVALUATION ───────────────────────────────────────────────
@@ -1689,27 +2022,23 @@ function renderScore(result) {
 
 // ── UI HELPERS ─────────────────────────────────────────────────────────────
 function appendMessage(role, text) {
-  const box  = document.getElementById('conversation-box');
-  const div  = document.createElement('div');
-  div.className = 'msg ' + role;
-  const avatar = role === 'ai' ? (selectedScenario?.emoji || '🤖') : '👤';
-  const now  = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-  div.innerHTML = `<div class="msg-avatar">${avatar}</div><div class="msg-content"><div class="msg-bubble">${escHtml(text)}</div><div class="msg-time">${now}</div></div>`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
+  // For text mode: add to transcript scroll as a special user entry
+  const scroll = document.getElementById('transcript-scroll');
+  if (!scroll) return;
+  const div = document.createElement('div');
+  div.className = 't-entry';
+  div.innerHTML = `
+    <div class="t-avatar" style="background:rgba(123,97,255,0.12);border-color:rgba(123,97,255,0.25);">👤</div>
+    <div class="t-body">
+      <div class="t-name" style="color:rgba(123,97,255,0.6)">You (typed)</div>
+      <div class="t-text" style="color:#d4caff">${escHtml(text)}</div>
+    </div>`;
+  scroll.appendChild(div);
+  scroll.scrollTop = scroll.scrollHeight;
 }
 
-function setStatusBadge(state) {
-  document.getElementById('aura-speaking-badge').classList.toggle('active', state === 'aura');
-  document.getElementById('user-speaking-badge').classList.toggle('active', state === 'user');
-  document.getElementById('thinking-badge').classList.toggle('active', state === 'thinking');
-}
-
-function setBoardGlow(state) {
-  const board = document.getElementById('board-outer');
-  board.classList.toggle('aura-speaking', state === 'aura');
-  board.classList.toggle('user-speaking', state === 'user');
-}
+function setStatusBadge() {}  // no-op — kept for compat with changeScenario
+function setBoardGlow() {}    // no-op
 
 function escHtml(t) {
   return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');

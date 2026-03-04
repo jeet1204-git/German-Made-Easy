@@ -648,7 +648,7 @@ async function startSession(){
 
   try {
     // 1. Resume AudioContext on user gesture
-audioCtx = new (window.AudioContext || window.webkitAudioContext)({sampleRate:16000});
+audioCtx = new (window.AudioContext || window.webkitAudioContext)({sampleRate:22050});
     await audioCtx.resume();
 
     // 2. Get microphone
@@ -725,7 +725,7 @@ Be concise, helpful, and conversational.` }]
     // raw binary audio — convert and play directly
     const raw = new Uint8Array(event.data);
     const samples = raw.length / 2;
-const buffer = audioCtx.createBuffer(1, samples, 16000);
+const buffer = audioCtx.createBuffer(1, samples, 22050);
     const channel = buffer.getChannelData(0);
     const view = new DataView(raw.buffer);
     for(let i=0;i<samples;i++){

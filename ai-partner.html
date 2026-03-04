@@ -1497,7 +1497,6 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
 
       // Ephemeral tokens use access_token param
       // CRITICAL: token format should be "authTokens/..." 
-      console.log('Got ephemeral token:', token.substring(0, 20) + '...');
 const wsUrl = `${GEMINI_LIVE_WS}?key=${token}`;
       const ws = new WebSocket(wsUrl);
       liveSocket = ws;

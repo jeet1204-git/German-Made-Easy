@@ -906,7 +906,9 @@ import { getFirestore, doc, getDoc, updateDoc, increment, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
+  // ⚠️ IMPORTANT: Never ship your Gemini API key in the browser.
+  // Gemini calls now go through your Cloudflare Worker (ephemeral tokens + server-side REST).
+  apiKey: "",
   authDomain: "german-made-easy.firebaseapp.com",
   projectId: "german-made-easy",
   storageBucket: "german-made-easy.firebasestorage.app",
@@ -917,7 +919,9 @@ const firebaseConfig = {
 
 // ── NEW: Ephemeral token endpoint on Worker ──────────────────────
 const EPHEMERAL_TOKEN_URL = 'https://aura-worker.jeetupadhyay1204.workers.dev/token';
-const GEMINI_LIVE_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
+// Ephemeral tokens are only compatible with the Live API in v1alpha.
+// When authenticating via ephemeral tokens, use the *Constrained* bidi method.
+const GEMINI_LIVE_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained';
 
 const MAX_TRIAL_CONVERSATIONS = 2;
 
@@ -1477,7 +1481,7 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
       if (!tokenRes.ok) throw new Error('Token fetch failed: ' + tokenRes.status);
       const { token } = await tokenRes.json();
 
-      // Ephemeral tokens use access_token param, not key
+      // Ephemeral tokens use access_token param (or Authorization: Token ...)
       const wsUrl = `${GEMINI_LIVE_WS}?access_token=${token}`;
       const ws = new WebSocket(wsUrl);
       liveSocket = ws;
@@ -1519,6 +1523,7 @@ function sendLiveSetup(systemPromptText) {
     setup: {
       model: 'models/gemini-2.5-flash-native-audio-preview-12-2025',
       generationConfig: {
+        // Request audio responses (you can also add 'TEXT' if you want both).
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
@@ -2073,16 +2078,13 @@ window.endSession = async () => {
   document.getElementById('overall-feedback-text').textContent = 'Aura is reviewing your session...';
   try {
     const evalPrompt = buildEvaluationPrompt();
-    const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E', {
+    // Server-side evaluation (keeps API key off the client)
+    const r = await fetch('https://aura-worker.jeetupadhyay1204.workers.dev/evaluate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: evalPrompt.system }] },
-        contents: evalPrompt.messages.map(m => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }]
-        })),
-        generationConfig: { temperature: 0.2, maxOutputTokens: 2000 }
+        system: evalPrompt.system,
+        messages: evalPrompt.messages
       })
     });
     const d = await r.json();

@@ -915,8 +915,9 @@ const firebaseConfig = {
   measurementId: "G-B7JMB0G85L"
 };
 
-// ── NEW: Updated routes — all Gemini now, no Deepgram ────────────
-const LIVE_WS_URL = 'wss://aura-worker.jeetupadhyay1204.workers.dev/live';
+// ── NEW: Ephemeral token endpoint on Worker ──────────────────────
+const EPHEMERAL_TOKEN_URL = 'https://aura-worker.jeetupadhyay1204.workers.dev/token';
+const GEMINI_LIVE_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
 
 const MAX_TRIAL_CONVERSATIONS = 2;
 
@@ -1465,29 +1466,47 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
   }
 
   liveManualClose = false;
-  liveSocketOpeningPromise = new Promise((resolve, reject) => {
-    const ws = new WebSocket(LIVE_WS_URL);
-    liveSocket = ws;
+  liveSocketOpeningPromise = new Promise(async (resolve, reject) => {
+    try {
+      // Step 1: Get ephemeral token from our Worker (keeps real API key secret)
+      const tokenRes = await fetch(EPHEMERAL_TOKEN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: currentUser?.uid || 'anon' })
+      });
+      if (!tokenRes.ok) throw new Error('Token fetch failed: ' + tokenRes.status);
+      const { token } = await tokenRes.json();
 
-    ws.onopen = () => {
-      console.log("AURA live ws open", { url: LIVE_WS_URL });
-      sendLiveSetup(systemPromptText || buildSystemPrompt(false));
-      ws.onmessage = handleLiveSocketMessage;
-      resolve();
-    };
+      // Step 2: Connect directly to Gemini using ephemeral token
+      // This gives best latency — no proxy in the audio path
+      const wsUrl = `${GEMINI_LIVE_WS}?key=${token}`;
+      const ws = new WebSocket(wsUrl);
+      liveSocket = ws;
 
-    ws.onerror = (e) => {
-      console.error("AURA live ws error", e);
-      reject(new Error('Live socket error'));
-      if (isRecording) stopLiveSession(true);
-    };
+      ws.onopen = () => {
+        console.log('✅ AURA connected directly to Gemini Live');
+        sendLiveSetup(systemPromptText || buildSystemPrompt(false));
+        ws.onmessage = handleLiveSocketMessage;
+        resolve();
+      };
 
-    ws.onclose = (e) => {
-      console.warn("AURA live ws close", { code: e.code, reason: e.reason, wasClean: e.wasClean });
-      liveSocket = null;
-      liveSetupSent = false;
-      if (!liveManualClose && isRecording) stopLiveSession(true);
-    };
+      ws.onerror = (e) => {
+        console.error('Gemini WS error', e);
+        reject(new Error('Gemini socket error'));
+        if (isRecording) stopLiveSession(true);
+      };
+
+      ws.onclose = (e) => {
+        console.warn('Gemini WS close', { code: e.code, reason: e.reason });
+        liveSocket = null;
+        liveSetupSent = false;
+        if (!liveManualClose && isRecording) stopLiveSession(true);
+      };
+
+    } catch (err) {
+      console.error('ensureLiveSocketOpen failed:', err);
+      reject(err);
+    }
   }).finally(() => {
     liveSocketOpeningPromise = null;
   });
@@ -1499,7 +1518,7 @@ function sendLiveSetup(systemPromptText) {
   if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN || liveSetupSent) return;
   liveSocket.send(JSON.stringify({
     setup: {
-      model: 'models/gemini-2.5-flash-native-audio-preview-09-2025',
+      model: 'models/gemini-2.5-flash-native-audio-preview-12-2025',
       generationConfig: {
         responseModalities: ['AUDIO'],
         speechConfig: {

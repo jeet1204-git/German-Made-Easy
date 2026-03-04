@@ -574,7 +574,6 @@ async function playNext(){
 
   const b64 = audioQueue.shift();
   const raw  = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
-  // Gemini outputs 24kHz PCM16
   const samples = raw.length / 2;
   const buffer  = audioCtx.createBuffer(1, samples, 24000);
   const channel = buffer.getChannelData(0);
@@ -589,6 +588,18 @@ async function playNext(){
   src.start();
 }
 
+  async function playNextBuffer(){
+  if(audioQueue.length === 0){ isPlayingAudio=false; setOrbState('listening'); return; }
+  isPlayingAudio = true;
+  setOrbState('speaking');
+  const buffer = audioQueue.shift();
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+  src.connect(audioCtx.destination);
+  src.onended = playNextBuffer;
+  src.start();
+}
+  
 // ── SESSION TIMER ─────────────────────────────────────────────────────────────
 function startTimer(){
   sessionStart = Date.now();
@@ -709,12 +720,26 @@ Be concise, helpful, and conversational.` }]
       startTimer();
     };
 
-    ws.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data);
-        handleServerMessage(msg);
-      } catch(e){ /* binary frame, skip */ }
-    };
+   ws.onmessage = async (event) => {
+  if (event.data instanceof ArrayBuffer) {
+    // raw binary audio — convert and play directly
+    const raw = new Uint8Array(event.data);
+    const samples = raw.length / 2;
+    const buffer = audioCtx.createBuffer(1, samples, 24000);
+    const channel = buffer.getChannelData(0);
+    const view = new DataView(raw.buffer);
+    for(let i=0;i<samples;i++){
+      channel[i] = view.getInt16(i*2, true) / 32768;
+    }
+    audioQueue.push(buffer);
+    if(!isPlayingAudio) playNextBuffer();
+    return;
+  }
+  try {
+    const msg = JSON.parse(event.data);
+    handleServerMessage(msg);
+  } catch(e) {}
+};
 
     ws.onerror = (e) => {
       showToast('WebSocket error. Check connection.');

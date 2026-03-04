@@ -674,19 +674,20 @@ const { token } = data;
     model: MODEL,
     generationConfig: {
       responseModalities: ['AUDIO'],
-      mediaResolution: 'MEDIA_RESOLUTION_MEDIUM',
       speechConfig: {
         voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: 'Zephyr' }
+          prebuiltVoiceConfig: { voiceName: 'Aoede' }
         }
       },
-      contextWindowCompression: {
-        triggerTokens: '104857',
-        slidingWindow: { targetTokens: '52428' }
+      thinkingConfig: {
+        thinkingBudget: 0
       }
     },
     systemInstruction: {
-      parts: [{ text: `You are AURA, an advanced multilingual voice AI assistant. Support English, German, Hindi, and Gujarati. Auto-detect language and respond in the same language. Be concise and conversational.` }]
+      parts:[{ text: `You are AURA, an advanced multilingual voice AI assistant. 
+You support English, German, Hindi, and Gujarati. 
+Auto-detect the user's language and respond in the same language.
+Be concise, helpful, and conversational.` }]
     }
   }
 }));

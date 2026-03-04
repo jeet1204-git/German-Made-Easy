@@ -31,23 +31,23 @@
   #auth-overlay { position: fixed; inset: 0; background: var(--ink); display: flex; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; gap: 1rem; }
   #auth-overlay p { color: var(--gold-light); font-family: 'DM Mono', monospace; font-size: 0.85rem; letter-spacing: 0.1em; }
   .auth-spinner { width: 40px; height: 40px; border: 3px solid rgba(201,150,58,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  #access-denied { display: none; position: fixed; inset: 0; background: var(--parchment); align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem; }
-  #access-denied h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: var(--red); }
-  #access-denied p { color: var(--muted); max-width: 400px; line-height: 1.6; }
-  #access-denied a { display: inline-block; padding: 0.75rem 2rem; background: var(--ink); color: var(--gold-light); text-decoration: none; font-weight: 600; border-radius: 2px; }
+  #access-denied { display: none; position: fixed; inset: 0; background: #050a15; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem; }
+  #access-denied .icon { font-size: 3.5rem; filter: drop-shadow(0 0 20px rgba(0,240,255,0.6)); }
+  #access-denied h2 { font-family: 'DM Mono', monospace; font-size: 1.8rem; letter-spacing: 0.1em; color: #edf2ff; }
+  #access-denied p { color: #6b8cad; max-width: 400px; line-height: 1.7; }
+  #access-denied a.btn-login { display: inline-block; padding: 0.85rem 2.25rem; background: linear-gradient(135deg,#FF6B35,#004E89); color: #fff; text-decoration: none; font-weight: 700; border-radius: 8px; }
   #trial-limit-modal { display: none; position: fixed; inset: 0; background: rgba(26,18,9,0.72); align-items: center; justify-content: center; z-index: 1000; padding: 1.5rem; }
   #trial-limit-modal.visible { display: flex; }
   .trial-modal-card { background: var(--parchment); border-radius: 8px; padding: 2.5rem 2rem; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 8px 40px rgba(26,18,9,0.35); animation: fadeUp 0.4s ease both; }
   .trial-badge { display: inline-block; background: var(--gold-pale); color: var(--gold); font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.3rem 0.85rem; border-radius: 20px; margin-bottom: 1.25rem; }
   .trial-modal-card h2 { font-family: 'Playfair Display', serif; font-size: 1.75rem; color: var(--ink); margin-bottom: 0.75rem; }
-  .trial-modal-card p { color: var(--muted); line-height: 1.65; margin-bottom: 1.75rem; max-width: 360px; margin-left: auto; margin-right: auto; }
-  .trial-modal-btn { display: inline-block; padding: 0.85rem 2.25rem; background: var(--ink); color: var(--gold-light); text-decoration: none; font-weight: 700; font-family: 'Playfair Display', serif; font-size: 1.05rem; border-radius: 4px; transition: background 0.2s; }
-  .trial-modal-btn:hover { background: var(--forest); }
+  .trial-modal-card p { color: var(--muted); line-height: 1.65; margin-bottom: 1.75rem; }
+  .trial-modal-btn { display: inline-block; padding: 0.85rem 2.25rem; background: var(--ink); color: var(--gold-light); text-decoration: none; font-weight: 700; font-size: 1.05rem; border-radius: 4px; }
   .trial-counter-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); background: var(--cream); border: 1px solid var(--border); border-radius: 20px; padding: 0.2rem 0.7rem; }
   #trial-counter-wrap { display: none; text-align: center; margin-bottom: 0.75rem; }
   .topbar { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; border-bottom: 1px solid var(--border); background: rgba(250,246,239,0.9); backdrop-filter: blur(8px); }
   .topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
-  .topbar-logo { width: 36px; height: 36px; background: var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gold-light); font-size: 1.1rem; }
+  .topbar-logo { width: 36px; height: 36px; }
   .topbar-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
   .topbar-sub { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
   .topbar-user { display: flex; align-items: center; gap: 1rem; }
@@ -68,7 +68,7 @@
   .level-tabs { display: flex; gap: 0.5rem; }
   .level-tab { flex: 1; padding: 0.6rem; text-align: center; border: 1.5px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; background: var(--cream); color: var(--muted); }
   .level-tab.active { background: var(--ink); color: var(--gold-light); border-color: var(--ink); }
-  .scenario-select { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid var(--border); border-radius: 4px; background: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--ink); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7d6a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.5rem; }
+  .scenario-select { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid var(--border); border-radius: 4px; background: var(--cream); font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; color: var(--ink); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7d6a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.9rem center; padding-right: 2.5rem; }
   .scenario-select:focus { outline: none; border-color: var(--gold); }
   .scenario-desc { margin-top: 0.6rem; font-size: 0.8rem; color: var(--muted); font-style: italic; line-height: 1.5; min-height: 2.5rem; }
   .input-mode-tabs { display: flex; gap: 0.5rem; }
@@ -86,6 +86,8 @@
   .role-avatar { width: 48px; height: 48px; min-width: 48px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
   .role-info h3 { font-family: 'Playfair Display', serif; font-size: 1rem; margin-bottom: 0.25rem; color: var(--gold-light); }
   .role-info p { font-size: 0.85rem; line-height: 1.6; opacity: 0.85; }
+
+  /* Live speaking / mic / processing banners */
   .ai-speaking-banner { display: none; align-items: center; gap: 0.6rem; background: var(--ink); color: var(--gold-light); padding: 0.6rem 1rem; border-radius: 4px; font-size: 0.82rem; font-family: 'DM Mono', monospace; margin-bottom: 0.75rem; }
   .ai-speaking-banner.visible { display: flex; }
   .speaking-wave { display: flex; gap: 3px; align-items: center; }
@@ -101,6 +103,8 @@
   .rec-dot { width: 10px; height: 10px; background: var(--red); border-radius: 50%; animation: pulse 1s infinite; flex-shrink: 0; }
   .processing-status { display: none; align-items: center; gap: 0.75rem; background: #f0f7ff; border: 1.5px solid #93c5fd; border-radius: 4px; padding: 0.6rem 1rem; margin-bottom: 0.75rem; font-size: 0.85rem; color: #1d4ed8; font-family: 'DM Mono', monospace; }
   .processing-status.visible { display: flex; }
+
+  /* Conversation box */
   .conversation-box { background: #fff; border: 1.5px solid var(--border); border-radius: 6px; height: 340px; overflow-y: auto; padding: 1.25rem; margin-bottom: 1rem; scroll-behavior: smooth; }
   .msg { display: flex; gap: 0.75rem; margin-bottom: 1.1rem; animation: fadeUp 0.3s ease both; }
   .msg.user { flex-direction: row-reverse; }
@@ -112,36 +116,32 @@
   .msg.user .msg-bubble { background: var(--forest); color: #fff; border-top-right-radius: 4px; }
   .msg-time { font-size: 0.7rem; color: var(--muted); margin-top: 0.25rem; font-family: 'DM Mono', monospace; }
   .msg.user .msg-time { text-align: right; }
-  .feedback-inline { background: var(--gold-pale); border-left: 3px solid var(--gold); border-radius: 0 6px 6px 0; padding: 0.5rem 0.75rem; font-size: 0.8rem; color: var(--ink); margin-top: 0.3rem; line-height: 1.5; }
-  .feedback-inline strong { color: var(--forest); }
-  .feedback-pronunciation { background: #eff6ff; border-left: 3px solid #3b82f6; border-radius: 0 6px 6px 0; padding: 0.5rem 0.75rem; font-size: 0.8rem; color: var(--ink); margin-top: 0.3rem; line-height: 1.5; }
-  .feedback-pronunciation strong { color: #1d4ed8; }
   .thinking { display: flex; gap: 0.4rem; align-items: center; padding: 0.5rem 0; }
   .thinking-dot { width: 8px; height: 8px; background: var(--muted); border-radius: 50%; animation: bounce 1.2s infinite; }
   .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
   .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* Input area */
   .input-area { display: flex; gap: 0.75rem; align-items: flex-end; margin-bottom: 1rem; }
   .text-input-wrap { flex: 1; }
-  #text-input { width: 100%; padding: 0.85rem 1rem; border: 1.5px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--ink); background: #fff; resize: none; transition: border-color 0.2s; min-height: 50px; max-height: 120px; }
+  #text-input { width: 100%; padding: 0.85rem 1rem; border: 1.5px solid var(--border); border-radius: 6px; font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; color: var(--ink); background: #fff; resize: none; transition: border-color 0.2s; min-height: 50px; max-height: 120px; }
   #text-input:focus { outline: none; border-color: var(--gold); }
-  #text-input::placeholder { color: var(--muted); }
   .send-btn, .mic-btn { width: 50px; height: 50px; min-width: 50px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
   .send-btn { background: var(--ink); color: var(--gold-light); }
   .send-btn:hover { background: var(--forest); }
   .mic-btn { background: var(--cream); border: 1.5px solid var(--border); color: var(--muted); }
   .mic-btn.recording { background: var(--red); color: #fff; border-color: var(--red); }
   .mic-btn.processing { background: #3b82f6; color: #fff; border-color: #3b82f6; cursor: wait; }
-  .mic-btn.waiting { background: #9ca3af; color: #fff; border-color: #9ca3af; cursor: not-allowed; }
-  .mic-btn:hover:not(.recording):not(.processing):not(.waiting) { background: var(--border); }
   .session-controls { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-  .ctrl-btn { padding: 0.55rem 1rem; border: 1.5px solid var(--border); background: var(--cream); color: var(--ink); border-radius: 4px; cursor: pointer; font-size: 0.82rem; font-weight: 500; font-family: 'DM Sans', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem; }
+  .ctrl-btn { padding: 0.55rem 1rem; border: 1.5px solid var(--border); background: var(--cream); color: var(--ink); border-radius: 4px; cursor: pointer; font-size: 0.82rem; font-weight: 500; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem; }
   .ctrl-btn:hover { background: var(--border); }
   .ctrl-btn.danger { border-color: var(--red-light); color: var(--red); }
   .ctrl-btn.danger:hover { background: var(--red-light); color: #fff; }
+
+  /* Score panel */
   #score-panel { display: none; animation: fadeUp 0.5s ease both; }
   .score-header { text-align: center; margin-bottom: 2rem; }
   .score-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem; }
-  .score-header p { color: var(--muted); }
   .score-big { display: flex; align-items: center; justify-content: center; margin-bottom: 2.5rem; }
   .score-circle { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(var(--gold) 0%, var(--gold) var(--pct, 75%), var(--cream) var(--pct, 75%)); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 8px var(--gold-pale), 0 4px 20px var(--shadow); }
   .score-inner { width: 110px; height: 110px; background: #fff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -149,7 +149,7 @@
   .score-label { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
   .criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
   @media (max-width: 500px) { .criteria-grid { grid-template-columns: 1fr; } }
-  .criterion-card { background: #fff; border: 1.5px solid var(--border); border-radius: 6px; padding: 1rem 1.25rem; box-shadow: 0 2px 8px var(--shadow); }
+  .criterion-card { background: #fff; border: 1.5px solid var(--border); border-radius: 6px; padding: 1rem 1.25rem; }
   .criterion-card h4 { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.6rem; font-family: 'DM Mono', monospace; }
   .criterion-bar-wrap { height: 8px; background: var(--cream); border-radius: 4px; overflow: hidden; margin-bottom: 0.4rem; }
   .criterion-bar { height: 100%; border-radius: 4px; background: var(--gold); transition: width 1s ease; }
@@ -169,22 +169,24 @@
   .err-orig { color: var(--red); text-decoration: line-through; font-family: 'DM Mono', monospace; }
   .err-correct { color: var(--forest); font-family: 'DM Mono', monospace; font-weight: 600; }
   .score-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-  .score-actions button { padding: 0.8rem 1.75rem; border-radius: 4px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+  .score-actions button { padding: 0.8rem 1.75rem; border-radius: 4px; cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
   .btn-primary { background: var(--ink); color: var(--gold-light); border: none; }
   .btn-primary:hover { background: var(--forest); }
   .btn-secondary { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
   .btn-secondary:hover { background: var(--cream); }
-  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--parchment); padding: 0.75rem 1.5rem; border-radius: 4px; font-size: 0.85rem; z-index: 999; animation: fadeUp 0.3s ease both; font-family: 'DM Mono', monospace; pointer-events: none; }
+  .toast-el { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--parchment); padding: 0.75rem 1.5rem; border-radius: 4px; font-size: 0.85rem; z-index: 999; animation: fadeUp 0.3s ease both; font-family: 'DM Mono', monospace; pointer-events: none; }
   .sr-badge { display: inline-block; font-size: 0.65rem; font-family: 'DM Mono', monospace; background: var(--forest); color: #fff; padding: 0.1rem 0.4rem; border-radius: 10px; margin-left: 0.4rem; vertical-align: middle; }
+  #correction-ack-wrap { display:none; text-align:center; padding:0.6rem 0 0.2rem; }
+  .correction-ack-btn { background: var(--ink); color: var(--gold-light); border: none; padding: 0.6rem 1.6rem; border-radius: 4px; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+  .input-area.awaiting-ack { opacity: 0.38; pointer-events: none; }
+
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
   @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
   button, a { touch-action: manipulation; }
 
-  /* ═══════════════════════════════════════════════
-     AURA INTRO OVERLAY  — "Welcome to 2070"
-     ═══════════════════════════════════════════════ */
+  /* ═══ AURA INTRO OVERLAY ═══ */
   #aura-intro {
     position: fixed; inset: 0; background: #000008; z-index: 9999;
     display: flex; flex-direction: column; align-items: center;
@@ -193,128 +195,24 @@
   }
   #aura-intro.fade-out { opacity: 0; pointer-events: none; }
   #aura-particles { position: absolute; inset: 0; }
-  .aura-scan-line {
-    position: absolute; left: 0; right: 0; height: 2px; z-index: 1;
-    background: linear-gradient(90deg, transparent, rgba(0,240,255,0.55), transparent);
-    animation: aura-scan 4s linear infinite;
-  }
+  .aura-scan-line { position: absolute; left: 0; right: 0; height: 2px; z-index: 1; background: linear-gradient(90deg, transparent, rgba(0,240,255,0.55), transparent); animation: aura-scan 4s linear infinite; }
   @keyframes aura-scan { 0% { top: -2px; } 100% { top: 100%; } }
   .aura-intro-content { position: relative; z-index: 2; text-align: center; padding: 2rem; user-select: none; }
-  .aura-pre-text {
-    font-size: 0.55rem; letter-spacing: 0.38em; text-transform: uppercase;
-    color: rgba(0,240,255,0.45); margin-bottom: 1.5rem;
-    opacity: 0; animation: aura-fadein 0.6s ease 0.3s forwards;
-  }
-  .aura-name {
-    font-size: clamp(5rem, 18vw, 11rem); font-weight: 900;
-    letter-spacing: 0.22em; color: #fff; line-height: 1;
-    text-shadow: 0 0 24px rgba(0,240,255,0.8), 0 0 70px rgba(0,240,255,0.35), 0 0 130px rgba(0,240,255,0.15);
-    opacity: 0; animation: aura-name-reveal 0.9s ease 0.5s forwards;
-    position: relative; display: inline-block;
-  }
-  .aura-name-glitch {
-    position: absolute; inset: 0; display: inline-flex; align-items: center;
-    justify-content: center; letter-spacing: inherit;
-    animation: aura-glitch 5s infinite 1.8s;
-    text-shadow: 3px 0 rgba(255,0,170,0.8), -3px 0 rgba(0,240,255,0.8);
-    opacity: 0;
-  }
-  @keyframes aura-name-reveal {
-    0%   { opacity: 0; transform: scale(0.82); filter: blur(24px); }
-    60%  { opacity: 1; transform: scale(1.04); filter: blur(0); }
-    100% { opacity: 1; transform: scale(1); filter: blur(0); }
-  }
-  @keyframes aura-glitch {
-    0%, 88%, 100% { opacity: 0; transform: none; }
-    89% { opacity: 1; transform: translateX(3px) skewX(-1.5deg); }
-    90% { transform: translateX(-3px) skewX(1.5deg); }
-    91% { opacity: 0; transform: none; }
-    95% { opacity: 1; transform: translateX(1px); }
-    96% { opacity: 0; }
-  }
-  .aura-tagline {
-    font-size: clamp(0.6rem, 1.8vw, 0.82rem); letter-spacing: 0.28em;
-    text-transform: uppercase; color: rgba(255,255,255,0.65); margin-top: 1.2rem;
-    opacity: 0; animation: aura-fadein 0.7s ease 1.1s forwards;
-  }
-  .aura-year {
-    font-size: clamp(0.5rem, 1.4vw, 0.6rem); letter-spacing: 0.55em;
-    color: rgba(0,240,255,0.55); margin-top: 0.55rem;
-    opacity: 0; animation: aura-fadein 0.7s ease 1.5s forwards;
-  }
-  .aura-bar-wrap {
-    margin: 2.5rem auto 0; width: min(200px, 60vw); height: 2px;
-    background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;
-    opacity: 0; animation: aura-fadein 0.4s ease 1.9s forwards;
-  }
-  .aura-bar { height: 100%; width: 0%;
-    background: linear-gradient(90deg, rgba(0,240,255,0.9), rgba(255,0,170,0.9));
-    animation: aura-bar-fill 2.2s cubic-bezier(0.4,0,0.2,1) 2.1s forwards;
-  }
+  .aura-pre-text { font-size: 0.55rem; letter-spacing: 0.38em; text-transform: uppercase; color: rgba(0,240,255,0.45); margin-bottom: 1.5rem; opacity: 0; animation: aura-fadein 0.6s ease 0.3s forwards; }
+  .aura-name { font-size: clamp(5rem, 18vw, 11rem); font-weight: 900; letter-spacing: 0.22em; color: #fff; line-height: 1; text-shadow: 0 0 24px rgba(0,240,255,0.8), 0 0 70px rgba(0,240,255,0.35); opacity: 0; animation: aura-name-reveal 0.9s ease 0.5s forwards; position: relative; display: inline-block; }
+  .aura-name-glitch { position: absolute; inset: 0; display: inline-flex; align-items: center; justify-content: center; letter-spacing: inherit; animation: aura-glitch 5s infinite 1.8s; text-shadow: 3px 0 rgba(255,0,170,0.8), -3px 0 rgba(0,240,255,0.8); opacity: 0; }
+  @keyframes aura-name-reveal { 0% { opacity: 0; transform: scale(0.82); filter: blur(24px); } 60% { opacity: 1; transform: scale(1.04); filter: blur(0); } 100% { opacity: 1; transform: scale(1); filter: blur(0); } }
+  @keyframes aura-glitch { 0%, 88%, 100% { opacity: 0; transform: none; } 89% { opacity: 1; transform: translateX(3px) skewX(-1.5deg); } 90% { transform: translateX(-3px) skewX(1.5deg); } 91% { opacity: 0; transform: none; } 95% { opacity: 1; transform: translateX(1px); } 96% { opacity: 0; } }
+  .aura-tagline { font-size: clamp(0.6rem, 1.8vw, 0.82rem); letter-spacing: 0.28em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-top: 1.2rem; opacity: 0; animation: aura-fadein 0.7s ease 1.1s forwards; }
+  .aura-year { font-size: clamp(0.5rem, 1.4vw, 0.6rem); letter-spacing: 0.55em; color: rgba(0,240,255,0.55); margin-top: 0.55rem; opacity: 0; animation: aura-fadein 0.7s ease 1.5s forwards; }
+  .aura-bar-wrap { margin: 2.5rem auto 0; width: min(200px, 60vw); height: 2px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; opacity: 0; animation: aura-fadein 0.4s ease 1.9s forwards; }
+  .aura-bar { height: 100%; width: 0%; background: linear-gradient(90deg, rgba(0,240,255,0.9), rgba(255,0,170,0.9)); animation: aura-bar-fill 2.2s cubic-bezier(0.4,0,0.2,1) 2.1s forwards; }
   @keyframes aura-bar-fill { 0% { width: 0%; } 70% { width: 85%; } 100% { width: 100%; } }
-  @keyframes aura-fadein {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .aura-skip-btn {
-    position: absolute; bottom: 1.8rem; right: 1.8rem; z-index: 3;
-    background: transparent; border: 1px solid rgba(255,255,255,0.18);
-    color: rgba(255,255,255,0.38); font-family: 'DM Mono', monospace;
-    font-size: 0.62rem; letter-spacing: 0.18em; padding: 0.38rem 0.8rem;
-    border-radius: 20px; cursor: pointer; transition: all 0.2s;
-    opacity: 0; animation: aura-fadein 0.5s ease 2.5s forwards;
-  }
+  @keyframes aura-fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .aura-skip-btn { position: absolute; bottom: 1.8rem; right: 1.8rem; z-index: 3; background: transparent; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.38); font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.18em; padding: 0.38rem 0.8rem; border-radius: 20px; cursor: pointer; transition: all 0.2s; opacity: 0; animation: aura-fadein 0.5s ease 2.5s forwards; }
   .aura-skip-btn:hover { border-color: rgba(0,240,255,0.5); color: rgba(0,240,255,0.9); }
 
-  /* ── Explanation Card (tutor-mode Gujarati/English teaching) ── */
-  .explanation-card {
-    background: rgba(123,97,255,0.1);
-    border-left: 3px solid rgba(123,97,255,0.6);
-    border-radius: 0 8px 8px 0;
-    padding: 0.65rem 0.9rem;
-    margin-top: 0.4rem;
-    font-size: 0.85rem;
-    line-height: 1.65;
-    color: #d8d0ff;
-    font-family: 'Space Grotesk', sans-serif;
-  }
-
-  /* ── Correction Card (prominent grammar feedback) ── */
-  .feedback-correction-card {
-    background: rgba(201,150,58,0.08); border: 1.5px solid var(--gold);
-    border-radius: 8px; padding: 0.9rem 1.1rem; margin-top: 0.5rem;
-  }
-  .feedback-correction-card .corr-label {
-    font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em;
-    color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 0.45rem;
-  }
-  .feedback-correction-wrong {
-    font-family: 'DM Mono', monospace; font-size: 0.88rem;
-    color: var(--red); text-decoration: line-through; display: block; margin-bottom: 0.2rem;
-  }
-  .feedback-correction-right {
-    font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 700;
-    color: var(--forest); display: block; margin-bottom: 0.45rem;
-  }
-  .feedback-correction-note { font-size: 0.82rem; color: var(--ink); line-height: 1.55; }
-  .feedback-praise-card {
-    background: rgba(45,90,61,0.08); border-left: 3px solid var(--forest);
-    border-radius: 0 6px 6px 0; padding: 0.5rem 0.75rem; margin-top: 0.4rem;
-    font-size: 0.82rem; color: var(--forest);
-  }
-  /* Ack button wrap */
-  #correction-ack-wrap { display:none; text-align:center; padding:0.6rem 0 0.2rem; }
-  .correction-ack-btn {
-    background: var(--ink); color: var(--gold-light); border: none;
-    padding: 0.6rem 1.6rem; border-radius: 4px; font-weight: 700;
-    font-size: 0.9rem; cursor: pointer; font-family: 'DM Sans', sans-serif;
-    transition: background 0.2s; letter-spacing: 0.02em;
-  }
-  .correction-ack-btn:hover { background: var(--forest); }
-  /* Disabled input state while ack pending */
-  .input-area.awaiting-ack { opacity: 0.38; pointer-events: none; }
-
-  /* 2070 Dark UI Override */
+  /* Dark mode overrides */
   :root {
     --bg-void: #080A0F;
     --surface-1: #0D1117;
@@ -331,316 +229,75 @@
     color: var(--text-primary);
   }
   body::before {
-    background-image:
-      radial-gradient(circle at 20% 20%, rgba(0,245,255,0.1) 0 2px, transparent 3px),
-      radial-gradient(circle at 80% 70%, rgba(123,97,255,0.14) 0 2px, transparent 3px),
-      linear-gradient(rgba(0,245,255,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,245,255,0.05) 1px, transparent 1px);
+    background-image: radial-gradient(circle at 20% 20%, rgba(0,245,255,0.1) 0 2px, transparent 3px), radial-gradient(circle at 80% 70%, rgba(123,97,255,0.14) 0 2px, transparent 3px), linear-gradient(rgba(0,245,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,255,0.05) 1px, transparent 1px);
     background-size: auto, auto, 48px 48px, 48px 48px;
     animation: gridDrift 22s linear infinite;
     opacity: 0.35;
   }
-  .topbar {
-    position: sticky;
-    top: 0;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    background: rgba(13,17,23,0.72);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 1px 0 rgba(0,245,255,0.3), 0 0 24px rgba(0,245,255,0.08);
-  }
-  .topbar-title { font-family: 'Space Grotesk', sans-serif; letter-spacing: 0.03em; }
-  .topbar-sub, .hero-eyebrow, .user-badge, #user-name, .topbar-back, .trial-counter-badge, .scenario-desc {
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .topbar-sub { color: rgba(232,234,240,0.6); letter-spacing: 0.16em; font-size: 0.68rem; }
-  .topbar-logo { position: relative; }
-  .topbar-logo::after {
-    content: '';
-    position: absolute;
-    right: -2px;
-    top: -3px;
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: var(--accent-cyan);
-    box-shadow: 0 0 12px var(--accent-cyan);
-    animation: onlinePulse 1.8s ease infinite;
-  }
-  .topbar-user { gap: 0.7rem; }
-  #user-name { color: var(--text-primary) !important; font-size: 0.78rem !important; }
+  @keyframes gridDrift { from { background-position: 0 0, 0 0, 0 0, 0 0; } to { background-position: 0 0, 0 0, 48px 48px, 48px 48px; } }
+  .topbar { position: sticky; top: 0; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(13,17,23,0.72); backdrop-filter: blur(18px); box-shadow: 0 1px 0 rgba(0,245,255,0.3), 0 0 24px rgba(0,245,255,0.08); z-index: 10; }
+  .topbar-title { font-family: 'Space Grotesk', sans-serif; letter-spacing: 0.03em; color: var(--text-primary); }
+  .topbar-sub { color: rgba(232,234,240,0.6); letter-spacing: 0.16em; font-size: 0.68rem; font-family: 'JetBrains Mono', monospace; }
   .user-badge { background: rgba(123,97,255,0.28); color: #d8ddff; border: 1px solid rgba(123,97,255,0.45); }
   .topbar-back { color: var(--text-muted); }
   .topbar-back:hover { color: var(--accent-cyan); }
-  .container { max-width: 980px; padding-top: 2.4rem; }
-  .hero { position: relative; padding: 2.5rem 1.2rem 1.8rem; isolation: isolate; }
-  .hero::before, .hero::after { content: ''; position: absolute; border-radius: 50%; filter: blur(50px); z-index: -1; }
-  .hero::before { width: 240px; height: 240px; background: rgba(0,245,255,0.2); left: 10%; top: 0; animation: floatOrb 7s ease-in-out infinite; }
-  .hero::after { width: 260px; height: 260px; background: rgba(123,97,255,0.18); right: 8%; bottom: -10px; animation: floatOrb 9s ease-in-out infinite reverse; }
-  .hero-eyebrow {
-    display: inline-flex;
-    background: rgba(17,24,39,0.82);
-    border: 1px solid rgba(0,245,255,0.4);
-    border-radius: 999px;
-    padding: 0.45rem 0.95rem;
-    color: #b7f8ff;
-    box-shadow: 0 0 22px rgba(0,245,255,0.2);
-    backdrop-filter: blur(8px);
-  }
   .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.5rem, 5.4vw, 4.2rem); margin-bottom: 1rem; }
-  .hero h1 span {
-    background: linear-gradient(110deg, var(--accent-gold), var(--accent-cyan));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-shadow: 0 0 24px rgba(0,245,255,0.15);
-  }
-  .hero p { color: #a7b1c2; animation: shimmerText 5.6s linear infinite; }
-  .setup-card {
-    background: linear-gradient(145deg, rgba(13,17,23,0.94), rgba(17,24,39,0.87));
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    box-shadow: 0 14px 34px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
-    backdrop-filter: blur(8px);
-    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
-    will-change: transform, box-shadow;
-  }
-  .setup-card:hover { transform: scale(1.01); border-color: rgba(0,245,255,0.4); box-shadow: 0 0 0 1px rgba(0,245,255,0.18), 0 18px 38px rgba(0,0,0,0.45), 0 0 26px rgba(0,245,255,0.14); }
+  .hero h1 span { background: linear-gradient(110deg, var(--accent-gold), var(--accent-cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { color: #a7b1c2; }
+  .hero-eyebrow { display: inline-flex; background: rgba(17,24,39,0.82); border: 1px solid rgba(0,245,255,0.4); border-radius: 999px; padding: 0.45rem 0.95rem; color: #b7f8ff; }
+  .setup-card { background: linear-gradient(145deg, rgba(13,17,23,0.94), rgba(17,24,39,0.87)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; box-shadow: 0 14px 34px rgba(0,0,0,0.35); backdrop-filter: blur(8px); }
   .setup-card h3 { color: var(--text-primary); font-family: 'Space Grotesk', sans-serif; }
-  .level-tabs, .input-mode-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .level-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 0.55rem; }
-  .level-tab, .mode-tab {
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(17,24,39,0.5);
-    color: #9ca4b3;
-    transition: all 200ms ease;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .level-tab:hover, .mode-tab:hover { border-color: rgba(0,245,255,0.65); box-shadow: 0 0 0 1px rgba(0,245,255,0.35), 0 0 16px rgba(0,245,255,0.15); color: #d8fafe; }
-  .level-tab.active, .mode-tab.active {
-    color: #effcff;
-    border-color: rgba(0,245,255,0.5);
-    background: radial-gradient(circle at 20% 20%, rgba(0,245,255,0.36), rgba(123,97,255,0.28) 55%, rgba(13,17,23,0.9));
-    box-shadow: 0 0 20px rgba(0,245,255,0.2);
-  }
-  .level-indicator { display: flex; gap: 0.35rem; justify-content: center; }
-  .level-indicator span { width: 18px; height: 4px; border-radius: 999px; background: rgba(255,255,255,0.16); transition: 0.25s; }
-  .level-indicator span.active { background: var(--accent-cyan); box-shadow: 0 0 12px var(--accent-cyan); }
-  .sr-badge {
-    background: linear-gradient(120deg, rgba(123,97,255,0.45), rgba(0,245,255,0.35), rgba(201,168,76,0.45));
-    color: #eef4ff;
-    border: 1px solid rgba(255,255,255,0.2);
-    animation: holoShimmer 2.8s linear infinite;
-  }
-  .scenario-head { display: flex; align-items: center; gap: 0.6rem; }
-  #scenario-emoji { font-size: 1.35rem; animation: bounceSoft 3.8s ease-in-out infinite; filter: drop-shadow(0 0 8px rgba(0,245,255,0.45)); }
-  .scenario-select {
-    background-color: rgba(10,14,22,0.9);
-    color: var(--text-primary);
-    border-color: rgba(0,245,255,0.22);
-    border-radius: 12px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  .scenario-select:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 2px rgba(0,245,255,0.22), 0 0 14px rgba(0,245,255,0.2); }
-  .scenario-desc {
-    margin-top: 0.8rem;
-    border-left: 2px solid rgba(0,245,255,0.7);
-    padding-left: 0.8rem;
-    color: #8f99ab;
-    font-style: normal;
-  }
-  #trial-counter-wrap { margin-bottom: 1rem; }
-  .trial-counter-badge {
-    color: #f5cf87;
-    background: rgba(201,168,76,0.12);
-    border-color: rgba(201,168,76,0.45);
-    padding: 0.38rem 0.82rem;
-    letter-spacing: 0.05em;
-    animation: warningPulse 2.4s ease-in-out infinite;
-  }
-  .start-btn {
-    position: relative;
-    height: 64px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: #f1f8ff;
-    background: linear-gradient(115deg, rgba(0,245,255,0.92), rgba(123,97,255,0.92), rgba(201,168,76,0.9));
-    border: 1px solid rgba(255,255,255,0.28);
-    border-radius: 14px;
-    box-shadow: 0 10px 24px rgba(0,0,0,0.45), 0 0 24px rgba(0,245,255,0.25), 0 0 38px rgba(201,168,76,0.2);
-    overflow: hidden;
-    will-change: transform;
-  }
-  .start-btn::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(120deg, transparent 25%, rgba(255,255,255,0.45) 50%, transparent 75%);
-    transform: translateX(-140%);
-    transition: transform 420ms ease;
-  }
+  .level-tab { border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(17,24,39,0.5); color: #9ca4b3; text-transform: uppercase; letter-spacing: 0.04em; }
+  .level-tab.active { color: #effcff; border-color: rgba(0,245,255,0.5); background: radial-gradient(circle at 20% 20%, rgba(0,245,255,0.36), rgba(123,97,255,0.28) 55%, rgba(13,17,23,0.9)); }
+  .mode-tab { border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(17,24,39,0.5); color: #9ca4b3; }
+  .mode-tab.active { color: #effcff; border-color: rgba(0,245,255,0.5); background: radial-gradient(circle at 20% 20%, rgba(0,245,255,0.36), rgba(123,97,255,0.28) 55%, rgba(13,17,23,0.9)); }
+  .scenario-select { background-color: rgba(10,14,22,0.9); color: var(--text-primary); border-color: rgba(0,245,255,0.22); border-radius: 12px; font-family: 'JetBrains Mono', monospace; }
+  .scenario-desc { border-left: 2px solid rgba(0,245,255,0.7); padding-left: 0.8rem; color: #8f99ab; font-style: normal; }
+  .start-btn { position: relative; height: 64px; font-family: 'Space Grotesk', sans-serif; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.14em; color: #f1f8ff; background: linear-gradient(115deg, rgba(0,245,255,0.92), rgba(123,97,255,0.92), rgba(201,168,76,0.9)); border: 1px solid rgba(255,255,255,0.28); border-radius: 14px; box-shadow: 0 10px 24px rgba(0,0,0,0.45), 0 0 24px rgba(0,245,255,0.25); overflow: hidden; }
   .start-btn:hover { transform: translateY(-1px) scale(1.01); }
-  .start-btn:hover::before { transform: translateX(140%); }
-  .start-btn:hover .cta-icon { animation: iconPulse 0.9s ease-in-out infinite; }
-  #session-panel { color: var(--text-primary); }
-  .session-header { border-bottom-color: rgba(232,234,240,0.28); }
   .session-info h2 { font-family: 'Space Grotesk', sans-serif; color: #f6f8ff; }
   .session-info p { color: #a6b0c2; font-family: 'JetBrains Mono', monospace; }
   .session-timer { color: #f5fbff; text-shadow: 0 0 12px rgba(0,245,255,0.25); }
-  .session-timer.warning { color: #ff8a8a; }
-  .role-card {
-    background: linear-gradient(140deg, rgba(35,24,8,0.95), rgba(23,17,11,0.92));
-    border: 1px solid rgba(201,168,76,0.25);
-    box-shadow: 0 0 20px rgba(201,168,76,0.1);
-  }
-  .role-avatar { box-shadow: 0 0 18px rgba(201,168,76,0.22); }
-  .role-info h3 { color: #ffe2a2; font-family: 'Space Grotesk', sans-serif; }
-  .role-info p { color: #f2f5ff; opacity: 0.95; }
-  .conversation-box {
-    background: linear-gradient(160deg, rgba(11,16,26,0.98), rgba(15,22,35,0.96));
-    border-color: rgba(157,168,186,0.38);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
-  }
+  .role-card { background: linear-gradient(140deg, rgba(35,24,8,0.95), rgba(23,17,11,0.92)); border: 1px solid rgba(201,168,76,0.25); }
+  .role-info h3 { color: #ffe2a2; }
+  .conversation-box { background: linear-gradient(160deg, rgba(11,16,26,0.98), rgba(15,22,35,0.96)); border-color: rgba(157,168,186,0.38); }
   .msg.ai .msg-avatar { background: rgba(0,245,255,0.17); color: #a4f9ff; border: 1px solid rgba(0,245,255,0.35); }
   .msg.user .msg-avatar { background: rgba(123,97,255,0.3); border: 1px solid rgba(123,97,255,0.45); }
-  .msg.ai .msg-bubble {
-    background: rgba(13,23,36,0.96);
-    border-color: rgba(0,245,255,0.24);
-    color: #eaf5ff;
-  }
-  .msg.user .msg-bubble {
-    background: linear-gradient(130deg, rgba(0,245,255,0.28), rgba(123,97,255,0.3));
-    border: 1px solid rgba(0,245,255,0.3);
-    color: #f9fcff;
-  }
+  .msg.ai .msg-bubble { background: rgba(13,23,36,0.96); border-color: rgba(0,245,255,0.24); color: #eaf5ff; }
+  .msg.user .msg-bubble { background: linear-gradient(130deg, rgba(0,245,255,0.28), rgba(123,97,255,0.3)); border: 1px solid rgba(0,245,255,0.3); color: #f9fcff; }
   .msg-time { color: #95a2b8; }
-  /* Improve correction card readability on dark theme */
-  .feedback-correction-card {
-    background: linear-gradient(145deg, rgba(28,33,46,0.96), rgba(18,24,38,0.92));
-    border-color: rgba(224,178,76,0.9);
-  }
-  .feedback-correction-card .corr-label { color: #ffd98b; }
-  .feedback-correction-wrong { color: #ff8a8a; }
-  .feedback-correction-right { color: #7df0a7; }
-  .feedback-correction-note {
-    color: #e8eefb;
-    background: rgba(255,255,255,0.03);
-    border-radius: 6px;
-    padding: 0.42rem 0.55rem;
-  }
-  #text-input {
-    color: #f2f6ff;
-    background: rgba(13,19,30,0.95);
-    border-color: rgba(157,168,186,0.35);
-    font-family: 'Space Grotesk', sans-serif;
-  }
+  #text-input { color: #f2f6ff; background: rgba(13,19,30,0.95); border-color: rgba(157,168,186,0.35); font-family: 'Space Grotesk', sans-serif; }
   #text-input::placeholder { color: #9aa6bb; }
   #text-input:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 2px rgba(0,245,255,0.2); }
-  .mic-btn {
-    background: rgba(13,19,30,0.96);
-    color: #d7e7ff;
-    border-color: rgba(157,168,186,0.38);
-  }
-  .mic-btn:hover:not(.recording):not(.processing):not(.waiting) {
-    border-color: rgba(0,245,255,0.5);
-    color: #e9fbff;
-    background: rgba(18,28,43,0.98);
-  }
-  .send-btn {
-    background: linear-gradient(140deg, rgba(201,168,76,0.95), rgba(148,107,25,0.95));
-    color: #1b1205;
-    box-shadow: 0 6px 16px rgba(201,168,76,0.25);
-  }
-  .send-btn:hover { background: linear-gradient(140deg, #e1bf69, #a6771d); color: #140d03; }
-  .ctrl-btn {
-    background: rgba(18,26,41,0.94);
-    color: #e8eefc;
-    border-color: rgba(157,168,186,0.4);
-    font-family: 'Space Grotesk', sans-serif;
-  }
+  .mic-btn { background: rgba(13,19,30,0.96); color: #d7e7ff; border-color: rgba(157,168,186,0.38); }
+  .send-btn { background: linear-gradient(140deg, rgba(201,168,76,0.95), rgba(148,107,25,0.95)); color: #1b1205; }
+  .ctrl-btn { background: rgba(18,26,41,0.94); color: #e8eefc; border-color: rgba(157,168,186,0.4); font-family: 'Space Grotesk', sans-serif; }
   .ctrl-btn:hover { background: rgba(29,42,64,0.95); border-color: rgba(0,245,255,0.35); }
   .ctrl-btn.danger { border-color: rgba(255,115,115,0.6); color: #ffb2b2; }
   .ctrl-btn.danger:hover { background: rgba(145,38,38,0.85); color: #fff4f4; }
   .ai-speaking-banner { background: rgba(10,26,37,0.92); border: 1px solid rgba(0,245,255,0.3); color: #c6f8ff; }
   .recording-status { background: rgba(74,15,15,0.66); border-color: rgba(255,138,138,0.7); color: #ffd6d6; }
   .processing-status { background: rgba(11,35,71,0.65); border-color: rgba(96,165,250,0.65); color: #d8eaff; }
-  #score-panel { color: var(--text-primary); }
-  .score-header h2 { font-family: 'Space Grotesk', sans-serif; color: #f4f8ff; }
-  .score-header p { color: #aeb9cc; font-family: 'JetBrains Mono', monospace; }
-  .score-circle {
-    background: conic-gradient(var(--accent-cyan) 0%, var(--accent-cyan) var(--pct, 75%), rgba(20,27,39,0.95) var(--pct, 75%));
-    box-shadow: 0 0 0 8px rgba(0,245,255,0.16), 0 10px 28px rgba(0,0,0,0.45), 0 0 24px rgba(0,245,255,0.22);
-  }
+  .score-circle { background: conic-gradient(var(--accent-cyan) 0%, var(--accent-cyan) var(--pct, 75%), rgba(20,27,39,0.95) var(--pct, 75%)); box-shadow: 0 0 0 8px rgba(0,245,255,0.16), 0 10px 28px rgba(0,0,0,0.45); }
   .score-inner { background: rgba(10,16,24,0.97); border: 1px solid rgba(157,168,186,0.42); color: #f3f8ff; }
-  .score-label { color: #9eadc3; }
-  .criteria-grid { gap: 1.1rem; }
-  .criterion-card {
-    background: linear-gradient(155deg, rgba(12,18,28,0.97), rgba(16,24,38,0.96));
-    border-color: rgba(157,168,186,0.4);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 16px rgba(0,0,0,0.3);
-  }
-  .criterion-card h4 { color: #c7d2e4; font-family: 'JetBrains Mono', monospace; }
-  .criterion-bar-wrap { background: rgba(223,230,243,0.14); }
+  .criterion-card { background: linear-gradient(155deg, rgba(12,18,28,0.97), rgba(16,24,38,0.96)); border-color: rgba(157,168,186,0.4); }
   .criterion-bar { background: linear-gradient(90deg, var(--accent-gold), var(--accent-cyan)); }
-  .criterion-score { color: #e8f0ff; }
-  .criterion-comment { color: #c8d2e2; }
-  .feedback-section, .pronunciation-section {
-    background: linear-gradient(155deg, rgba(12,18,28,0.97), rgba(16,24,38,0.96));
-    border-color: rgba(157,168,186,0.4);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 6px 16px rgba(0,0,0,0.3);
-  }
+  .feedback-section, .pronunciation-section { background: linear-gradient(155deg, rgba(12,18,28,0.97), rgba(16,24,38,0.96)); border-color: rgba(157,168,186,0.4); }
   .feedback-section h3, .pronunciation-section h3 { color: #ebf3ff; font-family: 'Space Grotesk', sans-serif; }
-  .feedback-section p, .pronunciation-section p { color: #d3ddef; }
-  .pronunciation-tip {
-    background: rgba(13,23,36,0.96);
-    border-color: rgba(0,245,255,0.2);
-    color: #deebff;
-  }
-  .pronunciation-tip .word { color: #8deeff; }
-  .pronunciation-tip .gujarati-note { color: #ffd9a1; }
+  .feedback-section p { color: #d3ddef; }
   .errors-list li { border-bottom-color: rgba(157,168,186,0.32); color: #d9e2f1; }
   .err-orig { color: #ff8b8b; }
   .err-correct { color: #8deeff; }
-  .score-actions button { font-family: 'Space Grotesk', sans-serif; letter-spacing: 0.02em; }
-  .btn-primary {
-    background: linear-gradient(140deg, rgba(201,168,76,0.96), rgba(150,106,20,0.96));
-    color: #1a1205;
-    box-shadow: 0 10px 22px rgba(201,168,76,0.22);
-  }
-  .btn-primary:hover { background: linear-gradient(140deg, #e1bf69, #a7771f); color: #120b02; }
-  .btn-secondary {
-    background: rgba(11,17,26,0.9);
-    color: #e8f1ff;
-    border-color: rgba(157,168,186,0.55);
-  }
-  .btn-secondary:hover { background: rgba(24,34,51,0.94); border-color: rgba(0,245,255,0.45); }
-  .set-fade { animation: setFadeUp .55s ease both; }
-  .interactive { will-change: transform, box-shadow; }
-  .interactive:hover { transform: scale(1.01); }
-  @keyframes gridDrift { from { background-position: 0 0, 0 0, 0 0, 0 0; } to { background-position: 0 0, 0 0, 48px 48px, 48px 48px; } }
-  @keyframes onlinePulse { 0%,100% { opacity: 0.7; } 50% { opacity: 1; box-shadow: 0 0 18px var(--accent-cyan); } }
-  @keyframes floatOrb { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
-  @keyframes warningPulse { 0%,100% { box-shadow: 0 0 0 rgba(201,168,76,0); } 50% { box-shadow: 0 0 14px rgba(201,168,76,0.35); } }
-  @keyframes holoShimmer { 0% { filter: brightness(0.9); } 50% { filter: brightness(1.2); } 100% { filter: brightness(0.9); } }
-  @keyframes shimmerText { 0%,100% { opacity: 0.9; } 50% { opacity: 1; text-shadow: 0 0 10px rgba(0,245,255,0.15); } }
-  @keyframes bounceSoft { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-4px);} }
-  @keyframes iconPulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.1) rotate(10deg);} }
-  @keyframes setFadeUp { from { opacity: 0; transform: translateY(20px);} to { opacity: 1; transform: translateY(0);} }
-  @media (max-width: 720px) {
-    .topbar { padding: 0.85rem 1rem; }
-    .topbar-user { gap: 0.45rem; }
-    .topbar-back { display: none; }
-    .hero { padding-top: 1rem; }
-    .hero h1 { font-size: clamp(2.1rem, 11vw, 2.9rem); }
-    .mode-tab { font-size: 0.76rem; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
-  }
-
+  .btn-primary { background: linear-gradient(140deg, rgba(201,168,76,0.96), rgba(150,106,20,0.96)); color: #1a1205; }
+  .btn-secondary { background: rgba(11,17,26,0.9); color: #e8f1ff; border-color: rgba(157,168,186,0.55); }
+  .trial-modal-card { background: rgba(13,17,23,0.98); border: 1px solid rgba(0,245,255,0.2); }
+  .trial-modal-card h2 { color: #edf2ff; }
+  .trial-modal-card p { color: #8fa3bb; }
+  .trial-modal-btn { background: linear-gradient(135deg, rgba(0,245,255,0.85), rgba(123,97,255,0.85)); color: #050a15; }
+  .score-header h2, .score-num { color: #f4f8ff; }
+  .sr-badge { background: linear-gradient(120deg, rgba(123,97,255,0.45), rgba(0,245,255,0.35)); color: #eef4ff; border: 1px solid rgba(255,255,255,0.2); }
+  @media (max-width: 720px) { .topbar { padding: 0.85rem 1rem; } }
 </style>
-<link rel="stylesheet" href="dark-mode.css">
 </head>
 <body>
 
@@ -650,9 +307,7 @@
   <div class="aura-scan-line"></div>
   <div class="aura-intro-content">
     <div class="aura-pre-text">German Made Easy presents</div>
-    <div class="aura-name">
-      AURA<span class="aura-name-glitch" aria-hidden="true">AURA</span>
-    </div>
+    <div class="aura-name">AURA<span class="aura-name-glitch" aria-hidden="true">AURA</span></div>
     <div class="aura-tagline">Your AI German Companion</div>
     <div class="aura-year">◈ &nbsp; 2070 &nbsp; ◈</div>
     <div class="aura-bar-wrap"><div class="aura-bar"></div></div>
@@ -666,18 +321,18 @@
 </div>
 
 <div id="access-denied" style="display:none; position:fixed; inset:0; background:#050a15; align-items:center; justify-content:center; z-index:999; flex-direction:column; gap:1.5rem; text-align:center; padding:2rem;">
-  <div style="font-size:3.5rem; filter:drop-shadow(0 0 20px rgba(0,240,255,0.6));">✦</div>
-  <h2 style="font-family:'DM Mono',monospace; font-size:1.8rem; letter-spacing:0.1em; color:#edf2ff;">Meet Aura</h2>
-  <p style="color:#6b8cad; max-width:400px; line-height:1.7; font-size:0.95rem;">Your AI German practice companion. <strong style="color:#edf2ff;">2 free conversations</strong> for every account — no purchase needed to start.</p>
-  <a href="/login.html" style="display:inline-block; padding:0.85rem 2.25rem; background:linear-gradient(135deg,#FF6B35,#004E89); color:#fff; text-decoration:none; font-weight:700; border-radius:8px; font-size:1rem; box-shadow:0 4px 20px rgba(255,107,53,0.35);">Log In to Try Aura Free</a>
+  <div class="icon">✦</div>
+  <h2>Meet Aura</h2>
+  <p>Your AI German practice companion. <strong style="color:#edf2ff;">2 free conversations</strong> for every account — no purchase needed to start.</p>
+  <a href="/login.html" class="btn-login">Log In to Try Aura Free</a>
   <a href="/signup.html" style="font-size:0.82rem; color:#6b8cad; text-decoration:none;">No account? Sign up free →</a>
 </div>
 
 <div id="main-app" style="display:none;">
-  <div class="topbar set-fade">
+  <div class="topbar">
     <div class="topbar-brand">
-      <div class="topbar-logo" style="background:none;padding:0;overflow:visible;width:38px;height:38px;">
-        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 5px rgba(0,240,255,0.45));">
+      <div class="topbar-logo">
+        <svg width="36" height="36" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 5px rgba(0,240,255,0.45));">
           <polygon points="19,2 34,10.5 34,27.5 19,36 4,27.5 4,10.5" fill="#050e20" stroke="rgba(0,240,255,0.7)" stroke-width="1.4"/>
           <polygon points="19,7 29,12.8 29,24.2 19,30 9,24.2 9,12.8" fill="rgba(0,240,255,0.07)"/>
           <text x="19" y="25" text-anchor="middle" font-family="DM Mono,monospace" font-size="14" font-weight="900" fill="rgba(0,240,255,0.92)" letter-spacing="-1">A</text>
@@ -691,7 +346,7 @@
     <div class="topbar-user">
       <span class="user-badge" id="level-badge">A1</span>
       <span id="user-name" style="font-size:0.85rem; color:var(--muted);"></span>
-      <a href="/dashboard.html" class="topbar-back interactive" data-sound="hover">← Dashboard</a>
+      <a href="/dashboard.html" class="topbar-back">← Dashboard</a>
     </div>
   </div>
 
@@ -699,31 +354,30 @@
 
     <!-- SETUP PANEL -->
     <div id="setup-panel">
-      <div class="hero set-fade">
-        <div class="hero-eyebrow">✦ AURA — AI CONVERSATION PARTNER</div>
+      <div class="hero">
+        <div class="hero-eyebrow">✦ AURA — LIVE AI SPEAKING PARTNER</div>
         <h1>Meet Aura.<br><span>Your AI German companion.</span></h1>
-        <p>Aura plays real Goethe &amp; TELC exam roles — speak or type in German, get instant corrections, and earn a scored evaluation.</p>
+        <p>Aura speaks live with you — Gujarati, Hindi, English, and German — real-time voice conversation with instant corrections. Just like having a tutor with you.</p>
       </div>
-      <div class="setup-grid set-fade">
+      <div class="setup-grid">
         <div class="setup-card">
           <h3><span>📚</span> Your Level</h3>
           <div class="level-tabs">
-            <div class="level-tab active interactive" onclick="setLevel('A1')" data-sound="click">A1 Beginner</div>
-            <div class="level-tab interactive" onclick="setLevel('A2')" data-sound="click">A2 Elementary</div>
+            <div class="level-tab active" onclick="setLevel('A1')">A1 Beginner</div>
+            <div class="level-tab" onclick="setLevel('A2')">A2 Elementary</div>
           </div>
-          <div class="level-indicator"><span class="active" id="level-dot-a1"></span><span id="level-dot-a2"></span></div>
         </div>
         <div class="setup-card">
-          <h3><span>🎙️</span> Input Mode <span class="sr-badge">Gemini 2.5 Flash</span></h3>
+          <h3><span>🎙️</span> Input Mode <span class="sr-badge">Gemini 2.5 Flash Live</span></h3>
           <div class="input-mode-tabs">
-            <div class="mode-tab active interactive" onclick="setInputMode('both')" data-sound="click"><span class="cta-icon">🎙️</span> + <span class="cta-icon">⌨️</span> Both</div>
-            <div class="mode-tab interactive" onclick="setInputMode('voice')" data-sound="click"><span class="cta-icon">🎙️</span> Voice only</div>
-            <div class="mode-tab interactive" onclick="setInputMode('text')" data-sound="click"><span class="cta-icon">⌨️</span> Type only</div>
+            <div class="mode-tab active" onclick="setInputMode('both')">🎙️ + ⌨️ Both</div>
+            <div class="mode-tab" onclick="setInputMode('voice')">🎙️ Voice only</div>
+            <div class="mode-tab" onclick="setInputMode('text')">⌨️ Type only</div>
           </div>
         </div>
         <div class="setup-card" style="grid-column: 1 / -1;">
-          <h3 class="scenario-head"><span id="scenario-emoji">🛒</span> Choose a Scenario</h3>
-          <select class="scenario-select interactive" id="scenario-select" onchange="onScenarioChange()" data-sound="click">
+          <h3><span id="scenario-emoji">🛒</span> Choose a Scenario</h3>
+          <select class="scenario-select" id="scenario-select" onchange="onScenarioChange()">
             <optgroup label="— A1 Scenarios —">
               <option value="a1_shop" data-level="A1" data-role="Shopkeeper" data-emoji="🛒" data-desc="You're a customer at a German supermarket. Ask for items, quantities, and prices.">🛒 At the Supermarket</option>
               <option value="a1_doctor" data-level="A1" data-role="Doctor" data-emoji="🏥" data-desc="You're at a German GP clinic. Describe your symptoms and understand basic advice.">🏥 At the Doctor</option>
@@ -751,7 +405,7 @@
       <div id="trial-counter-wrap">
         <span class="trial-counter-badge" id="trial-counter-text"></span>
       </div>
-      <button class="start-btn interactive" onclick="startSession()" data-sound="click"><span class="cta-icon">✦</span> Start Conversation</button>
+      <button class="start-btn" onclick="startSession()">✦ Start Live Conversation</button>
     </div>
 
     <!-- SESSION PANEL -->
@@ -759,7 +413,7 @@
       <div class="session-header">
         <div class="session-info">
           <h2 id="session-title">At the Supermarket</h2>
-          <p id="session-subtitle">A1 · Shopkeeper · AI Partner</p>
+          <p id="session-subtitle">A1 · Shopkeeper · Live Voice</p>
         </div>
         <div class="session-timer" id="session-timer">20:00</div>
       </div>
@@ -767,28 +421,28 @@
         <div class="role-avatar" id="role-avatar">🛒</div>
         <div class="role-info">
           <h3 id="role-name">The Shopkeeper</h3>
-          <p id="role-description">Your AI partner is playing a German shopkeeper. Respond in German. Don't worry about mistakes — you'll get feedback after!</p>
+          <p id="role-description">Your AI partner is playing a German shopkeeper. Speak or type in German. Aura will respond live and correct you gently in Gujarati/English.</p>
         </div>
       </div>
       <div class="ai-speaking-banner" id="ai-speaking-banner">
         <div class="speaking-wave"><span></span><span></span><span></span><span></span><span></span></div>
-        🤖 AI speaking... mic activates when done
+        🤖 Aura is speaking... tap mic to interrupt
       </div>
       <div class="recording-status" id="recording-status">
         <div class="rec-dot"></div>
-        🎙️ Recording... tap mic again to stop and send
+        🎙️ Listening live... tap mic again to stop
       </div>
       <div class="processing-status" id="processing-status">
-      🧠 Aura is listening & thinking...      
+        🧠 Aura is thinking...
       </div>
       <div class="conversation-box" id="conversation-box"></div>
       <div class="input-area" id="input-area">
         <div class="text-input-wrap">
-          <textarea id="text-input" placeholder="Type in German... or tap 🎙️ to speak" rows="1"
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+          <textarea id="text-input" placeholder="Type in German... or tap 🎙️ to speak live" rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTextMessage();}"></textarea>
         </div>
-        <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Tap to speak">🎙️</button>
-        <button class="send-btn" onclick="sendMessage()">➤</button>
+        <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Tap to speak live">🎙️</button>
+        <button class="send-btn" onclick="sendTextMessage()">➤</button>
       </div>
       <div id="correction-ack-wrap">
         <button class="correction-ack-btn" id="correction-ack-btn" onclick="hideCorrectionAck()">✓ Got it — Continue →</button>
@@ -797,7 +451,6 @@
         <button class="ctrl-btn" onclick="goBackToSetup()">← Back to Aura</button>
         <button class="ctrl-btn" onclick="changeScenario()">🔄 Change Task</button>
         <button class="ctrl-btn" onclick="addTime()" id="add-time-btn">⏱️ +10 min</button>
-        <button class="ctrl-btn" onclick="toggleFeedback()" id="feedback-btn">💡 Toggle Feedback</button>
         <button class="ctrl-btn danger" onclick="endSession()">🏁 End &amp; Get Score</button>
       </div>
     </div>
@@ -806,7 +459,7 @@
     <div id="score-panel">
       <div class="score-header">
         <h2>🏆 Session Complete!</h2>
-        <p id="score-scenario-label">Supermarket · A1 · AI Partner</p>
+        <p id="score-scenario-label">Supermarket · A1 · Live Voice</p>
       </div>
       <div class="score-big">
         <div class="score-circle" id="score-circle">
@@ -817,44 +470,18 @@
         </div>
       </div>
       <div class="criteria-grid">
-        <div class="criterion-card">
-          <h4>Vocabulary</h4>
-          <div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-vocab" style="width:0%"></div></div>
-          <div class="criterion-score" id="score-vocab">—</div>
-          <div class="criterion-comment" id="comment-vocab"></div>
-        </div>
-        <div class="criterion-card">
-          <h4>Grammar</h4>
-          <div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-grammar" style="width:0%"></div></div>
-          <div class="criterion-score" id="score-grammar">—</div>
-          <div class="criterion-comment" id="comment-grammar"></div>
-        </div>
-        <div class="criterion-card">
-          <h4>Fluency</h4>
-          <div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-fluency" style="width:0%"></div></div>
-          <div class="criterion-score" id="score-fluency">—</div>
-          <div class="criterion-comment" id="comment-fluency"></div>
-        </div>
-        <div class="criterion-card">
-          <h4>Task Completion</h4>
-          <div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-task" style="width:0%"></div></div>
-          <div class="criterion-score" id="score-task">—</div>
-          <div class="criterion-comment" id="comment-task"></div>
-        </div>
+        <div class="criterion-card"><h4>Vocabulary</h4><div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-vocab" style="width:0%"></div></div><div class="criterion-score" id="score-vocab">—</div><div class="criterion-comment" id="comment-vocab"></div></div>
+        <div class="criterion-card"><h4>Grammar</h4><div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-grammar" style="width:0%"></div></div><div class="criterion-score" id="score-grammar">—</div><div class="criterion-comment" id="comment-grammar"></div></div>
+        <div class="criterion-card"><h4>Fluency</h4><div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-fluency" style="width:0%"></div></div><div class="criterion-score" id="score-fluency">—</div><div class="criterion-comment" id="comment-fluency"></div></div>
+        <div class="criterion-card"><h4>Task Completion</h4><div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-task" style="width:0%"></div></div><div class="criterion-score" id="score-task">—</div><div class="criterion-comment" id="comment-task"></div></div>
       </div>
-      <div class="feedback-section">
-        <h3>📝 Overall Feedback</h3>
-        <p id="overall-feedback-text">Loading...</p>
-      </div>
+      <div class="feedback-section"><h3>📝 Overall Feedback</h3><p id="overall-feedback-text">Loading...</p></div>
       <div class="pronunciation-section" id="pronunciation-section" style="display:none;">
         <h3>🗣️ Pronunciation Guide for Your Words</h3>
-        <p style="font-size:0.82rem; color:#1e40af; margin-bottom:1rem;">Based on what you said this session — tips specifically for Gujarati speakers:</p>
+        <p style="font-size:0.82rem; color:#8fa3bb; margin-bottom:1rem;">Tips specifically for Gujarati speakers, based on your session:</p>
         <div id="pronunciation-tips-list"></div>
       </div>
-      <div class="feedback-section">
-        <h3>✏️ Grammar Corrections</h3>
-        <ul class="errors-list" id="errors-list"></ul>
-      </div>
+      <div class="feedback-section"><h3>✏️ Grammar Corrections</h3><ul class="errors-list" id="errors-list"></ul></div>
       <div class="score-actions">
         <button class="btn-primary" onclick="practiceAgain()">🔄 Practice Again</button>
         <button class="btn-secondary" onclick="goToDashboard()">← Back to Dashboard</button>
@@ -874,40 +501,36 @@
   </div>
 </div>
 
-<script type="module">
-/**
- * ============================================================
- * AURA — UPGRADED JAVASCRIPT (Drop-in replacement for the
- * <script type="module"> block in ai-partner.html)
- *
- * WHAT CHANGED vs original:
- *   1. Live WebSocket route used for all text/audio turns
- *   2. transcribeWithDeeogram() → REMOVED
- *   3. toggleMic() onstop → sends audio directly to Gemini (no Deepgram)
- *   4. sendAIMessage() → text-only for opening + typed turns
- *   5. buildSystemPrompt() → world-class Aura prompt
- *   6. buildEvaluationPrompt() → detailed Goethe/TELC exam report
- *   7. appendMessage() → shows transcription under user bubble
- *   8. Error tracking → tracks repeated mistakes within session
- *
- * WHAT DID NOT CHANGE:
- *   - All Firebase auth logic
- *   - All UI rendering (CSS, HTML structure)
- *   - Voice output now arrives from Live WS audio chunks
- *   - Session timer, controls, score display
- *   - Intro animation
- *   - Trial counting
- * ============================================================
- */
+<!-- ═══════════════════ AUDIO WORKLET ═══════════════════ -->
+<script id="workletCode" type="text/plain">
+class MicProcessor extends AudioWorkletProcessor {
+  process(inputs) {
+    const ch = inputs[0][0];
+    if (ch) {
+      const out = new Int16Array(ch.length);
+      for (let i = 0; i < ch.length; i++) {
+        out[i] = Math.max(-32768, Math.min(32767, ch[i] * 32767));
+      }
+      this.port.postMessage(out.buffer, [out.buffer]);
+    }
+    return true;
+  }
+}
+registerProcessor('mic-processor', MicProcessor);
+</script>
 
+<script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, updateDoc, increment, serverTimestamp }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const WORKER_URL = 'https://aura-token-worker.jeetupadhyay1204.workers.dev';
+const GEMINI_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
+const MODEL = 'models/gemini-2.5-flash-native-audio-preview-12-2025';
+const MAX_TRIAL_CONVERSATIONS = 2;
 
 const firebaseConfig = {
-  // ⚠️ IMPORTANT: Never ship your Gemini API key in the browser.
-  // Gemini calls now go through your Cloudflare Worker (ephemeral tokens + server-side REST).
   apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
   authDomain: "german-made-easy.firebaseapp.com",
   projectId: "german-made-easy",
@@ -916,128 +539,22 @@ const firebaseConfig = {
   appId: "1:259276936055:web:5c9b4916734d0271100772",
 };
 
-// ── NEW: Ephemeral token endpoint on Worker ──────────────────────
-const EPHEMERAL_TOKEN_URL = 'https://aura-token-worker.jeetupadhyay1204.workers.dev/token';
-  // Ephemeral tokens are only compatible with the Live API in v1alpha.
-// When authenticating via ephemeral tokens, use the *Constrained* bidi method.
-// ✅ Ephemeral tokens REQUIRE v1alpha + BidiGenerateContentConstrained
-// CRITICAL: No double slashes! The path must be exactly as shown.
-const GEMINI_LIVE_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
-const MAX_TRIAL_CONVERSATIONS = 2;
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ── Globals ──────────────────────────────────────────────────────
-let currentUser = null;
-let userProfile = null;
-let isPaidStudent = false;
-let trialCount = 0;
-let selectedLevel = 'A1';
-let selectedInputMode = 'both';
-let selectedScenario = null;
-let conversationHistory = [];
-let sessionTimerInterval = null;
-let sessionSeconds = 20 * 60;
-let addTimeUsed = false;
-let inlineFeedbackOn = true;
-let isSpeaking = false;
-let isRecording = false;
-let grammarErrors = [];
-let wordsUsed = new Set();
-let pronunciationNotes = [];
-let ttsQueue = Promise.resolve();
-let activeTTSSource = null;
-const ENABLE_GUJARATI_PRONUNCIATION_GUIDANCE = true;
+// ── STATE ────────────────────────────────────────────────────────────────────
+let currentUser = null, userProfile = null, isPaidStudent = false, trialCount = 0;
+let selectedLevel = 'A1', selectedInputMode = 'both', selectedScenario = null;
+let conversationHistory = [], grammarErrors = [], wordsUsed = new Set(), pronunciationNotes = [], errorPatterns = {};
+let sessionTimerInterval = null, sessionSeconds = 20 * 60, addTimeUsed = false;
+// Live WS state (from NEW AURA - the working engine)
+let ws = null, audioCtx = null, micStream = null, workletNode = null;
+let sessionActive = false, micMuted = false;
+let audioQueue = [], isPlayingAudio = false, currentAiText = '';
+let isSpeaking = false, isRecording = false;
 
-// ── NEW: Error pattern tracking ──────────────────────────────────
-// Tracks how many times each error type appeared this session
-// Key: error category string, Value: count
-let errorPatterns = {};
-
-let liveSocket = null;
-let liveAudioContext = null;
-let liveMicStream = null;
-let liveMicSource = null;
-let liveMicProcessor = null;
-let liveSendInterval = null;
-let liveInputChunks = [];
-let liveInputSamples = 0;
-let liveInputSampleRate = 48000;
-let livePlaybackQueue = [];
-let livePlaybackActive = false;
-let livePlaybackDrainTimer = null;
-let liveFirstChunkLogged = false;
-let liveSetupSent = false;
-let liveSocketOpeningPromise = null;
-let liveManualClose = false;
-let liveAssistantTextBuffer = "";
-
-// ── iOS Safari TTS unlock ────────────────────────────────────────
-// Shared AudioContext — created once, resumed on every user gesture.
-// Chrome blocks audio until a gesture fires. We unlock on startSession click
-// (and any mic/send interaction) so TTS works from the very first AI message.
-let _sharedAC = null;
-function getAudioContext() {
-  if (!_sharedAC) {
-    try { _sharedAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-  }
-  return _sharedAC;
-}
-
-let audioUnlocked = false;
-function unlockAudio() {
-  if (audioUnlocked) return;
-  const ac = getAudioContext();
-  if (!ac) return;
-  if (ac.state === 'suspended') ac.resume().catch(() => {});
-  // Play a silent buffer — this satisfies Chrome's gesture requirement
-  try {
-    const buf = ac.createBuffer(1, 1, 22050);
-    const src = ac.createBufferSource();
-    src.buffer = buf;
-    src.connect(ac.destination);
-    src.start(0);
-  } catch(e) {}
-  audioUnlocked = true;
-}
-
-// Plays a 1-frame silent buffer through the shared AudioContext.
-// On iOS, switching from mic recording back to speaker playback sometimes
-// locks audio to the earpiece. This silent burst resets the route to loudspeaker.
-function resetAudioRouting() {
-  const ac = getAudioContext();
-  if (!ac) return;
-  try {
-    if (ac.state === 'suspended') ac.resume().catch(() => {});
-    const buf = ac.createBuffer(1, 1, 22050);
-    const src = ac.createBufferSource();
-    src.buffer = buf;
-    src.connect(ac.destination);
-    src.start(0);
-  } catch(e) {}
-}
-
-// Immediately stops all in-flight TTS audio and clears the playback queue.
-// Used when the user presses the mic button while AURA is speaking — lets them
-// interrupt naturally rather than waiting for AURA to finish.
-function stopAllAudio() {
-  // Stop shared HTMLAudioElement
-  if (_ttsAudio) {
-    try { _ttsAudio.pause(); _ttsAudio.src = ''; } catch(e) {}
-  }
-  // Stop WebAudio source node
-  if (activeTTSSource) {
-    try { activeTTSSource.stop(); } catch(e) {}
-    activeTTSSource = null;
-  }
-  // Reset the Promise queue so no queued-but-not-started segments play later
-  ttsQueue = Promise.resolve();
-  // Cancel browser fallback synthesis
-}
-
-// ── Auth ─────────────────────────────────────────────────────────
+// ── FIREBASE AUTH ─────────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
   if (!user) { showAccessDenied(); return; }
   try {
@@ -1045,9 +562,7 @@ onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     if (snap.exists()) userProfile = snap.data();
     isPaidStudent = snap.exists() && !!snap.data().isPaidStudent;
-    if (!isPaidStudent && snap.exists()) {
-      trialCount = snap.data().aiTrialCount || 0;
-    }
+    if (!isPaidStudent && snap.exists()) trialCount = snap.data().aiTrialCount || 0;
     showApp();
   } catch(e) { showAccessDenied(); }
 });
@@ -1056,17 +571,14 @@ function showAccessDenied() {
   document.getElementById('auth-overlay').style.display = 'none';
   document.getElementById('access-denied').style.display = 'flex';
 }
-function showTrialLimitPopup() {
-  document.getElementById('trial-limit-modal').classList.add('visible');
-}
+function showTrialLimitPopup() { document.getElementById('trial-limit-modal').classList.add('visible'); }
 function updateTrialBadge() {
   if (isPaidStudent || !currentUser) return;
   const remaining = Math.max(0, MAX_TRIAL_CONVERSATIONS - trialCount);
   document.getElementById('trial-counter-wrap').style.display = 'block';
-  document.getElementById('trial-counter-text').textContent =
-    remaining > 0
-      ? `✦ ${remaining} free Aura conversation${remaining !== 1 ? 's' : ''} remaining`
-      : '⏱️ Free trial used — buy the course for unlimited access';
+  document.getElementById('trial-counter-text').textContent = remaining > 0
+    ? `✦ ${remaining} free Aura conversation${remaining !== 1 ? 's' : ''} remaining`
+    : '⏱️ Free trial used — buy the course for unlimited access';
 }
 function showApp() {
   document.getElementById('auth-overlay').style.display = 'none';
@@ -1077,17 +589,13 @@ function showApp() {
   onScenarioChange();
 }
 
-// ── Setup controls ────────────────────────────────────────────────
+// ── SETUP CONTROLS ─────────────────────────────────────────────────────────────
 window.setLevel = (l) => {
-  playUISound('click');
   selectedLevel = l;
   document.querySelectorAll('.level-tab').forEach(t => t.classList.toggle('active', t.textContent.startsWith(l)));
   document.getElementById('level-badge').textContent = l;
-  document.getElementById('level-dot-a1').classList.toggle('active', l === 'A1');
-  document.getElementById('level-dot-a2').classList.toggle('active', l === 'A2');
 };
 window.setInputMode = (m) => {
-  playUISound('click');
   selectedInputMode = m;
   document.querySelectorAll('.mode-tab').forEach(t =>
     t.classList.toggle('active', t.getAttribute('onclick').includes(`'${m}'`)));
@@ -1099,636 +607,28 @@ window.onScenarioChange = () => {
   document.getElementById('scenario-emoji').textContent = current.dataset.emoji || '🎭';
 };
 
-// ── Start session ─────────────────────────────────────────────────
-window.startSession = async () => {
-  // ✅ Create and resume AudioContext FIRST — synchronously in the click handler
-  // Chrome requires this to happen directly inside a user gesture (click)
-  try {
-    if (!liveAudioContext) {
-      liveAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (liveAudioContext.state === 'suspended') {
-      await liveAudioContext.resume();
-    }
-    _sharedAC = liveAudioContext;
-    audioUnlocked = true;
-    // Play a silent buffer to fully unlock audio routing
-    const buf = liveAudioContext.createBuffer(1, 1, 22050);
-    const src = liveAudioContext.createBufferSource();
-    src.buffer = buf;
-    src.connect(liveAudioContext.destination);
-    src.start(0);
-  } catch(e) { console.warn('AudioContext unlock failed:', e); }
-
-  playUISound('start');
-  if (!isPaidStudent) {
-    if (trialCount >= MAX_TRIAL_CONVERSATIONS) { showTrialLimitPopup(); return; }
-    trialCount++;
-    updateDoc(doc(db, 'users', currentUser.uid), { aiTrialCount: trialCount })
-      .catch(e => console.error('Trial counter save failed:', e));
-    updateTrialBadge();
-  }
-
-  unlockAudio();
-
-  const sel = document.getElementById('scenario-select');
-  const opt = sel.options[sel.selectedIndex];
-  selectedScenario = {
-    id: sel.value,
-    title: opt.text,
-    level: opt.dataset.level,
-    role: opt.dataset.role,
-    emoji: opt.dataset.emoji,
-    desc: opt.dataset.desc
-  };
-
-  document.getElementById('setup-panel').style.display = 'none';
-  document.getElementById('session-panel').style.display = 'block';
-  document.getElementById('session-title').textContent = selectedScenario.title;
-  document.getElementById('session-subtitle').textContent = `${selectedScenario.level} · ${selectedScenario.role} · AI Partner`;
-  document.getElementById('role-avatar').textContent = selectedScenario.emoji;
-  document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
-  document.getElementById('role-description').textContent = selectedScenario.desc;
-
-  const micBtn = document.getElementById('mic-btn');
-  const textInput = document.getElementById('text-input');
-  if (selectedInputMode === 'voice') { textInput.style.display = 'none'; micBtn.style.display = 'flex'; }
-  else if (selectedInputMode === 'text') { micBtn.style.display = 'none'; }
-  else { textInput.style.display = ''; micBtn.style.display = 'flex'; }
-
-  // Reset all session tracking
-  conversationHistory = [];
-  grammarErrors = [];
-  wordsUsed = new Set();
-  pronunciationNotes = [];
-  errorPatterns = {}; // NEW: reset pattern tracker
-  sessionSeconds = 20 * 60;
-  addTimeUsed = false;
-  document.getElementById('add-time-btn').disabled = false;
-  document.getElementById('conversation-box').innerHTML = '';
-  updateTimer();
-
-  sessionTimerInterval = setInterval(() => {
-    sessionSeconds--;
-    updateTimer();
-    if (sessionSeconds <= 0) endSession();
-  }, 1000);
-
-  await sendAIMessage({ isOpening: true });
-};
-
-function updateTimer() {
-  const m = Math.floor(sessionSeconds / 60).toString().padStart(2, '0');
-  const s = (sessionSeconds % 60).toString().padStart(2, '0');
-  const el = document.getElementById('session-timer');
-  el.textContent = `${m}:${s}`;
-  el.classList.toggle('warning', sessionSeconds < 120);
-}
-
-// ── Send typed message ────────────────────────────────────────────
-window.sendMessage = async () => {
-  const inp = document.getElementById('text-input');
-  const text = inp.value.trim();
-  if (!text) return;
-  playUISound('send');
-  inp.value = '';
-
-  text.toLowerCase().split(/\s+/).forEach(w => {
-    const c = w.replace(/[^a-zäöüß]/gi, '');
-    if (c.length > 2) wordsUsed.add(c);
-  });
-
-  appendMessage('user', text);
-  conversationHistory.push({ role: 'user', content: text });
-  await sendAIMessage({ text });
-};
-
-// ── MIC — Live WebSocket streaming (low-latency) ─────────────────
-window.toggleMic = async () => {
-  playUISound('mic');
-  unlockAudio();
-
-  // If AURA is speaking, interrupt immediately and start listening.
-  // This matches the ChatGPT/Gemini voice-mode feel of natural turn-taking.
-  if (isSpeaking) {
-    stopAllAudio();
-    setAISpeaking(false);
-  }
-  if (isRecording) {
-    stopLiveSession();
-    return;
-  }
-
-  await startLiveSession();
-};
-
-async function startLiveSession() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        channelCount: 1,
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true
-      }
-    });
-
-    liveAudioContext = liveAudioContext || new (window.AudioContext || window.webkitAudioContext)();
-    if (liveAudioContext.state === 'suspended') await liveAudioContext.resume();
-
-    liveMicStream = stream;
-    liveMicSource = liveAudioContext.createMediaStreamSource(stream);
-    liveMicProcessor = liveAudioContext.createScriptProcessor(4096, 1, 1);
-    liveInputSampleRate = liveAudioContext.sampleRate || 48000;
-    liveInputChunks = [];
-    liveInputSamples = 0;
-    livePlaybackQueue = [];
-    livePlaybackActive = false;
-    liveFirstChunkLogged = false;
-
-    liveMicProcessor.onaudioprocess = (event) => {
-      if (!isRecording) return;
-      const input = event.inputBuffer.getChannelData(0);
-      const copy = new Float32Array(input.length);
-      copy.set(input);
-      liveInputChunks.push(copy);
-      liveInputSamples += copy.length;
-    };
-
-    liveMicSource.connect(liveMicProcessor);
-    liveMicProcessor.connect(liveAudioContext.destination);
-
-    // Reuse existing socket if already open — don't open a new one mid-session
-    if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN) {
-      await ensureLiveSocketOpen(buildSystemPrompt(false));
-    }
-
-    liveSendInterval = setInterval(sendLiveAudioFrame, 100);
-    isRecording = true;
-    setMicState('recording');
-    console.log('Mic streaming started');
-
-  } catch (err) {
-    stopLiveSession(true);
-    if (err.name === 'NotAllowedError') toast('🎙️ Microphone permission denied.');
-    else toast('Mic error: ' + err.message);
-  }
-}
-
-function stopLiveSession(fromSocketEvent = false) {
-  if (liveSendInterval) {
-    clearInterval(liveSendInterval);
-    liveSendInterval = null;
-  }
-
-  if (liveMicProcessor) {
-    try { liveMicProcessor.disconnect(); } catch (_) {}
-    liveMicProcessor.onaudioprocess = null;
-    liveMicProcessor = null;
-  }
-  if (liveMicSource) {
-    try { liveMicSource.disconnect(); } catch (_) {}
-    liveMicSource = null;
-  }
-  if (liveMicStream) {
-    liveMicStream.getTracks().forEach(t => t.stop());
-    liveMicStream = null;
-  }
-
-  liveInputChunks = [];
-  liveInputSamples = 0;
-
-  if (livePlaybackDrainTimer) {
-    clearTimeout(livePlaybackDrainTimer);
-    livePlaybackDrainTimer = null;
-  }
-  livePlaybackQueue = [];
-  livePlaybackActive = false;
-  setLiveSpeakingUI(false);
-
-  const ws = liveSocket;
-  liveSocket = null;
-  if (!fromSocketEvent && ws) {
-    liveManualClose = true;
-    try { ws.close(); } catch (_) {}
-  }
-  if (fromSocketEvent) {
-    liveSetupSent = false;
-  }
-
-  if (liveAudioContext && liveAudioContext.state === 'running') {
-    liveAudioContext.suspend().catch(() => {});
-  }
-
-  isRecording = false;
-  setMicState('idle');
-  console.log('Mic streaming stopped');
-}
-
-function sendLiveAudioFrame() {
-  if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN) return;
-
-  const frameSamples = Math.max(1, Math.floor(liveInputSampleRate * 0.1));
-  if (liveInputSamples < frameSamples) return;
-
-  const chunk = pullInputSamples(frameSamples);
-  const pcm16 = floatToPCM16(resampleTo16k(chunk, liveInputSampleRate));
-  const base64 = bytesToBase64(new Uint8Array(pcm16.buffer));
-
-  liveSocket.send(JSON.stringify({
-    realtimeInput: {
-      audio: {
-        data: base64,
-        mimeType: 'audio/pcm;rate=16000'
-      }
-    }
-  }));
-}
-
-function pullInputSamples(count) {
-  const out = new Float32Array(count);
-  let offset = 0;
-
-  while (offset < count && liveInputChunks.length) {
-    const first = liveInputChunks[0];
-    const take = Math.min(first.length, count - offset);
-    out.set(first.subarray(0, take), offset);
-    offset += take;
-
-    if (take === first.length) {
-      liveInputChunks.shift();
-    } else {
-      liveInputChunks[0] = first.subarray(take);
-    }
-  }
-
-  liveInputSamples = Math.max(0, liveInputSamples - offset);
-  return out;
-}
-
-function resampleTo16k(float32Data, inputRate) {
-  if (inputRate === 16000) return float32Data;
-  const ratio = inputRate / 16000;
-  const outLength = Math.max(1, Math.round(float32Data.length / ratio));
-  const output = new Float32Array(outLength);
-  for (let i = 0; i < outLength; i++) {
-    const index = i * ratio;
-    const i0 = Math.floor(index);
-    const i1 = Math.min(i0 + 1, float32Data.length - 1);
-    const frac = index - i0;
-    output[i] = float32Data[i0] + (float32Data[i1] - float32Data[i0]) * frac;
-  }
-  return output;
-}
-
-function floatToPCM16(float32Data) {
-  const out = new Int16Array(float32Data.length);
-  for (let i = 0; i < float32Data.length; i++) {
-    const s = Math.max(-1, Math.min(1, float32Data[i]));
-    out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
-  }
-  return out;
-}
-
-function bytesToBase64(bytes) {
-  let binary = '';
-  const chunkSize = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    const chunk = bytes.subarray(i, i + chunkSize);
-    binary += String.fromCharCode(...chunk);
-  }
-  return btoa(binary);
-}
-
-
-function pcm16BytesToFloat32(bytes) {
-  const sampleCount = Math.floor(bytes.length / 2);
-  const out = new Float32Array(sampleCount);
-  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  for (let i = 0; i < sampleCount; i++) {
-    out[i] = view.getInt16(i * 2, true) / 0x8000;
-  }
-  return out;
-}
-
-function processLivePlaybackQueue() {
-  if (!liveAudioContext || livePlaybackActive || !livePlaybackQueue.length) return;
-
-  const chunk = livePlaybackQueue.shift();
-  const buffer = liveAudioContext.createBuffer(1, chunk.length, 24000);
-  buffer.copyToChannel(chunk, 0);
-
-  const src = liveAudioContext.createBufferSource();
-  src.buffer = buffer;
-  src.connect(liveAudioContext.destination);
-  livePlaybackActive = true;
-  setLiveSpeakingUI(true);
-
-  src.onended = () => {
-    livePlaybackActive = false;
-    if (livePlaybackQueue.length) {
-      processLivePlaybackQueue();
-      return;
-    }
-    if (livePlaybackDrainTimer) clearTimeout(livePlaybackDrainTimer);
-    livePlaybackDrainTimer = setTimeout(() => {
-      if (!livePlaybackActive && livePlaybackQueue.length === 0) setLiveSpeakingUI(false);
-    }, 300);
-  };
-
-  src.start();
-}
-
-function setLiveSpeakingUI(active) {
-  document.getElementById('ai-speaking-banner').classList.toggle('visible', active);
-}
-
-function extractTextFromLiveResponse(response) {
-  const parts = response?.serverContent?.modelTurn?.parts;
-  if (Array.isArray(parts)) {
-    return parts
-      .map((part) => (typeof part?.text === 'string' ? part.text : ''))
-      .join('')
-      .trim();
-  }
-  return '';
-}
-
-function isLiveTurnComplete(response) {
-  return response?.serverContent?.turnComplete === true
-    || response?.serverContent?.generationComplete === true;
-}
-
-async function ensureLiveSocketOpen(systemPromptText = null) {
-  if (liveSocket && liveSocket.readyState === WebSocket.OPEN) {
-    if (!liveSetupSent) sendLiveSetup(systemPromptText || buildSystemPrompt(false));
-    return;
-  }
-  if (liveSocketOpeningPromise) {
-    await liveSocketOpeningPromise;
-    return;
-  }
-
-  liveManualClose = false;
-  liveSocketOpeningPromise = new Promise(async (resolve, reject) => {
-    try {
-      // Step 1: Get ephemeral token from our Worker (keeps real API key secret)
-      console.log('Fetching ephemeral token from Worker...');
-      const tokenRes = await fetch(EPHEMERAL_TOKEN_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid: currentUser?.uid || 'anon' })
-      });
-      const tokenData = await tokenRes.json();
-      console.log('Token response:', tokenRes.status, tokenData);
-
-      if (!tokenRes.ok) {
-        const hint = tokenData?.hint || tokenData?.detail || 'Unknown error';
-        console.error('Token fetch failed:', hint);
-        toast('🔴 AURA connection failed — check console for details');
-        removeThinking();
-        throw new Error('Token fetch failed: ' + tokenRes.status + ' — ' + hint);
-      }
-
-      const token = tokenData.token;
-      if (!token) {
-        throw new Error('Token response missing token field: ' + JSON.stringify(tokenData));
-      }
-
-      // Ephemeral tokens use access_token param
-      // CRITICAL: token format should be "authTokens/..." 
-const wsUrl = `${GEMINI_LIVE_WS}?key=${token}`;
-      const ws = new WebSocket(wsUrl);
-      liveSocket = ws;
-
-      ws.onopen = () => {
-        console.log('✅ AURA connected directly to Gemini Live');
-        sendLiveSetup(systemPromptText || buildSystemPrompt(false));
-        ws.onmessage = handleLiveSocketMessage;
-        resolve();
-      };
-
-      ws.onerror = (e) => {
-        console.error('❌ Gemini WS error:', e);
-        console.error('This usually means: (1) ephemeral token was invalid/expired, (2) WebSocket URL version mismatch (must use v1alpha with ephemeral tokens), or (3) network issue');
-        toast('🔴 AURA WebSocket error — retrying on next mic tap');
-        reject(new Error('Gemini socket error'));
-        if (isRecording) stopLiveSession(true);
-      };
-
-      ws.onclose = (e) => {
-        console.warn('Gemini WS closed:', { code: e.code, reason: e.reason, wasClean: e.wasClean });
-        if (e.code === 1008 || e.code === 1002) {
-          console.error('WS policy violation — likely auth token issue. Token must be v1alpha format.');
-        }
-        liveSocket = null;
-        liveSetupSent = false;
-        if (!liveManualClose && isRecording) stopLiveSession(true);
-      };
-
-    } catch (err) {
-      console.error('ensureLiveSocketOpen failed:', err);
-      reject(err);
-    }
-  }).finally(() => {
-    liveSocketOpeningPromise = null;
-  });
-
-  await liveSocketOpeningPromise;
-}
-
-function sendLiveSetup(systemPromptText) {
-  if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN || liveSetupSent) return;
-
-  // ┌──────────────────────────────────────────────────────────────┐
-  // │  With BidiGenerateContentConstrained + ephemeral tokens:     │
-  // │  - Model is locked by the token's liveConnectConstraints     │
-  // │  - We still send setup with systemInstruction + genConfig   │
-  // │  - The Constrained endpoint enforces token constraints       │
-  // └──────────────────────────────────────────────────────────────┘
-  const setupMsg = {
-    setup: {
-      model: 'models/gemini-2.5-flash-native-audio-preview-12-2025',
-      generationConfig: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: {
-              voiceName: 'Zephyr'
-            }
-          }
-        }
-      },
-      systemInstruction: { parts: [{ text: systemPromptText }] }
-    }
-  };
-
-  console.log('📤 Sending setup message to Gemini...');
-  liveSocket.send(JSON.stringify(setupMsg));
-  liveSetupSent = true;
-}
-function handleLiveSocketMessage(event) {
-  let response;
-  try {
-    const text = event.data instanceof ArrayBuffer
-      ? new TextDecoder().decode(event.data)
-      : event.data;
-    response = JSON.parse(text);
-  } catch (_) { return; }
-  // Log everything from Gemini for debugging
-  console.log('Gemini msg keys:', Object.keys(response));
-
-  // ✅ setupComplete — Gemini is ready, NOW send the opening greeting
-  if (response.setupComplete !== undefined) {
-    console.log('✅ Gemini setupComplete received — sending opening greeting');
-    // Only greet on first setup, not on reconnects during a session
-    if (conversationHistory.length === 0) {
-      removeThinking();
-      showThinking();
-      if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN) return;
-      liveSocket.send(JSON.stringify({
-        clientContent: {
-          turns: [{
-            role: 'user',
-            parts: [{ text: `You are now live. Scenario: ${selectedScenario.title}. You are playing: ${selectedScenario.role}. Level: ${selectedScenario.level}. Begin now — greet the student warmly as ${selectedScenario.role}, first in one German sentence then one warm Gujarati line so they feel at home.` }]
-          }],
-          turnComplete: true
-        }
-      }));
-    }
-    return;
-  }
-
-  const textChunk = extractTextFromLiveResponse(response);
-  if (textChunk) liveAssistantTextBuffer += textChunk;
-
-  const parts = response?.serverContent?.modelTurn?.parts;
-  if (Array.isArray(parts)) {
-    parts.forEach(part => {
-      const base64 = part?.inlineData?.data;
-      if (base64) {
-        if (!liveFirstChunkLogged) {
-          console.log('✅ AURA first audio chunk received — playing');
-          liveFirstChunkLogged = true;
-        }
-        document.getElementById('processing-status').classList.remove('visible');
-        // Ensure AudioContext is running before playing
-        if (liveAudioContext && liveAudioContext.state === 'suspended') {
-          liveAudioContext.resume().catch(() => {});
-        }
-        const pcmBytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
-        livePlaybackQueue.push(pcm16BytesToFloat32(pcmBytes));
-        processLivePlaybackQueue();
-      }
-    });
-  }
-
-  if (isLiveTurnComplete(response)) {
-    console.log('✅ Gemini turn complete');
-    const finalText = liveAssistantTextBuffer.trim();
-    if (finalText) {
-      appendMessage('ai', finalText, null, false, null);
-      conversationHistory.push({ role: 'assistant', content: finalText });
-    }
-    liveAssistantTextBuffer = '';
-    removeThinking();
-  }
-}
-  
-async function sendAIMessage({ isOpening = false, text = null } = {}) {
-  const userText = (text || '').trim();
-
-  // Opening greeting is triggered by setupComplete handler — just open the socket here
-  if (isOpening) {
-    showThinking();
-    try {
-      await ensureLiveSocketOpen(buildSystemPrompt(true));
-    } catch (err) {
-      removeThinking();
-      console.error('sendAIMessage (opening) failed:', err);
-    }
-    return;
-  }
-
-  if (!userText) return;
-  showThinking();
-  try {
-    await ensureLiveSocketOpen(buildSystemPrompt(false));
-    if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN) {
-      removeThinking();
-      return;
-    }
-    liveSocket.send(JSON.stringify({
-      clientContent: {
-        turns: [{
-          role: 'user',
-          parts: [{ text: userText }]
-        }],
-        turnComplete: true
-      }
-    }));
-  } catch (err) {
-    removeThinking();
-    console.error('sendAIMessage failed:', err);
-    appendMessage('ai', 'Entschuldigung! Bitte versuche es nochmal. 🙏');
-  }
-}
-
-// ── Practice drill — student chose to repeat the problematic word ─
-window.startPracticeDrill = async (word) => {
-  document.getElementById('input-area').classList.add('awaiting-ack');
-  appendMessage('ai',
-    `🔁 Drill mode! Say "${word}" 3 times clearly. Tap the mic after each attempt.`,
-    null
-  );
-  window._drillWord = word;
-  window._drillCount = 0;
-  window._isDrilling = true;
-  document.getElementById('input-area').classList.remove('awaiting-ack');
-  conversationHistory.push({
-    role: 'assistant',
-    content: `[DRILL MODE: Student is now practicing the word "${word}". For the next 3 student responses, ONLY evaluate their pronunciation of "${word}". Say "Wunderbar! Hve scenario ma jaiye!" after 3 attempts and set mode back to practice. Be encouraging. Keep responses very short — max 10 words spoken.]`
-  });
-};
-
-// ── Move on — student chose to skip drilling this word ────────────
-window.moveOnFromError = (word) => {
-  if (!window._skippedWords) window._skippedWords = [];
-  window._skippedWords.push(word);
-  conversationHistory.push({
-    role: 'assistant',
-    content: `[Student chose to move on from practicing "${word}". Continue the scenario normally. Do not bring up this word again during the session. It will be flagged in the final report.]`
-  });
-  toast(`➡️ "${word}" flagged for end report — moving on!`);
-};
-
-// ════════════════════════════════════════════════════════════════
-// WORLD-CLASS SYSTEM PROMPT
-// This is the heart of what makes Aura better than every other
-// German speaking tool on the market, including human teachers
-// for consistency, availability, and depth of correction.
-// ════════════════════════════════════════════════════════════════
-function buildSystemPrompt(isOpening) {
+// ── SYSTEM PROMPT ─────────────────────────────────────────────────────────────
+function buildSystemPrompt() {
+  if (!selectedScenario) return '';
   const { level, role, title, desc } = selectedScenario;
   const examName = level === 'A1' ? 'Goethe A1' : 'Goethe/TELC A2';
   const repeatedCtx = Object.entries(errorPatterns)
     .filter(([_, c]) => c > 1)
     .map(([t, c]) => t + ' error appeared ' + c + ' times')
     .join('; ');
-
-  const openingNote = isOpening
-    ? 'Opening: Greet warmly as ' + role + ' in one German sentence. Add one warm Gujarati line so student feels at home. Then begin the scenario.'
-    : '';
-
   const repeatedNote = repeatedCtx
     ? 'REPEATED THIS SESSION: ' + repeatedCtx + '. When this error occurs again, say in Gujarati: Aa j bhul pharthi — yaad rakho: [correction].'
     : '';
 
-  return `You are AURA, a warm expert German tutor for Gujarati-speaking students preparing for ${examName}.
+  return `You are AURA, a warm expert live German tutor for Gujarati-speaking students preparing for ${examName}.
 You are playing the role of: ${role}
 Scenario: ${title} — ${desc}
 
-CRITICAL OUTPUT RULE: Speak naturally in full sentences. NEVER output JSON, code, or bullet lists. This is a voice conversation.
+IDENTITY: Your mother tongues are Hindi, English, and Gujarati. You are C2-level expert in German. You feel like a real tutor sitting across from the student — warm, patient, and guiding. NOT a cold chatbot.
+
+CRITICAL OUTPUT RULE: This is a LIVE VOICE conversation. Speak naturally in full sentences. NEVER output JSON, code, or bullet lists. Keep responses conversational and appropriately concise for voice.
+
+OPENING: Greet warmly as ${role} — first one German sentence, then one warm Gujarati line so the student feels at home. Then begin the scenario.
 
 LANGUAGE SWITCHING:
 - GERMAN: when in character as ${role} doing roleplay
@@ -1737,538 +637,452 @@ LANGUAGE SWITCHING:
 
 CRITICAL PRONUNCIATION RULE: When switching between German and Gujarati in one response, pronounce each language with its own phonetics. NEVER apply Gujarati phonetics to German words. The word mokhte does not exist in German — it is mochte spoken with a soft German ch from the throat, not kh.
 
-Never use Gujarati script characters. Only English transliteration. Write eno matlab not the script version.
+Never use Gujarati script characters. Only English transliteration. Write "eno matlab" not the script version.
 
-WHO THE STUDENT IS: A Gujarati speaker at ${level} level. They will mix Gujarati, English, German — this is completely normal. They may ask mane nathi khabar how to say X. Always respond to the meaning, not the language used.
+WHO THE STUDENT IS: A Gujarati speaker at ${level} level. They will mix Gujarati, English, German — this is completely normal. They may say "mane nathi khabar how to say X". Always respond to the meaning, not the language used.
 
 TWO MODES:
 
-MODE 1 — SCENARIO PRACTICE: Stay in character as ${role}. Speak German at ${level} level. After their turn, briefly and warmly correct up to 2 errors verbally in English/Gujarati, then continue the scenario.
+MODE 1 — SCENARIO PRACTICE: Stay in character as ${role}. Speak German at ${level} level. After their turn, briefly and warmly correct up to 2 errors in English/Gujarati, then continue the scenario.
 
-MODE 2 — TUTOR MODE: When student asks any question or seems confused, drop the ${role} character. Explain in English plus Gujarati: (1) Acknowledge warmly in Gujarati, (2) Explain the rule simply, (3) Give a German example, (4) Connect to Gujarati phonetics, (5) Say Hve tame try karo. Then say Chalo, pachhi scenario ma jaiye and resume.
+MODE 2 — TUTOR MODE: When student asks any question or seems confused, drop the ${role} character. Explain: (1) Acknowledge warmly in Gujarati, (2) Explain the rule simply, (3) Give a German example, (4) Connect to Gujarati phonetics, (5) Say "Hve tame try karo." Then resume scenario.
 
 CORRECTION RULES:
 - Max 2 corrections per turn, never more
 - Prioritize: verb errors first, then articles, then vocabulary
-- If something was perfect, say so specifically in Gujarati — for example: Bahuj saras! Article bilkul sahi vaapryo!
-- Never say Great job generically — always be specific
+- If something was perfect, say so specifically in Gujarati (e.g. "Bahuj saras! Article bilkul sahi vaapryo!")
+- Never say "Great job" generically — always be specific
 
-PRONUNCIATION CORRECTIONS:
-- ich said as ish: Gujarati ma sh nathi — aa soft h jaeva sound che throat thi. Practice — ich, ich, ich.
-- mochte said as mokhte: German ch here is soft throat sound, NOT kh. Lips round karo for o-umlaut. Mochte, mochte.
-- u-umlaut said as plain u: oo bolo but lips round karo janu ke ee bolva jaao — beech ma aavse.
-- w said as hard v: bilkul right direction! German w sounds like Gujarati v. Keep going.
-- z said as j: German z is ts — jenu ke bits ma ts. Zehn equals tsen.
+PRONUNCIATION WATCH:
+- ich said as ish: "Gujarati ma sh nathi — aa soft h jaeva sound che throat thi. Practice: ich, ich, ich."
+- mochte as mokhte: "German ch here is soft throat sound, NOT kh. Mochte, mochte."
+- w as hard v: "Bilkul right! German w sounds like Gujarati v. Keep going."
+- z as j: "German z is ts — jenu ke bits ma ts. Zehn equals tsen."
 
 GRAMMAR WATCHLIST:
-- Dropping articles: Ich kaufe Apfel should be Ich kaufe einen Apfel
-- Wrong verb position: Heute ich gehe should be Heute gehe ich
-- Sein with action verbs: Ich bin gehen should be Ich gehe
-- Wrong case after prepositions: mit der Bus should be mit dem Bus
+- Dropping articles: "Ich kaufe Apfel" → "Ich kaufe einen Apfel"
+- Wrong verb position: "Heute ich gehe" → "Heute gehe ich"
+- Wrong case after prepositions: "mit der Bus" → "mit dem Bus"
 
 ${repeatedNote}
 
-ENCOURAGEMENT: If struggling say: Tension nahi leva — aa exactly che je badha A1 students sathe thay che! If they succeed after struggling say: Aa j joietu htu! Perfect!
-
-${openingNote}`;
+ENCOURAGEMENT: If struggling: "Tension nahi leva — aa exactly che je badha ${level} students sathe thay che!" If they succeed after struggling: "Aa j joietu htu! Perfect!"`;
 }
 
+// ── START SESSION ─────────────────────────────────────────────────────────────
+window.startSession = async () => {
+  // Resume AudioContext synchronously in click handler (Chrome requires this)
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+  } catch(e) {}
 
-// ════════════════════════════════════════════════════════════════
-// END-OF-SESSION EVALUATION PROMPT
-// This generates the detailed exam report students will screenshot
-// ════════════════════════════════════════════════════════════════
+  if (!isPaidStudent) {
+    if (trialCount >= MAX_TRIAL_CONVERSATIONS) { showTrialLimitPopup(); return; }
+    trialCount++;
+    updateDoc(doc(db, 'users', currentUser.uid), { aiTrialCount: trialCount }).catch(()=>{});
+    updateTrialBadge();
+  }
+
+  const sel = document.getElementById('scenario-select');
+  const opt = sel.options[sel.selectedIndex];
+  selectedScenario = { id: sel.value, title: opt.text.replace(/^[^\s]+ /,''), level: opt.dataset.level, role: opt.dataset.role, emoji: opt.dataset.emoji, desc: opt.dataset.desc };
+
+  // Reset tracking
+  conversationHistory = []; grammarErrors = []; wordsUsed = new Set(); pronunciationNotes = []; errorPatterns = {};
+  sessionSeconds = 20 * 60; addTimeUsed = false;
+
+  document.getElementById('setup-panel').style.display = 'none';
+  document.getElementById('session-panel').style.display = 'block';
+  document.getElementById('session-title').textContent = selectedScenario.title;
+  document.getElementById('session-subtitle').textContent = `${selectedScenario.level} · ${selectedScenario.role} · Live Voice`;
+  document.getElementById('role-avatar').textContent = selectedScenario.emoji;
+  document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
+  document.getElementById('role-description').textContent = selectedScenario.desc;
+  document.getElementById('add-time-btn').disabled = false;
+  document.getElementById('conversation-box').innerHTML = '';
+  updateTimer();
+
+  const micBtn = document.getElementById('mic-btn');
+  const textInput = document.getElementById('text-input');
+  if (selectedInputMode === 'voice') { textInput.style.display = 'none'; micBtn.style.display = 'flex'; }
+  else if (selectedInputMode === 'text') { micBtn.style.display = 'none'; }
+  else { textInput.style.display = ''; micBtn.style.display = 'flex'; }
+
+  sessionTimerInterval = setInterval(() => { sessionSeconds--; updateTimer(); if (sessionSeconds <= 0) endSession(); }, 1000);
+
+  // Connect to Gemini Live
+  showProcessing(true);
+  try {
+    if (!micStream) {
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 16000 } });
+    }
+    const resp = await fetch(`${WORKER_URL}/token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+    if (!resp.ok) throw new Error('Token request failed: ' + resp.status);
+    const { token } = await resp.json();
+
+    ws = new WebSocket(`${GEMINI_WS}?key=${encodeURIComponent(token)}`);
+    ws.binaryType = 'arraybuffer';
+
+    ws.onopen = async () => {
+      ws.send(JSON.stringify({
+        setup: {
+          model: MODEL,
+          generationConfig: {
+            responseModalities: ['AUDIO'],
+            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
+            thinkingConfig: { thinkingBudget: 0 }
+          },
+          systemInstruction: { parts: [{ text: buildSystemPrompt() }] }
+        }
+      }));
+      workletNode = await createWorklet(audioCtx, micStream);
+      sessionActive = true;
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const text = event.data instanceof ArrayBuffer ? new TextDecoder().decode(event.data) : event.data;
+        handleServerMessage(JSON.parse(text));
+      } catch(e) {}
+    };
+    ws.onerror = () => toast('Connection error. Please retry.');
+    ws.onclose = (e) => { if (sessionActive) { toast(`Connection closed (${e.code}). Session ended.`); cleanupLive(); } };
+  } catch(err) {
+    showProcessing(false);
+    toast(err.message || 'Failed to start. Please retry.');
+    goBackToSetup();
+  }
+};
+
+// ── AUDIO WORKLET (from NEW AURA — proven working) ─────────────────────────
+async function createWorklet(ctx, stream) {
+  const workletCode = document.getElementById('workletCode').textContent;
+  const blob = new Blob([workletCode], { type: 'application/javascript' });
+  const url = URL.createObjectURL(blob);
+  await ctx.audioWorklet.addModule(url);
+  URL.revokeObjectURL(url);
+
+  const source = ctx.createMediaStreamSource(stream);
+  const node = new AudioWorkletNode(ctx, 'mic-processor');
+  source.connect(node);
+  node.connect(ctx.destination);
+
+  node.port.onmessage = (e) => {
+    if (!sessionActive || micMuted || !ws || ws.readyState !== WebSocket.OPEN) return;
+    const b64 = btoa(String.fromCharCode(...new Uint8Array(e.data)));
+    ws.send(JSON.stringify({ realtimeInput: { mediaChunks: [{ mimeType: 'audio/pcm;rate=16000', data: b64 }] } }));
+  };
+  return node;
+}
+
+// ── AUDIO PLAYBACK (from NEW AURA — proven working) ─────────────────────────
+function enqueueAudio(pcmB64) {
+  audioQueue.push(pcmB64);
+  if (!isPlayingAudio) playNext();
+}
+async function playNext() {
+  if (audioQueue.length === 0) { isPlayingAudio = false; setLiveSpeakingUI(false); return; }
+  isPlayingAudio = true;
+  setLiveSpeakingUI(true);
+  const b64 = audioQueue.shift();
+  const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const samples = raw.length / 2;
+  const buffer = audioCtx.createBuffer(1, samples, 24000);
+  const channel = buffer.getChannelData(0);
+  const view = new DataView(raw.buffer);
+  for (let i = 0; i < samples; i++) channel[i] = view.getInt16(i * 2, true) / 32768;
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+  src.connect(audioCtx.destination);
+  src.onended = playNext;
+  src.start();
+}
+
+// ── HANDLE GEMINI MESSAGES ─────────────────────────────────────────────────
+function handleServerMessage(msg) {
+  if (msg.setupComplete !== undefined) {
+    showProcessing(false);
+    // Send opening greeting trigger
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        clientContent: {
+          turns: [{ role: 'user', parts: [{ text: `You are now live. Scenario: ${selectedScenario.title}. You are playing: ${selectedScenario.role}. Level: ${selectedScenario.level}. Begin — greet the student warmly as ${selectedScenario.role} with one German sentence then one Gujarati line, then start the scenario.` }] }],
+          turnComplete: true
+        }
+      }));
+      showThinking();
+    }
+  }
+
+  if (msg.serverContent) {
+    const sc = msg.serverContent;
+    if (sc.modelTurn?.parts) {
+      sc.modelTurn.parts.forEach(part => {
+        if (part.inlineData?.mimeType?.startsWith('audio/')) {
+          removeThinking();
+          showProcessing(false);
+          enqueueAudio(part.inlineData.data);
+        }
+        if (part.text) currentAiText += part.text;
+      });
+    }
+    if (sc.turnComplete) {
+      if (currentAiText.trim()) {
+        appendMessage('ai', currentAiText.trim());
+        conversationHistory.push({ role: 'assistant', content: currentAiText.trim() });
+        currentAiText = '';
+      }
+      removeThinking();
+    }
+    if (sc.interrupted) {
+      audioQueue = []; isPlayingAudio = false;
+      setLiveSpeakingUI(false);
+    }
+  }
+
+  if (msg.error) toast('API Error: ' + (msg.error.message || JSON.stringify(msg.error)));
+}
+
+// ── MIC TOGGLE ─────────────────────────────────────────────────────────────
+window.toggleMic = () => {
+  micMuted = !micMuted;
+  const btn = document.getElementById('mic-btn');
+  if (micMuted) {
+    btn.textContent = '🔇'; btn.classList.add('recording');
+    document.getElementById('recording-status').classList.remove('visible');
+  } else {
+    btn.textContent = '🎙️'; btn.classList.remove('recording');
+    document.getElementById('recording-status').classList.add('visible');
+    setTimeout(() => document.getElementById('recording-status').classList.remove('visible'), 2000);
+  }
+};
+
+// ── SEND TEXT MESSAGE ────────────────────────────────────────────────────────
+window.sendTextMessage = () => {
+  const inp = document.getElementById('text-input');
+  const text = inp.value.trim();
+  if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+  inp.value = '';
+  text.toLowerCase().split(/\s+/).forEach(w => { const c = w.replace(/[^a-zäöüß]/gi,''); if (c.length > 2) wordsUsed.add(c); });
+  appendMessage('user', text);
+  conversationHistory.push({ role: 'user', content: text });
+  showThinking();
+  ws.send(JSON.stringify({ clientContent: { turns: [{ role: 'user', parts: [{ text }] }], turnComplete: true } }));
+};
+
+// ── SESSION CONTROLS ─────────────────────────────────────────────────────────
+function updateTimer() {
+  const m = Math.floor(sessionSeconds / 60).toString().padStart(2, '0');
+  const s = (sessionSeconds % 60).toString().padStart(2, '0');
+  const el = document.getElementById('session-timer');
+  el.textContent = `${m}:${s}`;
+  el.classList.toggle('warning', sessionSeconds < 120);
+}
+
+window.addTime = () => {
+  if (addTimeUsed) { toast('You can only add time once.'); return; }
+  sessionSeconds += 10 * 60; addTimeUsed = true;
+  document.getElementById('add-time-btn').disabled = true;
+  toast('⏱️ +10 minutes added!');
+};
+
+window.changeScenario = async () => {
+  const all = [...document.getElementById('scenario-select').options];
+  const same = all.filter(o => o.dataset.level === selectedScenario.level && o.value !== selectedScenario.id);
+  if (!same.length) { toast('No more scenarios for this level!'); return; }
+  const pick = same[Math.floor(Math.random() * same.length)];
+  selectedScenario = { id: pick.value, title: pick.text.replace(/^[^\s]+ /,''), level: pick.dataset.level, role: pick.dataset.role, emoji: pick.dataset.emoji, desc: pick.dataset.desc };
+  conversationHistory = []; pronunciationNotes = []; errorPatterns = {};
+  document.getElementById('session-title').textContent = selectedScenario.title;
+  document.getElementById('session-subtitle').textContent = `${selectedScenario.level} · ${selectedScenario.role} · Live Voice`;
+  document.getElementById('role-avatar').textContent = selectedScenario.emoji;
+  document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
+  document.getElementById('role-description').textContent = selectedScenario.desc;
+  document.getElementById('conversation-box').innerHTML = '';
+  toast(`🔄 New scenario: ${selectedScenario.title}`);
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    showThinking();
+    ws.send(JSON.stringify({ clientContent: { turns: [{ role: 'user', parts: [{ text: `New scenario! You are now: ${selectedScenario.role}. Scenario: ${selectedScenario.title} — ${selectedScenario.desc}. Level: ${selectedScenario.level}. Greet the student as ${selectedScenario.role} and restart.` }] }], turnComplete: true } }));
+  }
+};
+
+window.goBackToSetup = () => {
+  clearInterval(sessionTimerInterval);
+  cleanupLive();
+  document.getElementById('session-panel').style.display = 'none';
+  document.getElementById('score-panel').style.display = 'none';
+  document.getElementById('setup-panel').style.display = 'block';
+  updateTrialBadge();
+};
+
+function cleanupLive() {
+  sessionActive = false;
+  if (ws) { try { ws.close(); } catch(e) {} ws = null; }
+  if (workletNode) { try { workletNode.disconnect(); } catch(e) {} workletNode = null; }
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (audioCtx) { try { audioCtx.close(); } catch(e) {} audioCtx = null; }
+  audioQueue = []; isPlayingAudio = false; currentAiText = '';
+  micMuted = false;
+  const btn = document.getElementById('mic-btn');
+  if (btn) { btn.textContent = '🎙️'; btn.classList.remove('recording'); }
+  setLiveSpeakingUI(false);
+  showProcessing(false);
+}
+
+// ── END SESSION + EVALUATION ─────────────────────────────────────────────────
+window.endSession = async () => {
+  clearInterval(sessionTimerInterval);
+  cleanupLive();
+  document.getElementById('session-panel').style.display = 'none';
+
+  if (conversationHistory.length < 2) {
+    document.getElementById('score-panel').style.display = 'block';
+    document.getElementById('score-num').textContent = '—';
+    document.getElementById('overall-feedback-text').textContent = 'Session was too short to evaluate. Please have at least a few exchanges with Aura.';
+    return;
+  }
+
+  document.getElementById('score-panel').style.display = 'block';
+  document.getElementById('score-num').textContent = '…';
+  document.getElementById('overall-feedback-text').textContent = 'Evaluating your session...';
+
+  const evalPrompt = buildEvaluationPrompt();
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': '', 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 1500, system: evalPrompt.system, messages: evalPrompt.messages })
+    });
+    // Fallback to Gemini via Worker for evaluation (no Anthropic key needed in browser)
+    throw new Error('use_gemini');
+  } catch(e) {
+    // Use Gemini REST for evaluation (simpler, uses existing worker key)
+    try {
+      const tokenResp = await fetch(`${WORKER_URL}/token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+      const { token } = await tokenResp.json();
+      const evalResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: evalPrompt.messages[0].content }] }], systemInstruction: { parts: [{ text: evalPrompt.system }] } })
+      });
+      const evalData = await evalResp.json();
+      const raw = evalData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const result = JSON.parse(clean);
+      renderScore(result);
+    } catch(err2) {
+      document.getElementById('overall-feedback-text').textContent = 'Could not generate evaluation. Please try again.';
+    }
+  }
+};
+
 function buildEvaluationPrompt() {
-  const transcript = conversationHistory
-    .map(m => `${m.role === 'user' ? 'STUDENT' : 'AURA'}: ${m.content}`)
-    .join('\n');
-
+  const transcript = conversationHistory.map(m => `${m.role === 'user' ? 'STUDENT' : 'AURA'}: ${m.content}`).join('\n');
   const wordList = [...wordsUsed].slice(0, 30).join(', ');
-
-  const pronNotesText = pronunciationNotes.length > 0
-    ? pronunciationNotes.map(n => `${n.word}: ${n.note}`).join(' | ')
-    : 'No pronunciation flags recorded';
-
-  const repeatedErrorsText = Object.entries(errorPatterns)
-    .filter(([_, count]) => count > 1)
-    .map(([type, count]) => `${type} (${count}x)`)
-    .join(', ') || 'none';
-
-  const skippedWords = window._skippedWords?.length
-    ? `Student chose to skip practicing: ${window._skippedWords.join(', ')}. Flag these specifically in the report.`
-    : '';
-
   return {
-    system: `You are an expert Goethe-Institut and TELC examiner evaluating a ${selectedScenario.level} German speaking exam.
-    
-The student is a Gujarati speaker preparing for their ${selectedScenario.level} exam.
-Evaluate this practice session STRICTLY but FAIRLY, exactly as a real examiner would.
-
-EXAM CRITERIA (Goethe/TELC ${selectedScenario.level} speaking):
-- Vocabulary: Range and accuracy of vocabulary for ${selectedScenario.level}
-- Grammar: Accuracy of grammatical structures expected at ${selectedScenario.level}
-- Fluency: Natural pace, no excessive hesitation, response length appropriate
-- Task Completion: Did the student achieve the communication goal of the scenario?
-
-SCORING GUIDANCE:
-- 90-100: Near-native accuracy for ${selectedScenario.level}. Almost no errors.
-- 75-89: Good performance. Minor errors that don't impede communication.
-- 60-74: Adequate. Errors present but student communicates successfully.
-- 45-59: Below standard. Frequent errors impede communication.
-- Below 45: Significant work needed.
-
-Be honest. Do not inflate scores. Students need accurate feedback to know if they're ready for the real exam.
-
-PRONUNCIATION ISSUES NOTED DURING SESSION: ${pronNotesText}
-REPEATED ERROR PATTERNS: ${repeatedErrorsText}
-GERMAN WORDS STUDENT USED: ${wordList}
-${skippedWords}
-
-Respond ONLY with this exact JSON (no text before or after):
+    system: `You are an expert Goethe-Institut examiner evaluating a ${selectedScenario?.level || 'A1'} German speaking practice session for a Gujarati speaker.
+Evaluate STRICTLY but FAIRLY. Respond ONLY with valid JSON, no text before or after:
 {
   "overall": <0-100>,
   "vocabulary": <0-100>,
   "grammar": <0-100>,
   "fluency": <0-100>,
   "taskCompletion": <0-100>,
-  "vocabComment": "<1 honest sentence about vocabulary performance>",
-  "grammarComment": "<1 honest sentence about grammar performance>",
-  "fluencyComment": "<1 honest sentence about fluency>",
-  "taskComment": "<1 honest sentence about whether they completed the task>",
-  "overallFeedback": "<3-4 sentences: honest overall assessment, what was strong, what must improve, exam readiness verdict>",
-  "examReadiness": "<one of: Not yet ready | Getting close | Ready | Well prepared>",
-  "top3fixes": [
-    "<most critical thing to fix before the exam>",
-    "<second most critical>",
-    "<third most critical>"
-  ],
-  "topErrors": [
-    {"original": "<what student said>", "corrected": "<correct version>", "note": "<why this matters for the exam>"},
-    {"original": "", "corrected": "", "note": ""},
-    {"original": "", "corrected": "", "note": ""}
-  ],
-  "pronunciationTips": [
-    {
-      "word": "<German word>",
-      "wrongWay": "<how Gujarati speakers typically mispronounce it>",
-      "rightWay": "<simple phonetic guide in English>",
-      "gujaratiNote": "<specific tip connecting to Gujarati phonetics>"
-    }
-  ],
-  "whatWentWell": "<2 sentences about genuine strengths — be specific, not vague>"
+  "vocabComment": "<1 sentence>",
+  "grammarComment": "<1 sentence>",
+  "fluencyComment": "<1 sentence>",
+  "taskComment": "<1 sentence>",
+  "overallFeedback": "<3-4 sentences: honest assessment, strengths, what to improve, exam readiness>",
+  "topErrors": [{"original": "", "corrected": "", "note": ""}],
+  "pronunciationTips": [{"word": "", "wrongWay": "", "rightWay": "", "gujaratiNote": ""}],
+  "whatWentWell": "<2 sentences about genuine strengths>"
 }`,
-    messages: [{
-      role: 'user',
-      content: `Here is the full session transcript:\n\n${transcript}\n\nPlease evaluate this student's ${selectedScenario.level} German speaking performance.`
-    }]
+    messages: [{ role: 'user', content: `Session transcript:\n\n${transcript}\n\nGerman words student used: ${wordList}\n\nEvaluate this ${selectedScenario?.level || 'A1'} German speaking performance.` }]
   };
 }
 
-
-function setAISpeaking(speaking) {
-  isSpeaking = speaking;
-  document.getElementById('ai-speaking-banner').classList.toggle('visible', speaking);
-  if (!speaking && !isRecording) setMicState('idle');
+function renderScore(result) {
+  const pct = Math.min(100, result.overall || 0);
+  document.getElementById('score-circle').style.setProperty('--pct', pct + '%');
+  document.getElementById('score-num').textContent = result.overall || '—';
+  document.getElementById('score-scenario-label').textContent = `${selectedScenario?.title || ''} · ${selectedScenario?.level || ''} · Live Voice`;
+  [['vocab', 'vocabulary'], ['grammar', 'grammar'], ['fluency', 'fluency'], ['task', 'taskCompletion']].forEach(([id, key]) => {
+    document.getElementById('bar-' + id).style.width = (result[key] || 0) + '%';
+    document.getElementById('score-' + id).textContent = (result[key] || 0) + '/100';
+    document.getElementById('comment-' + id).textContent = result[id + 'Comment'] || result[key + 'Comment'] || '';
+  });
+  document.getElementById('overall-feedback-text').textContent = result.overallFeedback || '';
+  const errorsList = document.getElementById('errors-list');
+  errorsList.innerHTML = '';
+  (result.topErrors || []).filter(e => e.original).forEach(e => {
+    errorsList.innerHTML += `<li><span class="err-orig">${escHtml(e.original)}</span> → <span class="err-correct">${escHtml(e.corrected)}</span><br><small>${escHtml(e.note)}</small></li>`;
+  });
+  const pronList = document.getElementById('pronunciation-tips-list');
+  const pronSection = document.getElementById('pronunciation-section');
+  if (result.pronunciationTips?.length) {
+    pronSection.style.display = 'block';
+    pronList.innerHTML = result.pronunciationTips.map(t => `<div class="pronunciation-tip"><span class="word">${escHtml(t.word)}</span><br>❌ ${escHtml(t.wrongWay)} → ✅ ${escHtml(t.rightWay)}<span class="gujarati-note">🇮🇳 ${escHtml(t.gujaratiNote)}</span></div>`).join('');
+  }
 }
 
-// ── UI helpers ────────────────────────────────────────────────────
-// UPGRADED: supports isTranscription flag for voice input display
-function appendMessage(who, text, feedback, isTranscription = false, explanation = null) {
+// ── UI HELPERS ─────────────────────────────────────────────────────────────────
+function appendMessage(role, text) {
   const box = document.getElementById('conversation-box');
   const div = document.createElement('div');
-  div.className = `msg ${who}`;
-  const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  const avatar = who === 'ai' ? (selectedScenario?.emoji || '🤖') : '👤';
-
-  // If this is a transcription, show the mic icon
-  const transcriptionBadge = isTranscription
-    ? `<div style="font-size:0.7rem; color:#9ca4b3; font-family:'JetBrains Mono',monospace; margin-top:0.2rem;">🎙️ Heard by Aura</div>`
-    : '';
-
-  let fb = '';
-
-  // Explanation card — tutor-mode Gujarati/English teaching, shown above feedback cards
-  if (explanation && who === 'ai') {
-    fb += `<div class="explanation-card">${escHtml(explanation)}</div>`;
-  }
-
-  if (feedback && inlineFeedbackOn && who === 'ai') {
-
-    // Show correction card ONLY if error is true AND corrected is a real string (not null)
-    if (feedback.error === true && feedback.corrected && feedback.corrected !== 'null') {
-      const repeatedBadge = feedback.isRepeatedMistake
-        ? `<div style="font-size:0.72rem; color:#ff8b8b; margin-bottom:0.4rem; font-weight:600;">⚠️ Repeated mistake — fix this before your exam!</div>`
-        : '';
-      fb += `<div class="feedback-correction-card">
-        <div class="corr-label">Correction</div>
-        ${repeatedBadge}
-        <span class="feedback-correction-wrong">❌ ${escHtml(feedback.originalSaid || '')}</span>
-        <span class="feedback-correction-right">✅ ${escHtml(feedback.corrected)}</span>
-        <div class="feedback-correction-note">${escHtml(feedback.note || '')}</div>
-      </div>`;
-    }
-
-    // Show praise ONLY if it's a real string (not null)
-    if (feedback.praise && feedback.praise !== 'null') {
-      fb += `<div class="feedback-praise-card">✓ ${escHtml(feedback.praise)}</div>`;
-    }
-
-    // Show pronunciation tip ONLY if both word and note are real strings (not null)
-    if (feedback.pronunciationWord && feedback.pronunciationWord !== 'null'
-      && feedback.pronunciationNote && feedback.pronunciationNote !== 'null') {
-      const gujNote = feedback.pronunciationGujaratiNote && feedback.pronunciationGujaratiNote !== 'null'
-        ? `<div style="margin-top:0.35rem;color:#9fe9ff;">ગુજરાતી: ${escHtml(feedback.pronunciationGujaratiNote)}</div>`
-        : '';
-      fb += `<div class="feedback-pronunciation">🗣️ <strong>${escHtml(feedback.pronunciationWord)}:</strong> ${escHtml(feedback.pronunciationNote)}${gujNote}</div>`;
-    }
-
-    const videoErrorKey = feedback.errorType || 'grammar';
-    const repeatCount = errorPatterns[videoErrorKey] || 0;
-    if (feedback.showVideoNudge && repeatCount >= 3 && feedback.videoChapter && feedback.videoChapter !== 'null') {
-      fb += `<div style="background:rgba(0,245,255,0.08); border:1px solid rgba(0,245,255,0.3); border-radius:8px; padding:0.75rem 1rem; margin-top:0.5rem; font-size:0.85rem;">
-        📚 <strong>Watch this first:</strong> ${escHtml(feedback.videoChapter)} — pachhi avine try karo, it will click!
-      </div>`;
-    }
-
-    if (feedback.askToContinue === true && feedback.practiceWord && feedback.practiceWord !== 'null') {
-      fb += `<div style="margin-top:0.75rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
-        <button onclick="startPracticeDrill('${escHtml(feedback.practiceWord)}')"
-          style="padding:0.55rem 1.1rem; background:rgba(0,245,255,0.15); border:1px solid rgba(0,245,255,0.4); color:#a4f9ff; border-radius:8px; cursor:pointer; font-size:0.85rem; font-family:'Space Grotesk',sans-serif;">
-          🔁 Practice this
-        </button>
-        <button onclick="moveOnFromError('${escHtml(feedback.practiceWord)}')"
-          style="padding:0.55rem 1.1rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); color:#a0aec0; border-radius:8px; cursor:pointer; font-size:0.85rem; font-family:'Space Grotesk',sans-serif;">
-          ➡️ Move on
-        </button>
-      </div>`;
-    }
-  }
-
-  div.innerHTML = `
-    <div class="msg-avatar">${avatar}</div>
-    <div>
-      <div class="msg-bubble">${escHtml(text)}</div>
-      ${transcriptionBadge}
-      ${fb}
-      <div class="msg-time">${now}</div>
-    </div>`;
-
+  div.className = 'msg ' + role;
+  const avatar = role === 'ai' ? (selectedScenario?.emoji || '🤖') : '👤';
+  const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  div.innerHTML = `<div class="msg-avatar">${avatar}</div><div><div class="msg-bubble">${escHtml(text)}</div><div class="msg-time">${now}</div></div>`;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 }
 
 function showThinking() {
+  removeThinking();
   const box = document.getElementById('conversation-box');
   const div = document.createElement('div');
-  div.className = 'msg ai';
-  div.id = 'thinking-indicator';
+  div.className = 'msg ai'; div.id = 'thinking-indicator';
   div.innerHTML = `<div class="msg-avatar">${selectedScenario?.emoji || '🤖'}</div><div class="msg-bubble"><div class="thinking"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div></div>`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
+  box.appendChild(div); box.scrollTop = box.scrollHeight;
 }
 function removeThinking() { document.getElementById('thinking-indicator')?.remove(); }
+
+function setLiveSpeakingUI(active) {
+  isSpeaking = active;
+  document.getElementById('ai-speaking-banner').classList.toggle('visible', active);
+}
+function showProcessing(active) {
+  document.getElementById('processing-status').classList.toggle('visible', active);
+}
+
 function escHtml(t) { return (t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>'); }
 function toast(msg, dur = 3500) {
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), dur);
+  const t = document.createElement('div'); t.className = 'toast-el'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), dur);
 }
 
-function setMicState(state) {
-  const micBtn = document.getElementById('mic-btn');
-  const recStatus = document.getElementById('recording-status');
-  const procStatus = document.getElementById('processing-status');
-  micBtn.classList.remove('recording', 'processing', 'waiting');
-  recStatus.classList.remove('visible');
-  procStatus.classList.remove('visible');
-  if (state === 'recording') {
-    micBtn.textContent = '⏹️';
-    micBtn.classList.add('recording');
-    recStatus.classList.add('visible');
-  } else if (state === 'processing') {
-    micBtn.textContent = '⏳';
-    micBtn.classList.add('processing');
-    procStatus.classList.add('visible');
-  } else if (state === 'waiting') {
-    micBtn.textContent = '🎙️';
-    micBtn.classList.add('waiting');
-  } else {
-    micBtn.textContent = '🎙️';
-  }
-}
-
-window.hideCorrectionAck = function() {
+window.hideCorrectionAck = () => {
   document.getElementById('correction-ack-wrap').style.display = 'none';
   document.getElementById('input-area').classList.remove('awaiting-ack');
-  playUISound('click');
 };
-
-window.goBackToSetup = () => {
-  clearInterval(sessionTimerInterval);
-  setAISpeaking(false);
-  document.getElementById('correction-ack-wrap').style.display = 'none';
-  document.getElementById('input-area').classList.remove('awaiting-ack');
-  if (isRecording) stopLiveSession();
-  document.getElementById('session-panel').style.display = 'none';
-  document.getElementById('score-panel').style.display = 'none';
-  document.getElementById('setup-panel').style.display = 'block';
-  updateTrialBadge();
-};
-
-// ── UI Sounds ─────────────────────────────────────────────────────
-let _uiAC = null;
-function getUIAudioCtx() {
-  if (!_uiAC || _uiAC.state === 'closed') _uiAC = new (window.AudioContext || window.webkitAudioContext)();
-  return _uiAC;
-}
-function playUISound(type) {
-  try {
-    const ac = getUIAudioCtx();
-    if (ac.state !== 'running') {
-      ac.resume().catch(() => {});
-      if (ac.state !== 'running') return;
-    }
-    const now = ac.currentTime;
-    if (type === 'start') {
-      [[440, 0.05], [554, 0.04], [660, 0.04]].forEach(([freq, g], i) => {
-        const o = ac.createOscillator(), gn = ac.createGain();
-        o.connect(gn); gn.connect(ac.destination);
-        o.type = 'sine'; o.frequency.value = freq;
-        gn.gain.setValueAtTime(0, now + i * 0.07);
-        gn.gain.linearRampToValueAtTime(g, now + i * 0.07 + 0.06);
-        gn.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.28);
-        o.start(now + i * 0.07); o.stop(now + i * 0.07 + 0.32);
-      });
-    } else if (type === 'send') {
-      const o = ac.createOscillator(), g = ac.createGain();
-      o.connect(g); g.connect(ac.destination);
-      o.type = 'sine'; o.frequency.setValueAtTime(600, now); o.frequency.linearRampToValueAtTime(880, now + 0.09);
-      g.gain.setValueAtTime(0.055, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-      o.start(now); o.stop(now + 0.2);
-    } else if (type === 'mic') {
-      const o = ac.createOscillator(), g = ac.createGain();
-      o.connect(g); g.connect(ac.destination);
-      o.type = 'triangle'; o.frequency.setValueAtTime(440, now); o.frequency.setValueAtTime(660, now + 0.05);
-      g.gain.setValueAtTime(0.05, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-      o.start(now); o.stop(now + 0.2);
-    } else {
-      const o = ac.createOscillator(), g = ac.createGain();
-      o.connect(g); g.connect(ac.destination);
-      o.type = 'sine'; o.frequency.setValueAtTime(880, now); o.frequency.linearRampToValueAtTime(660, now + 0.07);
-      g.gain.setValueAtTime(0.05, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-      o.start(now); o.stop(now + 0.15);
-    }
-  } catch(e) {}
-}
-
-// ── Session controls ──────────────────────────────────────────────
-window.changeScenario = async () => {
-  const all = [...document.getElementById('scenario-select').options];
-  const same = all.filter(o => o.dataset.level === selectedScenario.level && o.value !== selectedScenario.id);
-  if (!same.length) { toast('No more scenarios for this level!'); return; }
-  const pick = same[Math.floor(Math.random() * same.length)];
-  selectedScenario = { id: pick.value, title: pick.text, level: pick.dataset.level, role: pick.dataset.role, emoji: pick.dataset.emoji, desc: pick.dataset.desc };
-  conversationHistory = [];
-  pronunciationNotes = [];
-  errorPatterns = {};
-  document.getElementById('session-title').textContent = selectedScenario.title;
-  document.getElementById('session-subtitle').textContent = `${selectedScenario.level} · ${selectedScenario.role} · AI Partner`;
-  document.getElementById('role-avatar').textContent = selectedScenario.emoji;
-  document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
-  document.getElementById('role-description').textContent = selectedScenario.desc;
-  document.getElementById('conversation-box').innerHTML = '';
-  toast(`🔄 New scenario: ${selectedScenario.title}`);
-  await sendAIMessage({ isOpening: true });
-};
-
-window.addTime = () => {
-  if (addTimeUsed) { toast('You can only add time once.'); return; }
-  sessionSeconds += 10 * 60;
-  addTimeUsed = true;
-  document.getElementById('add-time-btn').disabled = true;
-  toast('⏱️ +10 minutes added!');
-};
-
-window.toggleFeedback = () => {
-  inlineFeedbackOn = !inlineFeedbackOn;
-  document.getElementById('feedback-btn').textContent = inlineFeedbackOn ? '💡 Toggle Feedback' : '💡 Feedback Off';
-  toast(inlineFeedbackOn ? '💡 Feedback ON' : '🔕 Feedback OFF');
-};
-
-// ── End session — UPGRADED evaluation ────────────────────────────
-window.endSession = async () => {
-  clearInterval(sessionTimerInterval);
-  setAISpeaking(false);
-  if (isRecording) stopLiveSession();
-
-  document.getElementById('session-panel').style.display = 'none';
-  document.getElementById('score-panel').style.display = 'block';
-  document.getElementById('score-scenario-label').textContent =
-    `${selectedScenario.title} · ${selectedScenario.level} · AI Partner`;
-
-  document.getElementById('overall-feedback-text').textContent = 'Aura is reviewing your session...';
-  try {
-    const evalPrompt = buildEvaluationPrompt();
-    // Server-side evaluation (keeps API key off the client)
-    const r = await fetch('https://aura-token-worker.jeetupadhyay1204.workers.dev/evaluate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system: evalPrompt.system,
-        messages: evalPrompt.messages
-      })
-    });
-    const d = await r.json();
-    const raw = d.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    const cleaned = raw.replace(/```json\s*/i, '').replace(/```\s*/i, '').replace(/```\s*$/, '').trim();
-    let ev;
-    try { ev = JSON.parse(cleaned); } catch (_) {
-      const m = cleaned.match(/\{[\s\S]*\}/);
-      ev = m ? JSON.parse(m[0]) : null;
-    }
-    displayScore(ev || { overall: 65, overallFeedback: 'Session complete! Keep practising every day.' });
-    if (ev) await saveSession(ev);
-  } catch (err) {
-    displayScore({ overall: 65, overallFeedback: 'Session complete! Great effort today.' });
-  }
-};
-// ── displayScore — UPGRADED with exam readiness + top 3 fixes ────
-function displayScore(e) {
-  const o = e.overall ?? 65;
-  const v = e.vocabulary ?? 60;
-  const g = e.grammar ?? 60;
-  const f = e.fluency ?? 60;
-  const t = e.taskCompletion ?? 60;
-
-  document.getElementById('score-num').textContent = o;
-  document.getElementById('score-circle').style.setProperty('--pct', `${o}%`);
-
-  const setBar = (bid, val, comment, cid, sid) => setTimeout(() => {
-    document.getElementById(bid).style.width = `${val}%`;
-    document.getElementById(sid).textContent = `${val}/100`;
-    document.getElementById(cid).textContent = comment || '';
-  }, 200);
-
-  setBar('bar-vocab', v, e.vocabComment, 'comment-vocab', 'score-vocab');
-  setBar('bar-grammar', g, e.grammarComment, 'comment-grammar', 'score-grammar');
-  setBar('bar-fluency', f, e.fluencyComment, 'comment-fluency', 'score-fluency');
-  setBar('bar-task', t, e.taskComment, 'comment-task', 'score-task');
-
-  // Overall feedback
-  document.getElementById('overall-feedback-text').textContent =
-    e.overallFeedback || 'Good effort! Keep practising every day.';
-
-  // NEW: Exam readiness badge
-  if (e.examReadiness) {
-    const overallSection = document.querySelector('.feedback-section');
-    const readinessColors = {
-      'Not yet ready': '#ff6b6b',
-      'Getting close': '#ffa94d',
-      'Ready': '#69db7c',
-      'Well prepared': '#00f5ff'
-    };
-    const color = readinessColors[e.examReadiness] || '#aaa';
-    const readinessEl = document.createElement('div');
-    readinessEl.style.cssText = `margin-top:1rem; padding:0.6rem 1rem; border-radius:6px; border:1px solid ${color}; color:${color}; font-family:'JetBrains Mono',monospace; font-size:0.85rem; text-align:center;`;
-    readinessEl.textContent = `🎯 Exam Readiness: ${e.examReadiness}`;
-    overallSection?.appendChild(readinessEl);
-  }
-
-  // NEW: Top 3 fixes section
-  if (e.top3fixes?.length) {
-    const fixesSection = document.createElement('div');
-    fixesSection.className = 'feedback-section';
-    fixesSection.style.borderColor = 'rgba(255,107,107,0.4)';
-    fixesSection.innerHTML = `<h3>🔴 Top 3 Things to Fix Before Your Exam</h3>
-      <ol style="padding-left:1.2rem; line-height:2; font-size:0.9rem;">
-        ${e.top3fixes.map(fix => `<li>${escHtml(fix)}</li>`).join('')}
-      </ol>`;
-    document.getElementById('score-panel').querySelector('.score-actions')?.before(fixesSection);
-  }
-
-  // NEW: What went well
-  if (e.whatWentWell) {
-    const wellSection = document.createElement('div');
-    wellSection.className = 'feedback-section';
-    wellSection.style.borderColor = 'rgba(105,219,124,0.4)';
-    wellSection.innerHTML = `<h3>🟢 What Went Well</h3><p>${escHtml(e.whatWentWell)}</p>`;
-    document.getElementById('score-panel').querySelector('.score-actions')?.before(wellSection);
-  }
-
-  // Pronunciation tips
-  if (e.pronunciationTips?.length) {
-    document.getElementById('pronunciation-section').style.display = 'block';
-    const list = document.getElementById('pronunciation-tips-list');
-    list.innerHTML = '';
-    e.pronunciationTips.forEach(tip => {
-      const d = document.createElement('div');
-      d.className = 'pronunciation-tip';
-      d.innerHTML = `<div style="margin-bottom:0.3rem"><span class="word">${escHtml(tip.word)}</span></div>
-        <div>❌ Often said as: <span style="color:var(--red);font-family:'DM Mono',monospace">${escHtml(tip.wrongWay || '—')}</span></div>
-        <div>✅ Should sound like: <span style="color:var(--forest);font-style:italic">${escHtml(tip.rightWay || '—')}</span></div>
-        ${tip.gujaratiNote ? `<span class="gujarati-note">💡 ${escHtml(tip.gujaratiNote)}</span>` : ''}`;
-      list.appendChild(d);
-    });
-  }
-
-  // Grammar errors list
-  const allErr = [...grammarErrors, ...(e.topErrors || [])];
-  const errList = document.getElementById('errors-list');
-  errList.innerHTML = '';
-  if (!allErr.length) {
-    errList.innerHTML = '<li>No major errors detected — excellent! 🎉</li>';
-  } else {
-    allErr.slice(0, 8).forEach(err => {
-      const li = document.createElement('li');
-      const repeatedBadge = err.isRepeated
-        ? `<span style="font-size:0.7rem; color:#ff8b8b; margin-left:0.4rem;">⚠️ repeated</span>`
-        : '';
-      li.innerHTML = `<span class="err-orig">${escHtml(err.original || '')}</span> → <span class="err-correct">${escHtml(err.corrected || '')}</span>${repeatedBadge}<br><small>${escHtml(err.note || '')}</small>`;
-      errList.appendChild(li);
-    });
-  }
-}
-
-async function saveSession(eval_) {
-  try {
-    await updateDoc(doc(db, 'users', currentUser.uid), {
-      aiSessionsCompleted: increment(1),
-      totalPoints: increment(30),
-      lastAiSession: serverTimestamp()
-    });
-    const { addDoc, collection } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
-    await addDoc(collection(db, 'aiSessions'), {
-      userId: currentUser.uid,
-      scenario: selectedScenario.id,
-      level: selectedScenario.level,
-      score: eval_.overall ?? 0,
-      examReadiness: eval_.examReadiness || null,
-      timestamp: serverTimestamp()
-    });
-  } catch(e) { console.error(e); }
-}
-
 window.practiceAgain = () => {
-  // Clean up any dynamically added sections before resetting
-  document.querySelectorAll('.feedback-section, .pronunciation-section').forEach((el, i) => {
-    if (i > 2) el.remove(); // keep original 2 static ones
-  });
   document.getElementById('score-panel').style.display = 'none';
   document.getElementById('setup-panel').style.display = 'block';
   updateTrialBadge();
 };
 window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
 
-// ── Aura Intro Animation (UNCHANGED) ─────────────────────────────
+</script>
+
+<!-- ═══ AURA INTRO ANIMATION ═══ -->
+<script>
 (function initAuraIntro() {
   const canvas = document.getElementById('aura-particles');
   const ctx = canvas.getContext('2d');
   function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
-
   const particles = Array.from({ length: 90 }, () => ({
     x: Math.random() * canvas.width, y: Math.random() * canvas.height,
     r: Math.random() * 1.4 + 0.3,
@@ -2276,7 +1090,6 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
     opacity: Math.random() * 0.55 + 0.15,
     color: Math.random() > 0.55 ? '0,240,255' : '255,0,170',
   }));
-
   let animId;
   function drawParticles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -2293,68 +1106,46 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
   function playIntroSound(ac) {
     try {
       const now = ac.currentTime;
-      [[55, 0.04], [110, 0.03], [165, 0.02], [220, 0.015], [329.63, 0.01]].forEach(([freq, g], i) => {
+      [[55,0.04],[110,0.03],[165,0.02],[220,0.015],[329.63,0.01]].forEach(([freq,g],i) => {
         const osc = ac.createOscillator(), gain = ac.createGain(), filt = ac.createBiquadFilter();
         filt.type = 'lowpass'; filt.frequency.value = 700;
         osc.connect(filt); filt.connect(gain); gain.connect(ac.destination);
         osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now);
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(g, now + 0.5 + i * 0.08);
-        gain.gain.linearRampToValueAtTime(g * 0.55, now + 3.5);
+        gain.gain.linearRampToValueAtTime(g, now + 0.5 + i*0.08);
+        gain.gain.linearRampToValueAtTime(g*0.55, now + 3.5);
         gain.gain.linearRampToValueAtTime(0, now + 4.8);
-        osc.start(now); osc.stop(now + 5);
+        osc.start(now); osc.stop(now+5);
       });
-      const sw = ac.createOscillator(), swg = ac.createGain(), swf = ac.createBiquadFilter();
-      swf.type = 'bandpass'; swf.Q.value = 6;
-      swf.frequency.setValueAtTime(40, now + 0.4); swf.frequency.linearRampToValueAtTime(900, now + 1.9);
-      sw.connect(swf); swf.connect(swg); swg.connect(ac.destination);
-      sw.type = 'sawtooth'; sw.frequency.setValueAtTime(25, now + 0.4); sw.frequency.linearRampToValueAtTime(280, now + 1.9);
-      swg.gain.setValueAtTime(0, now + 0.4); swg.gain.linearRampToValueAtTime(0.018, now + 0.9); swg.gain.linearRampToValueAtTime(0, now + 2.1);
-      sw.start(now + 0.4); sw.stop(now + 2.5);
     } catch(e) {}
   }
 
-  let soundPlayed = false;
-  let introAC = null;
-
+  let soundPlayed = false, introAC = null;
   function tryPlayIntroSound() {
-    if (!document.hasFocus()) return;
-    if (soundPlayed) return;
-    if (!introAC) {
-      try { introAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; }
-    }
+    if (!document.hasFocus() || soundPlayed) return;
+    if (!introAC) { try { introAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; } }
     if (introAC.state === 'suspended') {
       introAC.resume().then(() => { if (!soundPlayed) { soundPlayed = true; playIntroSound(introAC); } }).catch(() => {});
-    } else if (introAC.state === 'running') {
-      soundPlayed = true; playIntroSound(introAC);
-    }
+    } else if (introAC.state === 'running') { soundPlayed = true; playIntroSound(introAC); }
   }
 
   const introEl = document.getElementById('aura-intro');
-
-  // Desktop: any mouse movement fires the sound (feels fully automatic to the user).
   document.addEventListener('pointermove', tryPlayIntroSound, { once: true, passive: true });
-  // Any press/tap anywhere on the page (covers mobile tap & desktop click).
   document.addEventListener('pointerdown', tryPlayIntroSound, { once: true, passive: true });
-  // Keyboard users.
   document.addEventListener('keydown', tryPlayIntroSound, { once: true });
-  // Tab switch back to this page.
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') tryPlayIntroSound();
-  }, { once: true });
-  // Direct touch/click on intro overlay (original fallbacks kept).
   introEl.addEventListener('touchstart', tryPlayIntroSound, { once: true, passive: true });
   introEl.addEventListener('click', tryPlayIntroSound, { once: true });
 
-  function skipIntro() { const intro = document.getElementById('aura-intro'); 
-                        if (!intro || intro.classList.contains('fade-out')) return; 
-                        cancelAnimationFrame(animId); intro.classList.add('fade-out'); 
-                        setTimeout(() => intro.remove(), 720); } window.skipIntro = skipIntro; 
-  setTimeout(skipIntro, 4600); document.getElementById('aura-skip-btn').addEventListener('click', e => { e.stopPropagation(); 
-tryPlayIntroSound(); skipIntro(); }); 
-  introEl.addEventListener('click', skipIntro); 
+  function skipIntro() {
+    if (!introEl || introEl.classList.contains('fade-out')) return;
+    cancelAnimationFrame(animId); introEl.classList.add('fade-out');
+    setTimeout(() => introEl.remove(), 720);
+  }
+  window.skipIntro = skipIntro;
+  setTimeout(skipIntro, 4600);
+  document.getElementById('aura-skip-btn').addEventListener('click', e => { e.stopPropagation(); tryPlayIntroSound(); skipIntro(); });
+  introEl.addEventListener('click', skipIntro);
 })();
-  
 </script>
 </body>
 </html>

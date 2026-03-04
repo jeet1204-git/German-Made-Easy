@@ -43,6 +43,18 @@
   .trial-modal-card h2 { font-family: 'Playfair Display', serif; font-size: 1.75rem; color: var(--ink); margin-bottom: 0.75rem; }
   .trial-modal-card p { color: var(--muted); line-height: 1.65; margin-bottom: 1.75rem; }
   .trial-modal-btn { display: inline-block; padding: 0.85rem 2.25rem; background: var(--ink); color: var(--gold-light); text-decoration: none; font-weight: 700; font-size: 1.05rem; border-radius: 4px; }
+
+  /* Privacy / headphone warning modal */
+  #privacy-modal { display: none; position: fixed; inset: 0; background: rgba(5,10,21,0.88); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem; backdrop-filter: blur(6px); }
+  #privacy-modal.visible { display: flex; }
+  .privacy-card { background: linear-gradient(145deg, rgba(13,17,23,0.98), rgba(17,24,39,0.96)); border: 1px solid rgba(0,245,255,0.25); border-radius: 16px; padding: 2.5rem 2rem; max-width: 480px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(0,245,255,0.08); animation: fadeUp 0.4s ease both; }
+  .privacy-icon { font-size: 3rem; margin-bottom: 1rem; filter: drop-shadow(0 0 12px rgba(0,245,255,0.4)); }
+  .privacy-card h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; color: #edf2ff; margin-bottom: 0.6rem; }
+  .privacy-card p { color: #8fa3bb; line-height: 1.7; margin-bottom: 0.6rem; font-size: 0.92rem; }
+  .privacy-card .tip { background: rgba(0,245,255,0.06); border: 1px solid rgba(0,245,255,0.18); border-radius: 8px; padding: 0.75rem 1rem; margin: 1rem 0 1.5rem; font-size: 0.85rem; color: #b7f8ff; display: flex; align-items: center; gap: 0.6rem; text-align: left; }
+  .privacy-btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  .privacy-btn-primary { padding: 0.85rem 2rem; background: linear-gradient(135deg, rgba(0,245,255,0.9), rgba(123,97,255,0.9)); color: #050a15; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; }
+  .privacy-btn-secondary { padding: 0.85rem 1.5rem; background: transparent; color: #8fa3bb; border: 1px solid rgba(157,168,186,0.35); border-radius: 10px; cursor: pointer; font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; }
   .trial-counter-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); background: var(--cream); border: 1px solid var(--border); border-radius: 20px; padding: 0.2rem 0.7rem; }
   #trial-counter-wrap { display: none; text-align: center; margin-bottom: 0.75rem; }
   .topbar { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; border-bottom: 1px solid var(--border); background: rgba(250,246,239,0.9); backdrop-filter: blur(8px); }
@@ -491,6 +503,24 @@
   </div>
 </div>
 
+<!-- PRIVACY / HEADPHONE WARNING MODAL -->
+<div id="privacy-modal">
+  <div class="privacy-card">
+    <div class="privacy-icon">🎧</div>
+    <h2>One quick thing before we start</h2>
+    <p>AURA will speak to you out loud — in German, Gujarati, Hindi, and English. If you're in a public place, people around you <em>will</em> hear the conversation.</p>
+    <div class="tip">
+      <span>💡</span>
+      <span><strong>Recommended:</strong> Use headphones or earphones for a private, distortion-free experience — especially in trains, cafés, or shared spaces.</span>
+    </div>
+    <p style="font-size:0.8rem; color:#5a7a9a;">Your microphone will also be active. AURA can hear you speak.</p>
+    <div class="privacy-btns">
+      <button class="privacy-btn-primary" onclick="confirmPrivacyAndStart()">✓ I understand — Start Aura</button>
+      <button class="privacy-btn-secondary" onclick="document.getElementById('privacy-modal').classList.remove('visible')">← Go back</button>
+    </div>
+  </div>
+</div>
+
 <!-- TRIAL LIMIT MODAL -->
 <div id="trial-limit-modal">
   <div class="trial-modal-card">
@@ -620,57 +650,77 @@ function buildSystemPrompt() {
     ? 'REPEATED THIS SESSION: ' + repeatedCtx + '. When this error occurs again, say in Gujarati: Aa j bhul pharthi — yaad rakho: [correction].'
     : '';
 
-  return `You are AURA, a warm expert live German tutor for Gujarati-speaking students preparing for ${examName}.
+  return `You are AURA — Advanced Understanding and Response Assistant — built exclusively by German Made Easy for Gujarati-speaking students learning German.
+
+YOUR SELF-INTRODUCTION (use this whenever a student asks who you are or what you do):
+"Namaste! Kem cho! I am AURA, your personal German tutor from German Made Easy. I speak Gujarati, Hindi, English, and German fluently, and I am specifically designed to help Gujarati students prepare for their ${examName} German exam. Think of me as your tutor who is always available, always patient, and always speaks your language. Chalo, let us begin!"
+
+YOUR SCOPE — ABSOLUTE RULE:
+You exist ONLY to teach German to Gujarati-speaking students. You must refuse any conversation outside German language learning — politely, warmly, but firmly.
+If a student discusses: politics, news, recipes, movies, cricket, general knowledge, philosophy, any other language, personal advice, or any topic unrelated to German learning — you MUST say something like:
+"Ha ha, samjayo — pan mane maafi aapjo! I am only designed to help with German language learning. I cannot go beyond that scope. Chalo, aapna practice par pachha jaiye — ${title} scenario ready che!"
+You must redirect EVERY time. Do not answer off-topic questions even "just once."
+
+IDENTITY: Your mother tongues are Hindi, English, and Gujarati. You are a C2-level German expert. You feel like a real tutor sitting across from the student — warm, patient, and guiding. NOT a cold chatbot.
+
+CURRENT SESSION:
 You are playing the role of: ${role}
 Scenario: ${title} — ${desc}
+Student level: ${level} (${examName})
 
-IDENTITY: Your mother tongues are Hindi, English, and Gujarati. You are C2-level expert in German. You feel like a real tutor sitting across from the student — warm, patient, and guiding. NOT a cold chatbot.
+CRITICAL OUTPUT RULE: This is a LIVE VOICE conversation. Speak naturally in full sentences. NEVER output JSON, code, or bullet lists. Keep responses concise and conversational — suited for voice.
 
-CRITICAL OUTPUT RULE: This is a LIVE VOICE conversation. Speak naturally in full sentences. NEVER output JSON, code, or bullet lists. Keep responses conversational and appropriately concise for voice.
-
-OPENING: Greet warmly as ${role} — first one German sentence, then one warm Gujarati line so the student feels at home. Then begin the scenario.
+OPENING: Greet warmly as ${role} — first one simple German sentence (${level} appropriate), then one warm Gujarati line so the student feels at home. Then begin the scenario immediately.
 
 LANGUAGE SWITCHING:
 - GERMAN: when in character as ${role} doing roleplay
 - ENGLISH + GUJARATI MIXED: when explaining grammar, pronunciation, answering doubts
 - GUJARATI ONLY: when encouraging a struggling student
 
-CRITICAL PRONUNCIATION RULE: When switching between German and Gujarati in one response, pronounce each language with its own phonetics. NEVER apply Gujarati phonetics to German words. The word mokhte does not exist in German — it is mochte spoken with a soft German ch from the throat, not kh.
+CRITICAL PRONUNCIATION RULE: When switching between German and Gujarati, pronounce each language with its own native phonetics. NEVER apply Gujarati phonetics to German words. "Möchte" is NOT "mokhte" — it uses a soft German throat ch, never kh.
 
 Never use Gujarati script characters. Only English transliteration. Write "eno matlab" not the script version.
 
-WHO THE STUDENT IS: A Gujarati speaker at ${level} level. They will mix Gujarati, English, German — this is completely normal. They may say "mane nathi khabar how to say X". Always respond to the meaning, not the language used.
+WHO THE STUDENT IS: A Gujarati speaker at ${level} level. They will mix Gujarati, English, German mid-sentence — this is completely normal. Always respond to the meaning, never judge the language used.
 
 TWO MODES:
-
-MODE 1 — SCENARIO PRACTICE: Stay in character as ${role}. Speak German at ${level} level. After their turn, briefly and warmly correct up to 2 errors in English/Gujarati, then continue the scenario.
-
-MODE 2 — TUTOR MODE: When student asks any question or seems confused, drop the ${role} character. Explain: (1) Acknowledge warmly in Gujarati, (2) Explain the rule simply, (3) Give a German example, (4) Connect to Gujarati phonetics, (5) Say "Hve tame try karo." Then resume scenario.
+MODE 1 — SCENARIO PRACTICE: Stay in character as ${role}. Speak German at ${level} level. After their turn, briefly and warmly correct up to 2 errors verbally in English/Gujarati, then continue the scenario.
+MODE 2 — TUTOR MODE: When student asks any German question or seems confused, drop the ${role} character. Explain: (1) Acknowledge warmly in Gujarati, (2) Explain the rule simply, (3) Give a German example, (4) Connect to Gujarati phonetics if relevant, (5) Say "Hve tame try karo." Then say "Chalo, scenario par pachha jaiye" and resume.
 
 CORRECTION RULES:
 - Max 2 corrections per turn, never more
-- Prioritize: verb errors first, then articles, then vocabulary
-- If something was perfect, say so specifically in Gujarati (e.g. "Bahuj saras! Article bilkul sahi vaapryo!")
-- Never say "Great job" generically — always be specific
+- Prioritize: verb position errors first, then articles, then vocabulary
+- If something was perfect, say so specifically in Gujarati: "Bahuj saras! Article bilkul sahi vaapryo!"
+- Never say "Great job" generically — always be specific about what was correct
 
 PRONUNCIATION WATCH:
-- ich said as ish: "Gujarati ma sh nathi — aa soft h jaeva sound che throat thi. Practice: ich, ich, ich."
-- mochte as mokhte: "German ch here is soft throat sound, NOT kh. Mochte, mochte."
-- w as hard v: "Bilkul right! German w sounds like Gujarati v. Keep going."
-- z as j: "German z is ts — jenu ke bits ma ts. Zehn equals tsen."
+- ich as ish: "Gujarati ma aa sh sound nathi — throat thi soft h jaevo sound che. ich, ich, ich."
+- möchte as mokhte: "German ch soft throat sound che, kh nathi. Möchte, möchte."
+- w as hard v: "Bilkul right direction! German w is like Gujarati v."
+- z as j: "German z is ts sound — zehn equals tsen."
 
 GRAMMAR WATCHLIST:
 - Dropping articles: "Ich kaufe Apfel" → "Ich kaufe einen Apfel"
 - Wrong verb position: "Heute ich gehe" → "Heute gehe ich"
-- Wrong case after prepositions: "mit der Bus" → "mit dem Bus"
+- Wrong case: "mit der Bus" → "mit dem Bus"
 
 ${repeatedNote}
 
-ENCOURAGEMENT: If struggling: "Tension nahi leva — aa exactly che je badha ${level} students sathe thay che!" If they succeed after struggling: "Aa j joietu htu! Perfect!"`;
+ENCOURAGEMENT: If struggling: "Tension nahi leva — aa exactly che je badha ${level} students sathe thay che!" If they nail it after struggling: "Aa j joietu htu! Perfect!"`;
 }
 
 // ── START SESSION ─────────────────────────────────────────────────────────────
 window.startSession = async () => {
+  // Show privacy/headphone warning first
+  document.getElementById('privacy-modal').classList.add('visible');
+};
+
+window.confirmPrivacyAndStart = async () => {
+  document.getElementById('privacy-modal').classList.remove('visible');
+  await _doStartSession();
+};
+
+async function _doStartSession() {
   // Resume AudioContext synchronously in click handler (Chrome requires this)
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
@@ -729,7 +779,7 @@ window.startSession = async () => {
         setup: {
           model: MODEL,
           generationConfig: {
-            responseModalities: ['AUDIO'],
+            responseModalities: ['AUDIO', 'TEXT'],
             speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
             thinkingConfig: { thinkingBudget: 0 }
           },
@@ -1106,6 +1156,7 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
   function playIntroSound(ac) {
     try {
       const now = ac.currentTime;
+      // Harmonic drone tones
       [[55,0.04],[110,0.03],[165,0.02],[220,0.015],[329.63,0.01]].forEach(([freq,g],i) => {
         const osc = ac.createOscillator(), gain = ac.createGain(), filt = ac.createBiquadFilter();
         filt.type = 'lowpass'; filt.frequency.value = 700;
@@ -1117,24 +1168,41 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
         gain.gain.linearRampToValueAtTime(0, now + 4.8);
         osc.start(now); osc.stop(now+5);
       });
+      // Frequency sweep (the "whoosh" that makes it cinematic)
+      const sw = ac.createOscillator(), swg = ac.createGain(), swf = ac.createBiquadFilter();
+      swf.type = 'bandpass'; swf.Q.value = 6;
+      swf.frequency.setValueAtTime(40, now + 0.4);
+      swf.frequency.linearRampToValueAtTime(900, now + 1.9);
+      sw.connect(swf); swf.connect(swg); swg.connect(ac.destination);
+      sw.type = 'sawtooth';
+      sw.frequency.setValueAtTime(25, now + 0.4);
+      sw.frequency.linearRampToValueAtTime(280, now + 1.9);
+      swg.gain.setValueAtTime(0, now + 0.4);
+      swg.gain.linearRampToValueAtTime(0.022, now + 0.9);
+      swg.gain.linearRampToValueAtTime(0, now + 2.1);
+      sw.start(now + 0.4); sw.stop(now + 2.5);
     } catch(e) {}
   }
 
   let soundPlayed = false, introAC = null;
   function tryPlayIntroSound() {
-    if (!document.hasFocus() || soundPlayed) return;
+    if (soundPlayed) return;
     if (!introAC) { try { introAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; } }
     if (introAC.state === 'suspended') {
       introAC.resume().then(() => { if (!soundPlayed) { soundPlayed = true; playIntroSound(introAC); } }).catch(() => {});
-    } else if (introAC.state === 'running') { soundPlayed = true; playIntroSound(introAC); }
+    } else {
+      soundPlayed = true; playIntroSound(introAC);
+    }
   }
 
   const introEl = document.getElementById('aura-intro');
-  document.addEventListener('pointermove', tryPlayIntroSound, { once: true, passive: true });
-  document.addEventListener('pointerdown', tryPlayIntroSound, { once: true, passive: true });
-  document.addEventListener('keydown', tryPlayIntroSound, { once: true });
+  // Fire on any interaction — the overlay takes up the whole screen so any gesture hits it
+  introEl.addEventListener('pointerdown', tryPlayIntroSound, { passive: true });
   introEl.addEventListener('touchstart', tryPlayIntroSound, { once: true, passive: true });
-  introEl.addEventListener('click', tryPlayIntroSound, { once: true });
+  document.addEventListener('pointermove', tryPlayIntroSound, { once: true, passive: true });
+  document.addEventListener('keydown', tryPlayIntroSound, { once: true });
+  // Also auto-attempt immediately (works if page was already interacted with)
+  tryPlayIntroSound();
 
   function skipIntro() {
     if (!introEl || introEl.classList.contains('fade-out')) return;

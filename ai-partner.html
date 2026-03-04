@@ -779,10 +779,11 @@ async function _doStartSession() {
         setup: {
           model: MODEL,
           generationConfig: {
-            responseModalities: ['AUDIO', 'TEXT'],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
-            thinkingConfig: { thinkingBudget: 0 }
+            responseModalities: ['AUDIO'],
+            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } }
           },
+          inputAudioTranscription: {},
+          outputAudioTranscription: {},
           systemInstruction: { parts: [{ text: buildSystemPrompt() }] }
         }
       }));
@@ -853,7 +854,6 @@ async function playNext() {
 function handleServerMessage(msg) {
   if (msg.setupComplete !== undefined) {
     showProcessing(false);
-    // Send opening greeting trigger
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({
         clientContent: {
@@ -867,6 +867,8 @@ function handleServerMessage(msg) {
 
   if (msg.serverContent) {
     const sc = msg.serverContent;
+
+    // Audio chunks — play immediately
     if (sc.modelTurn?.parts) {
       sc.modelTurn.parts.forEach(part => {
         if (part.inlineData?.mimeType?.startsWith('audio/')) {
@@ -874,9 +876,29 @@ function handleServerMessage(msg) {
           showProcessing(false);
           enqueueAudio(part.inlineData.data);
         }
+        // Fallback: text parts from modelTurn (not all models send transcription)
         if (part.text) currentAiText += part.text;
       });
     }
+
+    // Output transcription — AURA's words as text on screen
+    if (sc.outputTranscription?.text) {
+      currentAiText += sc.outputTranscription.text;
+    }
+
+    // Input transcription — student's spoken words on screen
+    if (sc.inputTranscription?.text) {
+      const spoken = sc.inputTranscription.text.trim();
+      if (spoken) {
+        appendMessage('user', spoken);
+        conversationHistory.push({ role: 'user', content: spoken });
+        spoken.toLowerCase().split(/\s+/).forEach(w => {
+          const c = w.replace(/[^a-zäöüß]/gi,'');
+          if (c.length > 2) wordsUsed.add(c);
+        });
+      }
+    }
+
     if (sc.turnComplete) {
       if (currentAiText.trim()) {
         appendMessage('ai', currentAiText.trim());
@@ -1187,7 +1209,10 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
   let soundPlayed = false, introAC = null;
   function tryPlayIntroSound() {
     if (soundPlayed) return;
-    if (!introAC) { try { introAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; } }
+    // Create AudioContext only inside a user gesture — Chrome policy
+    try {
+      if (!introAC) introAC = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) { return; }
     if (introAC.state === 'suspended') {
       introAC.resume().then(() => { if (!soundPlayed) { soundPlayed = true; playIntroSound(introAC); } }).catch(() => {});
     } else {
@@ -1196,13 +1221,11 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
   }
 
   const introEl = document.getElementById('aura-intro');
-  // Fire on any interaction — the overlay takes up the whole screen so any gesture hits it
-  introEl.addEventListener('pointerdown', tryPlayIntroSound, { passive: true });
+  // The intro overlay covers the entire screen — first touch/click/move fires the sound
+  introEl.addEventListener('pointerdown', tryPlayIntroSound, { once: true, passive: true });
   introEl.addEventListener('touchstart', tryPlayIntroSound, { once: true, passive: true });
   document.addEventListener('pointermove', tryPlayIntroSound, { once: true, passive: true });
   document.addEventListener('keydown', tryPlayIntroSound, { once: true });
-  // Also auto-attempt immediately (works if page was already interacted with)
-  tryPlayIntroSound();
 
   function skipIntro() {
     if (!introEl || introEl.classList.contains('fade-out')) return;

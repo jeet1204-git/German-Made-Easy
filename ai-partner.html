@@ -917,7 +917,7 @@ const firebaseConfig = {
 };
 
 // ── NEW: Ephemeral token endpoint on Worker ──────────────────────
-const EPHEMERAL_TOKEN_URL = 'https://aura-worker.jeetupadhyay1204.workers.dev/token';
+const EPHEMERAL_TOKEN_URL = 'https://aura-token-worker.jeetupadhyay1204.workers.dev';
 // Ephemeral tokens are only compatible with the Live API in v1alpha.
 // When authenticating via ephemeral tokens, use the *Constrained* bidi method.
 // ✅ Ephemeral tokens REQUIRE v1alpha + BidiGenerateContentConstrained
@@ -1499,7 +1499,7 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
       // Ephemeral tokens use access_token param
       // CRITICAL: token format should be "authTokens/..." 
       console.log('Got ephemeral token:', token.substring(0, 20) + '...');
-      const wsUrl = `${GEMINI_LIVE_WS}?access_token=${token}`;
+const wsUrl = `${GEMINI_LIVE_WS}?key=${token}`;
       const ws = new WebSocket(wsUrl);
       liveSocket = ws;
 
@@ -1552,7 +1552,7 @@ function sendLiveSetup(systemPromptText) {
     setup: {
       model: 'models/gemini-2.5-flash-native-audio-preview-12-2025',
       generationConfig: {
-        responseModalities: ['AUDIO', 'TEXT'],
+        responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
             prebuiltVoiceConfig: {
@@ -1571,8 +1571,12 @@ function sendLiveSetup(systemPromptText) {
 }
 function handleLiveSocketMessage(event) {
   let response;
-  try { response = JSON.parse(event.data); } catch (_) { return; }
-
+  try {
+    const text = event.data instanceof ArrayBuffer
+      ? new TextDecoder().decode(event.data)
+      : event.data;
+    response = JSON.parse(text);
+  } catch (_) { return; }
   // Log everything from Gemini for debugging
   console.log('Gemini msg keys:', Object.keys(response));
 
@@ -2110,7 +2114,7 @@ window.endSession = async () => {
   try {
     const evalPrompt = buildEvaluationPrompt();
     // Server-side evaluation (keeps API key off the client)
-    const r = await fetch('https://aura-worker.jeetupadhyay1204.workers.dev/evaluate', {
+    const r = await fetch('https://aura-token-worker.jeetupadhyay1204.workers.dev/evaluate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

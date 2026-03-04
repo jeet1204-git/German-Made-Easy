@@ -1510,7 +1510,7 @@ function handleLiveSocketMessage(event) {
       clientContent: {
         turns: [{
           role: 'user',
-          parts: [{ text: 'Please start the conversation now by greeting the student warmly in character.' }]
+parts: [{ text: `You are now live. The scenario is: ${selectedScenario.title}. You are playing: ${selectedScenario.role}. Level: ${selectedScenario.level}. Begin now — greet the student warmly as ${selectedScenario.role}, first in one German sentence, then one warm Gujarati line so they feel at home.` }]
         }],
         turnComplete: true
       }

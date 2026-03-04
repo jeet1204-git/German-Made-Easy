@@ -579,7 +579,7 @@ let selectedLevel = 'A1', selectedInputMode = 'both', selectedScenario = null;
 let conversationHistory = [], grammarErrors = [], wordsUsed = new Set(), pronunciationNotes = [], errorPatterns = {};
 let sessionTimerInterval = null, sessionSeconds = 20 * 60, addTimeUsed = false;
 // Live WS state (from NEW AURA - the working engine)
-let ws = null, audioCtx = null, micStream = null, workletNode = null;
+let ws = null, audioCtx = null, micCtx = null, micStream = null, workletNode = null;
 let sessionActive = false, micMuted = false;
 let audioQueue = [], isPlayingAudio = false, currentAiText = '';
 let isSpeaking = false, isRecording = false;

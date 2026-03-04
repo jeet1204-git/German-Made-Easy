@@ -2320,6 +2320,7 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
   let introAC = null;
 
   function tryPlayIntroSound() {
+    if (!document.hasFocus()) return;
     if (soundPlayed) return;
     if (!introAC) {
       try { introAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; }

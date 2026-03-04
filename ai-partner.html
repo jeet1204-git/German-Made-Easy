@@ -658,8 +658,8 @@ async function startSession(){
       const err = await resp.json().catch(()=>({}));
       throw new Error(err.error || `Token request failed: ${resp.status}`);
     }
-    const { token } = await resp.json();
-
+const data = await resp.json();
+const { token } = data;
     setStatus('Opening connection…');
 
     // 4. Open WebSocket to Gemini Live

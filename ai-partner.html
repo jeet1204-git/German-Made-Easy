@@ -443,8 +443,8 @@ registerProcessor('mic-processor', MicProcessor);
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 // Replace with your deployed Cloudflare Worker URL
 const WORKER_URL = 'https://aura-token-worker.jeetupadhyay1204.workers.dev';
-  const GEMINI_WS  = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained';
-const MODEL = 'models/gemini-2.5-flash-native-audio-preview-12-2025';
+const GEMINI_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
+  const MODEL = 'models/gemini-2.5-flash-native-audio-preview-12-2025';
   const MAX_MINUTES = 300; // 5 hours total
 const MAX_SESSIONS = 10;
 const SESSION_MINUTES = 30;

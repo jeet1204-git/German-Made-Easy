@@ -1096,13 +1096,25 @@ window.onScenarioChange = () => {
 
 // ── Start session ─────────────────────────────────────────────────
 window.startSession = async () => {
-  // Unlock audio FIRST — synchronously, directly in the click handler
-  const ac = new (window.AudioContext || window.webkitAudioContext)();
-  ac.resume();
-  _sharedAC = ac;
-  liveAudioContext = ac;
-  audioUnlocked = true;
-  
+  // ✅ Create and resume AudioContext FIRST — synchronously in the click handler
+  // Chrome requires this to happen directly inside a user gesture (click)
+  try {
+    if (!liveAudioContext) {
+      liveAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (liveAudioContext.state === 'suspended') {
+      await liveAudioContext.resume();
+    }
+    _sharedAC = liveAudioContext;
+    audioUnlocked = true;
+    // Play a silent buffer to fully unlock audio routing
+    const buf = liveAudioContext.createBuffer(1, 1, 22050);
+    const src = liveAudioContext.createBufferSource();
+    src.buffer = buf;
+    src.connect(liveAudioContext.destination);
+    src.start(0);
+  } catch(e) { console.warn('AudioContext unlock failed:', e); }
+
   playUISound('start');
   if (!isPaidStudent) {
     if (trialCount >= MAX_TRIAL_CONVERSATIONS) { showTrialLimitPopup(); return; }
@@ -1113,11 +1125,6 @@ window.startSession = async () => {
   }
 
   unlockAudio();
-  // Initialize liveAudioContext on session start so audio playback works for text turns
-if (!liveAudioContext) {
-  liveAudioContext = new (window.AudioContext || window.webkitAudioContext)();
-}
-if (liveAudioContext.state === 'suspended') liveAudioContext.resume().catch(() => {});
 
   const sel = document.getElementById('scenario-select');
   const opt = sel.options[sel.selectedIndex];
@@ -1502,15 +1509,20 @@ function handleLiveSocketMessage(event) {
   let response;
   try { response = JSON.parse(event.data); } catch (_) { return; }
 
-  // setupComplete fires once after setup — this is when Aura greets first
+  // Log everything from Gemini for debugging
+  console.log('Gemini msg keys:', Object.keys(response));
+
+  // ✅ setupComplete — Gemini is ready, NOW send the opening greeting
   if (response.setupComplete !== undefined) {
-    console.log('Gemini setup complete — Aura greeting now');
+    console.log('✅ Gemini setupComplete received — sending opening greeting');
+    removeThinking();
+    showThinking();
     if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN) return;
     liveSocket.send(JSON.stringify({
       clientContent: {
         turns: [{
           role: 'user',
-parts: [{ text: `You are now live. The scenario is: ${selectedScenario.title}. You are playing: ${selectedScenario.role}. Level: ${selectedScenario.level}. Begin now — greet the student warmly as ${selectedScenario.role}, first in one German sentence, then one warm Gujarati line so they feel at home.` }]
+          parts: [{ text: `You are now live. Scenario: ${selectedScenario.title}. You are playing: ${selectedScenario.role}. Level: ${selectedScenario.level}. Begin now — greet the student warmly as ${selectedScenario.role}, first in one German sentence then one warm Gujarati line so they feel at home.` }]
         }],
         turnComplete: true
       }
@@ -1527,10 +1539,14 @@ parts: [{ text: `You are now live. The scenario is: ${selectedScenario.title}. Y
       const base64 = part?.inlineData?.data;
       if (base64) {
         if (!liveFirstChunkLogged) {
-          console.log('AURA first audio chunk received');
+          console.log('✅ AURA first audio chunk received — playing');
           liveFirstChunkLogged = true;
         }
         document.getElementById('processing-status').classList.remove('visible');
+        // Ensure AudioContext is running before playing
+        if (liveAudioContext && liveAudioContext.state === 'suspended') {
+          liveAudioContext.resume().catch(() => {});
+        }
         const pcmBytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
         livePlaybackQueue.push(pcm16BytesToFloat32(pcmBytes));
         processLivePlaybackQueue();
@@ -1539,6 +1555,7 @@ parts: [{ text: `You are now live. The scenario is: ${selectedScenario.title}. Y
   }
 
   if (isLiveTurnComplete(response)) {
+    console.log('✅ Gemini turn complete');
     const finalText = liveAssistantTextBuffer.trim();
     if (finalText) {
       appendMessage('ai', finalText, null, false, null);
@@ -1551,13 +1568,19 @@ parts: [{ text: `You are now live. The scenario is: ${selectedScenario.title}. Y
   
 async function sendAIMessage({ isOpening = false, text = null } = {}) {
   const userText = (text || '').trim();
-  
-  // Opening is now triggered by setupComplete, not here
+
+  // Opening greeting is triggered by setupComplete handler — just open the socket here
   if (isOpening) {
-    await ensureLiveSocketOpen(buildSystemPrompt(true));
+    showThinking();
+    try {
+      await ensureLiveSocketOpen(buildSystemPrompt(true));
+    } catch (err) {
+      removeThinking();
+      console.error('sendAIMessage (opening) failed:', err);
+    }
     return;
   }
-  
+
   if (!userText) return;
   showThinking();
   try {

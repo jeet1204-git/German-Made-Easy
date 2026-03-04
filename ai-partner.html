@@ -1332,10 +1332,10 @@ function sendLiveAudioFrame() {
 
   liveSocket.send(JSON.stringify({
     realtimeInput: {
-      mediaChunks: [{
-        mimeType: 'audio/l16;rate=16000',
-        data: base64
-      }]
+      audio: {
+        data: base64,
+        mimeType: 'audio/pcm;rate=16000'
+      }
     }
   }));
 }
@@ -1410,7 +1410,7 @@ function processLivePlaybackQueue() {
   if (!liveAudioContext || livePlaybackActive || !livePlaybackQueue.length) return;
 
   const chunk = livePlaybackQueue.shift();
-  const buffer = liveAudioContext.createBuffer(1, chunk.length, 16000);
+  const buffer = liveAudioContext.createBuffer(1, chunk.length, 24000);
   buffer.copyToChannel(chunk, 0);
 
   const src = liveAudioContext.createBufferSource();

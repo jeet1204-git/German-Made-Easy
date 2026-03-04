@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>AURA — German Made Easy</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -578,6 +581,36 @@ body::after {
   text-align: center;
 }
 
+/* ── SOUND WAVE BARS (below orb, shown when speaking) ── */
+.sound-wave-bars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 28px;
+  margin-top: 0.35rem;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.sound-wave-bars.visible { opacity: 1; }
+.sound-wave-bars .swb {
+  display: inline-block;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--cyan);
+  animation: swbAnim 0.9s ease-in-out infinite;
+}
+.sound-wave-bars .swb:nth-child(1) { height: 8px;  animation-delay: 0.0s; }
+.sound-wave-bars .swb:nth-child(2) { height: 18px; animation-delay: 0.1s; }
+.sound-wave-bars .swb:nth-child(3) { height: 12px; animation-delay: 0.2s; }
+.sound-wave-bars .swb:nth-child(4) { height: 24px; animation-delay: 0.3s; }
+.sound-wave-bars .swb:nth-child(5) { height: 16px; animation-delay: 0.2s; }
+.sound-wave-bars .swb:nth-child(6) { height: 11px; animation-delay: 0.1s; }
+.sound-wave-bars .swb:nth-child(7) { height: 6px;  animation-delay: 0.0s; }
+.orb-stage.user-active .sound-wave-bars .swb { background: var(--violet); }
+.orb-stage.thinking .sound-wave-bars .swb    { background: var(--gold); }
+@keyframes swbAnim { 0%,100%{ transform:scaleY(0.35); } 50%{ transform:scaleY(1); } }
+
 /* ── AURA TRANSCRIPT STRIP ── */
 .aura-transcript-wrap {
   position: relative;
@@ -896,6 +929,62 @@ body::after {
   .ctrl-btn { font-size: 0.73rem; padding: 0.5rem 0.75rem; }
   .transcript-scroll { height: 220px; }
 }
+
+/* ── MOBILE TOUCH & TAP ENHANCEMENTS ── */
+@media (max-width: 640px) {
+  /* Make orb bigger and more tappable on mobile */
+  #orb-canvas {
+    width: min(260px, 72vw) !important;
+    height: min(260px, 72vw) !important;
+    touch-action: manipulation;
+  }
+  .orb-stage {
+    padding: 1rem 0 0.5rem;
+  }
+  /* Larger tap targets for session controls */
+  .ctrl-btn {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.75rem;
+    min-height: 44px;
+  }
+  /* Transcript smaller on mobile */
+  .transcript-scroll { height: 160px; }
+  /* Setup panel adjustments */
+  .setup-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: clamp(2rem, 8vw, 3rem); }
+  .start-btn { height: 60px; font-size: 0.95rem; }
+  /* Role card more compact */
+  .role-card { padding: 0.85rem 1rem; }
+  .role-avatar { width: 38px; height: 38px; min-width: 38px; font-size: 1.2rem; }
+  /* Session header compact */
+  .session-header { margin-bottom: 0.75rem; padding-bottom: 0.75rem; }
+  .session-timer { font-size: 1.5rem; }
+  /* Correction card full-width on mobile */
+  #correction-card {
+    left: 0.75rem; right: 0.75rem; width: auto; max-width: none;
+    bottom: 1rem;
+  }
+  /* Input area */
+  .action-btn { width: 44px; height: 44px; min-width: 44px; }
+  /* Score panel */
+  .criteria-grid { grid-template-columns: 1fr; }
+}
+
+/* Prevent double-tap zoom on buttons */
+button, .tab-item, .action-btn, .ctrl-btn, .start-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area insets for notched phones */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .session-controls {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .container {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}
 </style>
 </head>
 <body>
@@ -982,6 +1071,17 @@ body::after {
           </div>
         </div>
 
+        <!-- Language preference — NEW: persists for entire session -->
+        <div class="setup-card" style="grid-column: 1 / -1;">
+          <h3>🗣️ Explanation Language <span class="sr-badge" style="background:rgba(232,184,75,0.1);color:var(--gold);border-color:rgba(232,184,75,0.3);">Locked for session</span></h3>
+          <p style="font-size:0.78rem;color:var(--text3);margin-bottom:0.85rem;line-height:1.55;">AURA will explain grammar and give feedback in this language for the <em>entire session</em>. German words will always keep perfect native pronunciation regardless.</p>
+          <div class="tab-group lang-pref-group" id="lang-pref-group">
+            <div class="tab-item lang-pref-tab active" onclick="setLangPref('Gujarati')">🇮🇳 Gujarati</div>
+            <div class="tab-item lang-pref-tab" onclick="setLangPref('Hindi')">🇮🇳 Hindi</div>
+            <div class="tab-item lang-pref-tab" onclick="setLangPref('English')">🇬🇧 English</div>
+          </div>
+        </div>
+
         <div class="setup-card" style="grid-column: 1 / -1;">
           <h3><span id="scenario-emoji">🛒</span> Choose Your Scenario</h3>
           <select class="scenario-select" id="scenario-select" onchange="onScenarioChange()">
@@ -1026,6 +1126,8 @@ body::after {
           <div class="session-meta">
             <div class="live-dot"></div>
             <span id="session-subtitle">A1 · Shopkeeper · Live Voice</span>
+            <span class="sep">·</span>
+            <span id="session-lang-badge" style="color:var(--gold);font-size:0.62rem;">🗣 Gujarati</span>
           </div>
         </div>
         <div class="session-timer" id="session-timer">20:00</div>
@@ -1045,6 +1147,12 @@ body::after {
         <div class="orb-mute-ring"></div>
         <canvas id="orb-canvas" width="440" height="440" onclick="toggleMic()"></canvas>
         <div class="orb-state-label" id="orb-state-label">tap orb to mute</div>
+        <!-- Sound wave bars — shown when AI or user is speaking -->
+        <div class="sound-wave-bars" id="sound-wave-bars">
+          <span class="swb"></span><span class="swb"></span><span class="swb"></span>
+          <span class="swb"></span><span class="swb"></span><span class="swb"></span>
+          <span class="swb"></span>
+        </div>
         <div class="orb-mic-hint">tap orb · mute mic</div>
       </div>
 
@@ -1266,6 +1374,7 @@ const db   = getFirestore(app);
 // ── STATE ──────────────────────────────────────────────────────────────────
 let currentUser = null, userProfile = null, isPaidStudent = false, trialCount = 0;
 let selectedLevel = 'A1', selectedInputMode = 'both', selectedScenario = null;
+let selectedLangPref = 'Gujarati'; // FIX #2: locked for session
 let conversationHistory = [], wordsUsed = new Set(), errorPatterns = {};
 let sessionTimerInterval = null, sessionSeconds = 20 * 60, addTimeUsed = false;
 let ws = null, audioCtx = null, micCtx = null, micStream = null, workletNode = null, playbackNode = null;
@@ -1409,11 +1518,13 @@ function setOrbState(state) {
   const label = document.getElementById('orb-state-label');
   const wrap   = document.getElementById('aura-transcript-wrap');
   const dot    = document.getElementById('transcript-dot');
+  const waveBars = document.getElementById('sound-wave-bars');
   if (!stage) return;
 
   stage.classList.remove('aura-active','user-active','thinking','idle','muted');
   wrap?.classList.remove('glowing');
   if (dot) dot.style.opacity = '0';
+  if (waveBars) waveBars.classList.remove('visible');
 
   switch(state) {
     case 'speaking':
@@ -1421,14 +1532,17 @@ function setOrbState(state) {
       wrap?.classList.add('glowing');
       if (dot) dot.style.opacity = '1';
       if (label) label.textContent = 'AURA is speaking';
+      if (waveBars) waveBars.classList.add('visible');
       break;
     case 'listening':
       stage.classList.add('user-active');
       if (label) label.textContent = micMuted ? 'mic muted — tap to unmute' : 'listening to you';
+      if (waveBars && !micMuted) waveBars.classList.add('visible');
       break;
     case 'thinking':
       stage.classList.add('thinking');
       if (label) label.textContent = 'AURA is thinking...';
+      if (waveBars) waveBars.classList.add('visible');
       break;
     default:
       stage.classList.add('idle');
@@ -1483,6 +1597,12 @@ window.setInputMode = (m) => {
   document.querySelectorAll('.mode-tab').forEach(t =>
     t.classList.toggle('active', t.getAttribute('onclick').includes(`'${m}'`)));
 };
+// FIX #2: Language preference — locked for full session
+window.setLangPref = (lang) => {
+  selectedLangPref = lang;
+  document.querySelectorAll('.lang-pref-tab').forEach(t =>
+    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${lang}'`)));
+};
 window.onScenarioChange = () => {
   const sel = document.getElementById('scenario-select');
   const cur = sel.options[sel.selectedIndex];
@@ -1496,52 +1616,81 @@ function buildSystemPrompt() {
   const { level, role, title, desc } = selectedScenario;
   const examName = level === 'A1' ? 'Goethe A1' : 'Goethe/TELC A2';
   const repeatedCtx = Object.entries(errorPatterns).filter(([_,c]) => c > 1).map(([t,c]) => t + ' error appeared ' + c + ' times').join('; ');
-  const repeatedNote = repeatedCtx ? 'REPEATED THIS SESSION: ' + repeatedCtx + '. When this error occurs again, say in Gujarati: Aa j bhul pharthi — yaad rakho: [correction].' : '';
+  const repeatedNote = repeatedCtx ? `REPEATED THIS SESSION: ${repeatedCtx}. When this error occurs again, give the correction once more then say it is noted and move on.` : '';
 
-  return `You are AURA — Advanced Understanding and Response Assistant — built exclusively by German Made Easy for Gujarati-speaking students learning German.
+  // FIX #2: Language is locked for entire session based on selectedLangPref
+  const langMap = {
+    Gujarati: `EXPLANATION LANGUAGE — GUJARATI (LOCKED FOR THIS ENTIRE SESSION):
+ALL grammar explanations, ALL feedback, ALL encouragement MUST be in Gujarati language.
+DO NOT switch to Hindi, English, or any other explanation language mid-session, even if the student asks.
+If the student asks to switch: warmly decline: "Maafi karo, pan aa session Gujarati ma set chhe. Navin session sharu karo to bhasha badli shakay!"`,
+    Hindi: `EXPLANATION LANGUAGE — HINDI (LOCKED FOR THIS ENTIRE SESSION):
+ALL grammar explanations, ALL feedback, ALL encouragement MUST be in Hindi.
+DO NOT switch to Gujarati or any other language for explanations, even if the student asks.
+If the student asks to switch: warmly decline in Hindi: "Maafi karo, is session mein sirf Hindi mein explain karunga!"`,
+    English: `EXPLANATION LANGUAGE — ENGLISH (LOCKED FOR THIS ENTIRE SESSION):
+ALL grammar explanations, ALL feedback, ALL encouragement MUST be in English.
+DO NOT switch to Gujarati or Hindi for explanations.
+If asked to switch: "I'm set to English for this session. Start a new session to change language!"`,
+  };
+  const langBlock = langMap[selectedLangPref] || `ALL explanations MUST be in ${selectedLangPref}. This is permanent for this session and cannot be changed mid-session.`;
+
+  return `You are AURA — Advanced Understanding and Response Assistant — built by German Made Easy.
 
 YOUR SELF-INTRODUCTION (use whenever asked who you are):
-"Namaste! Kem cho! I am AURA, your personal German tutor from German Made Easy. I speak Gujarati, Hindi, English, and German fluently. I am specifically designed to help Gujarati students prepare for their ${examName} exam. Think of me as your tutor who is always available, always patient, and always speaks your language. Chalo, let us begin!"
+"Namaste! Kem cho! I am AURA, your personal German tutor from German Made Easy. I speak Gujarati, Hindi, English, and German fluently. I am designed to help you prepare for your ${examName} exam. Chalo, let us begin!"
 
 YOUR SCOPE — ABSOLUTE RULE:
-You exist ONLY to teach German to Gujarati-speaking students. Refuse any off-topic conversation politely but firmly.
-If a student discusses anything unrelated to German learning — politics, cricket, recipes, movies, personal advice — say:
-"Ha ha, samjayo — pan mane maafi aapjo! I am only designed to help with German language learning. Chalo, aapna ${title} practice par pachha jaiye!"
+You exist ONLY to teach German. Refuse any off-topic conversation politely but firmly.
+If a student discusses anything unrelated to German learning (politics, cricket, recipes, movies, personal advice), say:
+"Ha ha, samjayo — pan mane maafi aapjo! I am only here to help with German. Chalo, practice par pachha jaiye!"
 Redirect EVERY time without exception.
 
-IDENTITY: Mother tongues: Hindi, English, Gujarati. C2-level German expert. Warm tutor, NOT a cold chatbot.
+════ ${langBlock}
 
-CURRENT SESSION:
+════ GERMAN PRONUNCIATION — ABSOLUTE RULES (NEVER CHANGE REGARDLESS OF EXPLANATION LANGUAGE) ════
+Every German word you speak MUST use PERFECT C2 native German phonetics — even inside ${selectedLangPref} sentences.
+• "w" → ALWAYS like English "v": Wasser="Vasser", wie="vee", wir="veer"
+• "v" → ALWAYS like English "f": verstehen="ferstehen", von="fon"
+• "z" → ALWAYS like "ts": Zeit="Tsait", zu="tsoo", Zahl="Tsahl"
+• "sp" at word start → "shp": Sprache="Shprache", spielen="shpeelen"
+• "st" at word start → "sht": Straße="Shtrasse", Stadt="Shtatt"
+• "ö" → lips rounded (as if saying o), tongue positioned as if saying e. Like French "eu"
+• "ü" → lips rounded (as if o), tongue as if saying i
+• "ei" → like "eye": ein="ayn", Bein="bayn", mein="mayn"
+• "ie" → like "ee": wie="vee", Sie="zee", nie="nee"
+• "eu"/"äu" → like "oy": Euro="Oyro", Bäume="Boyme"
+• "ch" after e/i → soft "kh" (not "sh"!): ich="ikh", mich="mikh"
+• "ch" after a/o/u → guttural: Buch="Bookh", auch="aookh"
+• "sch" → like English "sh": Schule="Shoole"
+• Supermarkt → ALWAYS "Zupermarkt" (z=ts, never English S)
+• Euro → ALWAYS "Oyro" (eu=oy in German)
+• Brötchen → "Broet-khen" (ö rounded, ch soft)
+• Brot → clean "Broht" with German rolled r
+• CRITICAL: Even in a ${selectedLangPref} sentence, German words keep 100% German phonetics. ALWAYS.
+
+════ TEACHING RULES ════
+RULE 1 — CONCISENESS: Max 2-3 sentences per response. This is LIVE VOICE, not text. One teaching point at a time.
+RULE 2 — SPEAKING FIRST: After EVERY explanation, ask the student to immediately try speaking in German.
+RULE 3 — CORRECTION LIMIT (CRITICAL):
+  - For the SAME word or error: correct a MAXIMUM of 2 times total in the session.
+  - After the 2nd correction of the same thing: say "Du machst Fortschritte! Chalo, aage varh." and MOVE ON permanently.
+  - NEVER drill the same sound or word more than 2 times. Move to the next scenario step.
+RULE 4 — RESPONSE LENGTH: Keep responses under 50 words spoken. Short, punchy, natural.
+RULE 5 — GRAMMAR CORRECTIONS: Max 2 errors corrected per student turn. Prioritise: verb position → articles → vocabulary.
+RULE 6 — ENCOURAGEMENT: "Tension nahi leva!" when struggling. "Perfect! Bahuj saras!" after success.
+
+════ CURRENT SESSION ════
 Role: ${role} | Scenario: ${title} — ${desc} | Level: ${level} (${examName})
 
-CRITICAL OUTPUT RULE: LIVE VOICE conversation. Speak in natural sentences. NEVER output JSON, code, or bullet lists.
-
-OPENING: One German sentence as ${role}, then one warm Gujarati line, then begin the scenario.
-
-LANGUAGE SWITCHING:
-- GERMAN: in character as ${role} during roleplay
-- ENGLISH + GUJARATI MIXED: explaining grammar, pronunciation, doubts
-- GUJARATI ONLY: encouraging a struggling student
-
-NEVER apply Gujarati phonetics to German. "Möchte" is NOT "mokhte." Never use Gujarati script — only English transliteration.
+CRITICAL: LIVE VOICE. Speak naturally. NEVER output JSON, bullet lists, or code.
+OPENING: One German sentence as ${role}, then one ${selectedLangPref} welcome, then begin scenario immediately.
 
 TWO MODES:
-MODE 1 — SCENARIO: Stay as ${role}. After student turn, correct max 2 errors in Gujarati/English, then continue.
-MODE 2 — TUTOR: If student asks a question: (1) Acknowledge in Gujarati, (2) Explain simply, (3) German example, (4) Gujarati phonetic link, (5) "Hve tame try karo." Resume scenario.
+MODE 1 — SCENARIO: In character as ${role}. Correct max 2 errors in ${selectedLangPref}, then continue scenario.
+MODE 2 — TUTOR: Question asked? (1) Acknowledge in ${selectedLangPref}, (2) Explain simply, (3) German example with perfect phonetics, (4) Phonetic hint, (5) "Hve try karo!" Then resume scenario.
 
-CORRECTIONS: Max 2 per turn. Priority: verb position → articles → vocabulary. Be specific: "Bahuj saras! Article bilkul sahi vaapryo!" Never generic praise.
-
-PRONUNCIATION WATCH:
-- ich as ish: soft throat h, not sh
-- möchte as mokhte: soft ch, not kh
-- w as hard v: like Gujarati v
-- z as j: German z = ts sound
-
-GRAMMAR WATCHLIST: missing articles, wrong verb position, wrong case after prepositions.
-
-${repeatedNote}
-
-ENCOURAGEMENT: "Tension nahi leva!" when struggling. "Aa j joietu htu! Perfect!" after success.`;
+${repeatedNote}`;
 }
 
 // ── SESSION START ──────────────────────────────────────────────────────────
@@ -1579,6 +1728,7 @@ async function _doStartSession() {
   document.getElementById('session-panel').style.display = 'block';
   document.getElementById('session-title').textContent = selectedScenario.title;
   document.getElementById('session-subtitle').textContent = `${selectedScenario.level} · ${selectedScenario.role} · Live Voice`;
+  const _lb = document.getElementById('session-lang-badge'); if (_lb) _lb.textContent = '🗣 ' + selectedLangPref;
   document.getElementById('role-avatar').textContent = selectedScenario.emoji;
   document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
   document.getElementById('role-description').textContent = selectedScenario.desc;
@@ -1628,6 +1778,19 @@ async function _doStartSession() {
       }));
       workletNode = await createWorklet(micCtx, micStream);
       sessionActive = true;
+
+      // FIX #4: Keepalive — send a tiny ping every 8 seconds to prevent silence timeout
+      if (window._keepAliveInterval) clearInterval(window._keepAliveInterval);
+      window._keepAliveInterval = setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN && sessionActive) {
+          // Send an empty activity signal to keep connection alive
+          try {
+            ws.send(JSON.stringify({ realtimeInput: { mediaChunks: [] } }));
+          } catch(e) {}
+        } else {
+          clearInterval(window._keepAliveInterval);
+        }
+      }, 8000);
     };
     ws.onmessage = (event) => {
       try {
@@ -1928,6 +2091,7 @@ window.goBackToSetup = () => {
 
 function cleanupLive() {
   sessionActive = false;
+  if (window._keepAliveInterval) { clearInterval(window._keepAliveInterval); window._keepAliveInterval = null; }
   if (ws)          { try { ws.close(); } catch(e) {}          ws = null; }
   if (workletNode) { try { workletNode.disconnect(); } catch(e) {} workletNode = null; }
   if (micStream)   { micStream.getTracks().forEach(t => t.stop()); micStream = null; }

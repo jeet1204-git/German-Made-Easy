@@ -669,27 +669,28 @@ const { token } = data;
 
     ws.onopen = async () => {
       // 5. Send setup message
-      ws.send(JSON.stringify({
-        setup: {
-          model: MODEL,
-          generationConfig: {
-            responseModalities: ['AUDIO','TEXT'],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: { voiceName: 'Aoede' }
-              }
-            }
-          },
-          systemInstruction: {
-            parts:[{ text: `You are AURA, an advanced multilingual voice AI assistant. 
-You support English, German, Hindi, and Gujarati. 
-Auto-detect the user's language and respond in the same language. 
-If they switch languages mid-conversation, follow naturally.
-Be concise, helpful, and conversational. Keep responses brief unless asked for detail.
-Today's date: ${new Date().toDateString()}.` }]
-          }
+     ws.send(JSON.stringify({
+  setup: {
+    model: MODEL,
+    generationConfig: {
+      responseModalities: ['AUDIO'],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: { voiceName: 'Aoede' }
         }
-      }));
+      },
+      thinkingConfig: {
+        thinkingBudget: 0
+      }
+    },
+    systemInstruction: {
+      parts:[{ text: `You are AURA, an advanced multilingual voice AI assistant. 
+You support English, German, Hindi, and Gujarati. 
+Auto-detect the user's language and respond in the same language.
+Be concise, helpful, and conversational.` }]
+    }
+  }
+}));
 
       // 6. Start microphone worklet
       workletNode = await createWorklet(audioCtx, micStream);

@@ -1096,6 +1096,13 @@ window.onScenarioChange = () => {
 
 // ── Start session ─────────────────────────────────────────────────
 window.startSession = async () => {
+  // Unlock audio FIRST — synchronously, directly in the click handler
+  const ac = new (window.AudioContext || window.webkitAudioContext)();
+  ac.resume();
+  _sharedAC = ac;
+  liveAudioContext = ac;
+  audioUnlocked = true;
+  
   playUISound('start');
   if (!isPaidStudent) {
     if (trialCount >= MAX_TRIAL_CONVERSATIONS) { showTrialLimitPopup(); return; }
@@ -1495,6 +1502,22 @@ function handleLiveSocketMessage(event) {
   let response;
   try { response = JSON.parse(event.data); } catch (_) { return; }
 
+  // setupComplete fires once after setup — this is when Aura greets first
+  if (response.setupComplete !== undefined) {
+    console.log('Gemini setup complete — Aura greeting now');
+    if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN) return;
+    liveSocket.send(JSON.stringify({
+      clientContent: {
+        turns: [{
+          role: 'user',
+          parts: [{ text: 'Please start the conversation now by greeting the student warmly in character.' }]
+        }],
+        turnComplete: true
+      }
+    }));
+    return;
+  }
+
   const textChunk = extractTextFromLiveResponse(response);
   if (textChunk) liveAssistantTextBuffer += textChunk;
 
@@ -1528,11 +1551,17 @@ function handleLiveSocketMessage(event) {
   
 async function sendAIMessage({ isOpening = false, text = null } = {}) {
   const userText = (text || '').trim();
-  if (!isOpening && !userText) return;
+  
+  // Opening is now triggered by setupComplete, not here
+  if (isOpening) {
+    await ensureLiveSocketOpen(buildSystemPrompt(true));
+    return;
+  }
+  
+  if (!userText) return;
   showThinking();
   try {
-    await ensureLiveSocketOpen(buildSystemPrompt(isOpening));
-    if (isOpening) await new Promise(resolve => setTimeout(resolve, 500));
+    await ensureLiveSocketOpen(buildSystemPrompt(false));
     if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN) {
       removeThinking();
       return;
@@ -1541,7 +1570,7 @@ async function sendAIMessage({ isOpening = false, text = null } = {}) {
       clientContent: {
         turns: [{
           role: 'user',
-          parts: [{ text: isOpening ? 'Please start the conversation now by greeting the student in character.' : userText }]
+          parts: [{ text: userText }]
         }],
         turnComplete: true
       }

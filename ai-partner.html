@@ -648,7 +648,7 @@ async function startSession(){
 
   try {
     // 1. Resume AudioContext on user gesture
-audioCtx = new (window.AudioContext || window.webkitAudioContext)({sampleRate:22050});
+audioCtx = new (window.AudioContext || window.webkitAudioContext)({sampleRate:24000});
     await audioCtx.resume();
 
     // 2. Get microphone
@@ -720,27 +720,15 @@ Be concise, helpful, and conversational.` }]
       startTimer();
     };
 
-   ws.onmessage = async (event) => {
-  if (event.data instanceof ArrayBuffer) {
-    // raw binary audio — convert and play directly
-    const raw = new Uint8Array(event.data);
-    const samples = raw.length / 2;
-const buffer = audioCtx.createBuffer(1, samples, 22050);
-    const channel = buffer.getChannelData(0);
-    const view = new DataView(raw.buffer);
-    for(let i=0;i<samples;i++){
-      channel[i] = view.getInt16(i*2, true) / 32768;
-    }
-    audioQueue.push(buffer);
-    if(!isPlayingAudio) playNextBuffer();
-    return;
-  }
+  ws.onmessage = async (event) => {
   try {
-    const msg = JSON.parse(event.data);
+    const text = event.data instanceof ArrayBuffer
+      ? new TextDecoder().decode(event.data)
+      : event.data;
+    const msg = JSON.parse(text);
     handleServerMessage(msg);
-  } catch(e) {}
+  } catch(e) { console.log('parse error', e); }
 };
-
     ws.onerror = (e) => {
       showToast('WebSocket error. Check connection.');
       console.error('WS error', e);

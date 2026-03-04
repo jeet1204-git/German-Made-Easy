@@ -917,13 +917,12 @@ const firebaseConfig = {
 };
 
 // ── NEW: Ephemeral token endpoint on Worker ──────────────────────
-const EPHEMERAL_TOKEN_URL = 'https://aura-token-worker.jeetupadhyay1204.workers.dev';
-// Ephemeral tokens are only compatible with the Live API in v1alpha.
+const EPHEMERAL_TOKEN_URL = 'https://aura-token-worker.jeetupadhyay1204.workers.dev/token';
+  // Ephemeral tokens are only compatible with the Live API in v1alpha.
 // When authenticating via ephemeral tokens, use the *Constrained* bidi method.
 // ✅ Ephemeral tokens REQUIRE v1alpha + BidiGenerateContentConstrained
 // CRITICAL: No double slashes! The path must be exactly as shown.
-const GEMINI_LIVE_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained';
-
+const GEMINI_LIVE_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
 const MAX_TRIAL_CONVERSATIONS = 2;
 
 const app = initializeApp(firebaseConfig);

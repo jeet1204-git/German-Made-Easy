@@ -1496,9 +1496,21 @@ function sendLiveSetup(systemPromptText) {
   if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN || liveSetupSent) return;
   liveSocket.send(JSON.stringify({
     setup: {
-      model: 'models/gemini-2.5-flash-native-audio-latest',
+      model: 'models/gemini-2.5-flash-native-audio-preview-12-2025',
       generationConfig: {
-        responseModalities: ['AUDIO']
+        responseModalities: ['AUDIO'],
+        mediaResolution: 'MEDIA_RESOLUTION_MEDIUM',
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: {
+              voiceName: 'Zephyr'
+            }
+          }
+        },
+        contextWindowCompression: {
+          triggerTokens: '104857',
+          slidingWindow: { targetTokens: '52428' }
+        }
       },
       systemInstruction: { parts: [{ text: systemPromptText }] }
     }

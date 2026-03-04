@@ -442,7 +442,7 @@ registerProcessor('mic-processor', MicProcessor);
 <script>
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 // Replace with your deployed Cloudflare Worker URL
-const WORKER_URL = 'https://aura-token-worker.jeetupadhyay1204.workers.dev';
+const WORKER_URL = 'https://aura-token-worker.YOUR_SUBDOMAIN.workers.dev';
 const GEMINI_WS  = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained';
 const MODEL      = 'gemini-2.5-flash-native-audio-preview-12-2025';
 const MAX_MINUTES = 300; // 5 hours total
@@ -663,7 +663,8 @@ async function startSession(){
     setStatus('Opening connection…');
 
     // 4. Open WebSocket to Gemini Live
-    ws = new WebSocket(`${GEMINI_WS}?access_token=${encodeURIComponent(token)}`);
+    const wsParam = data.type === 'api_key' ? 'key' : 'access_token';
+    ws = new WebSocket(`${GEMINI_WS}?${wsParam}=${encodeURIComponent(token)}`);
     ws.binaryType = 'arraybuffer';
 
     ws.onopen = async () => {

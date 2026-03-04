@@ -920,6 +920,8 @@ const firebaseConfig = {
 const EPHEMERAL_TOKEN_URL = 'https://aura-worker.jeetupadhyay1204.workers.dev/token';
 // Ephemeral tokens are only compatible with the Live API in v1alpha.
 // When authenticating via ephemeral tokens, use the *Constrained* bidi method.
+// ✅ Ephemeral tokens REQUIRE v1alpha + BidiGenerateContentConstrained
+// CRITICAL: No double slashes! The path must be exactly as shown.
 const GEMINI_LIVE_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained';
 
 const MAX_TRIAL_CONVERSATIONS = 2;
@@ -1472,15 +1474,31 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
   liveSocketOpeningPromise = new Promise(async (resolve, reject) => {
     try {
       // Step 1: Get ephemeral token from our Worker (keeps real API key secret)
+      console.log('Fetching ephemeral token from Worker...');
       const tokenRes = await fetch(EPHEMERAL_TOKEN_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ uid: currentUser?.uid || 'anon' })
       });
-      if (!tokenRes.ok) throw new Error('Token fetch failed: ' + tokenRes.status);
-      const { token } = await tokenRes.json();
+      const tokenData = await tokenRes.json();
+      console.log('Token response:', tokenRes.status, tokenData);
 
-      // Ephemeral tokens use access_token param (or Authorization: Token ...)
+      if (!tokenRes.ok) {
+        const hint = tokenData?.hint || tokenData?.detail || 'Unknown error';
+        console.error('Token fetch failed:', hint);
+        toast('🔴 AURA connection failed — check console for details');
+        removeThinking();
+        throw new Error('Token fetch failed: ' + tokenRes.status + ' — ' + hint);
+      }
+
+      const token = tokenData.token;
+      if (!token) {
+        throw new Error('Token response missing token field: ' + JSON.stringify(tokenData));
+      }
+
+      // Ephemeral tokens use access_token param
+      // CRITICAL: token format should be "authTokens/..." 
+      console.log('Got ephemeral token:', token.substring(0, 20) + '...');
       const wsUrl = `${GEMINI_LIVE_WS}?access_token=${token}`;
       const ws = new WebSocket(wsUrl);
       liveSocket = ws;
@@ -1493,13 +1511,18 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
       };
 
       ws.onerror = (e) => {
-        console.error('Gemini WS error', e);
+        console.error('❌ Gemini WS error:', e);
+        console.error('This usually means: (1) ephemeral token was invalid/expired, (2) WebSocket URL version mismatch (must use v1alpha with ephemeral tokens), or (3) network issue');
+        toast('🔴 AURA WebSocket error — retrying on next mic tap');
         reject(new Error('Gemini socket error'));
         if (isRecording) stopLiveSession(true);
       };
 
       ws.onclose = (e) => {
-        console.warn('Gemini WS close', { code: e.code, reason: e.reason });
+        console.warn('Gemini WS closed:', { code: e.code, reason: e.reason, wasClean: e.wasClean });
+        if (e.code === 1008 || e.code === 1002) {
+          console.error('WS policy violation — likely auth token issue. Token must be v1alpha format.');
+        }
         liveSocket = null;
         liveSetupSent = false;
         if (!liveManualClose && isRecording) stopLiveSession(true);
@@ -1518,12 +1541,18 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
 
 function sendLiveSetup(systemPromptText) {
   if (!liveSocket || liveSocket.readyState !== WebSocket.OPEN || liveSetupSent) return;
-  liveSocket.send(JSON.stringify({
+
+  // ┌──────────────────────────────────────────────────────────────┐
+  // │  With BidiGenerateContentConstrained + ephemeral tokens:     │
+  // │  - Model is locked by the token's liveConnectConstraints     │
+  // │  - We still send setup with systemInstruction + genConfig   │
+  // │  - The Constrained endpoint enforces token constraints       │
+  // └──────────────────────────────────────────────────────────────┘
+  const setupMsg = {
     setup: {
       model: 'models/gemini-2.5-flash-native-audio-preview-12-2025',
       generationConfig: {
-        // Request audio responses (you can also add 'TEXT' if you want both).
-        responseModalities: ['AUDIO'],
+        responseModalities: ['AUDIO', 'TEXT'],
         speechConfig: {
           voiceConfig: {
             prebuiltVoiceConfig: {
@@ -1534,7 +1563,10 @@ function sendLiveSetup(systemPromptText) {
       },
       systemInstruction: { parts: [{ text: systemPromptText }] }
     }
-  }));
+  };
+
+  console.log('📤 Sending setup message to Gemini...');
+  liveSocket.send(JSON.stringify(setupMsg));
   liveSetupSent = true;
 }
 function handleLiveSocketMessage(event) {

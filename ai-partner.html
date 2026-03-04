@@ -1477,9 +1477,8 @@ async function ensureLiveSocketOpen(systemPromptText = null) {
       if (!tokenRes.ok) throw new Error('Token fetch failed: ' + tokenRes.status);
       const { token } = await tokenRes.json();
 
-      // Step 2: Connect directly to Gemini using ephemeral token
-      // This gives best latency — no proxy in the audio path
-      const wsUrl = `${GEMINI_LIVE_WS}?key=${token}`;
+      // Ephemeral tokens use access_token param, not key
+      const wsUrl = `${GEMINI_LIVE_WS}?access_token=${token}`;
       const ws = new WebSocket(wsUrl);
       liveSocket = ws;
 

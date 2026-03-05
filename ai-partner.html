@@ -2,776 +2,1050 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>AURA — AI German Tutor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AURA — AI German Tutor for Gujarati Students</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+
 <style>
-/* ════════════════════════════════════════════════════════
-   AURA — DESIGN SYSTEM
-════════════════════════════════════════════════════════ */
+/* ─────────────────────────────────────────────
+   DESIGN TOKENS
+───────────────────────────────────────────── */
 :root {
-  --ink:         #0f0f11;
-  --ink2:        #1a1a1e;
-  --ink3:        #222228;
-  --border:      rgba(255,255,255,0.07);
-  --border2:     rgba(255,255,255,0.12);
-  --border3:     rgba(255,255,255,0.18);
-  --white:       #f5f5f7;
-  --white2:      rgba(245,245,247,0.65);
-  --white3:      rgba(245,245,247,0.32);
-  --sage:        #3d7a5c;
-  --sage-light:  #4e9970;
-  --sage-dim:    rgba(61,122,92,0.14);
-  --saffron:     #c4892a;
-  --saffron-dim: rgba(196,137,42,0.11);
-  /* legacy aliases so existing JS/HTML refs still work */
-  --void:        #0f0f11;
-  --deep:        #141418;
-  --surface:     #1a1a1e;
-  --surface2:    #222228;
-  --cyan:        #4e9970;
-  --cyan-dim:    rgba(61,122,92,0.14);
-  --violet:      #8b7cf8;
-  --violet-dim:  rgba(139,124,248,0.14);
-  --gold:        #c4892a;
-  --gold-dim:    rgba(196,137,42,0.11);
-  --text:        #f5f5f7;
-  --text2:       rgba(245,245,247,0.65);
-  --text3:       rgba(245,245,247,0.32);
-  --danger:      #e05c5c;
-  --serif:       'Cormorant Garamond', Georgia, serif;
-  --sans:        'DM Sans', system-ui, sans-serif;
-  --mono:        'DM Mono', monospace;
-  --r: 1rem;
-  --r2: 1.4rem;
+  --ink:        #0f0f11;
+  --ink2:       #1a1a1e;
+  --ink3:       #222228;
+  --border:     rgba(255,255,255,0.07);
+  --border2:    rgba(255,255,255,0.12);
+  --white:      #f5f5f7;
+  --white2:     rgba(245,245,247,0.65);
+  --white3:     rgba(245,245,247,0.35);
+  --sage:       #3d7a5c;
+  --sage-light: #4e9970;
+  --sage-dim:   rgba(61,122,92,0.15);
+  --saffron:    #c4892a;
+  --saffron-dim:rgba(196,137,42,0.12);
+  --serif:      'Cormorant Garamond', Georgia, serif;
+  --sans:       'DM Sans', system-ui, sans-serif;
+  --mono:       'DM Mono', monospace;
 }
 
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
 
 body {
   font-family: var(--sans);
   background: var(--ink);
   color: var(--white);
-  min-height: 100vh;
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-/* ── GRAIN TEXTURE ── */
-body::before {
+/* ─────────────────────────────────────────────
+   NOISE TEXTURE OVERLAY
+───────────────────────────────────────────── */
+body::after {
   content: '';
   position: fixed; inset: 0; z-index: 1000; pointer-events: none;
-  opacity: 0.022;
+  opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 200px;
 }
 
-/* ── AMBIENT GLOW ── */
-body::after {
+/* ─────────────────────────────────────────────
+   NAV
+───────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1.25rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: rgba(15,15,17,0.85);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+}
+
+.nav-logo {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  text-decoration: none;
+}
+.nav-logo span { color: var(--sage-light); }
+
+.nav-links {
+  display: flex; align-items: center; gap: 2.5rem;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 0.8rem; letter-spacing: 0.04em;
+  color: var(--white3); text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+
+.nav-cta {
+  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em;
+  color: var(--ink); background: var(--white);
+  padding: 0.5rem 1.3rem; border-radius: 100px;
+  text-decoration: none; transition: opacity 0.2s;
+}
+.nav-cta:hover { opacity: 0.85; }
+
+/* ─────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────── */
+.hero {
+  min-height: 100svh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 8rem 2rem 5rem;
+  position: relative; overflow: hidden;
+}
+
+/* Subtle ambient glows */
+.hero::before {
   content: '';
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 60% 45% at 15% 0%,  rgba(78,153,112,0.09) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 35% at 85% 5%,   rgba(78,153,112,0.06) 0%, transparent 55%),
-    radial-gradient(ellipse 40% 40% at 50% 95%,  rgba(196,137,42,0.05) 0%, transparent 60%);
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(61,122,92,0.13) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(196,137,42,0.06) 0%, transparent 60%);
 }
 
-/* ── INTRO OVERLAY ── */
-#aura-intro {
-  position: fixed; inset: 0; z-index: 9999;
-  background: #09090b;
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.68rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--sage-light); margin-bottom: 2rem;
+  opacity: 0; animation: fadeUp 0.8s ease 0.2s forwards;
+}
+
+.hero-headline {
+  font-family: var(--serif);
+  font-size: clamp(3.2rem, 8vw, 7.5rem);
+  font-weight: 300; line-height: 1.06;
+  letter-spacing: -0.02em;
+  color: var(--white);
+  max-width: 900px;
+  opacity: 0; animation: fadeUp 0.9s ease 0.4s forwards;
+}
+.hero-headline em {
+  font-style: italic; color: rgba(245,245,247,0.55);
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 300; line-height: 1.7;
+  color: var(--white2);
+  max-width: 520px; margin: 2rem auto 0;
+  opacity: 0; animation: fadeUp 0.9s ease 0.6s forwards;
+}
+
+.hero-actions {
   display: flex; align-items: center; justify-content: center;
-  flex-direction: column; overflow: hidden;
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  gap: 1rem; margin-top: 3rem;
+  opacity: 0; animation: fadeUp 0.9s ease 0.8s forwards;
 }
-#aura-intro.fade-out { opacity: 0; transform: scale(1.03); pointer-events: none; }
-#aura-particles { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-.aura-scan-line {
-  position: absolute; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(78,153,112,0.5) 50%, transparent 100%);
-  animation: scanLine 4.5s linear infinite;
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: var(--sage);
+  color: #fff; font-weight: 500;
+  font-size: 0.9rem; letter-spacing: 0.03em;
+  padding: 0.85rem 1.9rem; border-radius: 100px;
+  text-decoration: none; border: none; cursor: pointer;
+  transition: background 0.25s, transform 0.2s;
+  position: relative; overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
   pointer-events: none;
 }
-@keyframes scanLine { from { top: -1px; opacity: 0.7; } to { top: 100vh; opacity: 0.1; } }
+.btn-primary:hover { background: var(--sage-light); transform: translateY(-1px); }
 
-.aura-intro-content {
-  position: relative; z-index: 2;
-  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
-  text-align: center;
-}
-
-.aura-pre-text {
-  font-family: var(--mono);
-  font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase;
-  color: rgba(78,153,112,0.45);
-  animation: aura-fadein 0.8s ease 0.4s both;
-}
-
-.aura-name {
-  position: relative;
-  font-family: var(--serif);
-  font-size: clamp(5rem, 18vw, 11rem);
-  font-weight: 300; font-style: italic;
-  letter-spacing: -0.01em; color: var(--white);
-  text-shadow: 0 0 80px rgba(78,153,112,0.2), 0 0 160px rgba(78,153,112,0.1);
-  animation: aura-fadein 0.9s ease 0.7s both;
-}
-.aura-name-glitch {
-  position: absolute; inset: 0; color: var(--sage-light);
-  clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
-  transform: translateX(-3px);
-  animation: glitch 7s infinite 2s; opacity: 0.45;
-}
-@keyframes glitch {
-  0%,90%,100% { transform: translateX(0); opacity: 0; clip-path: none; }
-  92% { transform: translateX(-5px); opacity: 0.5; clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); }
-  94% { transform: translateX(3px); opacity: 0.35; clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%); }
-  96% { transform: translateX(-2px); opacity: 0.45; clip-path: polygon(0 10%, 100% 10%, 100% 30%, 0 30%); }
-  98% { transform: translateX(0); opacity: 0; }
-}
-
-.aura-tagline {
-  font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase;
-  color: rgba(245,245,247,0.35);
-  animation: aura-fadein 0.8s ease 1.0s both;
-}
-.aura-year {
-  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.32em;
-  color: rgba(196,137,42,0.3);
-  animation: aura-fadein 0.8s ease 1.2s both;
-}
-.aura-bar-wrap {
-  width: 130px; height: 1px;
-  background: rgba(255,255,255,0.07);
-  border-radius: 1px; overflow: hidden; margin-top: 1.8rem;
-  animation: aura-fadein 0.6s ease 1.3s both;
-}
-.aura-bar {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, var(--sage), var(--sage-light));
-  animation: aura-load 3.2s ease 1.4s forwards;
-}
-@keyframes aura-load { to { width: 100%; } }
-@keyframes aura-fadein { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-
-.aura-skip-btn {
-  position: absolute; bottom: 2rem; right: 2rem; z-index: 3;
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 0.5rem;
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.22);
-  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.22em;
-  padding: 0.4rem 0.9rem; border-radius: 100px;
-  cursor: pointer; transition: all 0.2s;
-  opacity: 0; animation: aura-fadein 0.5s ease 2.5s forwards;
+  color: var(--white2); font-weight: 400;
+  font-size: 0.9rem; letter-spacing: 0.02em;
+  padding: 0.85rem 1.6rem; border-radius: 100px;
+  border: 1px solid var(--border2);
+  text-decoration: none; cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
 }
-.aura-skip-btn:hover { border-color: rgba(78,153,112,0.4); color: rgba(78,153,112,0.8); }
+.btn-ghost:hover { color: var(--white); border-color: rgba(255,255,255,0.25); }
 
-/* ── OVERLAYS ── */
-#auth-overlay {
-  position: fixed; inset: 0; z-index: 900;
-  background: var(--ink);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem;
-}
-.auth-spinner {
-  width: 28px; height: 28px;
-  border: 1.5px solid rgba(78,153,112,0.1);
-  border-top-color: var(--sage-light);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-#auth-overlay p { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; color: rgba(78,153,112,0.4); }
-
-#access-denied {
-  display: none; position: fixed; inset: 0;
-  background: var(--ink);
-  flex-direction: column; align-items: center; justify-content: center;
-  gap: 1.5rem; z-index: 899; text-align: center; padding: 2rem;
-}
-#access-denied .icon { font-size: 2.8rem; }
-#access-denied h2 { font-family: var(--serif); font-size: 2.2rem; font-weight: 300; font-style: italic; color: var(--white); }
-#access-denied p  { color: var(--white2); max-width: 360px; line-height: 1.78; font-size: 0.9rem; }
-#access-denied a.btn-login {
-  padding: 0.9rem 2.5rem;
-  background: var(--sage); color: #fff; font-weight: 500;
-  border-radius: 100px; text-decoration: none; font-size: 0.9rem;
-  transition: background 0.2s;
-}
-#access-denied a.btn-login:hover { background: var(--sage-light); }
-
-/* ── MODAL BASE ── */
-.modal-backdrop {
-  display: none; position: fixed; inset: 0;
-  background: rgba(9,9,11,0.88);
-  backdrop-filter: blur(16px);
-  align-items: center; justify-content: center;
-  z-index: 800; padding: 1.5rem;
-}
-.modal-backdrop.visible { display: flex; }
-
-.modal-card {
+/* ─────────────────────────────────────────────
+   HERO CHAT MOCKUP
+───────────────────────────────────────────── */
+.hero-mockup {
+  margin-top: 5rem;
+  width: 100%; max-width: 600px;
   background: var(--ink2);
   border: 1px solid var(--border2);
   border-radius: 20px;
-  padding: 2.5rem 2rem;
-  max-width: 460px; width: 100%;
-  text-align: center;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
-  animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  overflow: hidden;
+  box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+  opacity: 0; animation: fadeUp 1s ease 1s forwards;
+  text-align: left;
 }
-@keyframes slideUp { from { opacity:0; transform: translateY(20px) scale(0.98); } to { opacity:1; transform: none; } }
 
-/* ── PRIVACY MODAL ── */
-#privacy-modal { z-index: 850; }
-.privacy-icon { font-size: 2.4rem; margin-bottom: 1rem; }
-.privacy-card h2 { font-family: var(--serif); font-size: 1.7rem; font-weight: 300; font-style: italic; margin-bottom: 0.6rem; }
-.privacy-card p { color: var(--white2); font-size: 0.88rem; line-height: 1.75; margin-bottom: 0.5rem; }
-.privacy-tip {
-  background: var(--sage-dim); border: 1px solid rgba(78,153,112,0.18);
-  border-radius: 12px; padding: 0.85rem 1.1rem;
-  margin: 1rem 0 1.5rem;
-  font-size: 0.82rem; color: rgba(78,153,112,0.85);
-  display: flex; align-items: flex-start; gap: 0.6rem; text-align: left;
-}
-.privacy-btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
-
-.btn-primary-glow {
-  padding: 0.85rem 2rem;
-  background: var(--sage); color: #fff;
-  font-weight: 500; border: none; border-radius: 100px;
-  cursor: pointer; font-family: var(--sans); font-size: 0.9rem;
-  transition: all 0.2s; box-shadow: 0 6px 24px rgba(61,122,92,0.25);
-}
-.btn-primary-glow:hover { background: var(--sage-light); transform: translateY(-1px); }
-
-.btn-ghost {
-  padding: 0.85rem 1.4rem;
-  background: transparent; color: var(--white2);
-  border: 1px solid var(--border2); border-radius: 100px;
-  cursor: pointer; font-family: var(--sans); font-size: 0.87rem;
-  transition: all 0.2s;
-}
-.btn-ghost:hover { border-color: var(--border3); color: var(--white); }
-
-/* ── TRIAL MODAL ── */
-.trial-badge-pill {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  background: var(--saffron-dim); color: var(--saffron);
-  border: 1px solid rgba(196,137,42,0.25);
-  font-family: var(--mono); font-size: 0.62rem;
-  letter-spacing: 0.15em; padding: 0.3rem 0.85rem; border-radius: 100px;
-  margin-bottom: 1.2rem;
-}
-.modal-card h2 { font-family: var(--serif); font-size: 1.7rem; font-weight: 300; font-style: italic; margin-bottom: 0.6rem; }
-.modal-card p { color: var(--white2); line-height: 1.7; margin-bottom: 1.6rem; font-size: 0.88rem; }
-.trial-cta {
-  display: inline-block; padding: 0.9rem 2.25rem;
-  background: var(--saffron); color: #110900;
-  font-weight: 600; font-size: 0.95rem;
-  border-radius: 100px; text-decoration: none;
-  box-shadow: 0 6px 24px rgba(196,137,42,0.25);
-  transition: all 0.2s;
-}
-.trial-cta:hover { transform: translateY(-1px); filter: brightness(1.06); }
-
-/* ── TOPBAR ── */
-.topbar {
-  position: sticky; top: 0; z-index: 100;
+.mockup-bar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0.9rem 2rem;
-  background: rgba(15,15,17,0.85);
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  padding: 0.9rem 1.2rem;
   border-bottom: 1px solid var(--border);
+  background: var(--ink3);
 }
-.topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
-.topbar-logo { width: 34px; height: 34px; }
-.topbar-title { font-family: var(--serif); font-size: 1.2rem; font-weight: 300; font-style: italic; letter-spacing: 0.02em; color: var(--white); }
-.topbar-sub { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(78,153,112,0.4); }
-.topbar-right { display: flex; align-items: center; gap: 0.85rem; }
-.level-pill {
-  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em;
-  padding: 0.28rem 0.7rem; border-radius: 100px;
-  background: var(--sage-dim); color: var(--sage-light);
-  border: 1px solid rgba(78,153,112,0.25);
+.mockup-dots { display: flex; gap: 0.45rem; }
+.mockup-dots span {
+  width: 10px; height: 10px; border-radius: 50%;
 }
-.user-name-text { font-size: 0.78rem; color: var(--white2); }
-.topbar-back { font-size: 0.75rem; color: var(--white3); text-decoration: none; font-family: var(--mono); letter-spacing: 0.06em; transition: color 0.2s; }
-.topbar-back:hover { color: var(--sage-light); }
+.mockup-dots span:nth-child(1) { background: rgba(255,92,92,0.5); }
+.mockup-dots span:nth-child(2) { background: rgba(255,183,37,0.5); }
+.mockup-dots span:nth-child(3) { background: rgba(42,190,106,0.5); }
 
-/* ── LAYOUT ── */
-.container { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
-
-/* ── SETUP PANEL ── */
-.hero { text-align: center; margin-bottom: 3rem; animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
-
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  background: var(--ink2);
-  border: 1px solid rgba(78,153,112,0.22);
-  border-radius: 100px; padding: 0.4rem 1rem;
-  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
-  color: rgba(78,153,112,0.8); margin-bottom: 1.2rem;
+.mockup-title {
+  font-family: var(--mono);
+  font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--white3);
 }
-.hero-eyebrow .dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--sage-light); box-shadow: 0 0 6px var(--sage-light);
-  animation: pulse-dot 2.2s ease infinite;
-}
-@keyframes pulse-dot { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.3; transform:scale(0.5); } }
 
-.hero h1 {
+.aura-status {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.65rem; color: var(--sage-light);
+}
+.aura-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sage-light);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.mockup-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+
+.msg {
+  display: flex; gap: 0.75rem;
+  animation: fadeUp 0.5s ease both;
+}
+.msg-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 500;
+}
+.msg-user .msg-avatar { background: rgba(196,137,42,0.15); color: var(--saffron); border: 1px solid rgba(196,137,42,0.2); }
+.msg-aura .msg-avatar { background: var(--sage-dim); color: var(--sage-light); border: 1px solid rgba(61,122,92,0.25); }
+
+.msg-content { flex: 1; }
+.msg-name {
+  font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--white3); margin-bottom: 0.35rem;
+}
+.msg-bubble {
+  font-size: 0.9rem; line-height: 1.6;
+  padding: 0.75rem 1rem; border-radius: 12px;
+}
+.msg-user .msg-bubble { background: rgba(196,137,42,0.08); border: 1px solid rgba(196,137,42,0.15); }
+.msg-aura .msg-bubble { background: var(--sage-dim); border: 1px solid rgba(61,122,92,0.2); }
+
+.gujarati { color: var(--white); font-weight: 400; }
+.german { color: var(--sage-light); font-weight: 500; }
+.explanation { font-size: 0.8rem; color: var(--white2); margin-top: 0.35rem; display: block; }
+
+.msg-typing .msg-bubble {
+  display: flex; gap: 4px; align-items: center; padding: 0.85rem 1rem;
+}
+.typing-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--sage-light); opacity: 0.5;
+  animation: typingBounce 1.4s ease infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+  40% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ─────────────────────────────────────────────
+   SECTION SHARED
+───────────────────────────────────────────── */
+.section { padding: 7rem 2rem; }
+.section-inner { max-width: 1100px; margin: 0 auto; }
+
+.label-tag {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: var(--mono); font-size: 0.65rem;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--white3); border: 1px solid var(--border2);
+  padding: 0.35rem 0.85rem; border-radius: 100px;
+  margin-bottom: 2rem;
+}
+.label-tag span { width: 4px; height: 4px; border-radius: 50%; background: var(--sage-light); }
+
+.section-headline {
   font-family: var(--serif);
-  font-size: clamp(2.6rem, 6vw, 4.4rem);
-  font-weight: 300; font-style: italic;
-  line-height: 1.12; letter-spacing: -0.01em;
-  margin-bottom: 1rem; color: var(--white);
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 300; line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.section-headline em { font-style: italic; color: var(--white2); }
+
+/* ─────────────────────────────────────────────
+   DIVIDER LINE
+───────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--border2) 30%, var(--border2) 70%, transparent 100%);
+  margin: 0 2rem;
 }
 
-.hero p { font-size: 0.95rem; color: var(--white2); max-width: 500px; margin: 0 auto; line-height: 1.8; }
+/* ─────────────────────────────────────────────
+   PROBLEM SECTION
+───────────────────────────────────────────── */
+.problem-section { background: var(--ink); }
 
-/* Setup Grid */
-#setup-panel { animation: slideUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
-.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-@media (max-width: 600px) { .setup-grid { grid-template-columns: 1fr; } }
+.problem-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6rem; align-items: center;
+  margin-top: 4rem;
+}
 
-.setup-card {
+.problem-quote {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 300; line-height: 1.3;
+  font-style: italic;
+  color: var(--white);
+  border-left: 1px solid var(--sage);
+  padding-left: 2rem;
+}
+.problem-quote em { color: var(--sage-light); font-style: normal; }
+
+.problem-items { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.problem-item {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding: 1.25rem 1.5rem;
   background: var(--ink2);
   border: 1px solid var(--border);
-  border-radius: 14px; padding: 1.4rem;
-  transition: border-color 0.25s;
-}
-.setup-card:hover { border-color: var(--border2); }
-.setup-card h3 {
-  font-family: var(--sans); font-size: 0.71rem; font-weight: 600;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--white3); margin-bottom: 0.9rem;
-  display: flex; align-items: center; gap: 0.5rem;
-}
-
-/* Tabs */
-.tab-group { display: flex; gap: 0.3rem; padding: 0.25rem; background: rgba(255,255,255,0.03); border-radius: 10px; }
-.tab-item {
-  flex: 1; padding: 0.5rem 0.4rem; text-align: center;
-  font-size: 0.79rem; font-weight: 500;
-  border-radius: 8px; cursor: pointer;
-  color: var(--white3); border: none; background: transparent;
-  transition: all 0.18s;
-}
-.tab-item:hover { color: var(--white2); background: rgba(255,255,255,0.04); }
-.tab-item.active { background: var(--sage-dim); color: var(--sage-light); box-shadow: inset 0 0 0 1px rgba(78,153,112,0.25); }
-
-/* Scenario select */
-.scenario-select {
-  width: 100%; padding: 0.72rem 2.4rem 0.72rem 0.9rem;
-  background: var(--ink); color: var(--white);
-  border: 1px solid rgba(78,153,112,0.16); border-radius: 10px;
-  font-family: var(--sans); font-size: 0.88rem;
-  cursor: pointer; appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%234e9970' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 0.85rem center;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.scenario-select:focus { outline: none; border-color: var(--sage-light); box-shadow: 0 0 0 3px rgba(78,153,112,0.1); }
-.scenario-select option, .scenario-select optgroup { background: #0f0f11; }
-
-.scenario-desc {
-  margin-top: 0.6rem; font-size: 0.78rem; color: var(--white3); line-height: 1.62;
-  padding-left: 0.85rem; border-left: 2px solid rgba(78,153,112,0.35); min-height: 2.4rem;
-}
-
-.sr-badge {
-  display: inline-flex; font-size: 0.58rem; letter-spacing: 0.1em;
-  padding: 0.18rem 0.55rem; border-radius: 100px;
-  background: var(--sage-dim); color: var(--sage-light);
-  border: 1px solid rgba(78,153,112,0.2); font-family: var(--mono);
-}
-
-#trial-counter-wrap { display: none; text-align: center; margin-bottom: 0.8rem; }
-.trial-counter-text-el {
-  display: inline-flex; align-items: center; gap: 0.45rem;
-  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em;
-  color: rgba(196,137,42,0.6);
-  background: var(--saffron-dim); border: 1px solid rgba(196,137,42,0.18);
-  padding: 0.28rem 0.8rem; border-radius: 100px;
-}
-
-/* ── START BUTTON — crown jewel ── */
-.start-btn {
-  position: relative; width: 100%; height: 64px;
-  background: var(--sage);
-  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 14px;
-  font-family: var(--sans); font-size: 1rem; font-weight: 500;
-  letter-spacing: 0.06em; text-transform: uppercase;
-  color: #fff;
-  cursor: pointer; overflow: hidden;
-  box-shadow: 0 10px 40px rgba(61,122,92,0.3), 0 0 0 1px rgba(255,255,255,0.06) inset;
-  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  transition: border-color 0.3s;
 }
-.start-btn::before {
+.problem-item:hover { border-color: rgba(255,255,255,0.15); }
+
+.problem-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: 10px; background: rgba(255,92,92,0.08);
+  border: 1px solid rgba(255,92,92,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.problem-text strong { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
+.problem-text p { font-size: 0.82rem; color: var(--white2); line-height: 1.6; }
+
+/* ─────────────────────────────────────────────
+   FEATURES SECTION
+───────────────────────────────────────────── */
+.features-section { background: var(--ink2); }
+
+.features-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 1px; margin-top: 4rem;
+  border: 1px solid var(--border); border-radius: 20px;
+  overflow: hidden;
+}
+
+.feature-card {
+  padding: 2.5rem;
+  background: var(--ink2);
+  transition: background 0.3s;
+  position: relative;
+}
+.feature-card::after {
   content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 55%);
+  position: absolute; bottom: 0; right: 0;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, var(--sage-dim) 0%, transparent 70%);
+  pointer-events: none; opacity: 0; transition: opacity 0.4s;
+}
+.feature-card:hover { background: var(--ink3); }
+.feature-card:hover::after { opacity: 1; }
+
+.feature-number {
+  font-family: var(--mono); font-size: 0.65rem;
+  color: var(--white3); letter-spacing: 0.15em;
+  margin-bottom: 1.25rem;
+}
+.feature-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--sage-dim); border: 1px solid rgba(61,122,92,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; margin-bottom: 1.25rem;
+}
+.feature-title {
+  font-family: var(--serif); font-size: 1.45rem;
+  font-weight: 400; margin-bottom: 0.75rem; line-height: 1.2;
+}
+.feature-desc { font-size: 0.85rem; color: var(--white2); line-height: 1.7; }
+
+/* ─────────────────────────────────────────────
+   DEMO SECTION
+───────────────────────────────────────────── */
+.demo-section { background: var(--ink); }
+
+.demo-inner {
+  display: grid; grid-template-columns: 1fr 1.1fr;
+  gap: 5rem; align-items: start;
+  margin-top: 4rem;
+}
+
+.demo-copy { }
+.demo-copy p {
+  font-size: 0.9rem; color: var(--white2); line-height: 1.8;
+  margin-top: 1.5rem;
+}
+
+.demo-scenarios {
+  display: flex; flex-direction: column; gap: 0.6rem;
+  margin-top: 2rem;
+}
+.scenario-pill {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.6rem 1rem; border-radius: 8px;
+  background: var(--ink2); border: 1px solid var(--border);
+  cursor: pointer; transition: all 0.2s;
+  font-size: 0.82rem; color: var(--white2);
+}
+.scenario-pill.active {
+  border-color: rgba(61,122,92,0.4); color: var(--white);
+  background: var(--sage-dim);
+}
+.scenario-pill:hover:not(.active) { border-color: var(--border2); color: var(--white); }
+.scenario-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); flex-shrink: 0; }
+
+.demo-chat {
+  background: var(--ink2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.4);
+}
+
+/* ─────────────────────────────────────────────
+   COMPARE SECTION
+───────────────────────────────────────────── */
+.compare-section { background: var(--ink2); }
+.compare-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 2rem; margin-top: 4rem;
+}
+
+.compare-card {
+  padding: 2.5rem; border-radius: 20px;
+  border: 1px solid var(--border);
+}
+.compare-card.traditional { background: var(--ink3); }
+.compare-card.aura-card {
+  background: linear-gradient(135deg, rgba(61,122,92,0.12) 0%, rgba(61,122,92,0.04) 100%);
+  border-color: rgba(61,122,92,0.3);
+  position: relative; overflow: hidden;
+}
+.compare-card.aura-card::before {
+  content: '';
+  position: absolute; top: -30px; right: -30px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(61,122,92,0.2), transparent 70%);
   pointer-events: none;
 }
-.start-btn::after {
-  content: '';
-  position: absolute; top: -50%; left: -60%; width: 35%; height: 200%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
-  transform: skewX(-20deg);
-  animation: btnSheen 5s ease infinite 2s;
-}
-@keyframes btnSheen { 0%,100% { left:-60%; opacity:0; } 20%,80% { opacity:1; } 50% { left: 120%; } }
-.start-btn:hover { background: var(--sage-light); transform: translateY(-2px); box-shadow: 0 14px 50px rgba(61,122,92,0.38); }
-.start-btn:active { transform: translateY(0); }
 
-/* ════════════════════════════════════════════════════════
-   SESSION PANEL
-════════════════════════════════════════════════════════ */
-#session-panel { display: none; animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.compare-label {
+  font-family: var(--mono); font-size: 0.65rem;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.compare-card.traditional .compare-label { color: var(--white3); }
+.compare-card.aura-card .compare-label { color: var(--sage-light); }
 
-.session-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1.2rem; padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border);
-}
-.session-info h2 { font-family: var(--serif); font-size: 1.35rem; font-weight: 300; font-style: italic; color: var(--white); }
-.session-meta {
-  display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;
-  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--white3);
-}
-.session-meta .sep { opacity: 0.3; }
-.live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sage-light); box-shadow: 0 0 8px var(--sage-light); animation: pulse-dot 1.8s ease infinite; }
-
-.session-timer {
-  font-family: var(--mono); font-size: 1.9rem; font-weight: 300;
-  letter-spacing: 0.04em; color: var(--white);
-  transition: color 0.3s;
-}
-.session-timer.warning { color: #e05c5c; animation: pulse 1s infinite; }
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.55; } }
-
-.role-card {
-  background: linear-gradient(140deg, rgba(28,18,6,0.97), rgba(18,12,4,0.95));
-  border: 1px solid rgba(196,137,42,0.18);
-  border-radius: 14px; padding: 1.15rem 1.4rem; margin-bottom: 1.1rem;
-  display: flex; align-items: flex-start; gap: 1rem;
-}
-.role-avatar {
-  width: 46px; height: 46px; min-width: 46px;
-  background: var(--saffron-dim); border: 1px solid rgba(196,137,42,0.22);
-  border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
-}
-.role-info h3 { font-family: var(--sans); font-size: 0.9rem; font-weight: 500; color: rgba(255,218,155,0.88); margin-bottom: 0.2rem; }
-.role-info p  { font-size: 0.78rem; line-height: 1.62; color: rgba(255,210,140,0.42); }
-
-/* ════════════════════════════════════════════════════════
-   ORB INTERFACE
-════════════════════════════════════════════════════════ */
-.orb-stage {
-  position: relative; display: flex; flex-direction: column; align-items: center;
-  margin-bottom: 1rem; padding: 1.5rem 0 0.5rem;
-  background: radial-gradient(ellipse 70% 55% at 50% 55%, var(--orb-halo,rgba(78,153,112,0.04)) 0%, transparent 70%);
-  transition: background 0.8s ease;
-}
-.orb-stage.aura-active  { --orb-halo: rgba(78,153,112,0.07); }
-.orb-stage.user-active  { --orb-halo: rgba(139,124,248,0.07); }
-.orb-stage.thinking     { --orb-halo: rgba(196,137,42,0.06); }
-.orb-stage.idle         { --orb-halo: rgba(40,55,80,0.04); }
-
-#orb-canvas {
-  display: block; width: 260px; height: 260px;
-  cursor: pointer; border-radius: 50%;
-  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  touch-action: manipulation;
-}
-#orb-canvas:active { transform: scale(0.94); }
-
-.orb-state-label {
-  margin-top: 0.85rem; font-family: var(--mono);
-  font-size: 0.6rem; letter-spacing: 0.26em; text-transform: uppercase;
-  color: var(--white3); transition: color 0.5s ease; min-height: 1.2rem; text-align: center;
-}
-.orb-stage.aura-active  .orb-state-label { color: rgba(78,153,112,0.7); }
-.orb-stage.user-active  .orb-state-label { color: rgba(168,156,255,0.7); }
-.orb-stage.thinking     .orb-state-label { color: rgba(196,137,42,0.65); }
-.orb-stage.muted        .orb-state-label { color: rgba(224,92,92,0.55); }
-
-.orb-mute-ring {
-  position: absolute; top: 1.5rem; left: 50%; transform: translateX(-50%);
-  width: 278px; height: 278px; border-radius: 50%;
-  border: 1.5px dashed rgba(224,92,92,0.35);
-  pointer-events: none; opacity: 0; transition: opacity 0.35s ease;
-}
-.orb-stage.muted .orb-mute-ring { opacity: 1; }
-
-.orb-mic-hint {
-  position: absolute; bottom: 0;
-  font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--white3); opacity: 0.25; pointer-events: none; text-align: center;
+.compare-title {
+  font-family: var(--serif); font-size: 1.8rem;
+  font-weight: 400; margin-bottom: 1.5rem; line-height: 1.2;
 }
 
-.silence-countdown {
-  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.16em; text-transform: uppercase;
-  color: #e05c5c; opacity: 0.6; text-align: center; animation: pulse 1s ease infinite;
+.compare-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+.compare-list li {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  font-size: 0.875rem; color: var(--white2); line-height: 1.5;
 }
-.silence-countdown span { font-weight: 500; font-size: 0.65rem; }
+.compare-list li::before { flex-shrink: 0; margin-top: 0.15rem; }
+.compare-card.traditional .compare-list li::before { content: '✕'; color: rgba(255,92,92,0.5); }
+.compare-card.aura-card .compare-list li::before { content: '✓'; color: var(--sage-light); }
 
-/* Wave bars */
-.sound-wave-bars { display: flex; align-items: center; justify-content: center; gap: 3px; height: 24px; margin-top: 0.3rem; opacity: 0; transition: opacity 0.4s ease; }
-.sound-wave-bars.visible { opacity: 1; }
-.sound-wave-bars .swb { display: inline-block; width: 2.5px; border-radius: 2px; background: var(--sage-light); animation: swbAnim 0.85s ease-in-out infinite; }
-.sound-wave-bars .swb:nth-child(1)  { height: 5px;  animation-delay: 0.00s; }
-.sound-wave-bars .swb:nth-child(2)  { height: 13px; animation-delay: 0.08s; }
-.sound-wave-bars .swb:nth-child(3)  { height: 8px;  animation-delay: 0.16s; }
-.sound-wave-bars .swb:nth-child(4)  { height: 20px; animation-delay: 0.24s; }
-.sound-wave-bars .swb:nth-child(5)  { height: 14px; animation-delay: 0.32s; }
-.sound-wave-bars .swb:nth-child(6)  { height: 20px; animation-delay: 0.24s; }
-.sound-wave-bars .swb:nth-child(7)  { height: 8px;  animation-delay: 0.16s; }
-.sound-wave-bars .swb:nth-child(8)  { height: 13px; animation-delay: 0.08s; }
-.sound-wave-bars .swb:nth-child(9)  { height: 5px;  animation-delay: 0.00s; }
-.orb-stage.user-active .sound-wave-bars .swb { background: #8b7cf8; }
-.orb-stage.thinking    .sound-wave-bars .swb { background: var(--saffron); }
-@keyframes swbAnim { 0%,100%{ transform:scaleY(0.25); opacity:0.5; } 50%{ transform:scaleY(1); opacity:1; } }
+/* ─────────────────────────────────────────────
+   SOCIAL PROOF
+───────────────────────────────────────────── */
+.social-section { background: var(--ink); }
 
-/* ── TRANSCRIPT ── */
-.aura-transcript-wrap {
-  position: relative; background: var(--ink2);
-  border: 1px solid var(--border); border-radius: 14px;
-  overflow: hidden; margin-bottom: 1rem; transition: border-color 0.3s;
+.paths-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1rem; margin-top: 3rem;
 }
-.aura-transcript-wrap.glowing { border-color: rgba(78,153,112,0.28); box-shadow: 0 0 40px rgba(78,153,112,0.05); }
-
-.transcript-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.55rem 1rem; border-bottom: 1px solid var(--border);
-  background: rgba(78,153,112,0.025);
+.path-card {
+  padding: 1.75rem 1.5rem;
+  background: var(--ink2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: border-color 0.3s, transform 0.3s;
+  cursor: default;
 }
-.transcript-label {
-  display: flex; align-items: center; gap: 0.5rem;
-  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase;
-  color: rgba(78,153,112,0.42);
-}
-.transcript-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--sage-light); box-shadow: 0 0 5px var(--sage-light);
-  opacity: 0; transition: opacity 0.3s;
-}
-.aura-transcript-wrap.glowing .transcript-dot { opacity: 1; animation: pulse-dot 1.4s ease infinite; }
-.transcript-turns { font-family: var(--mono); font-size: 0.55rem; color: var(--white3); }
+.path-card:hover { border-color: rgba(61,122,92,0.35); transform: translateY(-3px); }
 
-.transcript-scroll { height: 240px; overflow-y: auto; padding: 1rem; scroll-behavior: smooth; }
-.transcript-scroll::-webkit-scrollbar { width: 2px; }
-.transcript-scroll::-webkit-scrollbar-thumb { background: rgba(78,153,112,0.12); border-radius: 2px; }
+.path-icon { font-size: 1.5rem; margin-bottom: 0.9rem; }
+.path-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.4rem; }
+.path-desc { font-size: 0.78rem; color: var(--white3); line-height: 1.5; }
 
-/* Transcript entries */
-.t-entry { display: flex; gap: 0.65rem; margin-bottom: 0.75rem; animation: tIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
-@keyframes tIn { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform:none; } }
+.testimonials-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem; margin-top: 3rem;
+}
+.testimonial-card {
+  padding: 2rem;
+  background: var(--ink2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.t-quote {
+  font-size: 0.9rem; line-height: 1.7; color: var(--white2);
+  margin-bottom: 1.5rem; font-style: italic;
+}
+.t-quote::before { content: '"'; color: var(--sage-light); font-size: 1.2rem; }
+.t-author { display: flex; align-items: center; gap: 0.75rem; }
 .t-avatar {
-  width: 26px; height: 26px; min-width: 26px;
-  background: var(--sage-dim); border: 1px solid rgba(78,153,112,0.18);
-  border-radius: 7px; display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem; margin-top: 1px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--sage-dim); border: 1px solid rgba(61,122,92,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; color: var(--sage-light); font-weight: 600;
 }
-.t-body { flex: 1; }
-.t-name { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(78,153,112,0.4); margin-bottom: 0.18rem; }
-.t-text { font-size: 0.86rem; line-height: 1.68; color: rgba(220,228,238,0.88); font-family: var(--sans); }
-.t-text.streaming::after { content: '▋'; display: inline-block; color: var(--sage-light); animation: blink 0.7s step-end infinite; margin-left: 2px; }
-@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+.t-name { font-size: 0.82rem; font-weight: 500; }
+.t-meta { font-size: 0.72rem; color: var(--white3); margin-top: 0.1rem; }
 
-/* Teacher board */
-.t-board {
-  margin-bottom: 0.85rem; border-radius: 12px; overflow: hidden;
-  animation: tIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
-  border: 1px solid rgba(196,137,42,0.18);
-  background: linear-gradient(140deg, rgba(26,16,4,0.97), rgba(16,11,3,0.96));
+/* ─────────────────────────────────────────────
+   FINAL CTA
+───────────────────────────────────────────── */
+.cta-section {
+  padding: 10rem 2rem;
+  text-align: center;
+  position: relative; overflow: hidden;
+  background: var(--ink);
 }
-.t-board-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.8rem; background: rgba(196,137,42,0.055); border-bottom: 1px solid rgba(196,137,42,0.1); }
-.t-board-icon { font-size: 0.72rem; }
-.t-board-label { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(196,137,42,0.58); flex: 1; }
-.t-board-body { padding: 0.7rem 0.85rem; }
-
-.t-correction-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
-.t-wrong { font-family: var(--mono); font-size: 0.84rem; color: #e08888; text-decoration: line-through; text-decoration-color: rgba(224,92,92,0.38); }
-.t-arrow { color: var(--white3); font-size: 0.68rem; }
-.t-right { font-family: var(--mono); font-size: 0.88rem; color: rgba(78,153,112,0.9); font-weight: 500; }
-.t-board-note { font-size: 0.8rem; line-height: 1.68; color: rgba(255,208,138,0.65); font-family: var(--sans); }
-.t-board-note.streaming::after { content: '▋'; display: inline-block; color: var(--saffron); animation: blink 0.7s step-end infinite; margin-left: 2px; }
-
-#correction-card { display: none !important; }
-
-.wave-bars { display: flex; gap: 2px; align-items: center; height: 14px; }
-.wave-bars span { display: inline-block; width: 2px; border-radius: 2px; background: currentColor; animation: waveBar 0.7s ease infinite; }
-.wave-bars span:nth-child(1) { height: 5px; animation-delay: 0s; }
-.wave-bars span:nth-child(2) { height: 10px; animation-delay: 0.12s; }
-.wave-bars span:nth-child(3) { height: 7px; animation-delay: 0.24s; }
-.wave-bars span:nth-child(4) { height: 12px; animation-delay: 0.08s; }
-.wave-bars span:nth-child(5) { height: 5px; animation-delay: 0.18s; }
-@keyframes waveBar { 0%,100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
-
-/* Input area */
-.input-area { display: flex; gap: 0.6rem; align-items: flex-end; margin-bottom: 1rem; }
-.text-input-wrap { flex: 1; position: relative; }
-#text-input {
-  width: 100%; padding: 0.82rem 1rem;
-  background: var(--ink2); border: 1px solid var(--border);
-  border-radius: 12px; font-family: var(--sans); font-size: 0.88rem;
-  color: var(--white); resize: none; min-height: 50px; max-height: 120px;
-  transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.5;
-}
-#text-input::placeholder { color: var(--white3); }
-#text-input:focus { outline: none; border-color: rgba(78,153,112,0.35); box-shadow: 0 0 0 3px rgba(78,153,112,0.07); }
-
-.action-btn {
-  width: 50px; height: 50px; min-width: 50px; border: none; border-radius: 12px;
-  cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.18s;
-}
-.mic-btn { background: var(--ink2); border: 1px solid var(--border); color: var(--white2); }
-.mic-btn:hover { border-color: rgba(139,124,248,0.35); color: rgba(196,188,255,0.9); transform: scale(1.04); }
-.mic-btn.muted { background: rgba(139,124,248,0.12); border-color: rgba(139,124,248,0.42); color: rgba(196,188,255,0.9); }
-.send-btn { background: var(--saffron); color: #110900; box-shadow: 0 4px 16px rgba(196,137,42,0.2); }
-.send-btn:hover { transform: scale(1.04); filter: brightness(1.06); }
-.send-btn:active { transform: scale(0.97); }
-
-.session-controls { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-.ctrl-btn {
-  padding: 0.52rem 0.95rem; background: var(--ink2);
-  border: 1px solid var(--border); border-radius: 9px; cursor: pointer;
-  font-size: 0.75rem; font-weight: 500; font-family: var(--sans); color: var(--white2);
-  transition: all 0.18s; display: flex; align-items: center; gap: 0.4rem;
-}
-.ctrl-btn:hover { border-color: var(--border2); color: var(--white); }
-.ctrl-btn.danger { border-color: rgba(224,92,92,0.25); color: rgba(224,150,150,0.8); }
-.ctrl-btn.danger:hover { background: rgba(100,18,18,0.8); border-color: rgba(224,92,92,0.5); color: #ffcccc; }
-
-/* ════════════════════════════════════════════════════════
-   SCORE PANEL
-════════════════════════════════════════════════════════ */
-#score-panel { display: none; animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
-.score-header { text-align: center; margin-bottom: 2.5rem; }
-.score-header h2 { font-family: var(--serif); font-size: 2.4rem; font-weight: 300; font-style: italic; margin-bottom: 0.4rem; }
-.score-header p  { color: var(--white2); font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; }
-
-.score-big { display: flex; justify-content: center; margin-bottom: 3rem; }
-.score-ring-wrap { position: relative; width: 160px; height: 160px; }
-.score-ring-svg { width: 160px; height: 160px; transform: rotate(-90deg); }
-.score-ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8; }
-.score-ring-fill {
-  fill: none; stroke-width: 8; stroke-linecap: round;
-  stroke: url(#scoreGradient); stroke-dasharray: 440; stroke-dashoffset: 440;
-  transition: stroke-dashoffset 1.4s cubic-bezier(0.16,1,0.3,1);
-}
-.score-ring-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.score-num { font-family: var(--serif); font-size: 2.8rem; font-weight: 300; font-style: italic; line-height: 1; color: var(--white); }
-.score-label { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.12em; color: var(--white3); text-transform: uppercase; }
-
-.criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
-@media (max-width: 500px) { .criteria-grid { grid-template-columns: 1fr; } }
-
-.criterion-card {
-  background: var(--ink2); border: 1px solid var(--border);
-  border-radius: 14px; padding: 1.1rem 1.25rem; transition: border-color 0.2s;
-}
-.criterion-card:hover { border-color: var(--border2); }
-.criterion-card h4 { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white3); margin-bottom: 0.65rem; }
-.criterion-bar-wrap { height: 3px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-bottom: 0.5rem; }
-.criterion-bar { height: 100%; border-radius: 3px; width: 0%; transition: width 1.2s cubic-bezier(0.16,1,0.3,1); background: linear-gradient(90deg, var(--sage), var(--sage-light)); }
-.criterion-score { font-family: var(--serif); font-weight: 300; font-style: italic; font-size: 1.2rem; color: var(--white); }
-.criterion-comment { font-size: 0.76rem; color: var(--white2); margin-top: 0.3rem; line-height: 1.58; }
-
-.feedback-card {
-  background: var(--ink2); border: 1px solid var(--border);
-  border-radius: 14px; padding: 1.4rem 1.5rem; margin-bottom: 1.2rem;
-}
-.feedback-card h3 { font-family: var(--sans); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--white2); margin-bottom: 0.85rem; }
-.feedback-card p { font-size: 0.88rem; line-height: 1.78; color: rgba(210,220,235,0.85); }
-
-.pronunciation-tip {
-  background: var(--sage-dim); border: 1px solid rgba(78,153,112,0.12);
-  border-radius: 10px; padding: 0.75rem 0.95rem; margin-bottom: 0.6rem;
-  font-size: 0.82rem; line-height: 1.65; color: var(--white2);
-}
-.pronunciation-tip .word { font-family: var(--mono); font-weight: 500; color: var(--sage-light); }
-.pronunciation-tip .gujarati-note { color: rgba(196,137,42,0.62); font-size: 0.74rem; margin-top: 0.2rem; display: block; }
-
-.errors-list { list-style: none; }
-.errors-list li { padding: 0.62rem 0; border-bottom: 1px solid var(--border); font-size: 0.84rem; color: rgba(210,220,235,0.85); line-height: 1.62; }
-.errors-list li:last-child { border-bottom: none; }
-.err-orig    { color: #e08888; text-decoration: line-through; font-family: var(--mono); }
-.err-correct { color: var(--sage-light); font-family: var(--mono); }
-
-.score-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 2.5rem; }
-.btn-outline {
-  padding: 0.82rem 1.8rem; background: var(--ink2); color: var(--white2);
-  border: 1px solid var(--border); border-radius: 100px;
-  font-family: var(--sans); font-weight: 500; font-size: 0.88rem;
-  cursor: pointer; transition: all 0.18s;
-}
-.btn-outline:hover { border-color: var(--border2); color: var(--white); }
-
-/* Toast */
-.toast-el {
-  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-  background: var(--ink2); color: var(--white);
-  border: 1px solid rgba(78,153,112,0.2);
-  padding: 0.7rem 1.4rem; border-radius: 100px;
-  font-size: 0.84rem; z-index: 9999;
-  box-shadow: 0 10px 36px rgba(0,0,0,0.5);
-  animation: toastIn 0.3s cubic-bezier(0.16,1,0.3,1) both;
-  white-space: nowrap; max-width: 90vw;
-}
-@keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
-
-/* Mobile */
-@media (max-width: 720px) {
-  .topbar { padding: 0.75rem 1rem; }
-  .container { padding: 1.5rem 1rem 4rem; }
-  .session-controls { gap: 0.5rem; }
-  .ctrl-btn { font-size: 0.72rem; padding: 0.5rem 0.72rem; }
-  .transcript-scroll { height: 220px; }
-}
-@media (max-width: 640px) {
-  #orb-canvas { width: min(300px, 80vw) !important; height: min(300px, 80vw) !important; touch-action: manipulation; }
-  .orb-mute-ring { width: calc(min(300px, 80vw) + 18px); height: calc(min(300px, 80vw) + 18px); top: 1.5rem; }
-  .orb-stage { padding: 0.75rem 0 0.25rem; }
-  .ctrl-btn { padding: 0.65rem 0.82rem; font-size: 0.72rem; min-height: 44px; }
-  .transcript-scroll { height: 140px; }
-  .setup-grid { grid-template-columns: 1fr; }
-  .hero h1 { font-size: clamp(2rem, 8vw, 3rem); }
-  .start-btn { height: 58px; font-size: 0.92rem; }
-  .role-card { padding: 0.72rem 0.9rem; margin-bottom: 0.72rem; }
-  .role-avatar { width: 36px; height: 36px; min-width: 36px; font-size: 1.1rem; }
-  .role-info h3 { font-size: 0.8rem; }
-  .role-info p { font-size: 0.72rem; }
-  .session-header { margin-bottom: 0.65rem; padding-bottom: 0.65rem; }
-  .session-timer { font-size: 1.4rem; }
-  .session-info h2 { font-size: 1rem; }
-  .action-btn { width: 44px; height: 44px; min-width: 44px; }
-  .criteria-grid { grid-template-columns: 1fr; }
-  .sound-wave-bars .swb { width: 3px; }
+.cta-section::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(61,122,92,0.1) 0%, transparent 65%);
 }
 
-button, .tab-item, .action-btn, .ctrl-btn, .start-btn {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
+.cta-headline {
+  font-family: var(--serif);
+  font-size: clamp(2.8rem, 7vw, 6rem);
+  font-weight: 300; line-height: 1.1; letter-spacing: -0.02em;
+  max-width: 700px; margin: 0 auto 2.5rem;
 }
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .session-controls { padding-bottom: env(safe-area-inset-bottom); }
-  .container { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+.cta-headline em { font-style: italic; color: var(--sage-light); }
+
+.cta-meta {
+  font-size: 0.82rem; color: var(--white3); margin-top: 1.5rem;
+  letter-spacing: 0.03em;
 }
 
+/* ─────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────── */
+footer {
+  padding: 2.5rem 3rem;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-logo {
+  font-family: var(--serif); font-size: 1.1rem;
+  color: var(--white2); text-decoration: none;
+}
+.footer-logo span { color: var(--sage-light); }
+.footer-copy { font-size: 0.75rem; color: var(--white3); }
+
+/* ─────────────────────────────────────────────
+   ANIMATIONS
+───────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity 0.75s ease, transform 0.75s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────── */
+@media (max-width: 900px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { display: none; }
+  .problem-grid,
+  .demo-inner,
+  .compare-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .features-grid { grid-template-columns: 1fr; }
+  .paths-grid { grid-template-columns: repeat(2, 1fr); }
+  .testimonials-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .section { padding: 5rem 1.25rem; }
+  .paths-grid { grid-template-columns: 1fr; }
+  .hero-actions { flex-direction: column; }
+  footer { flex-direction: column; gap: 1rem; text-align: center; }
+}
+
+/* ─────────────────────────────────────────────
+   SAFFRON ACCENT LINE (decorative Indian touch)
+───────────────────────────────────────────── */
+.saffron-line {
+  display: inline-block; width: 40px; height: 2px;
+  background: var(--saffron); margin-bottom: 2rem; border-radius: 2px;
+}
 </style>
 </head>
 <body>
+
+<!-- ── NAVIGATION ─────────────────────────────── -->
+<nav>
+  <a href="#" class="nav-logo">AURA<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#about">Why AURA</a></li>
+  </ul>
+  <a href="#" class="nav-cta">Start Speaking</a>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-eyebrow">AI Language Tutor · Built for Gujarati Learners</div>
+
+  <h1 class="hero-headline">
+    Learn German through<br>
+    <em>real conversations.</em>
+  </h1>
+
+  <p class="hero-sub">
+    AURA helps Gujarati students speak German with confidence — 
+    anytime, in your language, at your pace.
+  </p>
+
+  <div class="hero-actions">
+    <a href="#" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      Start Speaking with AURA
+    </a>
+    <a href="#demo" class="btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Watch Demo
+    </a>
+  </div>
+
+  <!-- Chat mockup -->
+  <div class="hero-mockup">
+    <div class="mockup-bar">
+      <div class="mockup-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="mockup-title">AURA · Conversation</div>
+      <div class="aura-status">
+        <div class="aura-dot"></div>
+        Live
+      </div>
+    </div>
+
+    <div class="mockup-body">
+      <div class="msg msg-user">
+        <div class="msg-avatar">A</div>
+        <div class="msg-content">
+          <div class="msg-name">Aryan · Student</div>
+          <div class="msg-bubble">
+            <span class="gujarati">મને જર્મનમાં પોતાનો પરિચય આપવો છે.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg msg-aura">
+        <div class="msg-avatar">◈</div>
+        <div class="msg-content">
+          <div class="msg-name">AURA · German Tutor</div>
+          <div class="msg-bubble">
+            <span class="german">Sehr gut! Ich heiße Aryan und ich komme aus Indien.</span>
+            <span class="explanation">→ "My name is Aryan and I come from India." — આ sentence practice કરો, પછી હું pronounce ચેક કરીશ.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg msg-user">
+        <div class="msg-avatar">A</div>
+        <div class="msg-content">
+          <div class="msg-name">Aryan · Student</div>
+          <div class="msg-bubble">
+            <span class="gujarati">Ich heiße Aryan und... ich komme aus Indien?</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg msg-aura msg-typing">
+        <div class="msg-avatar">◈</div>
+        <div class="msg-content">
+          <div class="msg-name">AURA · Responding</div>
+          <div class="msg-bubble">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── PROBLEM SECTION ─────────────────────────── -->
+<section class="section problem-section" id="problem">
+  <div class="section-inner">
+    <div class="label-tag"><span></span>The Real Challenge</div>
+
+    <div class="problem-grid">
+      <div>
+        <p class="problem-quote reveal">
+          "You don't learn a language<br>by reading it.<br>
+          <em>You learn it by speaking.</em>"
+        </p>
+      </div>
+
+      <div class="problem-items">
+        <div class="problem-item reveal reveal-delay-1">
+          <div class="problem-icon">📖</div>
+          <div class="problem-text">
+            <strong>Grammar without voice</strong>
+            <p>Most Gujarati students know German grammar well — but freeze when they need to speak it.</p>
+          </div>
+        </div>
+        <div class="problem-item reveal reveal-delay-2">
+          <div class="problem-icon">👥</div>
+          <div class="problem-text">
+            <strong>No conversation partner</strong>
+            <p>Finding someone to practice German with in Gujarat is nearly impossible. Classes don't give enough speaking time.</p>
+          </div>
+        </div>
+        <div class="problem-item reveal reveal-delay-3">
+          <div class="problem-icon">😶</div>
+          <div class="problem-text">
+            <strong>Fear of making mistakes</strong>
+            <p>Speaking a foreign language in front of others feels embarrassing — so students stay silent. Silence becomes habit.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── FEATURES SECTION ────────────────────────── -->
+<section class="section features-section" id="features">
+  <div class="section-inner">
+    <div class="label-tag reveal"><span></span>What AURA Does</div>
+    <h2 class="section-headline reveal">Four ways AURA<br><em>transforms your German.</em></h2>
+
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-number">01</div>
+        <div class="feature-icon">🗣️</div>
+        <div class="feature-title">Natural Conversations</div>
+        <p class="feature-desc">Speak freely with an AI that listens, responds, and adapts to your level. Practice at A1 or push toward B2 — on your schedule.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-number">02</div>
+        <div class="feature-icon">🇮🇳</div>
+        <div class="feature-title">Gujarati Explanations</div>
+        <p class="feature-desc">Complex German grammar, explained simply in Gujarati. No confusion, no guessing — concepts land in your native language first.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-number">03</div>
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">Real-Life Scenarios</div>
+        <p class="feature-desc">Practice university interviews, Studienkolleg conversations, grocery shopping, or job applications — situations you'll actually face in Germany.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-number">04</div>
+        <div class="feature-icon">🎧</div>
+        <div class="feature-title">Pronunciation Feedback</div>
+        <p class="feature-desc">AURA hears how you speak and guides you toward natural German pronunciation — the kind that gets you understood, not just graded.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── DEMO SECTION ────────────────────────────── -->
+<section class="section demo-section" id="demo">
+  <div class="section-inner">
+    <div class="label-tag reveal"><span></span>See AURA in Action</div>
+
+    <div class="demo-inner">
+      <div class="demo-copy">
+        <h2 class="section-headline reveal">Practice any<br><em>scenario,<br>anytime.</em></h2>
+        <p class="reveal">Choose a real-life situation. AURA becomes the other person — a professor, a doctor, a colleague — and guides you through the conversation step by step.</p>
+
+        <div class="demo-scenarios reveal">
+          <div class="scenario-pill active">
+            <div class="dot"></div>
+            Studienkolleg Interview
+          </div>
+          <div class="scenario-pill">
+            <div class="dot"></div>
+            Apartment Inquiry (Wohnungssuche)
+          </div>
+          <div class="scenario-pill">
+            <div class="dot"></div>
+            Doctor's Appointment
+          </div>
+          <div class="scenario-pill">
+            <div class="dot"></div>
+            Ausbildung Workplace
+          </div>
+          <div class="scenario-pill">
+            <div class="dot"></div>
+            Daily Shopping (Einkaufen)
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-chat reveal">
+        <div class="mockup-bar">
+          <div class="mockup-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="mockup-title">Studienkolleg Interview</div>
+          <div class="aura-status">
+            <div class="aura-dot"></div>
+            A2 Level
+          </div>
+        </div>
+
+        <div class="mockup-body">
+          <div class="msg msg-aura">
+            <div class="msg-avatar">◈</div>
+            <div class="msg-content">
+              <div class="msg-name">AURA · Interviewer</div>
+              <div class="msg-bubble">
+                <span class="german">Guten Morgen! Erzählen Sie mir etwas über sich.</span>
+                <span class="explanation">→ "Good morning! Tell me something about yourself." — શરૂ કરો, nervousness ની ચિંતા ન કરો.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="msg msg-user">
+            <div class="msg-avatar">A</div>
+            <div class="msg-content">
+              <div class="msg-name">You</div>
+              <div class="msg-bubble">
+                <span class="gujarati">Guten Morgen. Ich heiße Priya und ich komme aus Surat in Indien.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="msg msg-aura">
+            <div class="msg-avatar">◈</div>
+            <div class="msg-content">
+              <div class="msg-name">AURA · Feedback</div>
+              <div class="msg-bubble">
+                <span class="german">Sehr schön! ✓ Pronunciation gut. Warum möchten Sie in Deutschland studieren?</span>
+                <span class="explanation">→ Perfect! Now: "Why do you want to study in Germany?" — આ important interview question છે, તૈયાર રહો.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── COMPARE SECTION ─────────────────────────── -->
+<section class="section compare-section" id="about">
+  <div class="section-inner">
+    <div class="label-tag reveal"><span></span>AURA vs. Traditional</div>
+    <h2 class="section-headline reveal">Same language.<br><em>Different results.</em></h2>
+
+    <div class="compare-grid" style="margin-top: 3rem;">
+      <div class="compare-card traditional reveal">
+        <div class="compare-label">Traditional Courses</div>
+        <div class="compare-title">Grammar books &amp; passive learning</div>
+        <ul class="compare-list">
+          <li>Heavy grammar drills with no speaking practice</li>
+          <li>Fixed schedule, fixed pace — no flexibility</li>
+          <li>One teacher for thirty students</li>
+          <li>Explanations only in English or German</li>
+          <li>No feedback on how you actually sound</li>
+          <li>Exam-focused, not conversation-focused</li>
+        </ul>
+      </div>
+
+      <div class="compare-card aura-card reveal reveal-delay-2">
+        <div class="compare-label">AURA</div>
+        <div class="compare-title">Conversation-first, Gujarati-native</div>
+        <ul class="compare-list">
+          <li>Speak from day one — grammar in context</li>
+          <li>Practice at 2am or 2pm — whenever you need</li>
+          <li>Fully personal — adapts to your gaps</li>
+          <li>Explanations in Gujarati, so concepts truly land</li>
+          <li>Live pronunciation guidance after every attempt</li>
+          <li>Built for real scenarios you'll face in Germany</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── SOCIAL PROOF ────────────────────────────── -->
+<section class="section social-section">
+  <div class="section-inner">
+    <div class="label-tag reveal"><span></span>Who It's For</div>
+    <h2 class="section-headline reveal">Built for every<br><em>Gujarati path to Germany.</em></h2>
+
+    <div class="paths-grid" style="margin-top: 3rem;">
+      <div class="path-card reveal reveal-delay-1">
+        <div class="path-icon">🎓</div>
+        <div class="path-title">Studienkolleg</div>
+        <div class="path-desc">Prepare for entrance interviews and daily academic German.</div>
+      </div>
+      <div class="path-card reveal reveal-delay-2">
+        <div class="path-icon">🔧</div>
+        <div class="path-title">Ausbildung</div>
+        <div class="path-desc">Workplace vocabulary, professional conversation, German work culture.</div>
+      </div>
+      <div class="path-card reveal reveal-delay-3">
+        <div class="path-icon">🏛️</div>
+        <div class="path-title">University</div>
+        <div class="path-desc">Navigate seminars, professors, and student life with confidence.</div>
+      </div>
+      <div class="path-card reveal reveal-delay-4">
+        <div class="path-icon">💼</div>
+        <div class="path-title">Jobs &amp; Work Visas</div>
+        <div class="path-desc">Interviews, onboarding, and daily office German — practiced and ready.</div>
+      </div>
+    </div>
+
+    <div class="testimonials-grid" style="margin-top: 2rem;">
+      <div class="testimonial-card reveal">
+        <p class="t-quote">I practiced my Studienkolleg interview with AURA every night for two weeks. When the real interview came, I wasn't nervous. I'd already said it all before.</p>
+        <div class="t-author">
+          <div class="t-avatar">DJ</div>
+          <div>
+            <div class="t-name">Dhruvit Joshi</div>
+            <div class="t-meta">Studienkolleg, München · Surat, Gujarat</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal reveal-delay-1">
+        <p class="t-quote">The Gujarati explanations changed everything. German grammar finally made sense when AURA explained it the way my mind already works.</p>
+        <div class="t-author">
+          <div class="t-avatar">PP</div>
+          <div>
+            <div class="t-name">Priya Patel</div>
+            <div class="t-meta">Ausbildung Nursing · Ahmedabad, Gujarat</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card reveal reveal-delay-2">
+        <p class="t-quote">I went from silent to conversational in three months. AURA made me comfortable making mistakes — and that's what actually made me fluent.</p>
+        <div class="t-author">
+          <div class="t-avatar">KS</div>
+          <div>
+            <div class="t-name">Keyur Shah</div>
+            <div class="t-meta">TU Berlin · Rajkot, Gujarat</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ────────────────────────────────── -->
+<section class="cta-section">
+  <h2 class="cta-headline reveal">
+    Start speaking<br>
+    <em>German today.</em>
+  </h2>
+  <div class="reveal reveal-delay-1">
+    <a href="#" class="btn-primary" style="font-size: 1rem; padding: 1rem 2.2rem;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      Start Practicing with AURA
+    </a>
+  </div>
+  <p class="cta-meta reveal reveal-delay-2">No credit card required · Begin with your first free conversation</p>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────────── -->
+<footer>
+  <a href="#" class="footer-logo">AURA<span>.</span></a>
+  <p class="footer-copy">© 2025 AURA. Built for Gujarati students going to Germany.</p>
+</footer>
+
+<!-- ── SCROLL REVEAL JS ─────────────────────────── -->
+<script>
+(function () {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+  );
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Scenario pill interaction
+  document.querySelectorAll('.scenario-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.scenario-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+})();
+</script>
+
+
+
+
 
 <!-- ═══ AURA INTRO OVERLAY ═══ -->
 <div id="aura-intro">
@@ -2404,5 +2678,7 @@ window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
   introEl.addEventListener('click', skipIntro);
 })();
 </script>
+
+
 </body>
 </html>

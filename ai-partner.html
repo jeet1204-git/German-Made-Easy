@@ -581,7 +581,15 @@ body::after {
   text-align: center;
 }
 
-/* ── SOUND WAVE BARS (below orb, shown when speaking) ── */
+/* ── SILENCE COUNTDOWN ── */
+.silence-countdown {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--danger); opacity: 0.7;
+  text-align: center;
+  animation: pulse 1s ease infinite;
+}
+.silence-countdown span { font-weight: 700; font-size: 0.68rem; }
 .sound-wave-bars {
   display: flex;
   align-items: center;
@@ -1147,6 +1155,10 @@ button, .tab-item, .action-btn, .ctrl-btn, .start-btn {
         <div class="orb-mute-ring"></div>
         <canvas id="orb-canvas" width="440" height="440" onclick="toggleMic()"></canvas>
         <div class="orb-state-label" id="orb-state-label">tap orb to mute</div>
+        <!-- Silence countdown indicator -->
+        <div class="silence-countdown" id="silence-countdown" style="display:none;">
+          <span id="silence-countdown-text">30s</span> until pause
+        </div>
         <!-- Sound wave bars — shown when AI or user is speaking -->
         <div class="sound-wave-bars" id="sound-wave-bars">
           <span class="swb"></span><span class="swb"></span><span class="swb"></span>
@@ -1267,6 +1279,19 @@ button, .tab-item, .action-btn, .ctrl-btn, .start-btn {
   </div>
 </div>
 
+<!-- SILENCE / PAUSE MODAL -->
+<div class="modal-backdrop" id="silence-modal">
+  <div class="modal-card" style="max-width:380px;">
+    <div style="font-size:2.4rem;margin-bottom:0.8rem;">🤫</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;margin-bottom:0.55rem;">Still there?</h2>
+    <p style="color:var(--text2);font-size:0.88rem;line-height:1.65;margin-bottom:1.6rem;">No speech detected for 30 seconds. The session has been <strong style="color:var(--text);">paused</strong> to save your time.</p>
+    <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-primary-glow" onclick="resumeSession()" style="padding:0.85rem 1.8rem;">▶ Resume Session</button>
+      <button class="btn-ghost" onclick="endSession()" style="padding:0.85rem 1.2rem;">🏁 End & Score</button>
+    </div>
+  </div>
+</div>
+
 <!-- TRIAL LIMIT MODAL -->
 <div class="modal-backdrop" id="trial-limit-modal">
   <div class="modal-card">
@@ -1374,7 +1399,7 @@ const db   = getFirestore(app);
 // ── STATE ──────────────────────────────────────────────────────────────────
 let currentUser = null, userProfile = null, isPaidStudent = false, trialCount = 0;
 let selectedLevel = 'A1', selectedInputMode = 'both', selectedScenario = null;
-let selectedLangPref = 'Gujarati'; // FIX #2: locked for session
+let selectedLangPref = 'Gujarati'; // locked for session
 let conversationHistory = [], wordsUsed = new Set(), errorPatterns = {};
 let sessionTimerInterval = null, sessionSeconds = 20 * 60, addTimeUsed = false;
 let ws = null, audioCtx = null, micCtx = null, micStream = null, workletNode = null, playbackNode = null;
@@ -1382,6 +1407,15 @@ let sessionActive = false, micMuted = false;
 let currentAiText = '', currentAiEntryEl = null;
 let turnCount = 0;
 let correctionTimeout = null;
+
+// ── FIX: Silence / inactivity detection (30s) ──
+let silenceTimer = null;
+const SILENCE_TIMEOUT_MS = 30000;
+let sessionPaused = false;
+let lastUserSpeechTime = null;
+
+// ── FIX: Track last user input transcription (for non-German detection) ──
+let lastUserTranscript = '';
 
 // ── ORB ENGINE ─────────────────────────────────────────────────────────────
 let orbState = 'idle'; // 'idle' | 'listening' | 'thinking' | 'speaking'
@@ -1680,6 +1714,25 @@ RULE 4 — RESPONSE LENGTH: Keep responses under 50 words spoken. Short, punchy,
 RULE 5 — GRAMMAR CORRECTIONS: Max 2 errors corrected per student turn. Prioritise: verb position → articles → vocabulary.
 RULE 6 — ENCOURAGEMENT: "Tension nahi leva!" when struggling. "Perfect! Bahuj saras!" after success.
 
+RULE 7 — GERMAN-ONLY RESPONSES DURING SCENARIO (CRITICAL — NEW RULE):
+During MODE 1 (scenario roleplay), the student MUST respond in German.
+If the student responds to your scenario question in ANY language other than German (Gujarati, Hindi, English, etc.), do NOT accept it and do NOT advance the scenario.
+Instead, gently prompt them to say it in German. For example:
+- If they say "nahi chahiye" → respond: "Ha ha, samajh gayo! Pan scenario ma German bolvu padse. Bolo: 'Nein danke, das ist alles.' — Hve tame try karo!"
+- If they say "no" or "nothing else" → respond: "Saras! Pan German ma bolo: 'Nein danke, das ist alles!' — Try karo!"
+- If they say something in Hindi → respond: "Hindi samjayo, pan aapde German practice karvani chhe! Bolo: '[German equivalent]'"
+Keep the tone warm and encouraging, NOT scolding.
+EXCEPTION: If a student asks a grammar/pronunciation QUESTION (not a scenario answer), that is MODE 2 and they can ask in any language.
+The test is: is the student answering your scenario roleplay question? → MUST be in German. Are they asking a meta question about German? → any language is fine.
+
+RULE 8 — DETECTING NON-GERMAN SCENARIO ANSWERS:
+Signs the student did NOT answer in German:
+- Response contains no German words at all
+- Response is in Gujarati script or Gujarati words (chhe, nathi, haan, nai, etc.)
+- Response is in Hindi (hai, nahi, haan, theek, etc.)
+- Response is in English without any German mixed in
+When this happens: do NOT move the scenario forward. Prompt for German immediately.
+
 ════ CURRENT SESSION ════
 Role: ${role} | Scenario: ${title} — ${desc} | Level: ${level} (${examName})
 
@@ -1822,6 +1875,8 @@ async function createWorklet(ctx, stream) {
     if (!sessionActive || micMuted || !ws || ws.readyState !== WebSocket.OPEN) return;
     const b64 = btoa(String.fromCharCode(...new Uint8Array(e.data)));
     ws.send(JSON.stringify({ realtimeInput: { mediaChunks: [{ mimeType: 'audio/pcm;rate=16000', data: b64 }] } }));
+    // FIX: reset silence timer on every audio chunk sent (user is active)
+    resetSilenceTimer();
   };
   return node;
 }
@@ -1868,6 +1923,7 @@ function handleServerMessage(msg) {
       sc.modelTurn.parts.forEach(part => {
         if (part.inlineData?.mimeType?.startsWith('audio/')) {
           setOrbState('speaking');
+          clearSilenceTimer(); // AURA is speaking — no point timing user silence now
           enqueueAudio(part.inlineData.data);
         }
       });
@@ -1898,6 +1954,8 @@ function handleServerMessage(msg) {
         updateTurnCount();
       }
       setOrbState(micMuted ? 'idle' : 'listening');
+      // FIX: start silence countdown — user has 30s to respond after AURA speaks
+      if (!micMuted) startSilenceTimer();
     }
 
     if (sc.interrupted) {
@@ -2016,16 +2074,105 @@ window.dismissCorrection = () => {
 };
 
 // ── MIC TOGGLE ─────────────────────────────────────────────────────────────
+// ── SILENCE DETECTION ─────────────────────────────────────────────────────
+let silenceCountdownInterval = null;
+
+function startSilenceTimer() {
+  clearSilenceTimer();
+  if (!sessionActive || sessionPaused) return;
+
+  let remaining = Math.floor(SILENCE_TIMEOUT_MS / 1000);
+  const countdownEl = document.getElementById('silence-countdown');
+  const countdownTxt = document.getElementById('silence-countdown-text');
+
+  // Show countdown in last 10 seconds
+  silenceCountdownInterval = setInterval(() => {
+    remaining--;
+    if (remaining <= 10 && remaining > 0) {
+      if (countdownEl) { countdownEl.style.display = 'block'; }
+      if (countdownTxt) countdownTxt.textContent = remaining + 's';
+    }
+    if (remaining <= 0) {
+      clearInterval(silenceCountdownInterval);
+      if (countdownEl) countdownEl.style.display = 'none';
+    }
+  }, 1000);
+
+  silenceTimer = setTimeout(() => {
+    clearInterval(silenceCountdownInterval);
+    if (countdownEl) countdownEl.style.display = 'none';
+    pauseForSilence();
+  }, SILENCE_TIMEOUT_MS);
+}
+
+function resetSilenceTimer() {
+  if (!sessionActive || sessionPaused) return;
+  lastUserSpeechTime = Date.now();
+  clearSilenceTimer();
+  // Only restart if session is in listening state (not while AURA is speaking)
+  if (orbState === 'listening' || orbState === 'idle') {
+    startSilenceTimer();
+  }
+}
+
+function clearSilenceTimer() {
+  if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+  if (silenceCountdownInterval) { clearInterval(silenceCountdownInterval); silenceCountdownInterval = null; }
+  const countdownEl = document.getElementById('silence-countdown');
+  if (countdownEl) countdownEl.style.display = 'none';
+}
+
+function pauseForSilence() {
+  if (!sessionActive || sessionPaused) return;
+  sessionPaused = true;
+  clearSilenceTimer();
+  // Pause the session timer too
+  clearInterval(sessionTimerInterval);
+  // Show the pause modal
+  document.getElementById('silence-modal').classList.add('visible');
+  setOrbState('idle');
+  const label = document.getElementById('orb-state-label');
+  if (label) label.textContent = 'session paused';
+}
+
+window.resumeSession = () => {
+  document.getElementById('silence-modal').classList.remove('visible');
+  sessionPaused = false;
+  // Restart the session countdown timer
+  sessionTimerInterval = setInterval(() => {
+    sessionSeconds--;
+    updateTimer();
+    if (sessionSeconds <= 0) endSession();
+  }, 1000);
+  // Tell AURA we're back
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    setOrbState('thinking');
+    ws.send(JSON.stringify({
+      clientContent: {
+        turns: [{ role: 'user', parts: [{ text: 'I am back. Please continue where we left off.' }] }],
+        turnComplete: true
+      }
+    }));
+  } else {
+    setOrbState('listening');
+    startSilenceTimer();
+  }
+  toast('Session resumed! 🎙');
+};
+
 window.toggleMic = () => {
   micMuted = !micMuted;
   // Orb state reflects mute
   if (micMuted) {
     setOrbState('idle');
+    clearSilenceTimer(); // muted = user is intentionally silent, don't count
   } else {
     setOrbState(orbState === 'speaking' ? 'speaking' : 'listening');
+    startSilenceTimer(); // unmuted = start watching for silence again
   }
   const stage = document.getElementById('orb-stage');
   if (stage) stage.classList.toggle('muted', micMuted);
+};
 };
 
 function updateTurnCountLegacy() { /* replaced by updateTurnCount */ }
@@ -2039,6 +2186,7 @@ window.sendTextMessage = () => {
   text.toLowerCase().split(/\s+/).forEach(w => { const c = w.replace(/[^a-zäöüß]/gi,''); if (c.length > 2) wordsUsed.add(c); });
   conversationHistory.push({ role: 'user', content: text });
   setOrbState('thinking');
+  resetSilenceTimer(); // user is active
   ws.send(JSON.stringify({ clientContent: { turns: [{ role:'user', parts:[{ text }] }], turnComplete: true } }));
 };
 
@@ -2091,6 +2239,9 @@ window.goBackToSetup = () => {
 
 function cleanupLive() {
   sessionActive = false;
+  sessionPaused = false;
+  clearSilenceTimer();
+  if (silenceCountdownInterval) { clearInterval(silenceCountdownInterval); silenceCountdownInterval = null; }
   if (window._keepAliveInterval) { clearInterval(window._keepAliveInterval); window._keepAliveInterval = null; }
   if (ws)          { try { ws.close(); } catch(e) {}          ws = null; }
   if (workletNode) { try { workletNode.disconnect(); } catch(e) {} workletNode = null; }
@@ -2108,6 +2259,7 @@ function cleanupLive() {
 window.endSession = async () => {
   clearInterval(sessionTimerInterval);
   cleanupLive();
+  document.getElementById('silence-modal').classList.remove('visible');
   document.getElementById('session-panel').style.display = 'none';
 
   if (conversationHistory.length < 2) {

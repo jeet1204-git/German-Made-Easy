@@ -516,7 +516,7 @@ body::after {
 .role-info p  { font-size: 0.8rem; line-height: 1.6; color: rgba(255,220,160,0.55); }
 
 /* ════════════════════════════════════════════════════════
-   LIVE SESSION — ORB INTERFACE
+   LIVE SESSION — ORB INTERFACE  (v4 — fluid blob)
 ════════════════════════════════════════════════════════ */
 
 /* ── ORB STAGE ── */
@@ -525,58 +525,64 @@ body::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 1.25rem;
-  padding: 2rem 0 1rem;
-  background: radial-gradient(ellipse 80% 50% at 50% 60%, rgba(0,245,255,0.04) 0%, transparent 70%);
+  margin-bottom: 1rem;
+  padding: 1.5rem 0 0.5rem;
+  /* ambient halo behind orb — color shifts per state */
+  background: radial-gradient(ellipse 70% 55% at 50% 55%, var(--orb-halo,rgba(0,245,255,0.05)) 0%, transparent 70%);
+  transition: background 0.8s ease;
 }
+.orb-stage.aura-active  { --orb-halo: rgba(0,245,255,0.09); }
+.orb-stage.user-active  { --orb-halo: rgba(123,97,255,0.09); }
+.orb-stage.thinking     { --orb-halo: rgba(232,184,75,0.07); }
+.orb-stage.idle         { --orb-halo: rgba(60,80,140,0.05); }
 
-/* Canvas orb */
+/* Canvas orb — fluid blob */
 #orb-canvas {
   display: block;
-  width: 220px; height: 220px;
+  width: 260px; height: 260px;
   cursor: pointer;
-  filter: drop-shadow(0 0 40px rgba(0,245,255,0.18));
-  transition: filter 0.4s ease;
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  touch-action: manipulation;
 }
-.orb-stage.aura-active  #orb-canvas { filter: drop-shadow(0 0 60px rgba(0,245,255,0.45)); }
-.orb-stage.user-active  #orb-canvas { filter: drop-shadow(0 0 60px rgba(123,97,255,0.45)); }
-.orb-stage.idle         #orb-canvas { filter: drop-shadow(0 0 24px rgba(255,255,255,0.08)); }
+#orb-canvas:active { transform: scale(0.94); }
 
-/* State label below orb */
+/* State label */
 .orb-state-label {
-  margin-top: 1rem;
+  margin-top: 0.85rem;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase;
+  font-size: 0.62rem; letter-spacing: 0.24em; text-transform: uppercase;
   color: var(--text3);
-  transition: color 0.3s, opacity 0.3s;
+  transition: color 0.5s ease, opacity 0.3s;
   min-height: 1.2rem;
   text-align: center;
 }
-.orb-stage.aura-active  .orb-state-label { color: var(--cyan); }
-.orb-stage.user-active  .orb-state-label { color: #c4b8ff; }
-.orb-stage.thinking     .orb-state-label { color: var(--gold); }
+.orb-stage.aura-active  .orb-state-label { color: rgba(0,245,255,0.75); }
+.orb-stage.user-active  .orb-state-label { color: rgba(180,160,255,0.8); }
+.orb-stage.thinking     .orb-state-label { color: rgba(232,184,75,0.75); }
+.orb-stage.muted        .orb-state-label { color: rgba(255,92,92,0.65); }
 
-/* Mic mute ring — visible ring around orb when muted */
+/* Mute ring — dashed ring visible when muted */
 .orb-mute-ring {
   position: absolute;
-  top: calc(2rem + 0px); left: 50%;
+  top: 1.5rem; left: 50%;
   transform: translateX(-50%);
-  width: 236px; height: 236px;
+  width: 278px; height: 278px;
   border-radius: 50%;
-  border: 2px dashed rgba(255,92,92,0.5);
+  border: 2px dashed rgba(255,92,92,0.45);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.35s ease;
 }
 .orb-stage.muted .orb-mute-ring { opacity: 1; }
 
-/* Tap-to-mute hint */
+/* Hint text */
 .orb-mic-hint {
   position: absolute;
-  bottom: 0.4rem;
+  bottom: 0;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--text3); opacity: 0.5;
+  font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text3); opacity: 0.35;
   pointer-events: none;
   text-align: center;
 }
@@ -584,40 +590,44 @@ body::after {
 /* ── SILENCE COUNTDOWN ── */
 .silence-countdown {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--danger); opacity: 0.7;
+  font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--danger); opacity: 0.65;
   text-align: center;
   animation: pulse 1s ease infinite;
 }
-.silence-countdown span { font-weight: 700; font-size: 0.68rem; }
+.silence-countdown span { font-weight: 700; font-size: 0.66rem; }
+
+/* Wave bars — slim, elegant, floating below orb */
 .sound-wave-bars {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  height: 28px;
-  margin-top: 0.35rem;
+  gap: 3px;
+  height: 24px;
+  margin-top: 0.3rem;
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.4s ease;
 }
 .sound-wave-bars.visible { opacity: 1; }
 .sound-wave-bars .swb {
   display: inline-block;
-  width: 3px;
-  border-radius: 3px;
+  width: 2.5px;
+  border-radius: 2px;
   background: var(--cyan);
-  animation: swbAnim 0.9s ease-in-out infinite;
+  animation: swbAnim 0.85s ease-in-out infinite;
 }
-.sound-wave-bars .swb:nth-child(1) { height: 8px;  animation-delay: 0.0s; }
-.sound-wave-bars .swb:nth-child(2) { height: 18px; animation-delay: 0.1s; }
-.sound-wave-bars .swb:nth-child(3) { height: 12px; animation-delay: 0.2s; }
-.sound-wave-bars .swb:nth-child(4) { height: 24px; animation-delay: 0.3s; }
-.sound-wave-bars .swb:nth-child(5) { height: 16px; animation-delay: 0.2s; }
-.sound-wave-bars .swb:nth-child(6) { height: 11px; animation-delay: 0.1s; }
-.sound-wave-bars .swb:nth-child(7) { height: 6px;  animation-delay: 0.0s; }
+.sound-wave-bars .swb:nth-child(1)  { height: 5px;  animation-delay: 0.00s; }
+.sound-wave-bars .swb:nth-child(2)  { height: 13px; animation-delay: 0.08s; }
+.sound-wave-bars .swb:nth-child(3)  { height: 8px;  animation-delay: 0.16s; }
+.sound-wave-bars .swb:nth-child(4)  { height: 20px; animation-delay: 0.24s; }
+.sound-wave-bars .swb:nth-child(5)  { height: 14px; animation-delay: 0.32s; }
+.sound-wave-bars .swb:nth-child(6)  { height: 20px; animation-delay: 0.24s; }
+.sound-wave-bars .swb:nth-child(7)  { height: 8px;  animation-delay: 0.16s; }
+.sound-wave-bars .swb:nth-child(8)  { height: 13px; animation-delay: 0.08s; }
+.sound-wave-bars .swb:nth-child(9)  { height: 5px;  animation-delay: 0.00s; }
 .orb-stage.user-active .sound-wave-bars .swb { background: var(--violet); }
-.orb-stage.thinking .sound-wave-bars .swb    { background: var(--gold); }
-@keyframes swbAnim { 0%,100%{ transform:scaleY(0.35); } 50%{ transform:scaleY(1); } }
+.orb-stage.thinking    .sound-wave-bars .swb { background: var(--gold); }
+@keyframes swbAnim { 0%,100%{ transform:scaleY(0.25); opacity:0.5; } 50%{ transform:scaleY(1); opacity:1; } }
 
 /* ── AURA TRANSCRIPT STRIP ── */
 .aura-transcript-wrap {
@@ -940,33 +950,41 @@ body::after {
 
 /* ── MOBILE TOUCH & TAP ENHANCEMENTS ── */
 @media (max-width: 640px) {
-  /* Make orb bigger and more tappable on mobile */
+  /* ── BIG fluid orb on mobile — hero of the screen ── */
   #orb-canvas {
-    width: min(260px, 72vw) !important;
-    height: min(260px, 72vw) !important;
+    width: min(300px, 80vw) !important;
+    height: min(300px, 80vw) !important;
     touch-action: manipulation;
   }
+  .orb-mute-ring {
+    width: calc(min(300px, 80vw) + 18px);
+    height: calc(min(300px, 80vw) + 18px);
+    top: 1.5rem;
+  }
   .orb-stage {
-    padding: 1rem 0 0.5rem;
+    padding: 0.75rem 0 0.25rem;
   }
   /* Larger tap targets for session controls */
   .ctrl-btn {
     padding: 0.65rem 0.85rem;
-    font-size: 0.75rem;
+    font-size: 0.73rem;
     min-height: 44px;
   }
-  /* Transcript smaller on mobile */
-  .transcript-scroll { height: 160px; }
+  /* Transcript compact on mobile */
+  .transcript-scroll { height: 140px; }
   /* Setup panel adjustments */
   .setup-grid { grid-template-columns: 1fr; }
   .hero h1 { font-size: clamp(2rem, 8vw, 3rem); }
   .start-btn { height: 60px; font-size: 0.95rem; }
-  /* Role card more compact */
-  .role-card { padding: 0.85rem 1rem; }
-  .role-avatar { width: 38px; height: 38px; min-width: 38px; font-size: 1.2rem; }
+  /* Role card compact */
+  .role-card { padding: 0.75rem 0.9rem; margin-bottom: 0.75rem; }
+  .role-avatar { width: 36px; height: 36px; min-width: 36px; font-size: 1.1rem; }
+  .role-info h3 { font-size: 0.82rem; }
+  .role-info p { font-size: 0.73rem; }
   /* Session header compact */
-  .session-header { margin-bottom: 0.75rem; padding-bottom: 0.75rem; }
-  .session-timer { font-size: 1.5rem; }
+  .session-header { margin-bottom: 0.65rem; padding-bottom: 0.65rem; }
+  .session-timer { font-size: 1.4rem; }
+  .session-info h2 { font-size: 1rem; }
   /* Correction card full-width on mobile */
   #correction-card {
     left: 0.75rem; right: 0.75rem; width: auto; max-width: none;
@@ -976,6 +994,8 @@ body::after {
   .action-btn { width: 44px; height: 44px; min-width: 44px; }
   /* Score panel */
   .criteria-grid { grid-template-columns: 1fr; }
+  /* Wave bars slightly bigger on mobile */
+  .sound-wave-bars .swb { width: 3px; }
 }
 
 /* Prevent double-tap zoom on buttons */
@@ -1163,7 +1183,7 @@ button, .tab-item, .action-btn, .ctrl-btn, .start-btn {
         <div class="sound-wave-bars" id="sound-wave-bars">
           <span class="swb"></span><span class="swb"></span><span class="swb"></span>
           <span class="swb"></span><span class="swb"></span><span class="swb"></span>
-          <span class="swb"></span>
+          <span class="swb"></span><span class="swb"></span><span class="swb"></span>
         </div>
         <div class="orb-mic-hint">tap orb · mute mic</div>
       </div>
@@ -1425,119 +1445,240 @@ let orbParticles = [];
 function initOrb() {
   const canvas = document.getElementById('orb-canvas');
   if (!canvas) return;
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width  = 440 * dpr;
-  canvas.height = 440 * dpr;
-  canvas.style.width  = '220px';
-  canvas.style.height = '220px';
+
+  // Resize canvas to match its CSS display size with DPR
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cssW = canvas.offsetWidth  || 260;
+  const cssH = canvas.offsetHeight || 260;
+  canvas.width  = cssW * dpr;
+  canvas.height = cssH * dpr;
   const ctx = canvas.getContext('2d');
   ctx.scale(dpr, dpr);
-  const W = 220, H = 220, cx = W/2, cy = H/2;
+  const W = cssW, H = cssH, cx = W/2, cy = H/2;
+  const BASE_R = Math.min(W, H) * 0.36; // base orb radius
 
-  // Particle system
-  orbParticles = Array.from({length: 60}, (_, i) => ({
-    angle: (i / 60) * Math.PI * 2,
-    radius: 70 + Math.random() * 18,
-    baseRadius: 70 + Math.random() * 18,
-    speed: 0.003 + Math.random() * 0.006,
-    size: Math.random() * 2.2 + 0.5,
-    opacity: Math.random() * 0.7 + 0.1,
-    hue: Math.random() > 0.55 ? 0 : Math.random() > 0.5 ? 1 : 2, // 0=cyan 1=violet 2=gold
-    phase: Math.random() * Math.PI * 2,
-    active: Math.random() > 0.3,
-  }));
+  // ── Simplex-like smooth noise (no external lib needed) ──
+  function noise(x, y) {
+    // cheap smooth noise using sin waves
+    return (Math.sin(x * 1.7 + y * 0.5) * 0.5 +
+            Math.sin(x * 0.8 - y * 1.3) * 0.3 +
+            Math.sin(x * 2.4 + y * 1.9) * 0.2);
+  }
+
+  // Color palettes per state — [r,g,b] arrays
+  const COLORS = {
+    speaking:  { a: [0,245,255],   b: [100,180,255], c: [150,100,255], glow: [0,245,255]   },
+    listening: { a: [150,100,255], b: [100,60,220],  c: [60,160,255],  glow: [123,97,255]  },
+    thinking:  { a: [232,184,75],  b: [255,140,60],  c: [200,220,80],  glow: [232,184,75]  },
+    idle:      { a: [50,80,130],   b: [30,50,100],   c: [60,90,150],   glow: [50,80,130]   },
+  };
+
+  // Current interpolated colors
+  let curA = [...COLORS.idle.a], curB = [...COLORS.idle.b], curC = [...COLORS.idle.c];
+  let curGlow = [...COLORS.idle.glow];
+
+  function lerpColor(from, to, t) {
+    return from.map((v, i) => Math.round(v + (to[i] - v) * t));
+  }
 
   let time = 0;
-  let breathe = 0;
-  let energyLevel = 0;
-  let targetEnergy = 0;
+  let energyLevel = 0.0;
+  let targetEnergy = 0.12;
+  let colorT = 0;
+  let prevState = 'idle';
 
-  function getOrbColors() {
-    switch(orbState) {
-      case 'speaking':  return { core: [0,245,255],   glow: [0,245,255],   outer: [123,97,255] };
-      case 'listening': return { core: [123,97,255],  glow: [123,97,255],  outer: [0,245,255]  };
-      case 'thinking':  return { core: [232,184,75],  glow: [232,184,75],  outer: [200,140,40] };
-      default:          return { core: [80,100,140],  glow: [60,80,120],   outer: [40,55,90]   };
+  // Blob deformation points — 12 control points around circle
+  const N_POINTS = 64;
+  const blobOffsets = Array.from({length: N_POINTS}, (_, i) => ({
+    phase: (i / N_POINTS) * Math.PI * 2,
+    speed: 0.5 + Math.random() * 0.8,
+    amp: Math.random() * 0.6 + 0.4,
+  }));
+
+  // Ripple rings from tap
+  let ripples = [];
+
+  // Expose tap ripple trigger
+  canvas.addEventListener('pointerdown', () => {
+    if (energyLevel > 0.05) {
+      ripples.push({ r: BASE_R, maxR: BASE_R * 2.2, alpha: 0.6, born: time });
     }
+  });
+
+  function getBlobRadius(angle, t) {
+    // Multi-frequency noise deformation — this is the key "organic" look
+    const base = BASE_R;
+    const e = energyLevel;
+    const n1 = noise(Math.cos(angle) * 2.0 + t * 0.7, Math.sin(angle) * 2.0 + t * 0.5);
+    const n2 = noise(Math.cos(angle) * 3.5 - t * 0.9, Math.sin(angle) * 3.5 + t * 0.3);
+    const n3 = noise(Math.cos(angle) * 6.0 + t * 1.4, Math.sin(angle) * 6.0 - t * 0.8);
+    // Combine: large slow waves + medium + small fast ripple
+    const deform = n1 * 0.55 + n2 * 0.30 + n3 * 0.15;
+    // Scale deformation by energy: idle = barely moves, speaking = dramatic morph
+    const deformAmt = base * (0.04 + e * 0.22);
+    // Extra breathing pulse
+    const breathe = Math.sin(t * (orbState === 'speaking' ? 3.5 : orbState === 'listening' ? 2.5 : 1.2)) * base * (0.02 + e * 0.06);
+    return base + deform * deformAmt + breathe;
+  }
+
+  function drawBlob(t) {
+    const points = [];
+    for (let i = 0; i < N_POINTS; i++) {
+      const angle = (i / N_POINTS) * Math.PI * 2;
+      const r = getBlobRadius(angle, t);
+      points.push({ x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r });
+    }
+
+    // Smooth blob path with bezier curves
+    ctx.beginPath();
+    for (let i = 0; i < N_POINTS; i++) {
+      const p0 = points[(i - 1 + N_POINTS) % N_POINTS];
+      const p1 = points[i];
+      const p2 = points[(i + 1) % N_POINTS];
+      const p3 = points[(i + 2) % N_POINTS];
+      if (i === 0) {
+        const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+        ctx.moveTo(mx, my);
+      }
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, mx, my);
+    }
+    ctx.closePath();
+    return { path: ctx, points };
   }
 
   function drawFrame() {
     ctx.clearRect(0, 0, W, H);
-    time += 0.016;
-    breathe += 0.022;
+    time += 0.014;
 
-    // Ease energy toward target
-    targetEnergy = orbState === 'speaking' ? 0.9 : orbState === 'listening' ? 0.65 : orbState === 'thinking' ? 0.4 : 0.12;
-    energyLevel += (targetEnergy - energyLevel) * 0.04;
+    // ── Energy easing ──
+    const stateMap = { speaking: 0.92, listening: 0.68, thinking: 0.42, idle: 0.10 };
+    targetEnergy = stateMap[orbState] ?? 0.10;
+    energyLevel += (targetEnergy - energyLevel) * 0.05;
 
-    const col = getOrbColors();
-    const pulse = Math.sin(breathe) * 0.12 * (1 + energyLevel);
-    const orbR = 58 + pulse * 12 * energyLevel;
+    // ── Color interpolation — smooth transitions between states ──
+    const tgt = COLORS[orbState] || COLORS.idle;
+    const lerpSpd = 0.045;
+    curA    = lerpColor(curA,    tgt.a,    lerpSpd);
+    curB    = lerpColor(curB,    tgt.b,    lerpSpd);
+    curC    = lerpColor(curC,    tgt.c,    lerpSpd);
+    curGlow = lerpColor(curGlow, tgt.glow, lerpSpd);
 
-    // ── Outer glow rings ──
-    for (let r = 3; r >= 1; r--) {
-      const ringR = orbR + r * 22 * energyLevel;
-      const alpha = (0.04 - r * 0.01) * energyLevel;
-      const grad = ctx.createRadialGradient(cx, cy, orbR*0.4, cx, cy, ringR);
-      grad.addColorStop(0, `rgba(${col.glow.join(',')},0)`);
-      grad.addColorStop(1, `rgba(${col.glow.join(',')},${alpha})`);
-      ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI*2);
+    const e = energyLevel;
+    const glowAlpha = 0.05 + e * 0.22;
+
+    // ── 1. Outer atmospheric glow (multiple layers) ──
+    for (let layer = 4; layer >= 1; layer--) {
+      const glowR = BASE_R * (1.15 + layer * 0.38 * e);
+      const a     = glowAlpha * (0.3 / layer);
+      const grad = ctx.createRadialGradient(cx, cy, BASE_R * 0.5, cx, cy, glowR);
+      grad.addColorStop(0, `rgba(${curGlow},0)`);
+      grad.addColorStop(0.6, `rgba(${curGlow},${a * 0.4})`);
+      grad.addColorStop(1, `rgba(${curGlow},0)`);
+      ctx.beginPath(); ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
       ctx.fillStyle = grad; ctx.fill();
     }
 
-    // ── Main orb body ──
-    const bodyGrad = ctx.createRadialGradient(cx - orbR*0.3, cy - orbR*0.35, orbR*0.05, cx, cy, orbR);
-    const cAlpha = 0.55 + energyLevel * 0.35;
-    bodyGrad.addColorStop(0,   `rgba(255,255,255,${0.18 + energyLevel*0.1})`);
-    bodyGrad.addColorStop(0.3, `rgba(${col.core.join(',')},${cAlpha})`);
-    bodyGrad.addColorStop(0.7, `rgba(${col.outer.join(',')},${cAlpha * 0.7})`);
-    bodyGrad.addColorStop(1,   `rgba(10,12,20,0.95)`);
-    ctx.beginPath(); ctx.arc(cx, cy, orbR, 0, Math.PI*2);
-    ctx.fillStyle = bodyGrad; ctx.fill();
+    // ── 2. Blob fill ──
+    ctx.save();
+    drawBlob(time);
 
-    // ── Inner shimmer ──
-    const shimGrad = ctx.createRadialGradient(cx - orbR*0.25, cy - orbR*0.3, 0, cx - orbR*0.1, cy - orbR*0.15, orbR*0.55);
-    shimGrad.addColorStop(0, `rgba(255,255,255,${0.2 + energyLevel*0.15})`);
-    shimGrad.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.beginPath(); ctx.arc(cx, cy, orbR, 0, Math.PI*2);
-    ctx.fillStyle = shimGrad; ctx.fill();
+    // Main gradient — radial, off-center highlight
+    const hx = cx - BASE_R * 0.28, hy = cy - BASE_R * 0.32;
+    const fillGrad = ctx.createRadialGradient(hx, hy, BASE_R * 0.02, cx, cy, BASE_R * 1.1);
+    fillGrad.addColorStop(0.0, `rgba(255,255,255,${0.55 + e * 0.2})`);
+    fillGrad.addColorStop(0.2, `rgba(${curA},${0.7 + e * 0.2})`);
+    fillGrad.addColorStop(0.55, `rgba(${curB},${0.75 + e * 0.15})`);
+    fillGrad.addColorStop(0.85, `rgba(${curC},${0.5 + e * 0.3})`);
+    fillGrad.addColorStop(1.0, `rgba(8,10,20,0.92)`);
+    ctx.fillStyle = fillGrad;
+    ctx.fill();
 
-    // ── Sound wave rings (only when speaking/thinking) ──
-    if (orbState === 'speaking' || orbState === 'thinking') {
-      const numRings = orbState === 'speaking' ? 4 : 2;
+    // ── 3. Inner light caustic (the "cloud" swirl) ──
+    const causticGrad = ctx.createRadialGradient(
+      cx - BASE_R * 0.18 + Math.sin(time * 0.7) * BASE_R * 0.12,
+      cy - BASE_R * 0.22 + Math.cos(time * 0.5) * BASE_R * 0.1,
+      0, cx, cy, BASE_R * 0.75
+    );
+    causticGrad.addColorStop(0,   `rgba(255,255,255,${0.25 + e * 0.18})`);
+    causticGrad.addColorStop(0.4, `rgba(${curA},${0.12 + e * 0.1})`);
+    causticGrad.addColorStop(1,   'rgba(255,255,255,0)');
+    ctx.fillStyle = causticGrad;
+    ctx.fill();
+
+    // ── 4. Second swirling highlight (gives it depth / movement) ──
+    const swirl2 = ctx.createRadialGradient(
+      cx + Math.sin(time * 0.9 + 2.1) * BASE_R * 0.35,
+      cy + Math.cos(time * 0.6 + 1.3) * BASE_R * 0.3,
+      0, cx, cy, BASE_R * 0.9
+    );
+    swirl2.addColorStop(0,   `rgba(${curB},${0.14 + e * 0.1})`);
+    swirl2.addColorStop(0.5, `rgba(${curC},${0.06 + e * 0.06})`);
+    swirl2.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = swirl2;
+    ctx.fill();
+
+    ctx.restore();
+
+    // ── 5. Ripple rings (expand outward on tap) ──
+    ripples = ripples.filter(rp => {
+      const age = time - rp.born;
+      const progress = Math.min(age / 1.8, 1);
+      rp.r = BASE_R + progress * (rp.maxR - BASE_R);
+      rp.alpha = (1 - progress) * 0.5;
+      if (rp.alpha < 0.01) return false;
+      ctx.beginPath(); ctx.arc(cx, cy, rp.r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(${curGlow},${rp.alpha})`;
+      ctx.lineWidth = 1.5 * (1 - progress);
+      ctx.stroke();
+      return true;
+    });
+
+    // ── 6. Pulse rings (speaking / listening) ──
+    if (orbState === 'speaking' || orbState === 'listening') {
+      const numRings = orbState === 'speaking' ? 3 : 2;
       for (let i = 0; i < numRings; i++) {
-        const phase = (time * (0.8 + i*0.3) + i * 0.7) % 1;
-        const ringR2 = orbR + phase * 55 * energyLevel;
-        const ringA  = (1 - phase) * 0.22 * energyLevel;
-        ctx.beginPath(); ctx.arc(cx, cy, ringR2, 0, Math.PI*2);
-        ctx.strokeStyle = `rgba(${col.core.join(',')},${ringA})`;
-        ctx.lineWidth = 1.5 - phase;
+        const progress = ((time * (0.55 + i * 0.25) + i * 0.72) % 1);
+        const ringR = BASE_R * 1.02 + progress * BASE_R * (orbState === 'speaking' ? 0.95 : 0.65) * e;
+        const rAlpha = (1 - progress) * (orbState === 'speaking' ? 0.32 : 0.2) * e;
+        ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${curGlow},${rAlpha})`;
+        ctx.lineWidth = (1 - progress) * 2.5;
         ctx.stroke();
       }
     }
 
-    // ── Particles ──
-    orbParticles.forEach((p, idx) => {
-      if (!p.active && orbState === 'idle') return;
-      p.angle += p.speed * (1 + energyLevel * 2);
-      const wobble = Math.sin(time * 1.8 + p.phase) * 8 * energyLevel;
-      const r = p.baseRadius + wobble + (orbR - 58);
-      const x = cx + Math.cos(p.angle) * r;
-      const y = cy + Math.sin(p.angle) * r;
-      const colors = [[0,245,255],[123,97,255],[232,184,75]];
-      const [pr,pg,pb] = colors[p.hue];
-      const pAlpha = p.opacity * (0.3 + energyLevel * 0.6) * (0.5 + 0.5 * Math.sin(time * 2 + p.phase));
-      ctx.beginPath(); ctx.arc(x, y, p.size * (0.5 + energyLevel * 0.8), 0, Math.PI*2);
-      ctx.fillStyle = `rgba(${pr},${pg},${pb},${pAlpha})`;
-      ctx.fill();
-    });
+    // ── 7. Thinking spinner arc ──
+    if (orbState === 'thinking') {
+      const arcR = BASE_R * 1.15;
+      const start = time * 2.5;
+      const arcLen = Math.PI * (0.5 + 0.4 * Math.sin(time * 1.8));
+      ctx.beginPath();
+      ctx.arc(cx, cy, arcR, start, start + arcLen);
+      ctx.strokeStyle = `rgba(${curGlow},${0.5 * e})`;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      // second arc offset
+      ctx.beginPath();
+      ctx.arc(cx, cy, arcR, start + Math.PI, start + Math.PI + arcLen * 0.6);
+      ctx.strokeStyle = `rgba(${curC},${0.3 * e})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
 
-    // ── Muted indicator ──
+    // ── 8. Muted indicator ──
     if (micMuted) {
-      ctx.font = `bold ${18}px sans-serif`;
+      ctx.save();
+      ctx.font = `${BASE_R * 0.38}px sans-serif`;
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = 'rgba(255,92,92,0.85)';
-      ctx.fillText('🔇', cx, cy + orbR + 10);
+      ctx.globalAlpha = 0.65;
+      ctx.fillText('🔇', cx, cy + BASE_R * 1.35);
+      ctx.restore();
     }
 
     orbAnim = requestAnimationFrame(drawFrame);
@@ -1790,8 +1931,8 @@ async function _doStartSession() {
   updateTimer();
   updateTurnCount();
 
-  // Init the orb
-  initOrb();
+  // Init the orb — wait one tick so CSS layout has settled
+  setTimeout(() => { initOrb(); }, 20);
   setOrbState('idle');
 
   const textInput = document.getElementById('text-input');

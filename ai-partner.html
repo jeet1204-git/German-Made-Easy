@@ -669,113 +669,98 @@ body::after {
 .transcript-turns { font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; color: var(--text3); }
 
 .transcript-scroll {
-  height: 200px; overflow-y: auto; padding: 1rem 1.2rem;
+  height: 240px; overflow-y: auto; padding: 1rem 1.1rem;
   scroll-behavior: smooth;
 }
 .transcript-scroll::-webkit-scrollbar { width: 3px; }
 .transcript-scroll::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.12); border-radius: 3px; }
 
-/* Individual transcript entries */
-.t-entry {
-  display: flex; gap: 0.7rem; margin-bottom: 0.9rem;
-  animation: tIn 0.35s cubic-bezier(0.16,1,0.3,1) both;
-}
-@keyframes tIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:none; } }
+/* ── TRANSCRIPT ENTRY TYPES ── */
 
+/* Standard dialogue entry (German conversation) */
+.t-entry { display: flex; gap: 0.7rem; margin-bottom: 0.75rem; animation: tIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes tIn { from { opacity:0; transform: translateY(5px); } to { opacity:1; transform:none; } }
 .t-avatar {
   width: 26px; height: 26px; min-width: 26px;
-  background: rgba(0,245,255,0.08);
-  border: 1px solid rgba(0,245,255,0.2);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem;
-  margin-top: 1px;
+  background: rgba(0,245,255,0.08); border: 1px solid rgba(0,245,255,0.2);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; margin-top: 1px;
 }
 .t-body { flex: 1; }
 .t-name {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(0,245,255,0.5); margin-bottom: 0.2rem;
+  font-size: 0.54rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(0,245,255,0.45); margin-bottom: 0.18rem;
 }
 .t-text {
   font-size: 0.88rem; line-height: 1.65; color: #c8dff2;
   font-family: 'Space Grotesk', sans-serif;
 }
 .t-text.streaming::after {
-  content: '▋';
-  display: inline-block; color: var(--cyan);
-  animation: blink 0.7s step-end infinite;
-  margin-left: 2px;
+  content: '▋'; display: inline-block; color: var(--cyan);
+  animation: blink 0.7s step-end infinite; margin-left: 2px;
 }
 @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
 
-/* ── CORRECTION CARD ── */
-#correction-card {
-  position: fixed;
-  bottom: 2rem; right: 1.5rem;
-  width: 320px; max-width: calc(100vw - 3rem);
-  background: linear-gradient(145deg, rgba(10,14,22,0.98), rgba(14,10,26,0.97));
-  border: 1px solid rgba(255,92,92,0.3);
-  border-radius: 18px;
-  padding: 1.1rem 1.3rem;
-  z-index: 500;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,92,92,0.1), 0 0 30px rgba(255,92,92,0.08);
-  transform: translateY(120%) scale(0.95);
-  opacity: 0;
-  transition: transform 0.45s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease;
-  pointer-events: none;
+/* ── TEACHER BOARD — inline explanation/correction entry ── */
+/* This replaces the old floating correction card */
+.t-board {
+  margin-bottom: 0.85rem;
+  border-radius: 14px;
+  overflow: hidden;
+  animation: tIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  border: 1px solid rgba(232,184,75,0.22);
+  background: linear-gradient(140deg, rgba(24,18,6,0.97), rgba(18,14,4,0.96));
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(232,184,75,0.1);
 }
-#correction-card.visible {
-  transform: translateY(0) scale(1);
-  opacity: 1;
-  pointer-events: auto;
+.t-board-header {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  background: rgba(232,184,75,0.07);
+  border-bottom: 1px solid rgba(232,184,75,0.12);
 }
-.cc-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 0.75rem;
-}
-.cc-badge {
-  display: flex; align-items: center; gap: 0.45rem;
+.t-board-icon { font-size: 0.75rem; }
+.t-board-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase;
-  color: #ff9a9a;
-  background: rgba(255,92,92,0.08);
-  border: 1px solid rgba(255,92,92,0.2);
-  padding: 0.2rem 0.65rem; border-radius: 20px;
+  font-size: 0.54rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(232,184,75,0.65); flex: 1;
 }
-.cc-badge-dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: #ff5c5c; box-shadow: 0 0 6px #ff5c5c;
-  animation: pulse-dot 1.5s ease infinite;
-}
-.cc-close {
-  background: transparent; border: none;
-  color: var(--text3); font-size: 1.1rem; cursor: pointer;
-  line-height: 1; padding: 0.1rem;
-  transition: color 0.2s;
-}
-.cc-close:hover { color: var(--text); }
+.t-board-body { padding: 0.75rem 0.9rem; }
 
-.cc-row {
-  display: flex; align-items: flex-start; gap: 0.6rem;
-  margin-bottom: 0.5rem;
+/* Correction row inside board: wrong → right */
+.t-correction-row {
+  display: flex; align-items: center; gap: 0.55rem;
+  margin-bottom: 0.5rem; flex-wrap: wrap;
 }
-.cc-row-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.56rem; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--text3); min-width: 46px; margin-top: 0.18rem;
+.t-wrong {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+  color: #ff8b8b; text-decoration: line-through;
+  text-decoration-color: rgba(255,92,92,0.45);
 }
-.cc-wrong  { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; color: #ff8b8b; text-decoration: line-through; text-decoration-color: rgba(255,92,92,0.5); }
-.cc-right  { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; color: #8deeff; }
-.cc-arrow  { color: var(--text3); font-size: 0.75rem; margin-top: 0.15rem; }
-.cc-note   { font-size: 0.8rem; color: var(--text2); line-height: 1.55; margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px solid var(--border); }
+.t-arrow { color: var(--text3); font-size: 0.7rem; }
+.t-right {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
+  color: #7df5c0; font-weight: 600;
+}
+/* Explanation text inside board */
+.t-board-note {
+  font-size: 0.82rem; line-height: 1.65; color: rgba(255,220,160,0.75);
+  font-family: 'Space Grotesk', sans-serif;
+}
+.t-board-note.streaming::after {
+  content: '▋'; display: inline-block; color: var(--gold);
+  animation: blink 0.7s step-end infinite; margin-left: 2px;
+}
+
+/* ── FLOATING CORRECTION CARD — REMOVED, replaced by t-board inline ── */
+/* Keep the element hidden so no JS errors if it's still referenced */
+#correction-card { display: none !important; }
 
 /* Wave bars (reused in transcript header) */
 .wave-bars { display: flex; gap: 2px; align-items: center; height: 14px; }
 .wave-bars span {
   display: inline-block; width: 2.5px; border-radius: 2px;
-  background: currentColor;
-  animation: waveBar 0.7s ease infinite;
+  background: currentColor; animation: waveBar 0.7s ease infinite;
 }
 .wave-bars span:nth-child(1) { height: 5px; animation-delay: 0s; }
 .wave-bars span:nth-child(2) { height: 10px; animation-delay: 0.12s; }
@@ -2064,38 +2049,36 @@ function handleServerMessage(msg) {
       sc.modelTurn.parts.forEach(part => {
         if (part.inlineData?.mimeType?.startsWith('audio/')) {
           setOrbState('speaking');
-          clearSilenceTimer(); // AURA is speaking — no point timing user silence now
+          clearSilenceTimer();
           enqueueAudio(part.inlineData.data);
         }
       });
     }
 
-    // Output transcription — stream AURA's words in real time
+    // Output transcription — stream AURA's words, creating appropriate entry type
     if (sc.outputTranscription?.text) {
       const chunk = sc.outputTranscription.text;
       currentAiText += chunk;
-      if (!currentAiEntryEl) currentAiEntryEl = createTranscriptEntry();
+
+      if (!currentAiEntryEl) {
+        // Decide entry type early based on what we have so far
+        // Start as dialogue — will upgrade to board at finalise if needed
+        currentAiEntryEl = createTranscriptEntry();
+      }
       updateTranscriptEntry(currentAiEntryEl, currentAiText);
     }
 
-    // Input transcription — REMOVED (unreliable, multilingual mess)
-    // We intentionally do NOT display user speech transcription
-
     if (sc.turnComplete) {
       if (currentAiText.trim()) {
-        if (currentAiEntryEl) finaliseTranscriptEntry(currentAiEntryEl);
+        // Pass the full raw text so finalise can strip phonetics + classify
+        finaliseTranscriptEntry(currentAiEntryEl, currentAiText.trim());
         currentAiEntryEl = null;
         conversationHistory.push({ role: 'assistant', content: currentAiText.trim() });
-
-        // Detect corrections in AURA's text and show correction card
-        detectAndShowCorrection(currentAiText.trim());
-
         currentAiText = '';
         turnCount++;
         updateTurnCount();
       }
       setOrbState(micMuted ? 'idle' : 'listening');
-      // FIX: start silence countdown — user has 30s to respond after AURA speaks
       if (!micMuted) startSilenceTimer();
     }
 
@@ -2107,6 +2090,36 @@ function handleServerMessage(msg) {
 }
 
 // ── TRANSCRIPT HELPERS ─────────────────────────────────────────────────────
+
+// Strip phonetic hints from display text — things like "(tsvelf Oyro)", "(Vasser)", etc.
+// These are pronunciation guides AURA speaks aloud but students shouldn't read
+function stripPhoneticHints(text) {
+  // Remove parenthesised phonetic annotations — e.g. "(tsvelf Oyro)", "(Vee gehts)"
+  // Pattern: ( followed by content that looks like phonetics — not pure German/Gujarati/Hindi sentence)
+  return text
+    // Remove phonetic hints in parentheses: (word) where content is short & latin-script
+    .replace(/\s*\([A-Za-zäöüÄÖÜß\s\-']{1,40}\)/g, (match) => {
+      // Keep parentheses that look like grammar labels e.g. "(Akkusativ)" or translations
+      const inner = match.replace(/[()]/g,'').trim();
+      // If it's a single short word/phrase that looks phonetic (all latin, no spaces or short), strip it
+      if (/^[A-Za-z\s\-'äöüÄÖÜß]{2,30}$/.test(inner) && inner.split(' ').length <= 4) return '';
+      return match;
+    })
+    .replace(/\s+/g, ' ').trim();
+}
+
+// Classify what type of content an AURA turn contains
+// Returns: 'dialogue' | 'correction' | 'explanation' | 'mixed'
+function classifyTurn(text) {
+  const hasCorrectionSignal = /(?:nicht .+? sondern|richtig (?:ist|wäre)|korrekt|solltest .+? statt|Fehler|falsch|korrigier)/i.test(text);
+  const hasExplanationSignal = /(?:artikel|akkusativ|dativ|verb|grammatik|regel|aussprache|pronunciat|bedeutet|heißt|auf deutsch|wort für|bolo:|try karo|karo!|pan german|bolvu|german ma)/i.test(text);
+  
+  if (hasCorrectionSignal) return 'correction';
+  if (hasExplanationSignal) return 'explanation';
+  return 'dialogue';
+}
+
+// Create a standard dialogue transcript entry (German exchange)
 function createTranscriptEntry() {
   const scroll = document.getElementById('transcript-scroll');
   if (!scroll) return null;
@@ -2124,16 +2137,107 @@ function createTranscriptEntry() {
   return div;
 }
 
-function updateTranscriptEntry(el, text) {
-  const t = el?.querySelector('.t-text');
-  if (t) { t.textContent = text; t.classList.add('streaming'); }
+// Create a teacher-board entry (correction or explanation) — inline in transcript
+function createBoardEntry(type) {
+  const scroll = document.getElementById('transcript-scroll');
+  if (!scroll) return null;
+  const div = document.createElement('div');
+  div.className = 't-board';
+  const isCorrection = type === 'correction';
+  const icon = isCorrection ? '✏️' : '💡';
+  const label = isCorrection ? 'Correction' : 'Teacher Note';
+  div.innerHTML = `
+    <div class="t-board-header">
+      <span class="t-board-icon">${icon}</span>
+      <span class="t-board-label">${label}</span>
+    </div>
+    <div class="t-board-body">
+      <div class="t-board-note streaming"></div>
+    </div>`;
+  scroll.appendChild(div);
+  scroll.scrollTop = scroll.scrollHeight;
+  return div;
+}
+
+function updateTranscriptEntry(el, rawText) {
+  if (!el) return;
+  const cleanText = stripPhoneticHints(rawText);
+  // Is this a board entry or dialogue entry?
+  const boardNote = el.querySelector('.t-board-note');
+  const diagText  = el.querySelector('.t-text');
+  if (boardNote) {
+    boardNote.textContent = cleanText;
+    boardNote.classList.add('streaming');
+  } else if (diagText) {
+    diagText.textContent = cleanText;
+    diagText.classList.add('streaming');
+  }
   const scroll = document.getElementById('transcript-scroll');
   if (scroll) scroll.scrollTop = scroll.scrollHeight;
 }
 
-function finaliseTranscriptEntry(el) {
-  const t = el?.querySelector('.t-text');
-  if (t) t.classList.remove('streaming');
+function finaliseTranscriptEntry(el, fullRawText) {
+  if (!el) return;
+  const cleanText = stripPhoneticHints(fullRawText || '');
+  
+  // Check if this dialogue entry should actually be a board entry
+  // (happens when we created a dialogue entry but the content turned out to be an explanation)
+  const diagText = el.querySelector('.t-text');
+  const boardNote = el.querySelector('.t-board-note');
+  
+  if (diagText) {
+    diagText.classList.remove('streaming');
+    // If the finalised content is actually an explanation/correction, upgrade the entry to a board
+    const type = classifyTurn(cleanText);
+    if (type === 'correction' || type === 'explanation') {
+      // Rebuild as a board entry in place
+      const icon = type === 'correction' ? '✏️' : '💡';
+      const label = type === 'correction' ? 'Correction' : 'Teacher Note';
+      el.className = 't-board';
+      el.innerHTML = `
+        <div class="t-board-header">
+          <span class="t-board-icon">${icon}</span>
+          <span class="t-board-label">${label}</span>
+        </div>
+        <div class="t-board-body">
+          ${buildBoardContent(cleanText, type)}
+        </div>`;
+    } else {
+      diagText.textContent = cleanText;
+    }
+  } else if (boardNote) {
+    boardNote.classList.remove('streaming');
+    boardNote.innerHTML = buildBoardContent(cleanText, 'explanation');
+  }
+}
+
+// Build richer HTML inside board for corrections — extract wrong→right if detectable
+function buildBoardContent(text, type) {
+  if (type !== 'correction') {
+    return `<div class="t-board-note">${escHtml(text)}</div>`;
+  }
+  // Try to extract wrong → right pair
+  let wrong = '', right = '';
+  const m1 = text.match(/nicht\s+["»]?([^,»"]+)["«]?,?\s+sondern\s+["»]?([^.!»"\n]{2,40})["«]?/i);
+  if (m1) { wrong = m1[1].trim(); right = m1[2].trim(); }
+  if (!wrong) {
+    const m2 = text.match(/["»]([^"»]{2,35})["«]\s+statt\s+["»]([^"»]{2,35})["«]/i);
+    if (m2) { right = m2[1].trim(); wrong = m2[2].trim(); }
+  }
+  if (!wrong && !right) {
+    const m3 = text.match(/richtig(?:\s+ist|\s+wäre)?\s*[:\-]?\s*["»]?([A-Za-zäöüÄÖÜß\s,!?]{3,50})["«]?/i);
+    if (m3) right = m3[1].trim();
+  }
+
+  let html = '';
+  if (wrong || right) {
+    html += `<div class="t-correction-row">`;
+    if (wrong) html += `<span class="t-wrong">${escHtml(wrong)}</span><span class="t-arrow">→</span>`;
+    if (right) html += `<span class="t-right">${escHtml(right)}</span>`;
+    html += `</div>`;
+  }
+  html += `<div class="t-board-note">${escHtml(text)}</div>`;
+  return html;
 }
 
 function updateTurnCount() {
@@ -2141,78 +2245,10 @@ function updateTurnCount() {
   if (el) el.textContent = turnCount + ' turn' + (turnCount !== 1 ? 's' : '');
 }
 
-// ── CORRECTION CARD ────────────────────────────────────────────────────────
-const CORRECTION_TRIGGERS = [
-  /nicht (.+?),?\s+(?:sondern|aber)\s+(.+)/i,
-  /sollte(?:st)?\s+(.+?)\s+statt\s+(.+)/i,
-  /richtig\s+(?:ist|wäre)\s*[:\-]?\s*["»]?(.+?)["«]?(?:\s*,|\s*\.|\s*nicht\s)/i,
-  /korrekt\s+(?:ist|wäre)\s*[:\-]?\s*["»]?(.+?)["«]?/i,
-  /sagen\s+(?:wir|man)\s*[:\-]?\s*["»]?(.+?)["«]?/i,
-  /gemeint\s+ist\s*[:\-]?\s*["»]?(.+?)["«]?/i,
-];
-
-function detectAndShowCorrection(text) {
-  // Simple heuristic: look for correction patterns AND the presence of a German word + fix
-  const hasCorrection = CORRECTION_TRIGGERS.some(r => r.test(text)) ||
-    /(?:falsch|Fehler|korrigier|verbessern|artikel|akkusativ|dativ|verb)/i.test(text);
-
-  if (!hasCorrection) return;
-
-  // Extract wrong → right pairs when possible
-  let wrong = '', right = '', note = '';
-
-  // Pattern: "nicht X, sondern Y"
-  const m1 = text.match(/nicht\s+["»]?([^,»"]+)["«]?,?\s+sondern\s+["»]?([^.!»"]+)["«]?/i);
-  if (m1) { wrong = m1[1].trim(); right = m1[2].trim(); }
-
-  // Pattern: "richtig ist: X"
-  if (!wrong) {
-    const m2 = text.match(/richtig(?:\s+ist|\s+wäre)\s*[:\-]?\s*["»]?([^.!»"]{3,40})["«]?/i);
-    if (m2) { right = m2[1].trim(); }
-  }
-
-  // Pattern: "statt X → Y"  or "X statt Y"
-  if (!wrong) {
-    const m3 = text.match(/["»]([^"»]{2,30})["«]\s+statt\s+["»]([^"»]{2,30})["«]/i);
-    if (m3) { right = m3[1].trim(); wrong = m3[2].trim(); }
-  }
-
-  // Extract a short explanatory sentence as the note
-  const sentences = text.split(/[.!?]/);
-  const noteSentence = sentences.find(s =>
-    /(?:artikel|verb|dativ|akkusativ|position|ending|regel|falsch|fehler|korrekt)/i.test(s) && s.trim().length > 10
-  );
-  note = noteSentence ? noteSentence.trim() : '';
-
-  // Only show card if we have at least something
-  if (!right && !note) return;
-
-  const body = document.getElementById('cc-body');
-  if (!body) return;
-  let html = '';
-  if (wrong || right) {
-    html += `<div class="cc-row">
-      <div class="cc-row-label">Said</div>
-      <div class="cc-wrong">${escHtml(wrong || '?')}</div>
-      <div class="cc-arrow">→</div>
-      <div class="cc-right">${escHtml(right || '?')}</div>
-    </div>`;
-  }
-  if (note) html += `<div class="cc-note">${escHtml(note)}</div>`;
-  body.innerHTML = html;
-
-  const card = document.getElementById('correction-card');
-  if (card) {
-    card.classList.add('visible');
-    clearTimeout(correctionTimeout);
-    correctionTimeout = setTimeout(() => dismissCorrection(), 8000);
-  }
-}
-
-window.dismissCorrection = () => {
-  document.getElementById('correction-card')?.classList.remove('visible');
-  clearTimeout(correctionTimeout);
-};
+// ── CORRECTION CARD — now replaced by inline board, these are no-ops ────────
+const CORRECTION_TRIGGERS = [];
+function detectAndShowCorrection(text) { /* replaced by inline board system */ }
+window.dismissCorrection = () => { /* no-op — no floating card anymore */ };
 
 // ── MIC TOGGLE ─────────────────────────────────────────────────────────────
 // ── SILENCE DETECTION ─────────────────────────────────────────────────────

@@ -2,1046 +2,2407 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AURA — AI German Tutor for Gujarati Students</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AURA — AI German Tutor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
-
 <style>
-/* ─────────────────────────────────────────────
-   DESIGN TOKENS
-───────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════
+   AURA — DESIGN SYSTEM
+════════════════════════════════════════════════════════ */
 :root {
-  --ink:        #0f0f11;
-  --ink2:       #1a1a1e;
-  --ink3:       #222228;
-  --border:     rgba(255,255,255,0.07);
-  --border2:    rgba(255,255,255,0.12);
-  --white:      #f5f5f7;
-  --white2:     rgba(245,245,247,0.65);
-  --white3:     rgba(245,245,247,0.35);
-  --sage:       #3d7a5c;
-  --sage-light: #4e9970;
-  --sage-dim:   rgba(61,122,92,0.15);
-  --saffron:    #c4892a;
-  --saffron-dim:rgba(196,137,42,0.12);
-  --serif:      'Cormorant Garamond', Georgia, serif;
-  --sans:       'DM Sans', system-ui, sans-serif;
-  --mono:       'DM Mono', monospace;
+  --ink:         #0f0f11;
+  --ink2:        #1a1a1e;
+  --ink3:        #222228;
+  --border:      rgba(255,255,255,0.07);
+  --border2:     rgba(255,255,255,0.12);
+  --border3:     rgba(255,255,255,0.18);
+  --white:       #f5f5f7;
+  --white2:      rgba(245,245,247,0.65);
+  --white3:      rgba(245,245,247,0.32);
+  --sage:        #3d7a5c;
+  --sage-light:  #4e9970;
+  --sage-dim:    rgba(61,122,92,0.14);
+  --saffron:     #c4892a;
+  --saffron-dim: rgba(196,137,42,0.11);
+  /* legacy aliases so existing JS/HTML refs still work */
+  --void:        #0f0f11;
+  --deep:        #141418;
+  --surface:     #1a1a1e;
+  --surface2:    #222228;
+  --cyan:        #4e9970;
+  --cyan-dim:    rgba(61,122,92,0.14);
+  --violet:      #8b7cf8;
+  --violet-dim:  rgba(139,124,248,0.14);
+  --gold:        #c4892a;
+  --gold-dim:    rgba(196,137,42,0.11);
+  --text:        #f5f5f7;
+  --text2:       rgba(245,245,247,0.65);
+  --text3:       rgba(245,245,247,0.32);
+  --danger:      #e05c5c;
+  --serif:       'Cormorant Garamond', Georgia, serif;
+  --sans:        'DM Sans', system-ui, sans-serif;
+  --mono:        'DM Mono', monospace;
+  --r: 1rem;
+  --r2: 1.4rem;
 }
 
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; font-size: 16px; }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--sans);
   background: var(--ink);
   color: var(--white);
-  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ─────────────────────────────────────────────
-   NOISE TEXTURE OVERLAY
-───────────────────────────────────────────── */
-body::after {
+/* ── GRAIN TEXTURE ── */
+body::before {
   content: '';
   position: fixed; inset: 0; z-index: 1000; pointer-events: none;
-  opacity: 0.025;
+  opacity: 0.022;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 200px;
 }
 
-/* ─────────────────────────────────────────────
-   NAV
-───────────────────────────────────────────── */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding: 1.25rem 3rem;
-  display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  background: rgba(15,15,17,0.85);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-}
-
-.nav-logo {
-  font-family: var(--serif);
-  font-size: 1.35rem;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  color: var(--white);
-  text-decoration: none;
-}
-.nav-logo span { color: var(--sage-light); }
-
-.nav-links {
-  display: flex; align-items: center; gap: 2.5rem;
-  list-style: none;
-}
-.nav-links a {
-  font-size: 0.8rem; letter-spacing: 0.04em;
-  color: var(--white3); text-decoration: none;
-  transition: color 0.2s;
-}
-.nav-links a:hover { color: var(--white); }
-
-.nav-cta {
-  font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em;
-  color: var(--ink); background: var(--white);
-  padding: 0.5rem 1.3rem; border-radius: 100px;
-  text-decoration: none; transition: opacity 0.2s;
-}
-.nav-cta:hover { opacity: 0.85; }
-
-/* ─────────────────────────────────────────────
-   HERO
-───────────────────────────────────────────── */
-.hero {
-  min-height: 100svh;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center;
-  padding: 8rem 2rem 5rem;
-  position: relative; overflow: hidden;
-}
-
-/* Subtle ambient glows */
-.hero::before {
+/* ── AMBIENT GLOW ── */
+body::after {
   content: '';
-  position: absolute; inset: 0; pointer-events: none;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(61,122,92,0.13) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 20% 80%, rgba(196,137,42,0.06) 0%, transparent 60%);
+    radial-gradient(ellipse 60% 45% at 15% 0%,  rgba(78,153,112,0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 5%,   rgba(78,153,112,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 50% 95%,  rgba(196,137,42,0.05) 0%, transparent 60%);
 }
 
-.hero-eyebrow {
-  font-family: var(--mono);
-  font-size: 0.68rem; letter-spacing: 0.28em; text-transform: uppercase;
-  color: var(--sage-light); margin-bottom: 2rem;
-  opacity: 0; animation: fadeUp 0.8s ease 0.2s forwards;
-}
-
-.hero-headline {
-  font-family: var(--serif);
-  font-size: clamp(3.2rem, 8vw, 7.5rem);
-  font-weight: 300; line-height: 1.06;
-  letter-spacing: -0.02em;
-  color: var(--white);
-  max-width: 900px;
-  opacity: 0; animation: fadeUp 0.9s ease 0.4s forwards;
-}
-.hero-headline em {
-  font-style: italic; color: rgba(245,245,247,0.55);
-}
-
-.hero-sub {
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  font-weight: 300; line-height: 1.7;
-  color: var(--white2);
-  max-width: 520px; margin: 2rem auto 0;
-  opacity: 0; animation: fadeUp 0.9s ease 0.6s forwards;
-}
-
-.hero-actions {
+/* ── INTRO OVERLAY ── */
+#aura-intro {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #09090b;
   display: flex; align-items: center; justify-content: center;
-  gap: 1rem; margin-top: 3rem;
-  opacity: 0; animation: fadeUp 0.9s ease 0.8s forwards;
+  flex-direction: column; overflow: hidden;
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
+#aura-intro.fade-out { opacity: 0; transform: scale(1.03); pointer-events: none; }
+#aura-particles { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-.btn-primary {
-  display: inline-flex; align-items: center; gap: 0.6rem;
-  background: var(--sage);
-  color: #fff; font-weight: 500;
-  font-size: 0.9rem; letter-spacing: 0.03em;
-  padding: 0.85rem 1.9rem; border-radius: 100px;
-  text-decoration: none; border: none; cursor: pointer;
-  transition: background 0.25s, transform 0.2s;
-  position: relative; overflow: hidden;
-}
-.btn-primary::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+.aura-scan-line {
+  position: absolute; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(78,153,112,0.5) 50%, transparent 100%);
+  animation: scanLine 4.5s linear infinite;
   pointer-events: none;
 }
-.btn-primary:hover { background: var(--sage-light); transform: translateY(-1px); }
+@keyframes scanLine { from { top: -1px; opacity: 0.7; } to { top: 100vh; opacity: 0.1; } }
+
+.aura-intro-content {
+  position: relative; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+  text-align: center;
+}
+
+.aura-pre-text {
+  font-family: var(--mono);
+  font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: rgba(78,153,112,0.45);
+  animation: aura-fadein 0.8s ease 0.4s both;
+}
+
+.aura-name {
+  position: relative;
+  font-family: var(--serif);
+  font-size: clamp(5rem, 18vw, 11rem);
+  font-weight: 300; font-style: italic;
+  letter-spacing: -0.01em; color: var(--white);
+  text-shadow: 0 0 80px rgba(78,153,112,0.2), 0 0 160px rgba(78,153,112,0.1);
+  animation: aura-fadein 0.9s ease 0.7s both;
+}
+.aura-name-glitch {
+  position: absolute; inset: 0; color: var(--sage-light);
+  clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+  transform: translateX(-3px);
+  animation: glitch 7s infinite 2s; opacity: 0.45;
+}
+@keyframes glitch {
+  0%,90%,100% { transform: translateX(0); opacity: 0; clip-path: none; }
+  92% { transform: translateX(-5px); opacity: 0.5; clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); }
+  94% { transform: translateX(3px); opacity: 0.35; clip-path: polygon(0 55%, 100% 55%, 100% 75%, 0 75%); }
+  96% { transform: translateX(-2px); opacity: 0.45; clip-path: polygon(0 10%, 100% 10%, 100% 30%, 0 30%); }
+  98% { transform: translateX(0); opacity: 0; }
+}
+
+.aura-tagline {
+  font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(245,245,247,0.35);
+  animation: aura-fadein 0.8s ease 1.0s both;
+}
+.aura-year {
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.32em;
+  color: rgba(196,137,42,0.3);
+  animation: aura-fadein 0.8s ease 1.2s both;
+}
+.aura-bar-wrap {
+  width: 130px; height: 1px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 1px; overflow: hidden; margin-top: 1.8rem;
+  animation: aura-fadein 0.6s ease 1.3s both;
+}
+.aura-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--sage), var(--sage-light));
+  animation: aura-load 3.2s ease 1.4s forwards;
+}
+@keyframes aura-load { to { width: 100%; } }
+@keyframes aura-fadein { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+.aura-skip-btn {
+  position: absolute; bottom: 2rem; right: 2rem; z-index: 3;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.22);
+  font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.22em;
+  padding: 0.4rem 0.9rem; border-radius: 100px;
+  cursor: pointer; transition: all 0.2s;
+  opacity: 0; animation: aura-fadein 0.5s ease 2.5s forwards;
+}
+.aura-skip-btn:hover { border-color: rgba(78,153,112,0.4); color: rgba(78,153,112,0.8); }
+
+/* ── OVERLAYS ── */
+#auth-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: var(--ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem;
+}
+.auth-spinner {
+  width: 28px; height: 28px;
+  border: 1.5px solid rgba(78,153,112,0.1);
+  border-top-color: var(--sage-light);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#auth-overlay p { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; color: rgba(78,153,112,0.4); }
+
+#access-denied {
+  display: none; position: fixed; inset: 0;
+  background: var(--ink);
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 1.5rem; z-index: 899; text-align: center; padding: 2rem;
+}
+#access-denied .icon { font-size: 2.8rem; }
+#access-denied h2 { font-family: var(--serif); font-size: 2.2rem; font-weight: 300; font-style: italic; color: var(--white); }
+#access-denied p  { color: var(--white2); max-width: 360px; line-height: 1.78; font-size: 0.9rem; }
+#access-denied a.btn-login {
+  padding: 0.9rem 2.5rem;
+  background: var(--sage); color: #fff; font-weight: 500;
+  border-radius: 100px; text-decoration: none; font-size: 0.9rem;
+  transition: background 0.2s;
+}
+#access-denied a.btn-login:hover { background: var(--sage-light); }
+
+/* ── MODAL BASE ── */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(9,9,11,0.88);
+  backdrop-filter: blur(16px);
+  align-items: center; justify-content: center;
+  z-index: 800; padding: 1.5rem;
+}
+.modal-backdrop.visible { display: flex; }
+
+.modal-card {
+  background: var(--ink2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  max-width: 460px; width: 100%;
+  text-align: center;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+  animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes slideUp { from { opacity:0; transform: translateY(20px) scale(0.98); } to { opacity:1; transform: none; } }
+
+/* ── PRIVACY MODAL ── */
+#privacy-modal { z-index: 850; }
+.privacy-icon { font-size: 2.4rem; margin-bottom: 1rem; }
+.privacy-card h2 { font-family: var(--serif); font-size: 1.7rem; font-weight: 300; font-style: italic; margin-bottom: 0.6rem; }
+.privacy-card p { color: var(--white2); font-size: 0.88rem; line-height: 1.75; margin-bottom: 0.5rem; }
+.privacy-tip {
+  background: var(--sage-dim); border: 1px solid rgba(78,153,112,0.18);
+  border-radius: 12px; padding: 0.85rem 1.1rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.82rem; color: rgba(78,153,112,0.85);
+  display: flex; align-items: flex-start; gap: 0.6rem; text-align: left;
+}
+.privacy-btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+.btn-primary-glow {
+  padding: 0.85rem 2rem;
+  background: var(--sage); color: #fff;
+  font-weight: 500; border: none; border-radius: 100px;
+  cursor: pointer; font-family: var(--sans); font-size: 0.9rem;
+  transition: all 0.2s; box-shadow: 0 6px 24px rgba(61,122,92,0.25);
+}
+.btn-primary-glow:hover { background: var(--sage-light); transform: translateY(-1px); }
 
 .btn-ghost {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  background: transparent;
-  color: var(--white2); font-weight: 400;
-  font-size: 0.9rem; letter-spacing: 0.02em;
-  padding: 0.85rem 1.6rem; border-radius: 100px;
-  border: 1px solid var(--border2);
-  text-decoration: none; cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
+  padding: 0.85rem 1.4rem;
+  background: transparent; color: var(--white2);
+  border: 1px solid var(--border2); border-radius: 100px;
+  cursor: pointer; font-family: var(--sans); font-size: 0.87rem;
+  transition: all 0.2s;
 }
-.btn-ghost:hover { color: var(--white); border-color: rgba(255,255,255,0.25); }
+.btn-ghost:hover { border-color: var(--border3); color: var(--white); }
 
-/* ─────────────────────────────────────────────
-   HERO CHAT MOCKUP
-───────────────────────────────────────────── */
-.hero-mockup {
-  margin-top: 5rem;
-  width: 100%; max-width: 600px;
-  background: var(--ink2);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
-  opacity: 0; animation: fadeUp 1s ease 1s forwards;
-  text-align: left;
-}
-
-.mockup-bar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.9rem 1.2rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--ink3);
-}
-.mockup-dots { display: flex; gap: 0.45rem; }
-.mockup-dots span {
-  width: 10px; height: 10px; border-radius: 50%;
-}
-.mockup-dots span:nth-child(1) { background: rgba(255,92,92,0.5); }
-.mockup-dots span:nth-child(2) { background: rgba(255,183,37,0.5); }
-.mockup-dots span:nth-child(3) { background: rgba(42,190,106,0.5); }
-
-.mockup-title {
-  font-family: var(--mono);
-  font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
-  color: var(--white3);
-}
-
-.aura-status {
-  display: flex; align-items: center; gap: 0.4rem;
-  font-size: 0.65rem; color: var(--sage-light);
-}
-.aura-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--sage-light);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
-}
-
-.mockup-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-
-.msg {
-  display: flex; gap: 0.75rem;
-  animation: fadeUp 0.5s ease both;
-}
-.msg-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem; font-weight: 500;
-}
-.msg-user .msg-avatar { background: rgba(196,137,42,0.15); color: var(--saffron); border: 1px solid rgba(196,137,42,0.2); }
-.msg-aura .msg-avatar { background: var(--sage-dim); color: var(--sage-light); border: 1px solid rgba(61,122,92,0.25); }
-
-.msg-content { flex: 1; }
-.msg-name {
-  font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--white3); margin-bottom: 0.35rem;
-}
-.msg-bubble {
-  font-size: 0.9rem; line-height: 1.6;
-  padding: 0.75rem 1rem; border-radius: 12px;
-}
-.msg-user .msg-bubble { background: rgba(196,137,42,0.08); border: 1px solid rgba(196,137,42,0.15); }
-.msg-aura .msg-bubble { background: var(--sage-dim); border: 1px solid rgba(61,122,92,0.2); }
-
-.gujarati { color: var(--white); font-weight: 400; }
-.german { color: var(--sage-light); font-weight: 500; }
-.explanation { font-size: 0.8rem; color: var(--white2); margin-top: 0.35rem; display: block; }
-
-.msg-typing .msg-bubble {
-  display: flex; gap: 4px; align-items: center; padding: 0.85rem 1rem;
-}
-.typing-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--sage-light); opacity: 0.5;
-  animation: typingBounce 1.4s ease infinite;
-}
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes typingBounce {
-  0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
-  40% { transform: translateY(-6px); opacity: 1; }
-}
-
-/* ─────────────────────────────────────────────
-   SECTION SHARED
-───────────────────────────────────────────── */
-.section { padding: 7rem 2rem; }
-.section-inner { max-width: 1100px; margin: 0 auto; }
-
-.label-tag {
+/* ── TRIAL MODAL ── */
+.trial-badge-pill {
   display: inline-flex; align-items: center; gap: 0.4rem;
-  font-family: var(--mono); font-size: 0.65rem;
-  letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--white3); border: 1px solid var(--border2);
-  padding: 0.35rem 0.85rem; border-radius: 100px;
-  margin-bottom: 2rem;
+  background: var(--saffron-dim); color: var(--saffron);
+  border: 1px solid rgba(196,137,42,0.25);
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.15em; padding: 0.3rem 0.85rem; border-radius: 100px;
+  margin-bottom: 1.2rem;
 }
-.label-tag span { width: 4px; height: 4px; border-radius: 50%; background: var(--sage-light); }
+.modal-card h2 { font-family: var(--serif); font-size: 1.7rem; font-weight: 300; font-style: italic; margin-bottom: 0.6rem; }
+.modal-card p { color: var(--white2); line-height: 1.7; margin-bottom: 1.6rem; font-size: 0.88rem; }
+.trial-cta {
+  display: inline-block; padding: 0.9rem 2.25rem;
+  background: var(--saffron); color: #110900;
+  font-weight: 600; font-size: 0.95rem;
+  border-radius: 100px; text-decoration: none;
+  box-shadow: 0 6px 24px rgba(196,137,42,0.25);
+  transition: all 0.2s;
+}
+.trial-cta:hover { transform: translateY(-1px); filter: brightness(1.06); }
 
-.section-headline {
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 2rem;
+  background: rgba(15,15,17,0.85);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-brand { display: flex; align-items: center; gap: 0.75rem; }
+.topbar-logo { width: 34px; height: 34px; }
+.topbar-title { font-family: var(--serif); font-size: 1.2rem; font-weight: 300; font-style: italic; letter-spacing: 0.02em; color: var(--white); }
+.topbar-sub { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(78,153,112,0.4); }
+.topbar-right { display: flex; align-items: center; gap: 0.85rem; }
+.level-pill {
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em;
+  padding: 0.28rem 0.7rem; border-radius: 100px;
+  background: var(--sage-dim); color: var(--sage-light);
+  border: 1px solid rgba(78,153,112,0.25);
+}
+.user-name-text { font-size: 0.78rem; color: var(--white2); }
+.topbar-back { font-size: 0.75rem; color: var(--white3); text-decoration: none; font-family: var(--mono); letter-spacing: 0.06em; transition: color 0.2s; }
+.topbar-back:hover { color: var(--sage-light); }
+
+/* ── LAYOUT ── */
+.container { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+/* ── SETUP PANEL ── */
+.hero { text-align: center; margin-bottom: 3rem; animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--ink2);
+  border: 1px solid rgba(78,153,112,0.22);
+  border-radius: 100px; padding: 0.4rem 1rem;
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(78,153,112,0.8); margin-bottom: 1.2rem;
+}
+.hero-eyebrow .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--sage-light); box-shadow: 0 0 6px var(--sage-light);
+  animation: pulse-dot 2.2s ease infinite;
+}
+@keyframes pulse-dot { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.3; transform:scale(0.5); } }
+
+.hero h1 {
   font-family: var(--serif);
-  font-size: clamp(2.2rem, 5vw, 4rem);
-  font-weight: 300; line-height: 1.15;
-  letter-spacing: -0.02em;
-}
-.section-headline em { font-style: italic; color: var(--white2); }
-
-/* ─────────────────────────────────────────────
-   DIVIDER LINE
-───────────────────────────────────────────── */
-.divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, var(--border2) 30%, var(--border2) 70%, transparent 100%);
-  margin: 0 2rem;
+  font-size: clamp(2.6rem, 6vw, 4.4rem);
+  font-weight: 300; font-style: italic;
+  line-height: 1.12; letter-spacing: -0.01em;
+  margin-bottom: 1rem; color: var(--white);
 }
 
-/* ─────────────────────────────────────────────
-   PROBLEM SECTION
-───────────────────────────────────────────── */
-.problem-section { background: var(--ink); }
+.hero p { font-size: 0.95rem; color: var(--white2); max-width: 500px; margin: 0 auto; line-height: 1.8; }
 
-.problem-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 6rem; align-items: center;
-  margin-top: 4rem;
-}
+/* Setup Grid */
+#setup-panel { animation: slideUp 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
+.setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+@media (max-width: 600px) { .setup-grid { grid-template-columns: 1fr; } }
 
-.problem-quote {
-  font-family: var(--serif);
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-  font-weight: 300; line-height: 1.3;
-  font-style: italic;
-  color: var(--white);
-  border-left: 1px solid var(--sage);
-  padding-left: 2rem;
-}
-.problem-quote em { color: var(--sage-light); font-style: normal; }
-
-.problem-items { display: flex; flex-direction: column; gap: 1.5rem; }
-
-.problem-item {
-  display: flex; gap: 1rem; align-items: flex-start;
-  padding: 1.25rem 1.5rem;
+.setup-card {
   background: var(--ink2);
   border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.4rem;
+  transition: border-color 0.25s;
+}
+.setup-card:hover { border-color: var(--border2); }
+.setup-card h3 {
+  font-family: var(--sans); font-size: 0.71rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--white3); margin-bottom: 0.9rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+/* Tabs */
+.tab-group { display: flex; gap: 0.3rem; padding: 0.25rem; background: rgba(255,255,255,0.03); border-radius: 10px; }
+.tab-item {
+  flex: 1; padding: 0.5rem 0.4rem; text-align: center;
+  font-size: 0.79rem; font-weight: 500;
+  border-radius: 8px; cursor: pointer;
+  color: var(--white3); border: none; background: transparent;
+  transition: all 0.18s;
+}
+.tab-item:hover { color: var(--white2); background: rgba(255,255,255,0.04); }
+.tab-item.active { background: var(--sage-dim); color: var(--sage-light); box-shadow: inset 0 0 0 1px rgba(78,153,112,0.25); }
+
+/* Scenario select */
+.scenario-select {
+  width: 100%; padding: 0.72rem 2.4rem 0.72rem 0.9rem;
+  background: var(--ink); color: var(--white);
+  border: 1px solid rgba(78,153,112,0.16); border-radius: 10px;
+  font-family: var(--sans); font-size: 0.88rem;
+  cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%234e9970' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.85rem center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.scenario-select:focus { outline: none; border-color: var(--sage-light); box-shadow: 0 0 0 3px rgba(78,153,112,0.1); }
+.scenario-select option, .scenario-select optgroup { background: #0f0f11; }
+
+.scenario-desc {
+  margin-top: 0.6rem; font-size: 0.78rem; color: var(--white3); line-height: 1.62;
+  padding-left: 0.85rem; border-left: 2px solid rgba(78,153,112,0.35); min-height: 2.4rem;
+}
+
+.sr-badge {
+  display: inline-flex; font-size: 0.58rem; letter-spacing: 0.1em;
+  padding: 0.18rem 0.55rem; border-radius: 100px;
+  background: var(--sage-dim); color: var(--sage-light);
+  border: 1px solid rgba(78,153,112,0.2); font-family: var(--mono);
+}
+
+#trial-counter-wrap { display: none; text-align: center; margin-bottom: 0.8rem; }
+.trial-counter-text-el {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em;
+  color: rgba(196,137,42,0.6);
+  background: var(--saffron-dim); border: 1px solid rgba(196,137,42,0.18);
+  padding: 0.28rem 0.8rem; border-radius: 100px;
+}
+
+/* ── START BUTTON — crown jewel ── */
+.start-btn {
+  position: relative; width: 100%; height: 64px;
+  background: var(--sage);
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 14px;
-  transition: border-color 0.3s;
+  font-family: var(--sans); font-size: 1rem; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: #fff;
+  cursor: pointer; overflow: hidden;
+  box-shadow: 0 10px 40px rgba(61,122,92,0.3), 0 0 0 1px rgba(255,255,255,0.06) inset;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
 }
-.problem-item:hover { border-color: rgba(255,255,255,0.15); }
-
-.problem-icon {
-  width: 36px; height: 36px; flex-shrink: 0;
-  border-radius: 10px; background: rgba(255,92,92,0.08);
-  border: 1px solid rgba(255,92,92,0.15);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem;
-}
-.problem-text strong { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 0.3rem; }
-.problem-text p { font-size: 0.82rem; color: var(--white2); line-height: 1.6; }
-
-/* ─────────────────────────────────────────────
-   FEATURES SECTION
-───────────────────────────────────────────── */
-.features-section { background: var(--ink2); }
-
-.features-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 1px; margin-top: 4rem;
-  border: 1px solid var(--border); border-radius: 20px;
-  overflow: hidden;
-}
-
-.feature-card {
-  padding: 2.5rem;
-  background: var(--ink2);
-  transition: background 0.3s;
-  position: relative;
-}
-.feature-card::after {
+.start-btn::before {
   content: '';
-  position: absolute; bottom: 0; right: 0;
-  width: 120px; height: 120px;
-  background: radial-gradient(circle, var(--sage-dim) 0%, transparent 70%);
-  pointer-events: none; opacity: 0; transition: opacity 0.4s;
-}
-.feature-card:hover { background: var(--ink3); }
-.feature-card:hover::after { opacity: 1; }
-
-.feature-number {
-  font-family: var(--mono); font-size: 0.65rem;
-  color: var(--white3); letter-spacing: 0.15em;
-  margin-bottom: 1.25rem;
-}
-.feature-icon {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: var(--sage-dim); border: 1px solid rgba(61,122,92,0.25);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; margin-bottom: 1.25rem;
-}
-.feature-title {
-  font-family: var(--serif); font-size: 1.45rem;
-  font-weight: 400; margin-bottom: 0.75rem; line-height: 1.2;
-}
-.feature-desc { font-size: 0.85rem; color: var(--white2); line-height: 1.7; }
-
-/* ─────────────────────────────────────────────
-   DEMO SECTION
-───────────────────────────────────────────── */
-.demo-section { background: var(--ink); }
-
-.demo-inner {
-  display: grid; grid-template-columns: 1fr 1.1fr;
-  gap: 5rem; align-items: start;
-  margin-top: 4rem;
-}
-
-.demo-copy { }
-.demo-copy p {
-  font-size: 0.9rem; color: var(--white2); line-height: 1.8;
-  margin-top: 1.5rem;
-}
-
-.demo-scenarios {
-  display: flex; flex-direction: column; gap: 0.6rem;
-  margin-top: 2rem;
-}
-.scenario-pill {
-  display: flex; align-items: center; gap: 0.6rem;
-  padding: 0.6rem 1rem; border-radius: 8px;
-  background: var(--ink2); border: 1px solid var(--border);
-  cursor: pointer; transition: all 0.2s;
-  font-size: 0.82rem; color: var(--white2);
-}
-.scenario-pill.active {
-  border-color: rgba(61,122,92,0.4); color: var(--white);
-  background: var(--sage-dim);
-}
-.scenario-pill:hover:not(.active) { border-color: var(--border2); color: var(--white); }
-.scenario-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); flex-shrink: 0; }
-
-.demo-chat {
-  background: var(--ink2);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 20px 80px rgba(0,0,0,0.4);
-}
-
-/* ─────────────────────────────────────────────
-   COMPARE SECTION
-───────────────────────────────────────────── */
-.compare-section { background: var(--ink2); }
-.compare-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 2rem; margin-top: 4rem;
-}
-
-.compare-card {
-  padding: 2.5rem; border-radius: 20px;
-  border: 1px solid var(--border);
-}
-.compare-card.traditional { background: var(--ink3); }
-.compare-card.aura-card {
-  background: linear-gradient(135deg, rgba(61,122,92,0.12) 0%, rgba(61,122,92,0.04) 100%);
-  border-color: rgba(61,122,92,0.3);
-  position: relative; overflow: hidden;
-}
-.compare-card.aura-card::before {
-  content: '';
-  position: absolute; top: -30px; right: -30px;
-  width: 160px; height: 160px;
-  background: radial-gradient(circle, rgba(61,122,92,0.2), transparent 70%);
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 55%);
   pointer-events: none;
 }
-
-.compare-label {
-  font-family: var(--mono); font-size: 0.65rem;
-  letter-spacing: 0.2em; text-transform: uppercase;
-  margin-bottom: 1.5rem;
-}
-.compare-card.traditional .compare-label { color: var(--white3); }
-.compare-card.aura-card .compare-label { color: var(--sage-light); }
-
-.compare-title {
-  font-family: var(--serif); font-size: 1.8rem;
-  font-weight: 400; margin-bottom: 1.5rem; line-height: 1.2;
-}
-
-.compare-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
-.compare-list li {
-  display: flex; align-items: flex-start; gap: 0.6rem;
-  font-size: 0.875rem; color: var(--white2); line-height: 1.5;
-}
-.compare-list li::before { flex-shrink: 0; margin-top: 0.15rem; }
-.compare-card.traditional .compare-list li::before { content: '✕'; color: rgba(255,92,92,0.5); }
-.compare-card.aura-card .compare-list li::before { content: '✓'; color: var(--sage-light); }
-
-/* ─────────────────────────────────────────────
-   SOCIAL PROOF
-───────────────────────────────────────────── */
-.social-section { background: var(--ink); }
-
-.paths-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1rem; margin-top: 3rem;
-}
-.path-card {
-  padding: 1.75rem 1.5rem;
-  background: var(--ink2);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  transition: border-color 0.3s, transform 0.3s;
-  cursor: default;
-}
-.path-card:hover { border-color: rgba(61,122,92,0.35); transform: translateY(-3px); }
-
-.path-icon { font-size: 1.5rem; margin-bottom: 0.9rem; }
-.path-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.4rem; }
-.path-desc { font-size: 0.78rem; color: var(--white3); line-height: 1.5; }
-
-.testimonials-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem; margin-top: 3rem;
-}
-.testimonial-card {
-  padding: 2rem;
-  background: var(--ink2);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-}
-.t-quote {
-  font-size: 0.9rem; line-height: 1.7; color: var(--white2);
-  margin-bottom: 1.5rem; font-style: italic;
-}
-.t-quote::before { content: '"'; color: var(--sage-light); font-size: 1.2rem; }
-.t-author { display: flex; align-items: center; gap: 0.75rem; }
-.t-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: var(--sage-dim); border: 1px solid rgba(61,122,92,0.25);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem; color: var(--sage-light); font-weight: 600;
-}
-.t-name { font-size: 0.82rem; font-weight: 500; }
-.t-meta { font-size: 0.72rem; color: var(--white3); margin-top: 0.1rem; }
-
-/* ─────────────────────────────────────────────
-   FINAL CTA
-───────────────────────────────────────────── */
-.cta-section {
-  padding: 10rem 2rem;
-  text-align: center;
-  position: relative; overflow: hidden;
-  background: var(--ink);
-}
-.cta-section::before {
+.start-btn::after {
   content: '';
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(61,122,92,0.1) 0%, transparent 65%);
+  position: absolute; top: -50%; left: -60%; width: 35%; height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+  transform: skewX(-20deg);
+  animation: btnSheen 5s ease infinite 2s;
 }
+@keyframes btnSheen { 0%,100% { left:-60%; opacity:0; } 20%,80% { opacity:1; } 50% { left: 120%; } }
+.start-btn:hover { background: var(--sage-light); transform: translateY(-2px); box-shadow: 0 14px 50px rgba(61,122,92,0.38); }
+.start-btn:active { transform: translateY(0); }
 
-.cta-headline {
-  font-family: var(--serif);
-  font-size: clamp(2.8rem, 7vw, 6rem);
-  font-weight: 300; line-height: 1.1; letter-spacing: -0.02em;
-  max-width: 700px; margin: 0 auto 2.5rem;
-}
-.cta-headline em { font-style: italic; color: var(--sage-light); }
+/* ════════════════════════════════════════════════════════
+   SESSION PANEL
+════════════════════════════════════════════════════════ */
+#session-panel { display: none; animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 
-.cta-meta {
-  font-size: 0.82rem; color: var(--white3); margin-top: 1.5rem;
-  letter-spacing: 0.03em;
-}
-
-/* ─────────────────────────────────────────────
-   FOOTER
-───────────────────────────────────────────── */
-footer {
-  padding: 2.5rem 3rem;
-  border-top: 1px solid var(--border);
+.session-header {
   display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.2rem; padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
 }
-.footer-logo {
-  font-family: var(--serif); font-size: 1.1rem;
-  color: var(--white2); text-decoration: none;
+.session-info h2 { font-family: var(--serif); font-size: 1.35rem; font-weight: 300; font-style: italic; color: var(--white); }
+.session-meta {
+  display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--white3);
 }
-.footer-logo span { color: var(--sage-light); }
-.footer-copy { font-size: 0.75rem; color: var(--white3); }
+.session-meta .sep { opacity: 0.3; }
+.live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sage-light); box-shadow: 0 0 8px var(--sage-light); animation: pulse-dot 1.8s ease infinite; }
 
-/* ─────────────────────────────────────────────
-   ANIMATIONS
-───────────────────────────────────────────── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+.session-timer {
+  font-family: var(--mono); font-size: 1.9rem; font-weight: 300;
+  letter-spacing: 0.04em; color: var(--white);
+  transition: color 0.3s;
+}
+.session-timer.warning { color: #e05c5c; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.55; } }
+
+.role-card {
+  background: linear-gradient(140deg, rgba(28,18,6,0.97), rgba(18,12,4,0.95));
+  border: 1px solid rgba(196,137,42,0.18);
+  border-radius: 14px; padding: 1.15rem 1.4rem; margin-bottom: 1.1rem;
+  display: flex; align-items: flex-start; gap: 1rem;
+}
+.role-avatar {
+  width: 46px; height: 46px; min-width: 46px;
+  background: var(--saffron-dim); border: 1px solid rgba(196,137,42,0.22);
+  border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.role-info h3 { font-family: var(--sans); font-size: 0.9rem; font-weight: 500; color: rgba(255,218,155,0.88); margin-bottom: 0.2rem; }
+.role-info p  { font-size: 0.78rem; line-height: 1.62; color: rgba(255,210,140,0.42); }
+
+/* ════════════════════════════════════════════════════════
+   ORB INTERFACE
+════════════════════════════════════════════════════════ */
+.orb-stage {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 1rem; padding: 1.5rem 0 0.5rem;
+  background: radial-gradient(ellipse 70% 55% at 50% 55%, var(--orb-halo,rgba(78,153,112,0.04)) 0%, transparent 70%);
+  transition: background 0.8s ease;
+}
+.orb-stage.aura-active  { --orb-halo: rgba(78,153,112,0.07); }
+.orb-stage.user-active  { --orb-halo: rgba(139,124,248,0.07); }
+.orb-stage.thinking     { --orb-halo: rgba(196,137,42,0.06); }
+.orb-stage.idle         { --orb-halo: rgba(40,55,80,0.04); }
+
+#orb-canvas {
+  display: block; width: 260px; height: 260px;
+  cursor: pointer; border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  touch-action: manipulation;
+}
+#orb-canvas:active { transform: scale(0.94); }
+
+.orb-state-label {
+  margin-top: 0.85rem; font-family: var(--mono);
+  font-size: 0.6rem; letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--white3); transition: color 0.5s ease; min-height: 1.2rem; text-align: center;
+}
+.orb-stage.aura-active  .orb-state-label { color: rgba(78,153,112,0.7); }
+.orb-stage.user-active  .orb-state-label { color: rgba(168,156,255,0.7); }
+.orb-stage.thinking     .orb-state-label { color: rgba(196,137,42,0.65); }
+.orb-stage.muted        .orb-state-label { color: rgba(224,92,92,0.55); }
+
+.orb-mute-ring {
+  position: absolute; top: 1.5rem; left: 50%; transform: translateX(-50%);
+  width: 278px; height: 278px; border-radius: 50%;
+  border: 1.5px dashed rgba(224,92,92,0.35);
+  pointer-events: none; opacity: 0; transition: opacity 0.35s ease;
+}
+.orb-stage.muted .orb-mute-ring { opacity: 1; }
+
+.orb-mic-hint {
+  position: absolute; bottom: 0;
+  font-family: var(--mono); font-size: 0.48rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--white3); opacity: 0.25; pointer-events: none; text-align: center;
 }
 
-.reveal {
-  opacity: 0; transform: translateY(28px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+.silence-countdown {
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: #e05c5c; opacity: 0.6; text-align: center; animation: pulse 1s ease infinite;
 }
-.reveal.visible { opacity: 1; transform: translateY(0); }
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-.reveal-delay-4 { transition-delay: 0.4s; }
+.silence-countdown span { font-weight: 500; font-size: 0.65rem; }
 
-/* ─────────────────────────────────────────────
-   RESPONSIVE
-───────────────────────────────────────────── */
-@media (max-width: 900px) {
-  nav { padding: 1rem 1.5rem; }
-  .nav-links { display: none; }
-  .problem-grid,
-  .demo-inner,
-  .compare-grid { grid-template-columns: 1fr; gap: 3rem; }
-  .features-grid { grid-template-columns: 1fr; }
-  .paths-grid { grid-template-columns: repeat(2, 1fr); }
-  .testimonials-grid { grid-template-columns: 1fr; }
+/* Wave bars */
+.sound-wave-bars { display: flex; align-items: center; justify-content: center; gap: 3px; height: 24px; margin-top: 0.3rem; opacity: 0; transition: opacity 0.4s ease; }
+.sound-wave-bars.visible { opacity: 1; }
+.sound-wave-bars .swb { display: inline-block; width: 2.5px; border-radius: 2px; background: var(--sage-light); animation: swbAnim 0.85s ease-in-out infinite; }
+.sound-wave-bars .swb:nth-child(1)  { height: 5px;  animation-delay: 0.00s; }
+.sound-wave-bars .swb:nth-child(2)  { height: 13px; animation-delay: 0.08s; }
+.sound-wave-bars .swb:nth-child(3)  { height: 8px;  animation-delay: 0.16s; }
+.sound-wave-bars .swb:nth-child(4)  { height: 20px; animation-delay: 0.24s; }
+.sound-wave-bars .swb:nth-child(5)  { height: 14px; animation-delay: 0.32s; }
+.sound-wave-bars .swb:nth-child(6)  { height: 20px; animation-delay: 0.24s; }
+.sound-wave-bars .swb:nth-child(7)  { height: 8px;  animation-delay: 0.16s; }
+.sound-wave-bars .swb:nth-child(8)  { height: 13px; animation-delay: 0.08s; }
+.sound-wave-bars .swb:nth-child(9)  { height: 5px;  animation-delay: 0.00s; }
+.orb-stage.user-active .sound-wave-bars .swb { background: #8b7cf8; }
+.orb-stage.thinking    .sound-wave-bars .swb { background: var(--saffron); }
+@keyframes swbAnim { 0%,100%{ transform:scaleY(0.25); opacity:0.5; } 50%{ transform:scaleY(1); opacity:1; } }
+
+/* ── TRANSCRIPT ── */
+.aura-transcript-wrap {
+  position: relative; background: var(--ink2);
+  border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; margin-bottom: 1rem; transition: border-color 0.3s;
 }
-@media (max-width: 600px) {
-  .section { padding: 5rem 1.25rem; }
-  .paths-grid { grid-template-columns: 1fr; }
-  .hero-actions { flex-direction: column; }
-  footer { flex-direction: column; gap: 1rem; text-align: center; }
+.aura-transcript-wrap.glowing { border-color: rgba(78,153,112,0.28); box-shadow: 0 0 40px rgba(78,153,112,0.05); }
+
+.transcript-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.55rem 1rem; border-bottom: 1px solid var(--border);
+  background: rgba(78,153,112,0.025);
+}
+.transcript-label {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(78,153,112,0.42);
+}
+.transcript-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--sage-light); box-shadow: 0 0 5px var(--sage-light);
+  opacity: 0; transition: opacity 0.3s;
+}
+.aura-transcript-wrap.glowing .transcript-dot { opacity: 1; animation: pulse-dot 1.4s ease infinite; }
+.transcript-turns { font-family: var(--mono); font-size: 0.55rem; color: var(--white3); }
+
+.transcript-scroll { height: 240px; overflow-y: auto; padding: 1rem; scroll-behavior: smooth; }
+.transcript-scroll::-webkit-scrollbar { width: 2px; }
+.transcript-scroll::-webkit-scrollbar-thumb { background: rgba(78,153,112,0.12); border-radius: 2px; }
+
+/* Transcript entries */
+.t-entry { display: flex; gap: 0.65rem; margin-bottom: 0.75rem; animation: tIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+@keyframes tIn { from { opacity:0; transform: translateY(4px); } to { opacity:1; transform:none; } }
+.t-avatar {
+  width: 26px; height: 26px; min-width: 26px;
+  background: var(--sage-dim); border: 1px solid rgba(78,153,112,0.18);
+  border-radius: 7px; display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; margin-top: 1px;
+}
+.t-body { flex: 1; }
+.t-name { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(78,153,112,0.4); margin-bottom: 0.18rem; }
+.t-text { font-size: 0.86rem; line-height: 1.68; color: rgba(220,228,238,0.88); font-family: var(--sans); }
+.t-text.streaming::after { content: '▋'; display: inline-block; color: var(--sage-light); animation: blink 0.7s step-end infinite; margin-left: 2px; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+/* Teacher board */
+.t-board {
+  margin-bottom: 0.85rem; border-radius: 12px; overflow: hidden;
+  animation: tIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  border: 1px solid rgba(196,137,42,0.18);
+  background: linear-gradient(140deg, rgba(26,16,4,0.97), rgba(16,11,3,0.96));
+}
+.t-board-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.8rem; background: rgba(196,137,42,0.055); border-bottom: 1px solid rgba(196,137,42,0.1); }
+.t-board-icon { font-size: 0.72rem; }
+.t-board-label { font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(196,137,42,0.58); flex: 1; }
+.t-board-body { padding: 0.7rem 0.85rem; }
+
+.t-correction-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+.t-wrong { font-family: var(--mono); font-size: 0.84rem; color: #e08888; text-decoration: line-through; text-decoration-color: rgba(224,92,92,0.38); }
+.t-arrow { color: var(--white3); font-size: 0.68rem; }
+.t-right { font-family: var(--mono); font-size: 0.88rem; color: rgba(78,153,112,0.9); font-weight: 500; }
+.t-board-note { font-size: 0.8rem; line-height: 1.68; color: rgba(255,208,138,0.65); font-family: var(--sans); }
+.t-board-note.streaming::after { content: '▋'; display: inline-block; color: var(--saffron); animation: blink 0.7s step-end infinite; margin-left: 2px; }
+
+#correction-card { display: none !important; }
+
+.wave-bars { display: flex; gap: 2px; align-items: center; height: 14px; }
+.wave-bars span { display: inline-block; width: 2px; border-radius: 2px; background: currentColor; animation: waveBar 0.7s ease infinite; }
+.wave-bars span:nth-child(1) { height: 5px; animation-delay: 0s; }
+.wave-bars span:nth-child(2) { height: 10px; animation-delay: 0.12s; }
+.wave-bars span:nth-child(3) { height: 7px; animation-delay: 0.24s; }
+.wave-bars span:nth-child(4) { height: 12px; animation-delay: 0.08s; }
+.wave-bars span:nth-child(5) { height: 5px; animation-delay: 0.18s; }
+@keyframes waveBar { 0%,100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+
+/* Input area */
+.input-area { display: flex; gap: 0.6rem; align-items: flex-end; margin-bottom: 1rem; }
+.text-input-wrap { flex: 1; position: relative; }
+#text-input {
+  width: 100%; padding: 0.82rem 1rem;
+  background: var(--ink2); border: 1px solid var(--border);
+  border-radius: 12px; font-family: var(--sans); font-size: 0.88rem;
+  color: var(--white); resize: none; min-height: 50px; max-height: 120px;
+  transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.5;
+}
+#text-input::placeholder { color: var(--white3); }
+#text-input:focus { outline: none; border-color: rgba(78,153,112,0.35); box-shadow: 0 0 0 3px rgba(78,153,112,0.07); }
+
+.action-btn {
+  width: 50px; height: 50px; min-width: 50px; border: none; border-radius: 12px;
+  cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.18s;
+}
+.mic-btn { background: var(--ink2); border: 1px solid var(--border); color: var(--white2); }
+.mic-btn:hover { border-color: rgba(139,124,248,0.35); color: rgba(196,188,255,0.9); transform: scale(1.04); }
+.mic-btn.muted { background: rgba(139,124,248,0.12); border-color: rgba(139,124,248,0.42); color: rgba(196,188,255,0.9); }
+.send-btn { background: var(--saffron); color: #110900; box-shadow: 0 4px 16px rgba(196,137,42,0.2); }
+.send-btn:hover { transform: scale(1.04); filter: brightness(1.06); }
+.send-btn:active { transform: scale(0.97); }
+
+.session-controls { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.ctrl-btn {
+  padding: 0.52rem 0.95rem; background: var(--ink2);
+  border: 1px solid var(--border); border-radius: 9px; cursor: pointer;
+  font-size: 0.75rem; font-weight: 500; font-family: var(--sans); color: var(--white2);
+  transition: all 0.18s; display: flex; align-items: center; gap: 0.4rem;
+}
+.ctrl-btn:hover { border-color: var(--border2); color: var(--white); }
+.ctrl-btn.danger { border-color: rgba(224,92,92,0.25); color: rgba(224,150,150,0.8); }
+.ctrl-btn.danger:hover { background: rgba(100,18,18,0.8); border-color: rgba(224,92,92,0.5); color: #ffcccc; }
+
+/* ════════════════════════════════════════════════════════
+   SCORE PANEL
+════════════════════════════════════════════════════════ */
+#score-panel { display: none; animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.score-header { text-align: center; margin-bottom: 2.5rem; }
+.score-header h2 { font-family: var(--serif); font-size: 2.4rem; font-weight: 300; font-style: italic; margin-bottom: 0.4rem; }
+.score-header p  { color: var(--white2); font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; }
+
+.score-big { display: flex; justify-content: center; margin-bottom: 3rem; }
+.score-ring-wrap { position: relative; width: 160px; height: 160px; }
+.score-ring-svg { width: 160px; height: 160px; transform: rotate(-90deg); }
+.score-ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8; }
+.score-ring-fill {
+  fill: none; stroke-width: 8; stroke-linecap: round;
+  stroke: url(#scoreGradient); stroke-dasharray: 440; stroke-dashoffset: 440;
+  transition: stroke-dashoffset 1.4s cubic-bezier(0.16,1,0.3,1);
+}
+.score-ring-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.score-num { font-family: var(--serif); font-size: 2.8rem; font-weight: 300; font-style: italic; line-height: 1; color: var(--white); }
+.score-label { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.12em; color: var(--white3); text-transform: uppercase; }
+
+.criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+@media (max-width: 500px) { .criteria-grid { grid-template-columns: 1fr; } }
+
+.criterion-card {
+  background: var(--ink2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.1rem 1.25rem; transition: border-color 0.2s;
+}
+.criterion-card:hover { border-color: var(--border2); }
+.criterion-card h4 { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white3); margin-bottom: 0.65rem; }
+.criterion-bar-wrap { height: 3px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin-bottom: 0.5rem; }
+.criterion-bar { height: 100%; border-radius: 3px; width: 0%; transition: width 1.2s cubic-bezier(0.16,1,0.3,1); background: linear-gradient(90deg, var(--sage), var(--sage-light)); }
+.criterion-score { font-family: var(--serif); font-weight: 300; font-style: italic; font-size: 1.2rem; color: var(--white); }
+.criterion-comment { font-size: 0.76rem; color: var(--white2); margin-top: 0.3rem; line-height: 1.58; }
+
+.feedback-card {
+  background: var(--ink2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.4rem 1.5rem; margin-bottom: 1.2rem;
+}
+.feedback-card h3 { font-family: var(--sans); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--white2); margin-bottom: 0.85rem; }
+.feedback-card p { font-size: 0.88rem; line-height: 1.78; color: rgba(210,220,235,0.85); }
+
+.pronunciation-tip {
+  background: var(--sage-dim); border: 1px solid rgba(78,153,112,0.12);
+  border-radius: 10px; padding: 0.75rem 0.95rem; margin-bottom: 0.6rem;
+  font-size: 0.82rem; line-height: 1.65; color: var(--white2);
+}
+.pronunciation-tip .word { font-family: var(--mono); font-weight: 500; color: var(--sage-light); }
+.pronunciation-tip .gujarati-note { color: rgba(196,137,42,0.62); font-size: 0.74rem; margin-top: 0.2rem; display: block; }
+
+.errors-list { list-style: none; }
+.errors-list li { padding: 0.62rem 0; border-bottom: 1px solid var(--border); font-size: 0.84rem; color: rgba(210,220,235,0.85); line-height: 1.62; }
+.errors-list li:last-child { border-bottom: none; }
+.err-orig    { color: #e08888; text-decoration: line-through; font-family: var(--mono); }
+.err-correct { color: var(--sage-light); font-family: var(--mono); }
+
+.score-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 2.5rem; }
+.btn-outline {
+  padding: 0.82rem 1.8rem; background: var(--ink2); color: var(--white2);
+  border: 1px solid var(--border); border-radius: 100px;
+  font-family: var(--sans); font-weight: 500; font-size: 0.88rem;
+  cursor: pointer; transition: all 0.18s;
+}
+.btn-outline:hover { border-color: var(--border2); color: var(--white); }
+
+/* Toast */
+.toast-el {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  background: var(--ink2); color: var(--white);
+  border: 1px solid rgba(78,153,112,0.2);
+  padding: 0.7rem 1.4rem; border-radius: 100px;
+  font-size: 0.84rem; z-index: 9999;
+  box-shadow: 0 10px 36px rgba(0,0,0,0.5);
+  animation: toastIn 0.3s cubic-bezier(0.16,1,0.3,1) both;
+  white-space: nowrap; max-width: 90vw;
+}
+@keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+
+/* Mobile */
+@media (max-width: 720px) {
+  .topbar { padding: 0.75rem 1rem; }
+  .container { padding: 1.5rem 1rem 4rem; }
+  .session-controls { gap: 0.5rem; }
+  .ctrl-btn { font-size: 0.72rem; padding: 0.5rem 0.72rem; }
+  .transcript-scroll { height: 220px; }
+}
+@media (max-width: 640px) {
+  #orb-canvas { width: min(300px, 80vw) !important; height: min(300px, 80vw) !important; touch-action: manipulation; }
+  .orb-mute-ring { width: calc(min(300px, 80vw) + 18px); height: calc(min(300px, 80vw) + 18px); top: 1.5rem; }
+  .orb-stage { padding: 0.75rem 0 0.25rem; }
+  .ctrl-btn { padding: 0.65rem 0.82rem; font-size: 0.72rem; min-height: 44px; }
+  .transcript-scroll { height: 140px; }
+  .setup-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: clamp(2rem, 8vw, 3rem); }
+  .start-btn { height: 58px; font-size: 0.92rem; }
+  .role-card { padding: 0.72rem 0.9rem; margin-bottom: 0.72rem; }
+  .role-avatar { width: 36px; height: 36px; min-width: 36px; font-size: 1.1rem; }
+  .role-info h3 { font-size: 0.8rem; }
+  .role-info p { font-size: 0.72rem; }
+  .session-header { margin-bottom: 0.65rem; padding-bottom: 0.65rem; }
+  .session-timer { font-size: 1.4rem; }
+  .session-info h2 { font-size: 1rem; }
+  .action-btn { width: 44px; height: 44px; min-width: 44px; }
+  .criteria-grid { grid-template-columns: 1fr; }
+  .sound-wave-bars .swb { width: 3px; }
 }
 
-/* ─────────────────────────────────────────────
-   SAFFRON ACCENT LINE (decorative Indian touch)
-───────────────────────────────────────────── */
-.saffron-line {
-  display: inline-block; width: 40px; height: 2px;
-  background: var(--saffron); margin-bottom: 2rem; border-radius: 2px;
+button, .tab-item, .action-btn, .ctrl-btn, .start-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .session-controls { padding-bottom: env(safe-area-inset-bottom); }
+  .container { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+}
+
 </style>
 </head>
 <body>
 
-<!-- ── NAVIGATION ─────────────────────────────── -->
-<nav>
-  <a href="#" class="nav-logo">AURA<span>.</span></a>
-  <ul class="nav-links">
-    <li><a href="#features">Features</a></li>
-    <li><a href="#demo">Demo</a></li>
-    <li><a href="#about">Why AURA</a></li>
-  </ul>
-  <a href="#" class="nav-cta">Start Speaking</a>
-</nav>
-
-<!-- ── HERO ───────────────────────────────────── -->
-<section class="hero">
-  <div class="hero-eyebrow">AI Language Tutor · Built for Gujarati Learners</div>
-
-  <h1 class="hero-headline">
-    Learn German through<br>
-    <em>real conversations.</em>
-  </h1>
-
-  <p class="hero-sub">
-    AURA helps Gujarati students speak German with confidence — 
-    anytime, in your language, at your pace.
-  </p>
-
-  <div class="hero-actions">
-    <a href="#" class="btn-primary">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-      Start Speaking with AURA
-    </a>
-    <a href="#demo" class="btn-ghost">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      Watch Demo
-    </a>
+<!-- ═══ AURA INTRO OVERLAY ═══ -->
+<div id="aura-intro">
+  <canvas id="aura-particles"></canvas>
+  <div class="aura-scan-line"></div>
+  <div class="aura-intro-content">
+    <div class="aura-pre-text">German Made Easy presents</div>
+    <div class="aura-name">AURA<span class="aura-name-glitch" aria-hidden="true">AURA</span></div>
+    <div class="aura-tagline">AI German Companion</div>
+    <div class="aura-year">◈ &nbsp; 2070 &nbsp; ◈</div>
+    <div class="aura-bar-wrap"><div class="aura-bar"></div></div>
   </div>
+  <button class="aura-skip-btn" id="aura-skip-btn">SKIP →</button>
+</div>
 
-  <!-- Chat mockup -->
-  <div class="hero-mockup">
-    <div class="mockup-bar">
-      <div class="mockup-dots">
-        <span></span><span></span><span></span>
+<!-- AUTH LOADING -->
+<div id="auth-overlay">
+  <div class="auth-spinner"></div>
+  <p>Connecting to AURA...</p>
+</div>
+
+<!-- ACCESS DENIED -->
+<div id="access-denied" style="display:none; position:fixed; inset:0; background:var(--void); flex-direction:column; align-items:center; justify-content:center; gap:1.5rem; z-index:899; text-align:center; padding:2rem;">
+  <div class="icon" style="font-size:3rem; filter:drop-shadow(0 0 16px rgba(0,245,255,0.5));">✦</div>
+  <h2 style="font-family:'Syne',sans-serif; font-size:2rem;">Meet AURA</h2>
+  <p style="color:var(--text2); max-width:380px; line-height:1.7;">Your AI German practice companion. <strong style="color:var(--text);">2 free conversations</strong> for every account — no purchase needed to start.</p>
+  <a href="/login.html" style="padding:0.9rem 2.5rem; background:linear-gradient(135deg,var(--violet),var(--cyan)); color:#050a15; font-weight:700; border-radius:12px; text-decoration:none;">Log In to Try AURA Free</a>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" style="display:none;">
+  <nav class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo">
+        <svg width="34" height="34" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 6px rgba(0,240,255,0.5));">
+          <polygon points="19,2 34,10.5 34,27.5 19,36 4,27.5 4,10.5" fill="#040810" stroke="rgba(0,240,255,0.7)" stroke-width="1.4"/>
+          <polygon points="19,7 29,12.8 29,24.2 19,30 9,24.2 9,12.8" fill="rgba(0,240,255,0.06)"/>
+          <text x="19" y="25" text-anchor="middle" font-family="Syne,sans-serif" font-size="14" font-weight="800" fill="rgba(0,240,255,0.95)" letter-spacing="-1">A</text>
+        </svg>
       </div>
-      <div class="mockup-title">AURA · Conversation</div>
-      <div class="aura-status">
-        <div class="aura-dot"></div>
-        Live
-      </div>
-    </div>
-
-    <div class="mockup-body">
-      <div class="msg msg-user">
-        <div class="msg-avatar">A</div>
-        <div class="msg-content">
-          <div class="msg-name">Aryan · Student</div>
-          <div class="msg-bubble">
-            <span class="gujarati">મને જર્મનમાં પોતાનો પરિચય આપવો છે.</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="msg msg-aura">
-        <div class="msg-avatar">◈</div>
-        <div class="msg-content">
-          <div class="msg-name">AURA · German Tutor</div>
-          <div class="msg-bubble">
-            <span class="german">Sehr gut! Ich heiße Aryan und ich komme aus Indien.</span>
-            <span class="explanation">→ "My name is Aryan and I come from India." — આ sentence practice કરો, પછી હું pronounce ચેક કરીશ.</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="msg msg-user">
-        <div class="msg-avatar">A</div>
-        <div class="msg-content">
-          <div class="msg-name">Aryan · Student</div>
-          <div class="msg-bubble">
-            <span class="gujarati">Ich heiße Aryan und... ich komme aus Indien?</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="msg msg-aura msg-typing">
-        <div class="msg-avatar">◈</div>
-        <div class="msg-content">
-          <div class="msg-name">AURA · Responding</div>
-          <div class="msg-bubble">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ── PROBLEM SECTION ─────────────────────────── -->
-<section class="section problem-section" id="problem">
-  <div class="section-inner">
-    <div class="label-tag"><span></span>The Real Challenge</div>
-
-    <div class="problem-grid">
       <div>
-        <p class="problem-quote reveal">
-          "You don't learn a language<br>by reading it.<br>
-          <em>You learn it by speaking.</em>"
-        </p>
-      </div>
-
-      <div class="problem-items">
-        <div class="problem-item reveal reveal-delay-1">
-          <div class="problem-icon">📖</div>
-          <div class="problem-text">
-            <strong>Grammar without voice</strong>
-            <p>Most Gujarati students know German grammar well — but freeze when they need to speak it.</p>
-          </div>
-        </div>
-        <div class="problem-item reveal reveal-delay-2">
-          <div class="problem-icon">👥</div>
-          <div class="problem-text">
-            <strong>No conversation partner</strong>
-            <p>Finding someone to practice German with in Gujarat is nearly impossible. Classes don't give enough speaking time.</p>
-          </div>
-        </div>
-        <div class="problem-item reveal reveal-delay-3">
-          <div class="problem-icon">😶</div>
-          <div class="problem-text">
-            <strong>Fear of making mistakes</strong>
-            <p>Speaking a foreign language in front of others feels embarrassing — so students stay silent. Silence becomes habit.</p>
-          </div>
-        </div>
+        <div class="topbar-title">✦ AURA</div>
+        <div class="topbar-sub">AI German Companion</div>
       </div>
     </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- ── FEATURES SECTION ────────────────────────── -->
-<section class="section features-section" id="features">
-  <div class="section-inner">
-    <div class="label-tag reveal"><span></span>What AURA Does</div>
-    <h2 class="section-headline reveal">Four ways AURA<br><em>transforms your German.</em></h2>
-
-    <div class="features-grid reveal">
-      <div class="feature-card">
-        <div class="feature-number">01</div>
-        <div class="feature-icon">🗣️</div>
-        <div class="feature-title">Natural Conversations</div>
-        <p class="feature-desc">Speak freely with an AI that listens, responds, and adapts to your level. Practice at A1 or push toward B2 — on your schedule.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-number">02</div>
-        <div class="feature-icon">🇮🇳</div>
-        <div class="feature-title">Gujarati Explanations</div>
-        <p class="feature-desc">Complex German grammar, explained simply in Gujarati. No confusion, no guessing — concepts land in your native language first.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-number">03</div>
-        <div class="feature-icon">🎯</div>
-        <div class="feature-title">Real-Life Scenarios</div>
-        <p class="feature-desc">Practice university interviews, Studienkolleg conversations, grocery shopping, or job applications — situations you'll actually face in Germany.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-number">04</div>
-        <div class="feature-icon">🎧</div>
-        <div class="feature-title">Pronunciation Feedback</div>
-        <p class="feature-desc">AURA hears how you speak and guides you toward natural German pronunciation — the kind that gets you understood, not just graded.</p>
-      </div>
+    <div class="topbar-right">
+      <span class="level-pill" id="level-badge">A1</span>
+      <span class="user-name-text" id="user-name"></span>
+      <a href="/dashboard.html" class="topbar-back">← Dashboard</a>
     </div>
-  </div>
-</section>
+  </nav>
 
-<div class="divider"></div>
+  <div class="container">
 
-<!-- ── DEMO SECTION ────────────────────────────── -->
-<section class="section demo-section" id="demo">
-  <div class="section-inner">
-    <div class="label-tag reveal"><span></span>See AURA in Action</div>
-
-    <div class="demo-inner">
-      <div class="demo-copy">
-        <h2 class="section-headline reveal">Practice any<br><em>scenario,<br>anytime.</em></h2>
-        <p class="reveal">Choose a real-life situation. AURA becomes the other person — a professor, a doctor, a colleague — and guides you through the conversation step by step.</p>
-
-        <div class="demo-scenarios reveal">
-          <div class="scenario-pill active">
-            <div class="dot"></div>
-            Studienkolleg Interview
-          </div>
-          <div class="scenario-pill">
-            <div class="dot"></div>
-            Apartment Inquiry (Wohnungssuche)
-          </div>
-          <div class="scenario-pill">
-            <div class="dot"></div>
-            Doctor's Appointment
-          </div>
-          <div class="scenario-pill">
-            <div class="dot"></div>
-            Ausbildung Workplace
-          </div>
-          <div class="scenario-pill">
-            <div class="dot"></div>
-            Daily Shopping (Einkaufen)
-          </div>
+    <!-- ══ SETUP PANEL ══ -->
+    <div id="setup-panel">
+      <div class="hero">
+        <div class="hero-eyebrow">
+          <span class="dot"></span>
+          AURA — Live AI Speaking Partner
         </div>
+        <h1>Your German Tutor.<br>Always Ready.</h1>
+        <p>AURA speaks live with you — in Gujarati, Hindi, English, and German — real-time voice conversation with instant corrections. Like having a fluent tutor on call, forever.</p>
       </div>
 
-      <div class="demo-chat reveal">
-        <div class="mockup-bar">
-          <div class="mockup-dots">
-            <span></span><span></span><span></span>
-          </div>
-          <div class="mockup-title">Studienkolleg Interview</div>
-          <div class="aura-status">
-            <div class="aura-dot"></div>
-            A2 Level
+      <div class="setup-grid">
+        <div class="setup-card">
+          <h3>📚 Your Level</h3>
+          <div class="tab-group">
+            <div class="tab-item level-tab active" onclick="setLevel('A1')">A1 Beginner</div>
+            <div class="tab-item level-tab" onclick="setLevel('A2')">A2 Elementary</div>
           </div>
         </div>
 
-        <div class="mockup-body">
-          <div class="msg msg-aura">
-            <div class="msg-avatar">◈</div>
-            <div class="msg-content">
-              <div class="msg-name">AURA · Interviewer</div>
-              <div class="msg-bubble">
-                <span class="german">Guten Morgen! Erzählen Sie mir etwas über sich.</span>
-                <span class="explanation">→ "Good morning! Tell me something about yourself." — શરૂ કરો, nervousness ની ચિંતા ન કરો.</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="msg msg-user">
-            <div class="msg-avatar">A</div>
-            <div class="msg-content">
-              <div class="msg-name">You</div>
-              <div class="msg-bubble">
-                <span class="gujarati">Guten Morgen. Ich heiße Priya und ich komme aus Surat in Indien.</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="msg msg-aura">
-            <div class="msg-avatar">◈</div>
-            <div class="msg-content">
-              <div class="msg-name">AURA · Feedback</div>
-              <div class="msg-bubble">
-                <span class="german">Sehr schön! ✓ Pronunciation gut. Warum möchten Sie in Deutschland studieren?</span>
-                <span class="explanation">→ Perfect! Now: "Why do you want to study in Germany?" — આ important interview question છે, તૈયાર રહો.</span>
-              </div>
-            </div>
+        <div class="setup-card">
+          <h3>🎙️ Input Mode <span class="sr-badge">Gemini 2.5 Live</span></h3>
+          <div class="tab-group">
+            <div class="tab-item mode-tab active" onclick="setInputMode('both')">🎙️+⌨️</div>
+            <div class="tab-item mode-tab" onclick="setInputMode('voice')">🎙️ Voice</div>
+            <div class="tab-item mode-tab" onclick="setInputMode('text')">⌨️ Text</div>
           </div>
         </div>
+
+        <!-- Language preference — NEW: persists for entire session -->
+        <div class="setup-card" style="grid-column: 1 / -1;">
+          <h3>🗣️ Explanation Language <span class="sr-badge" style="background:rgba(232,184,75,0.1);color:var(--gold);border-color:rgba(232,184,75,0.3);">Locked for session</span></h3>
+          <p style="font-size:0.78rem;color:var(--text3);margin-bottom:0.85rem;line-height:1.55;">AURA will explain grammar and give feedback in this language for the <em>entire session</em>. German words will always keep perfect native pronunciation regardless.</p>
+          <div class="tab-group lang-pref-group" id="lang-pref-group">
+            <div class="tab-item lang-pref-tab active" onclick="setLangPref('Gujarati')">🇮🇳 Gujarati</div>
+            <div class="tab-item lang-pref-tab" onclick="setLangPref('Hindi')">🇮🇳 Hindi</div>
+            <div class="tab-item lang-pref-tab" onclick="setLangPref('English')">🇬🇧 English</div>
+          </div>
+        </div>
+
+        <div class="setup-card" style="grid-column: 1 / -1;">
+          <h3><span id="scenario-emoji">🛒</span> Choose Your Scenario</h3>
+          <select class="scenario-select" id="scenario-select" onchange="onScenarioChange()">
+            <optgroup label="— A1 Scenarios —">
+              <option value="a1_shop"      data-level="A1" data-role="Shopkeeper"         data-emoji="🛒" data-desc="You're a customer at a German supermarket. Ask for items, quantities, and prices.">🛒 At the Supermarket</option>
+              <option value="a1_doctor"    data-level="A1" data-role="Doctor"              data-emoji="🏥" data-desc="You're at a German GP clinic. Describe your symptoms and understand basic advice.">🏥 At the Doctor</option>
+              <option value="a1_hotel"     data-level="A1" data-role="Hotel Receptionist"  data-emoji="🏨" data-desc="Check into a German hotel. Ask about room types, prices, and breakfast.">🏨 Hotel Check-in</option>
+              <option value="a1_cafe"      data-level="A1" data-role="Café Waiter"          data-emoji="☕" data-desc="Order food and drinks at a German café. Ask about the menu and pay the bill.">☕ At the Café</option>
+              <option value="a1_directions" data-level="A1" data-role="Passerby"            data-emoji="🗺️" data-desc="You're lost in a German city. Ask for directions to key locations.">🗺️ Asking for Directions</option>
+              <option value="a1_phone"     data-level="A1" data-role="Office Secretary"     data-emoji="📞" data-desc="Make a simple phone call to book an appointment in German.">📞 Making an Appointment</option>
+              <option value="a1_introduce" data-level="A1" data-role="New Neighbour"        data-emoji="👋" data-desc="Introduce yourself to a new German neighbour. Share your name, country, job, and hobbies.">👋 Introducing Yourself</option>
+              <option value="a1_transport" data-level="A1" data-role="Ticket Office Staff"  data-emoji="🚂" data-desc="Buy a train or bus ticket at a German station. Ask about times and prices.">🚂 Buying a Train Ticket</option>
+            </optgroup>
+            <optgroup label="— A2 Scenarios —">
+              <option value="a2_flat"      data-level="A2" data-role="Landlord"             data-emoji="🏠" data-desc="Discuss renting a flat in Germany. Ask about rent, deposit, and utilities.">🏠 Renting a Flat</option>
+              <option value="a2_job"       data-level="A2" data-role="HR Manager"           data-emoji="💼" data-desc="Attend a simple job interview. Describe your experience and strengths.">💼 Job Interview</option>
+              <option value="a2_bank"      data-level="A2" data-role="Bank Clerk"           data-emoji="🏦" data-desc="Open a bank account in Germany. Provide personal details and ask about fees.">🏦 Opening a Bank Account</option>
+              <option value="a2_complaint" data-level="A2" data-role="Shop Manager"         data-emoji="⚠️" data-desc="Return a faulty product and make a polite complaint in German.">⚠️ Making a Complaint</option>
+              <option value="a2_party"     data-level="A2" data-role="German Friend"        data-emoji="🎉" data-desc="Discuss plans for a party. Talk about food, guests, location, and time.">🎉 Planning a Party</option>
+              <option value="a2_health"    data-level="A2" data-role="Pharmacist"           data-emoji="💊" data-desc="Visit a German pharmacy. Describe symptoms and ask for medication.">💊 At the Pharmacy</option>
+              <option value="a2_school"    data-level="A2" data-role="School Administrator" data-emoji="🏫" data-desc="Enrol in a German course. Ask about schedules and fees.">🏫 School Enrolment</option>
+              <option value="a2_travel"    data-level="A2" data-role="Travel Agent"         data-emoji="✈️" data-desc="Book a holiday package. Discuss destinations, dates, and budget.">✈️ Booking a Holiday</option>
+            </optgroup>
+          </select>
+          <div class="scenario-desc" id="scenario-desc">You're a customer at a German supermarket. Ask for items, quantities, and prices.</div>
+        </div>
       </div>
+
+      <div id="trial-counter-wrap">
+        <span class="trial-counter-text-el" id="trial-counter-text">✦ Loading...</span>
+      </div>
+      <button class="start-btn" onclick="startSession()">✦ Start Live Conversation with AURA</button>
     </div>
-  </div>
-</section>
 
-<div class="divider"></div>
+    <!-- ══ SESSION PANEL ══ -->
+    <div id="session-panel">
 
-<!-- ── COMPARE SECTION ─────────────────────────── -->
-<section class="section compare-section" id="about">
-  <div class="section-inner">
-    <div class="label-tag reveal"><span></span>AURA vs. Traditional</div>
-    <h2 class="section-headline reveal">Same language.<br><em>Different results.</em></h2>
-
-    <div class="compare-grid" style="margin-top: 3rem;">
-      <div class="compare-card traditional reveal">
-        <div class="compare-label">Traditional Courses</div>
-        <div class="compare-title">Grammar books &amp; passive learning</div>
-        <ul class="compare-list">
-          <li>Heavy grammar drills with no speaking practice</li>
-          <li>Fixed schedule, fixed pace — no flexibility</li>
-          <li>One teacher for thirty students</li>
-          <li>Explanations only in English or German</li>
-          <li>No feedback on how you actually sound</li>
-          <li>Exam-focused, not conversation-focused</li>
-        </ul>
+      <!-- Top bar: scenario info + timer -->
+      <div class="session-header">
+        <div class="session-info">
+          <h2 id="session-title">At the Supermarket</h2>
+          <div class="session-meta">
+            <div class="live-dot"></div>
+            <span id="session-subtitle">A1 · Shopkeeper · Live Voice</span>
+            <span class="sep">·</span>
+            <span id="session-lang-badge" style="color:var(--gold);font-size:0.62rem;">🗣 Gujarati</span>
+          </div>
+        </div>
+        <div class="session-timer" id="session-timer">20:00</div>
       </div>
 
-      <div class="compare-card aura-card reveal reveal-delay-2">
-        <div class="compare-label">AURA</div>
-        <div class="compare-title">Conversation-first, Gujarati-native</div>
-        <ul class="compare-list">
-          <li>Speak from day one — grammar in context</li>
-          <li>Practice at 2am or 2pm — whenever you need</li>
-          <li>Fully personal — adapts to your gaps</li>
-          <li>Explanations in Gujarati, so concepts truly land</li>
-          <li>Live pronunciation guidance after every attempt</li>
-          <li>Built for real scenarios you'll face in Germany</li>
-        </ul>
+      <!-- Role chip — compact -->
+      <div class="role-card">
+        <div class="role-avatar" id="role-avatar">🛒</div>
+        <div class="role-info">
+          <h3 id="role-name">The Shopkeeper</h3>
+          <p id="role-description">Just speak naturally in German. AURA listens, responds live, and corrects you in Gujarati and English.</p>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
 
-<div class="divider"></div>
+      <!-- ORB STAGE — the living, breathing core of the session -->
+      <div class="orb-stage idle" id="orb-stage">
+        <div class="orb-mute-ring"></div>
+        <canvas id="orb-canvas" width="440" height="440" onclick="toggleMic()"></canvas>
+        <div class="orb-state-label" id="orb-state-label">tap orb to mute</div>
+        <!-- Silence countdown indicator -->
+        <div class="silence-countdown" id="silence-countdown" style="display:none;">
+          <span id="silence-countdown-text">30s</span> until pause
+        </div>
+        <!-- Sound wave bars — shown when AI or user is speaking -->
+        <div class="sound-wave-bars" id="sound-wave-bars">
+          <span class="swb"></span><span class="swb"></span><span class="swb"></span>
+          <span class="swb"></span><span class="swb"></span><span class="swb"></span>
+          <span class="swb"></span><span class="swb"></span><span class="swb"></span>
+        </div>
+        <div class="orb-mic-hint">tap orb · mute mic</div>
+      </div>
 
-<!-- ── SOCIAL PROOF ────────────────────────────── -->
-<section class="section social-section">
-  <div class="section-inner">
-    <div class="label-tag reveal"><span></span>Who It's For</div>
-    <h2 class="section-headline reveal">Built for every<br><em>Gujarati path to Germany.</em></h2>
+      <!-- AURA TRANSCRIPT — only AURA's words, real-time -->
+      <div class="aura-transcript-wrap" id="aura-transcript-wrap">
+        <div class="transcript-header">
+          <div class="transcript-label">
+            <span class="transcript-dot" id="transcript-dot"></span>
+            AURA says
+          </div>
+          <div class="transcript-turns" id="transcript-turns">0 turns</div>
+        </div>
+        <div class="transcript-scroll" id="transcript-scroll"></div>
+      </div>
 
-    <div class="paths-grid" style="margin-top: 3rem;">
-      <div class="path-card reveal reveal-delay-1">
-        <div class="path-icon">🎓</div>
-        <div class="path-title">Studienkolleg</div>
-        <div class="path-desc">Prepare for entrance interviews and daily academic German.</div>
+      <!-- Text input (shown when mode includes typing) -->
+      <div class="input-area" id="input-area">
+        <div class="text-input-wrap">
+          <textarea id="text-input" placeholder="Or type in German here..." rows="1"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTextMessage();}"></textarea>
+        </div>
+        <button class="action-btn send-btn" onclick="sendTextMessage()">➤</button>
       </div>
-      <div class="path-card reveal reveal-delay-2">
-        <div class="path-icon">🔧</div>
-        <div class="path-title">Ausbildung</div>
-        <div class="path-desc">Workplace vocabulary, professional conversation, German work culture.</div>
-      </div>
-      <div class="path-card reveal reveal-delay-3">
-        <div class="path-icon">🏛️</div>
-        <div class="path-title">University</div>
-        <div class="path-desc">Navigate seminars, professors, and student life with confidence.</div>
-      </div>
-      <div class="path-card reveal reveal-delay-4">
-        <div class="path-icon">💼</div>
-        <div class="path-title">Jobs &amp; Work Visas</div>
-        <div class="path-desc">Interviews, onboarding, and daily office German — practiced and ready.</div>
+
+      <div class="session-controls">
+        <button class="ctrl-btn" onclick="goBackToSetup()">← Back</button>
+        <button class="ctrl-btn" onclick="changeScenario()">🔄 Change Task</button>
+        <button class="ctrl-btn" onclick="addTime()" id="add-time-btn">⏱️ +10 min</button>
+        <button class="ctrl-btn danger" onclick="endSession()">🏁 End &amp; Get Score</button>
       </div>
     </div>
 
-    <div class="testimonials-grid" style="margin-top: 2rem;">
-      <div class="testimonial-card reveal">
-        <p class="t-quote">I practiced my Studienkolleg interview with AURA every night for two weeks. When the real interview came, I wasn't nervous. I'd already said it all before.</p>
-        <div class="t-author">
-          <div class="t-avatar">DJ</div>
-          <div>
-            <div class="t-name">Dhruvit Joshi</div>
-            <div class="t-meta">Studienkolleg, München · Surat, Gujarat</div>
-          </div>
-        </div>
+    <!-- ══ CORRECTION CARD (floating, fixed) ══ -->
+    <div id="correction-card">
+      <div class="cc-header">
+        <div class="cc-badge"><span class="cc-badge-dot"></span> Correction</div>
+        <button class="cc-close" onclick="dismissCorrection()">✕</button>
       </div>
-      <div class="testimonial-card reveal reveal-delay-1">
-        <p class="t-quote">The Gujarati explanations changed everything. German grammar finally made sense when AURA explained it the way my mind already works.</p>
-        <div class="t-author">
-          <div class="t-avatar">PP</div>
-          <div>
-            <div class="t-name">Priya Patel</div>
-            <div class="t-meta">Ausbildung Nursing · Ahmedabad, Gujarat</div>
-          </div>
-        </div>
-      </div>
-      <div class="testimonial-card reveal reveal-delay-2">
-        <p class="t-quote">I went from silent to conversational in three months. AURA made me comfortable making mistakes — and that's what actually made me fluent.</p>
-        <div class="t-author">
-          <div class="t-avatar">KS</div>
-          <div>
-            <div class="t-name">Keyur Shah</div>
-            <div class="t-meta">TU Berlin · Rajkot, Gujarat</div>
-          </div>
-        </div>
+      <div id="cc-body">
+        <!-- filled dynamically -->
       </div>
     </div>
+
+    <!-- ══ SCORE PANEL ══ -->
+    <div id="score-panel">
+      <div class="score-header">
+        <h2>🏆 Session Complete</h2>
+        <p id="score-scenario-label">Supermarket · A1 · Live Voice</p>
+      </div>
+
+      <div class="score-big">
+        <div class="score-ring-wrap">
+          <svg class="score-ring-svg" viewBox="0 0 160 160">
+            <defs>
+              <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#7B61FF"/>
+                <stop offset="50%"  stop-color="#00F5FF"/>
+                <stop offset="100%" stop-color="#E8B84B"/>
+              </linearGradient>
+            </defs>
+            <circle class="score-ring-bg"   cx="80" cy="80" r="70"/>
+            <circle class="score-ring-fill" cx="80" cy="80" r="70" id="score-ring-fill"/>
+          </svg>
+          <div class="score-ring-inner">
+            <div class="score-num" id="score-num">—</div>
+            <div class="score-label">/ 100</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="criteria-grid">
+        <div class="criterion-card"><h4>Vocabulary</h4>    <div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-vocab"   style="width:0%"></div></div><div class="criterion-score" id="score-vocab">—</div>  <div class="criterion-comment" id="comment-vocab"></div></div>
+        <div class="criterion-card"><h4>Grammar</h4>       <div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-grammar" style="width:0%"></div></div><div class="criterion-score" id="score-grammar">—</div><div class="criterion-comment" id="comment-grammar"></div></div>
+        <div class="criterion-card"><h4>Fluency</h4>       <div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-fluency" style="width:0%"></div></div><div class="criterion-score" id="score-fluency">—</div><div class="criterion-comment" id="comment-fluency"></div></div>
+        <div class="criterion-card"><h4>Task Completion</h4><div class="criterion-bar-wrap"><div class="criterion-bar" id="bar-task"    style="width:0%"></div></div><div class="criterion-score" id="score-task">—</div>   <div class="criterion-comment" id="comment-task"></div></div>
+      </div>
+
+      <div class="feedback-card"><h3>📝 Overall Feedback</h3><p id="overall-feedback-text">Loading...</p></div>
+
+      <div class="feedback-card" id="pronunciation-section" style="display:none;">
+        <h3>🗣️ Pronunciation Guide</h3>
+        <p style="font-size:0.78rem; color:var(--text3); margin-bottom:1rem; font-family:'JetBrains Mono',monospace; letter-spacing:0.05em;">Tips tailored for Gujarati speakers, based on your session</p>
+        <div id="pronunciation-tips-list"></div>
+      </div>
+
+      <div class="feedback-card"><h3>✏️ Grammar Corrections</h3><ul class="errors-list" id="errors-list"></ul></div>
+
+      <div class="score-actions">
+        <button class="btn-primary-glow" onclick="practiceAgain()">🔄 Practice Again</button>
+        <button class="btn-outline" onclick="goToDashboard()">← Dashboard</button>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</div><!-- /main-app -->
+
+<!-- PRIVACY MODAL -->
+<div class="modal-backdrop" id="privacy-modal">
+  <div class="modal-card privacy-card">
+    <div class="privacy-icon">🎧</div>
+    <h2>Before we begin</h2>
+    <p>AURA speaks out loud — in German, Gujarati, Hindi, and English. If you're in a public place, people nearby <em>will</em> hear the conversation.</p>
+    <div class="privacy-tip">
+      <span>💡</span>
+      <span><strong>Recommended:</strong> Use headphones for a private, clear experience — especially in trains, cafés, or libraries. AURA sounds best through earphones.</span>
+    </div>
+    <p style="font-size:0.78rem; color:var(--text3);">Your microphone will be active. AURA can hear you speak.</p>
+    <div class="privacy-btns" style="margin-top:1.5rem;">
+      <button class="btn-primary-glow" onclick="confirmPrivacyAndStart()">✓ Got it — Start AURA</button>
+      <button class="btn-ghost" onclick="document.getElementById('privacy-modal').classList.remove('visible')">← Go back</button>
+    </div>
   </div>
-</section>
+</div>
 
-<!-- ── FINAL CTA ────────────────────────────────── -->
-<section class="cta-section">
-  <h2 class="cta-headline reveal">
-    Start speaking<br>
-    <em>German today.</em>
-  </h2>
-  <div class="reveal reveal-delay-1">
-    <a href="#" class="btn-primary" style="font-size: 1rem; padding: 1rem 2.2rem;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-      Start Practicing with AURA
-    </a>
+<!-- SILENCE / PAUSE MODAL -->
+<div class="modal-backdrop" id="silence-modal">
+  <div class="modal-card" style="max-width:380px;">
+    <div style="font-size:2.4rem;margin-bottom:0.8rem;">🤫</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;margin-bottom:0.55rem;">Still there?</h2>
+    <p style="color:var(--text2);font-size:0.88rem;line-height:1.65;margin-bottom:1.6rem;">No speech detected for 30 seconds. The session has been <strong style="color:var(--text);">paused</strong> to save your time.</p>
+    <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-primary-glow" onclick="resumeSession()" style="padding:0.85rem 1.8rem;">▶ Resume Session</button>
+      <button class="btn-ghost" onclick="endSession()" style="padding:0.85rem 1.2rem;">🏁 End & Score</button>
+    </div>
   </div>
-  <p class="cta-meta reveal reveal-delay-2">No credit card required · Begin with your first free conversation</p>
-</section>
+</div>
 
-<!-- ── FOOTER ──────────────────────────────────── -->
-<footer>
-  <a href="#" class="footer-logo">AURA<span>.</span></a>
-  <p class="footer-copy">© 2025 AURA. Built for Gujarati students going to Germany.</p>
-</footer>
+<!-- TRIAL LIMIT MODAL -->
+<div class="modal-backdrop" id="trial-limit-modal">
+  <div class="modal-card">
+    <div class="trial-badge-pill">✦ Free Trial Complete</div>
+    <h2>You've experienced AURA!</h2>
+    <p>Your 2 free conversations are used. Buy the course to unlock <strong style="color:var(--text);">unlimited AURA conversations</strong>, full exam scoring, guided lessons, and more.</p>
+    <a href="/#courses" class="trial-cta">🛒 Unlock Unlimited Access</a>
+  </div>
+</div>
 
-<!-- ── SCROLL REVEAL JS ─────────────────────────── -->
-<script>
-(function () {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    },
-    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-  );
+<!-- ══ AUDIO WORKLET CODE ══ -->
+<script id="workletCode" type="text/plain">
+class MicProcessor extends AudioWorkletProcessor {
+  constructor() { super(); }
+  process(inputs) {
+    const ch = inputs[0][0];
+    if (!ch) return true;
+    const inputRate = sampleRate;
+    const outputRate = 16000;
+    if (inputRate === outputRate) {
+      const out = new Int16Array(ch.length);
+      for (let i = 0; i < ch.length; i++)
+        out[i] = Math.max(-32768, Math.min(32767, Math.round(ch[i] * 32767)));
+      this.port.postMessage(out.buffer, [out.buffer]);
+      return true;
+    }
+    const ratio = inputRate / outputRate;
+    const outputLength = Math.floor(ch.length / ratio);
+    const out = new Int16Array(outputLength);
+    for (let i = 0; i < outputLength; i++) {
+      const pos = i * ratio;
+      const idx = Math.floor(pos);
+      const frac = pos - idx;
+      const a = ch[idx] || 0;
+      const b = ch[Math.min(idx + 1, ch.length - 1)] || 0;
+      out[i] = Math.max(-32768, Math.min(32767, Math.round((a + frac * (b - a)) * 32767)));
+    }
+    this.port.postMessage(out.buffer, [out.buffer]);
+    return true;
+  }
+}
+registerProcessor('mic-processor', MicProcessor);
 
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-  // Scenario pill interaction
-  document.querySelectorAll('.scenario-pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      document.querySelectorAll('.scenario-pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-    });
-  });
-})();
+class PlaybackProcessor extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    this._queue = [];
+    this._offset = 0;
+    this.port.onmessage = (e) => {
+      const int16 = new Int16Array(e.data);
+      const float32 = new Float32Array(int16.length);
+      for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768.0;
+      this._queue.push(float32);
+    };
+  }
+  process(_inputs, outputs) {
+    const out = outputs[0][0];
+    if (!out) return true;
+    let written = 0;
+    while (written < out.length && this._queue.length > 0) {
+      const chunk = this._queue[0];
+      const available = chunk.length - this._offset;
+      const needed = out.length - written;
+      if (available <= needed) {
+        out.set(chunk.subarray(this._offset), written);
+        written += available;
+        this._queue.shift();
+        this._offset = 0;
+      } else {
+        out.set(chunk.subarray(this._offset, this._offset + needed), written);
+        this._offset += needed;
+        written = out.length;
+      }
+    }
+    for (let i = written; i < out.length; i++) out[i] = 0;
+    return true;
+  }
+}
+registerProcessor('playback-processor', PlaybackProcessor);
 </script>
 
+<!-- ══ MAIN JS ══ -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const WORKER_URL = 'https://aura-token-worker.jeetupadhyay1204.workers.dev';
+const GEMINI_WS  = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent';
+const MODEL      = 'models/gemini-2.5-flash-native-audio-preview-12-2025';
+const MAX_TRIAL  = 2;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDx2fBrlxNP_zs0xra8ccXyCHQtnHud30E",
+  authDomain: "german-made-easy.firebaseapp.com",
+  projectId: "german-made-easy",
+  storageBucket: "german-made-easy.firebasestorage.app",
+  messagingSenderId: "259276936055",
+  appId: "1:259276936055:web:5c9b4916734d0271100772",
+};
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let currentUser = null, userProfile = null, isPaidStudent = false, trialCount = 0;
+let selectedLevel = 'A1', selectedInputMode = 'both', selectedScenario = null;
+let selectedLangPref = 'Gujarati'; // locked for session
+let conversationHistory = [], wordsUsed = new Set(), errorPatterns = {};
+let sessionTimerInterval = null, sessionSeconds = 20 * 60, addTimeUsed = false;
+let ws = null, audioCtx = null, micCtx = null, micStream = null, workletNode = null, playbackNode = null;
+let sessionActive = false, micMuted = false;
+let currentAiText = '', currentAiEntryEl = null;
+let turnCount = 0;
+let correctionTimeout = null;
+
+// ── FIX: Silence / inactivity detection (30s) ──
+let silenceTimer = null;
+const SILENCE_TIMEOUT_MS = 30000;
+let sessionPaused = false;
+let lastUserSpeechTime = null;
+
+// ── FIX: Track last user input transcription (for non-German detection) ──
+let lastUserTranscript = '';
+
+// ── ORB ENGINE ─────────────────────────────────────────────────────────────
+let orbState = 'idle'; // 'idle' | 'listening' | 'thinking' | 'speaking'
+let orbAnim = null;
+let orbParticles = [];
+
+function initOrb() {
+  const canvas = document.getElementById('orb-canvas');
+  if (!canvas) return;
+
+  // Resize canvas to match its CSS display size with DPR
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cssW = canvas.offsetWidth  || 260;
+  const cssH = canvas.offsetHeight || 260;
+  canvas.width  = cssW * dpr;
+  canvas.height = cssH * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = cssW, H = cssH, cx = W/2, cy = H/2;
+  const BASE_R = Math.min(W, H) * 0.36; // base orb radius
+
+  // ── Simplex-like smooth noise (no external lib needed) ──
+  function noise(x, y) {
+    // cheap smooth noise using sin waves
+    return (Math.sin(x * 1.7 + y * 0.5) * 0.5 +
+            Math.sin(x * 0.8 - y * 1.3) * 0.3 +
+            Math.sin(x * 2.4 + y * 1.9) * 0.2);
+  }
+
+  // Color palettes per state — [r,g,b] arrays
+  const COLORS = {
+    speaking:  { a: [0,245,255],   b: [100,180,255], c: [150,100,255], glow: [0,245,255]   },
+    listening: { a: [150,100,255], b: [100,60,220],  c: [60,160,255],  glow: [123,97,255]  },
+    thinking:  { a: [232,184,75],  b: [255,140,60],  c: [200,220,80],  glow: [232,184,75]  },
+    idle:      { a: [50,80,130],   b: [30,50,100],   c: [60,90,150],   glow: [50,80,130]   },
+  };
+
+  // Current interpolated colors
+  let curA = [...COLORS.idle.a], curB = [...COLORS.idle.b], curC = [...COLORS.idle.c];
+  let curGlow = [...COLORS.idle.glow];
+
+  function lerpColor(from, to, t) {
+    return from.map((v, i) => Math.round(v + (to[i] - v) * t));
+  }
+
+  let time = 0;
+  let energyLevel = 0.0;
+  let targetEnergy = 0.12;
+  let colorT = 0;
+  let prevState = 'idle';
+
+  // Blob deformation points — 12 control points around circle
+  const N_POINTS = 64;
+  const blobOffsets = Array.from({length: N_POINTS}, (_, i) => ({
+    phase: (i / N_POINTS) * Math.PI * 2,
+    speed: 0.5 + Math.random() * 0.8,
+    amp: Math.random() * 0.6 + 0.4,
+  }));
+
+  // Ripple rings from tap
+  let ripples = [];
+
+  // Expose tap ripple trigger
+  canvas.addEventListener('pointerdown', () => {
+    if (energyLevel > 0.05) {
+      ripples.push({ r: BASE_R, maxR: BASE_R * 2.2, alpha: 0.6, born: time });
+    }
+  });
+
+  function getBlobRadius(angle, t) {
+    // Multi-frequency noise deformation — this is the key "organic" look
+    const base = BASE_R;
+    const e = energyLevel;
+    const n1 = noise(Math.cos(angle) * 2.0 + t * 0.7, Math.sin(angle) * 2.0 + t * 0.5);
+    const n2 = noise(Math.cos(angle) * 3.5 - t * 0.9, Math.sin(angle) * 3.5 + t * 0.3);
+    const n3 = noise(Math.cos(angle) * 6.0 + t * 1.4, Math.sin(angle) * 6.0 - t * 0.8);
+    // Combine: large slow waves + medium + small fast ripple
+    const deform = n1 * 0.55 + n2 * 0.30 + n3 * 0.15;
+    // Scale deformation by energy: idle = barely moves, speaking = dramatic morph
+    const deformAmt = base * (0.04 + e * 0.22);
+    // Extra breathing pulse
+    const breathe = Math.sin(t * (orbState === 'speaking' ? 3.5 : orbState === 'listening' ? 2.5 : 1.2)) * base * (0.02 + e * 0.06);
+    return base + deform * deformAmt + breathe;
+  }
+
+  function drawBlob(t) {
+    const points = [];
+    for (let i = 0; i < N_POINTS; i++) {
+      const angle = (i / N_POINTS) * Math.PI * 2;
+      const r = getBlobRadius(angle, t);
+      points.push({ x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r });
+    }
+
+    // Smooth blob path with bezier curves
+    ctx.beginPath();
+    for (let i = 0; i < N_POINTS; i++) {
+      const p0 = points[(i - 1 + N_POINTS) % N_POINTS];
+      const p1 = points[i];
+      const p2 = points[(i + 1) % N_POINTS];
+      const p3 = points[(i + 2) % N_POINTS];
+      if (i === 0) {
+        const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+        ctx.moveTo(mx, my);
+      }
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, mx, my);
+    }
+    ctx.closePath();
+    return { path: ctx, points };
+  }
+
+  function drawFrame() {
+    ctx.clearRect(0, 0, W, H);
+    time += 0.014;
+
+    // ── Energy easing ──
+    const stateMap = { speaking: 0.92, listening: 0.68, thinking: 0.42, idle: 0.10 };
+    targetEnergy = stateMap[orbState] ?? 0.10;
+    energyLevel += (targetEnergy - energyLevel) * 0.05;
+
+    // ── Color interpolation — smooth transitions between states ──
+    const tgt = COLORS[orbState] || COLORS.idle;
+    const lerpSpd = 0.045;
+    curA    = lerpColor(curA,    tgt.a,    lerpSpd);
+    curB    = lerpColor(curB,    tgt.b,    lerpSpd);
+    curC    = lerpColor(curC,    tgt.c,    lerpSpd);
+    curGlow = lerpColor(curGlow, tgt.glow, lerpSpd);
+
+    const e = energyLevel;
+    const glowAlpha = 0.05 + e * 0.22;
+
+    // ── 1. Outer atmospheric glow (multiple layers) ──
+    for (let layer = 4; layer >= 1; layer--) {
+      const glowR = BASE_R * (1.15 + layer * 0.38 * e);
+      const a     = glowAlpha * (0.3 / layer);
+      const grad = ctx.createRadialGradient(cx, cy, BASE_R * 0.5, cx, cy, glowR);
+      grad.addColorStop(0, `rgba(${curGlow},0)`);
+      grad.addColorStop(0.6, `rgba(${curGlow},${a * 0.4})`);
+      grad.addColorStop(1, `rgba(${curGlow},0)`);
+      ctx.beginPath(); ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+      ctx.fillStyle = grad; ctx.fill();
+    }
+
+    // ── 2. Blob fill ──
+    ctx.save();
+    drawBlob(time);
+
+    // Main gradient — radial, off-center highlight
+    const hx = cx - BASE_R * 0.28, hy = cy - BASE_R * 0.32;
+    const fillGrad = ctx.createRadialGradient(hx, hy, BASE_R * 0.02, cx, cy, BASE_R * 1.1);
+    fillGrad.addColorStop(0.0, `rgba(255,255,255,${0.55 + e * 0.2})`);
+    fillGrad.addColorStop(0.2, `rgba(${curA},${0.7 + e * 0.2})`);
+    fillGrad.addColorStop(0.55, `rgba(${curB},${0.75 + e * 0.15})`);
+    fillGrad.addColorStop(0.85, `rgba(${curC},${0.5 + e * 0.3})`);
+    fillGrad.addColorStop(1.0, `rgba(8,10,20,0.92)`);
+    ctx.fillStyle = fillGrad;
+    ctx.fill();
+
+    // ── 3. Inner light caustic (the "cloud" swirl) ──
+    const causticGrad = ctx.createRadialGradient(
+      cx - BASE_R * 0.18 + Math.sin(time * 0.7) * BASE_R * 0.12,
+      cy - BASE_R * 0.22 + Math.cos(time * 0.5) * BASE_R * 0.1,
+      0, cx, cy, BASE_R * 0.75
+    );
+    causticGrad.addColorStop(0,   `rgba(255,255,255,${0.25 + e * 0.18})`);
+    causticGrad.addColorStop(0.4, `rgba(${curA},${0.12 + e * 0.1})`);
+    causticGrad.addColorStop(1,   'rgba(255,255,255,0)');
+    ctx.fillStyle = causticGrad;
+    ctx.fill();
+
+    // ── 4. Second swirling highlight (gives it depth / movement) ──
+    const swirl2 = ctx.createRadialGradient(
+      cx + Math.sin(time * 0.9 + 2.1) * BASE_R * 0.35,
+      cy + Math.cos(time * 0.6 + 1.3) * BASE_R * 0.3,
+      0, cx, cy, BASE_R * 0.9
+    );
+    swirl2.addColorStop(0,   `rgba(${curB},${0.14 + e * 0.1})`);
+    swirl2.addColorStop(0.5, `rgba(${curC},${0.06 + e * 0.06})`);
+    swirl2.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = swirl2;
+    ctx.fill();
+
+    ctx.restore();
+
+    // ── 5. Ripple rings (expand outward on tap) ──
+    ripples = ripples.filter(rp => {
+      const age = time - rp.born;
+      const progress = Math.min(age / 1.8, 1);
+      rp.r = BASE_R + progress * (rp.maxR - BASE_R);
+      rp.alpha = (1 - progress) * 0.5;
+      if (rp.alpha < 0.01) return false;
+      ctx.beginPath(); ctx.arc(cx, cy, rp.r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(${curGlow},${rp.alpha})`;
+      ctx.lineWidth = 1.5 * (1 - progress);
+      ctx.stroke();
+      return true;
+    });
+
+    // ── 6. Pulse rings (speaking / listening) ──
+    if (orbState === 'speaking' || orbState === 'listening') {
+      const numRings = orbState === 'speaking' ? 3 : 2;
+      for (let i = 0; i < numRings; i++) {
+        const progress = ((time * (0.55 + i * 0.25) + i * 0.72) % 1);
+        const ringR = BASE_R * 1.02 + progress * BASE_R * (orbState === 'speaking' ? 0.95 : 0.65) * e;
+        const rAlpha = (1 - progress) * (orbState === 'speaking' ? 0.32 : 0.2) * e;
+        ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(${curGlow},${rAlpha})`;
+        ctx.lineWidth = (1 - progress) * 2.5;
+        ctx.stroke();
+      }
+    }
+
+    // ── 7. Thinking spinner arc ──
+    if (orbState === 'thinking') {
+      const arcR = BASE_R * 1.15;
+      const start = time * 2.5;
+      const arcLen = Math.PI * (0.5 + 0.4 * Math.sin(time * 1.8));
+      ctx.beginPath();
+      ctx.arc(cx, cy, arcR, start, start + arcLen);
+      ctx.strokeStyle = `rgba(${curGlow},${0.5 * e})`;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      // second arc offset
+      ctx.beginPath();
+      ctx.arc(cx, cy, arcR, start + Math.PI, start + Math.PI + arcLen * 0.6);
+      ctx.strokeStyle = `rgba(${curC},${0.3 * e})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // ── 8. Muted indicator ──
+    if (micMuted) {
+      ctx.save();
+      ctx.font = `${BASE_R * 0.38}px sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.globalAlpha = 0.65;
+      ctx.fillText('🔇', cx, cy + BASE_R * 1.35);
+      ctx.restore();
+    }
+
+    orbAnim = requestAnimationFrame(drawFrame);
+  }
+  if (orbAnim) cancelAnimationFrame(orbAnim);
+  orbAnim = requestAnimationFrame(drawFrame);
+}
+
+function setOrbState(state) {
+  orbState = state;
+  const stage = document.getElementById('orb-stage');
+  const label = document.getElementById('orb-state-label');
+  const wrap   = document.getElementById('aura-transcript-wrap');
+  const dot    = document.getElementById('transcript-dot');
+  const waveBars = document.getElementById('sound-wave-bars');
+  if (!stage) return;
+
+  stage.classList.remove('aura-active','user-active','thinking','idle','muted');
+  wrap?.classList.remove('glowing');
+  if (dot) dot.style.opacity = '0';
+  if (waveBars) waveBars.classList.remove('visible');
+
+  switch(state) {
+    case 'speaking':
+      stage.classList.add('aura-active');
+      wrap?.classList.add('glowing');
+      if (dot) dot.style.opacity = '1';
+      if (label) label.textContent = 'AURA is speaking';
+      if (waveBars) waveBars.classList.add('visible');
+      break;
+    case 'listening':
+      stage.classList.add('user-active');
+      if (label) label.textContent = micMuted ? 'mic muted — tap to unmute' : 'listening to you';
+      if (waveBars && !micMuted) waveBars.classList.add('visible');
+      break;
+    case 'thinking':
+      stage.classList.add('thinking');
+      if (label) label.textContent = 'AURA is thinking...';
+      if (waveBars) waveBars.classList.add('visible');
+      break;
+    default:
+      stage.classList.add('idle');
+      if (label) label.textContent = micMuted ? 'mic muted — tap orb to unmute' : 'tap orb to mute mic';
+  }
+  if (micMuted) stage.classList.add('muted');
+}
+
+// ── FIREBASE AUTH ──────────────────────────────────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { showAccessDenied(); return; }
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    currentUser = user;
+    if (snap.exists()) userProfile = snap.data();
+    isPaidStudent = snap.exists() && !!snap.data().isPaidStudent;
+    if (!isPaidStudent && snap.exists()) trialCount = snap.data().aiTrialCount || 0;
+    showApp();
+  } catch(e) { showAccessDenied(); }
+});
+
+function showAccessDenied() {
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('access-denied').style.display = 'flex';
+}
+function showTrialLimitPopup() { document.getElementById('trial-limit-modal').classList.add('visible'); }
+function updateTrialBadge() {
+  if (isPaidStudent || !currentUser) return;
+  const rem = Math.max(0, MAX_TRIAL - trialCount);
+  document.getElementById('trial-counter-wrap').style.display = 'block';
+  document.getElementById('trial-counter-text').textContent = rem > 0
+    ? `✦ ${rem} free Aura conversation${rem !== 1 ? 's' : ''} remaining`
+    : '⏱️ Free trial used — buy the course for unlimited access';
+}
+function showApp() {
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  if (userProfile?.level) setLevel(userProfile.level.toUpperCase() === 'A2' ? 'A2' : 'A1');
+  document.getElementById('user-name').textContent = userProfile?.displayName || currentUser.email.split('@')[0];
+  updateTrialBadge();
+  onScenarioChange();
+}
+
+// ── SETUP CONTROLS ─────────────────────────────────────────────────────────
+window.setLevel = (l) => {
+  selectedLevel = l;
+  document.querySelectorAll('.level-tab').forEach(t => t.classList.toggle('active', t.textContent.startsWith(l)));
+  document.getElementById('level-badge').textContent = l;
+};
+window.setInputMode = (m) => {
+  selectedInputMode = m;
+  document.querySelectorAll('.mode-tab').forEach(t =>
+    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${m}'`)));
+};
+// FIX #2: Language preference — locked for full session
+window.setLangPref = (lang) => {
+  selectedLangPref = lang;
+  document.querySelectorAll('.lang-pref-tab').forEach(t =>
+    t.classList.toggle('active', t.getAttribute('onclick').includes(`'${lang}'`)));
+};
+window.onScenarioChange = () => {
+  const sel = document.getElementById('scenario-select');
+  const cur = sel.options[sel.selectedIndex];
+  document.getElementById('scenario-desc').textContent = cur.dataset.desc || '';
+  document.getElementById('scenario-emoji').textContent = cur.dataset.emoji || '🎭';
+};
+
+// ── SYSTEM PROMPT ──────────────────────────────────────────────────────────
+function buildSystemPrompt() {
+  if (!selectedScenario) return '';
+  const { level, role, title, desc } = selectedScenario;
+  const examName = level === 'A1' ? 'Goethe A1' : 'Goethe/TELC A2';
+  const repeatedCtx = Object.entries(errorPatterns).filter(([_,c]) => c > 1).map(([t,c]) => t + ' error appeared ' + c + ' times').join('; ');
+  const repeatedNote = repeatedCtx ? `REPEATED THIS SESSION: ${repeatedCtx}. When this error occurs again, give the correction once more then say it is noted and move on.` : '';
+
+  // FIX #2: Language is locked for entire session based on selectedLangPref
+  const langMap = {
+    Gujarati: `EXPLANATION LANGUAGE — GUJARATI (LOCKED FOR THIS ENTIRE SESSION):
+ALL grammar explanations, ALL feedback, ALL encouragement MUST be in Gujarati language.
+DO NOT switch to Hindi, English, or any other explanation language mid-session, even if the student asks.
+If the student asks to switch: warmly decline: "Maafi karo, pan aa session Gujarati ma set chhe. Navin session sharu karo to bhasha badli shakay!"`,
+    Hindi: `EXPLANATION LANGUAGE — HINDI (LOCKED FOR THIS ENTIRE SESSION):
+ALL grammar explanations, ALL feedback, ALL encouragement MUST be in Hindi.
+DO NOT switch to Gujarati or any other language for explanations, even if the student asks.
+If the student asks to switch: warmly decline in Hindi: "Maafi karo, is session mein sirf Hindi mein explain karunga!"`,
+    English: `EXPLANATION LANGUAGE — ENGLISH (LOCKED FOR THIS ENTIRE SESSION):
+ALL grammar explanations, ALL feedback, ALL encouragement MUST be in English.
+DO NOT switch to Gujarati or Hindi for explanations.
+If asked to switch: "I'm set to English for this session. Start a new session to change language!"`,
+  };
+  const langBlock = langMap[selectedLangPref] || `ALL explanations MUST be in ${selectedLangPref}. This is permanent for this session and cannot be changed mid-session.`;
+
+  return `You are AURA — Advanced Understanding and Response Assistant — built by German Made Easy.
+
+YOUR SELF-INTRODUCTION (use whenever asked who you are):
+"Namaste! Kem cho! I am AURA, your personal German tutor from German Made Easy. I speak Gujarati, Hindi, English, and German fluently. I am designed to help you prepare for your ${examName} exam. Chalo, let us begin!"
+
+YOUR SCOPE — ABSOLUTE RULE:
+You exist ONLY to teach German. Refuse any off-topic conversation politely but firmly.
+If a student discusses anything unrelated to German learning (politics, cricket, recipes, movies, personal advice), say:
+"Ha ha, samjayo — pan mane maafi aapjo! I am only here to help with German. Chalo, practice par pachha jaiye!"
+Redirect EVERY time without exception.
+
+════ ${langBlock}
+
+════ GERMAN PRONUNCIATION — ABSOLUTE RULES (NEVER CHANGE REGARDLESS OF EXPLANATION LANGUAGE) ════
+Every German word you speak MUST use PERFECT C2 native German phonetics — even inside ${selectedLangPref} sentences.
+• "w" → ALWAYS like English "v": Wasser="Vasser", wie="vee", wir="veer"
+• "v" → ALWAYS like English "f": verstehen="ferstehen", von="fon"
+• "z" → ALWAYS like "ts": Zeit="Tsait", zu="tsoo", Zahl="Tsahl"
+• "sp" at word start → "shp": Sprache="Shprache", spielen="shpeelen"
+• "st" at word start → "sht": Straße="Shtrasse", Stadt="Shtatt"
+• "ö" → lips rounded (as if saying o), tongue positioned as if saying e. Like French "eu"
+• "ü" → lips rounded (as if o), tongue as if saying i
+• "ei" → like "eye": ein="ayn", Bein="bayn", mein="mayn"
+• "ie" → like "ee": wie="vee", Sie="zee", nie="nee"
+• "eu"/"äu" → like "oy": Euro="Oyro", Bäume="Boyme"
+• "ch" after e/i → soft "kh" (not "sh"!): ich="ikh", mich="mikh"
+• "ch" after a/o/u → guttural: Buch="Bookh", auch="aookh"
+• "sch" → like English "sh": Schule="Shoole"
+• Supermarkt → ALWAYS "Zupermarkt" (z=ts, never English S)
+• Euro → ALWAYS "Oyro" (eu=oy in German)
+• Brötchen → "Broet-khen" (ö rounded, ch soft)
+• Brot → clean "Broht" with German rolled r
+• CRITICAL: Even in a ${selectedLangPref} sentence, German words keep 100% German phonetics. ALWAYS.
+
+════ TEACHING RULES ════
+RULE 1 — CONCISENESS: Max 2-3 sentences per response. This is LIVE VOICE, not text. One teaching point at a time.
+RULE 2 — SPEAKING FIRST: After EVERY explanation, ask the student to immediately try speaking in German.
+RULE 3 — CORRECTION LIMIT (CRITICAL):
+  - For the SAME word or error: correct a MAXIMUM of 2 times total in the session.
+  - After the 2nd correction of the same thing: say "Du machst Fortschritte! Chalo, aage varh." and MOVE ON permanently.
+  - NEVER drill the same sound or word more than 2 times. Move to the next scenario step.
+RULE 4 — RESPONSE LENGTH: Keep responses under 50 words spoken. Short, punchy, natural.
+RULE 5 — GRAMMAR CORRECTIONS: Max 2 errors corrected per student turn. Prioritise: verb position → articles → vocabulary.
+RULE 6 — ENCOURAGEMENT: "Tension nahi leva!" when struggling. "Perfect! Bahuj saras!" after success.
+
+RULE 7 — GERMAN-ONLY RESPONSES DURING SCENARIO (CRITICAL — NEW RULE):
+During MODE 1 (scenario roleplay), the student MUST respond in German.
+If the student responds to your scenario question in ANY language other than German (Gujarati, Hindi, English, etc.), do NOT accept it and do NOT advance the scenario.
+Instead, gently prompt them to say it in German. For example:
+- If they say "nahi chahiye" → respond: "Ha ha, samajh gayo! Pan scenario ma German bolvu padse. Bolo: 'Nein danke, das ist alles.' — Hve tame try karo!"
+- If they say "no" or "nothing else" → respond: "Saras! Pan German ma bolo: 'Nein danke, das ist alles!' — Try karo!"
+- If they say something in Hindi → respond: "Hindi samjayo, pan aapde German practice karvani chhe! Bolo: '[German equivalent]'"
+Keep the tone warm and encouraging, NOT scolding.
+EXCEPTION: If a student asks a grammar/pronunciation QUESTION (not a scenario answer), that is MODE 2 and they can ask in any language.
+The test is: is the student answering your scenario roleplay question? → MUST be in German. Are they asking a meta question about German? → any language is fine.
+
+RULE 8 — DETECTING NON-GERMAN SCENARIO ANSWERS:
+Signs the student did NOT answer in German:
+- Response contains no German words at all
+- Response is in Gujarati script or Gujarati words (chhe, nathi, haan, nai, etc.)
+- Response is in Hindi (hai, nahi, haan, theek, etc.)
+- Response is in English without any German mixed in
+When this happens: do NOT move the scenario forward. Prompt for German immediately.
+
+════ CURRENT SESSION ════
+Role: ${role} | Scenario: ${title} — ${desc} | Level: ${level} (${examName})
+
+CRITICAL: LIVE VOICE. Speak naturally. NEVER output JSON, bullet lists, or code.
+OPENING: One German sentence as ${role}, then one ${selectedLangPref} welcome, then begin scenario immediately.
+
+TWO MODES:
+MODE 1 — SCENARIO: In character as ${role}. Correct max 2 errors in ${selectedLangPref}, then continue scenario.
+MODE 2 — TUTOR: Question asked? (1) Acknowledge in ${selectedLangPref}, (2) Explain simply, (3) German example with perfect phonetics, (4) Phonetic hint, (5) "Hve try karo!" Then resume scenario.
+
+${repeatedNote}`;
+}
+
+// ── SESSION START ──────────────────────────────────────────────────────────
+window.startSession = async () => {
+  document.getElementById('privacy-modal').classList.add('visible');
+};
+window.confirmPrivacyAndStart = async () => {
+  document.getElementById('privacy-modal').classList.remove('visible');
+  await _doStartSession();
+};
+
+async function _doStartSession() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+    if (!micCtx) micCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (micCtx.state === 'suspended') await micCtx.resume();
+  } catch(e) {}
+
+  if (!isPaidStudent) {
+    if (trialCount >= MAX_TRIAL) { showTrialLimitPopup(); return; }
+    trialCount++;
+    updateDoc(doc(db, 'users', currentUser.uid), { aiTrialCount: trialCount }).catch(() => {});
+    updateTrialBadge();
+  }
+
+  const sel = document.getElementById('scenario-select');
+  const opt = sel.options[sel.selectedIndex];
+  selectedScenario = { id: sel.value, title: opt.text.replace(/^[^\s]+ /,''), level: opt.dataset.level, role: opt.dataset.role, emoji: opt.dataset.emoji, desc: opt.dataset.desc };
+
+  conversationHistory = []; wordsUsed = new Set(); errorPatterns = {};
+  sessionSeconds = 20 * 60; addTimeUsed = false; turnCount = 0;
+
+  document.getElementById('setup-panel').style.display = 'none';
+  document.getElementById('session-panel').style.display = 'block';
+  document.getElementById('session-title').textContent = selectedScenario.title;
+  document.getElementById('session-subtitle').textContent = `${selectedScenario.level} · ${selectedScenario.role} · Live Voice`;
+  const _lb = document.getElementById('session-lang-badge'); if (_lb) _lb.textContent = '🗣 ' + selectedLangPref;
+  document.getElementById('role-avatar').textContent = selectedScenario.emoji;
+  document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
+  document.getElementById('role-description').textContent = selectedScenario.desc;
+  document.getElementById('add-time-btn').disabled = false;
+  document.getElementById('transcript-scroll').innerHTML = '';
+  updateTimer();
+  updateTurnCount();
+
+  // Init the orb — wait one tick so CSS layout has settled
+  setTimeout(() => { initOrb(); }, 20);
+  setOrbState('idle');
+
+  const textInput = document.getElementById('text-input');
+  const inputArea = document.getElementById('input-area');
+  if (selectedInputMode === 'voice') {
+    if (inputArea) inputArea.style.display = 'none';
+  } else {
+    if (inputArea) inputArea.style.display = 'flex';
+  }
+
+  sessionTimerInterval = setInterval(() => { sessionSeconds--; updateTimer(); if (sessionSeconds <= 0) endSession(); }, 1000);
+
+  setOrbState('thinking');
+  try {
+    if (!micStream) micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    await ensurePlaybackWorklet();
+
+    const resp = await fetch(`${WORKER_URL}/token`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+    if (!resp.ok) throw new Error('Token request failed: ' + resp.status);
+    const { token } = await resp.json();
+
+    ws = new WebSocket(`${GEMINI_WS}?key=${encodeURIComponent(token)}`);
+    ws.binaryType = 'arraybuffer';
+
+    ws.onopen = async () => {
+      ws.send(JSON.stringify({
+        setup: {
+          model: MODEL,
+          generationConfig: {
+            responseModalities: ['AUDIO'],
+            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } }
+          },
+          inputAudioTranscription: {},
+          outputAudioTranscription: {},
+          systemInstruction: { parts: [{ text: buildSystemPrompt() }] }
+        }
+      }));
+      workletNode = await createWorklet(micCtx, micStream);
+      sessionActive = true;
+
+      // FIX #4: Keepalive — send a tiny ping every 8 seconds to prevent silence timeout
+      if (window._keepAliveInterval) clearInterval(window._keepAliveInterval);
+      window._keepAliveInterval = setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN && sessionActive) {
+          // Send an empty activity signal to keep connection alive
+          try {
+            ws.send(JSON.stringify({ realtimeInput: { mediaChunks: [] } }));
+          } catch(e) {}
+        } else {
+          clearInterval(window._keepAliveInterval);
+        }
+      }, 8000);
+    };
+    ws.onmessage = (event) => {
+      try {
+        const txt = event.data instanceof ArrayBuffer ? new TextDecoder().decode(event.data) : event.data;
+        handleServerMessage(JSON.parse(txt));
+      } catch(e) {}
+    };
+    ws.onerror = () => toast('Connection error. Please retry.');
+    ws.onclose = (e) => { if (sessionActive) { toast(`Connection closed (${e.code}). Session ended.`); cleanupLive(); } };
+  } catch(err) {
+    setOrbState('idle');
+    toast(err.message || 'Failed to start. Please retry.');
+    goBackToSetup();
+  }
+}
+
+// ── WORKLET SETUP ──────────────────────────────────────────────────────────
+async function createWorklet(ctx, stream) {
+  const code = document.getElementById('workletCode').textContent;
+  const blob = new Blob([code], { type: 'application/javascript' });
+  const url  = URL.createObjectURL(blob);
+  await ctx.audioWorklet.addModule(url);
+  URL.revokeObjectURL(url);
+  const source = ctx.createMediaStreamSource(stream);
+  const node   = new AudioWorkletNode(ctx, 'mic-processor');
+  source.connect(node);
+  node.connect(ctx.destination);
+  node.port.onmessage = (e) => {
+    if (!sessionActive || micMuted || !ws || ws.readyState !== WebSocket.OPEN) return;
+    const b64 = btoa(String.fromCharCode(...new Uint8Array(e.data)));
+    ws.send(JSON.stringify({ realtimeInput: { mediaChunks: [{ mimeType: 'audio/pcm;rate=16000', data: b64 }] } }));
+    // FIX: reset silence timer on every audio chunk sent (user is active)
+    resetSilenceTimer();
+  };
+  return node;
+}
+
+async function ensurePlaybackWorklet() {
+  if (playbackNode) return;
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+  const code = document.getElementById('workletCode').textContent;
+  const blob = new Blob([code], { type: 'application/javascript' });
+  const url  = URL.createObjectURL(blob);
+  try { await audioCtx.audioWorklet.addModule(url); } catch(e) {}
+  URL.revokeObjectURL(url);
+  playbackNode = new AudioWorkletNode(audioCtx, 'playback-processor');
+  playbackNode.connect(audioCtx.destination);
+}
+
+// ── AUDIO PLAYBACK ─────────────────────────────────────────────────────────
+function enqueueAudio(pcmB64) {
+  const raw   = Uint8Array.from(atob(pcmB64), c => c.charCodeAt(0));
+  const int16 = new Int16Array(raw.buffer);
+  if (playbackNode) playbackNode.port.postMessage(int16.buffer, [int16.buffer]);
+}
+
+// ── HANDLE GEMINI MESSAGES ─────────────────────────────────────────────────
+function handleServerMessage(msg) {
+  if (msg.setupComplete !== undefined) {
+    setOrbState('thinking');
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({
+        clientContent: {
+          turns: [{ role: 'user', parts: [{ text: `You are now live. Scenario: ${selectedScenario.title}. You are playing: ${selectedScenario.role}. Level: ${selectedScenario.level}. Begin — greet the student warmly.` }] }],
+          turnComplete: true
+        }
+      }));
+    }
+  }
+
+  if (msg.serverContent) {
+    const sc = msg.serverContent;
+
+    // Audio chunks → play
+    if (sc.modelTurn?.parts) {
+      sc.modelTurn.parts.forEach(part => {
+        if (part.inlineData?.mimeType?.startsWith('audio/')) {
+          setOrbState('speaking');
+          clearSilenceTimer();
+          enqueueAudio(part.inlineData.data);
+        }
+      });
+    }
+
+    // Output transcription — stream AURA's words, creating appropriate entry type
+    if (sc.outputTranscription?.text) {
+      const chunk = sc.outputTranscription.text;
+      currentAiText += chunk;
+
+      if (!currentAiEntryEl) {
+        // Decide entry type early based on what we have so far
+        // Start as dialogue — will upgrade to board at finalise if needed
+        currentAiEntryEl = createTranscriptEntry();
+      }
+      updateTranscriptEntry(currentAiEntryEl, currentAiText);
+    }
+
+    if (sc.turnComplete) {
+      if (currentAiText.trim()) {
+        // Pass the full raw text so finalise can strip phonetics + classify
+        finaliseTranscriptEntry(currentAiEntryEl, currentAiText.trim());
+        currentAiEntryEl = null;
+        conversationHistory.push({ role: 'assistant', content: currentAiText.trim() });
+        currentAiText = '';
+        turnCount++;
+        updateTurnCount();
+      }
+      setOrbState(micMuted ? 'idle' : 'listening');
+      if (!micMuted) startSilenceTimer();
+    }
+
+    if (sc.interrupted) {
+      setOrbState(micMuted ? 'idle' : 'listening');
+    }
+  }
+  if (msg.error) toast('API Error: ' + (msg.error.message || JSON.stringify(msg.error)));
+}
+
+// ── TRANSCRIPT HELPERS ─────────────────────────────────────────────────────
+
+// Strip phonetic hints from display text — things like "(tsvelf Oyro)", "(Vasser)", etc.
+// These are pronunciation guides AURA speaks aloud but students shouldn't read
+function stripPhoneticHints(text) {
+  // Remove parenthesised phonetic annotations — e.g. "(tsvelf Oyro)", "(Vee gehts)"
+  // Pattern: ( followed by content that looks like phonetics — not pure German/Gujarati/Hindi sentence)
+  return text
+    // Remove phonetic hints in parentheses: (word) where content is short & latin-script
+    .replace(/\s*\([A-Za-zäöüÄÖÜß\s\-']{1,40}\)/g, (match) => {
+      // Keep parentheses that look like grammar labels e.g. "(Akkusativ)" or translations
+      const inner = match.replace(/[()]/g,'').trim();
+      // If it's a single short word/phrase that looks phonetic (all latin, no spaces or short), strip it
+      if (/^[A-Za-z\s\-'äöüÄÖÜß]{2,30}$/.test(inner) && inner.split(' ').length <= 4) return '';
+      return match;
+    })
+    .replace(/\s+/g, ' ').trim();
+}
+
+// Classify what type of content an AURA turn contains
+// Returns: 'dialogue' | 'correction' | 'explanation' | 'mixed'
+function classifyTurn(text) {
+  const hasCorrectionSignal = /(?:nicht .+? sondern|richtig (?:ist|wäre)|korrekt|solltest .+? statt|Fehler|falsch|korrigier)/i.test(text);
+  const hasExplanationSignal = /(?:artikel|akkusativ|dativ|verb|grammatik|regel|aussprache|pronunciat|bedeutet|heißt|auf deutsch|wort für|bolo:|try karo|karo!|pan german|bolvu|german ma)/i.test(text);
+  
+  if (hasCorrectionSignal) return 'correction';
+  if (hasExplanationSignal) return 'explanation';
+  return 'dialogue';
+}
+
+// Create a standard dialogue transcript entry (German exchange)
+function createTranscriptEntry() {
+  const scroll = document.getElementById('transcript-scroll');
+  if (!scroll) return null;
+  const div = document.createElement('div');
+  div.className = 't-entry';
+  const emoji = selectedScenario?.emoji || '🤖';
+  div.innerHTML = `
+    <div class="t-avatar">${emoji}</div>
+    <div class="t-body">
+      <div class="t-name">AURA</div>
+      <div class="t-text streaming"></div>
+    </div>`;
+  scroll.appendChild(div);
+  scroll.scrollTop = scroll.scrollHeight;
+  return div;
+}
+
+// Create a teacher-board entry (correction or explanation) — inline in transcript
+function createBoardEntry(type) {
+  const scroll = document.getElementById('transcript-scroll');
+  if (!scroll) return null;
+  const div = document.createElement('div');
+  div.className = 't-board';
+  const isCorrection = type === 'correction';
+  const icon = isCorrection ? '✏️' : '💡';
+  const label = isCorrection ? 'Correction' : 'Teacher Note';
+  div.innerHTML = `
+    <div class="t-board-header">
+      <span class="t-board-icon">${icon}</span>
+      <span class="t-board-label">${label}</span>
+    </div>
+    <div class="t-board-body">
+      <div class="t-board-note streaming"></div>
+    </div>`;
+  scroll.appendChild(div);
+  scroll.scrollTop = scroll.scrollHeight;
+  return div;
+}
+
+function updateTranscriptEntry(el, rawText) {
+  if (!el) return;
+  const cleanText = stripPhoneticHints(rawText);
+  // Is this a board entry or dialogue entry?
+  const boardNote = el.querySelector('.t-board-note');
+  const diagText  = el.querySelector('.t-text');
+  if (boardNote) {
+    boardNote.textContent = cleanText;
+    boardNote.classList.add('streaming');
+  } else if (diagText) {
+    diagText.textContent = cleanText;
+    diagText.classList.add('streaming');
+  }
+  const scroll = document.getElementById('transcript-scroll');
+  if (scroll) scroll.scrollTop = scroll.scrollHeight;
+}
+
+function finaliseTranscriptEntry(el, fullRawText) {
+  if (!el) return;
+  const cleanText = stripPhoneticHints(fullRawText || '');
+  
+  // Check if this dialogue entry should actually be a board entry
+  // (happens when we created a dialogue entry but the content turned out to be an explanation)
+  const diagText = el.querySelector('.t-text');
+  const boardNote = el.querySelector('.t-board-note');
+  
+  if (diagText) {
+    diagText.classList.remove('streaming');
+    // If the finalised content is actually an explanation/correction, upgrade the entry to a board
+    const type = classifyTurn(cleanText);
+    if (type === 'correction' || type === 'explanation') {
+      // Rebuild as a board entry in place
+      const icon = type === 'correction' ? '✏️' : '💡';
+      const label = type === 'correction' ? 'Correction' : 'Teacher Note';
+      el.className = 't-board';
+      el.innerHTML = `
+        <div class="t-board-header">
+          <span class="t-board-icon">${icon}</span>
+          <span class="t-board-label">${label}</span>
+        </div>
+        <div class="t-board-body">
+          ${buildBoardContent(cleanText, type)}
+        </div>`;
+    } else {
+      diagText.textContent = cleanText;
+    }
+  } else if (boardNote) {
+    boardNote.classList.remove('streaming');
+    boardNote.innerHTML = buildBoardContent(cleanText, 'explanation');
+  }
+}
+
+// Build richer HTML inside board for corrections — extract wrong→right if detectable
+function buildBoardContent(text, type) {
+  if (type !== 'correction') {
+    return `<div class="t-board-note">${escHtml(text)}</div>`;
+  }
+  // Try to extract wrong → right pair
+  let wrong = '', right = '';
+  const m1 = text.match(/nicht\s+["»]?([^,»"]+)["«]?,?\s+sondern\s+["»]?([^.!»"\n]{2,40})["«]?/i);
+  if (m1) { wrong = m1[1].trim(); right = m1[2].trim(); }
+  if (!wrong) {
+    const m2 = text.match(/["»]([^"»]{2,35})["«]\s+statt\s+["»]([^"»]{2,35})["«]/i);
+    if (m2) { right = m2[1].trim(); wrong = m2[2].trim(); }
+  }
+  if (!wrong && !right) {
+    const m3 = text.match(/richtig(?:\s+ist|\s+wäre)?\s*[:\-]?\s*["»]?([A-Za-zäöüÄÖÜß\s,!?]{3,50})["«]?/i);
+    if (m3) right = m3[1].trim();
+  }
+
+  let html = '';
+  if (wrong || right) {
+    html += `<div class="t-correction-row">`;
+    if (wrong) html += `<span class="t-wrong">${escHtml(wrong)}</span><span class="t-arrow">→</span>`;
+    if (right) html += `<span class="t-right">${escHtml(right)}</span>`;
+    html += `</div>`;
+  }
+  html += `<div class="t-board-note">${escHtml(text)}</div>`;
+  return html;
+}
+
+function updateTurnCount() {
+  const el = document.getElementById('transcript-turns');
+  if (el) el.textContent = turnCount + ' turn' + (turnCount !== 1 ? 's' : '');
+}
+
+// ── CORRECTION CARD — now replaced by inline board, these are no-ops ────────
+const CORRECTION_TRIGGERS = [];
+function detectAndShowCorrection(text) { /* replaced by inline board system */ }
+window.dismissCorrection = () => { /* no-op — no floating card anymore */ };
+
+// ── MIC TOGGLE ─────────────────────────────────────────────────────────────
+// ── SILENCE DETECTION ─────────────────────────────────────────────────────
+let silenceCountdownInterval = null;
+
+function startSilenceTimer() {
+  clearSilenceTimer();
+  if (!sessionActive || sessionPaused) return;
+
+  let remaining = Math.floor(SILENCE_TIMEOUT_MS / 1000);
+  const countdownEl = document.getElementById('silence-countdown');
+  const countdownTxt = document.getElementById('silence-countdown-text');
+
+  // Show countdown in last 10 seconds
+  silenceCountdownInterval = setInterval(() => {
+    remaining--;
+    if (remaining <= 10 && remaining > 0) {
+      if (countdownEl) { countdownEl.style.display = 'block'; }
+      if (countdownTxt) countdownTxt.textContent = remaining + 's';
+    }
+    if (remaining <= 0) {
+      clearInterval(silenceCountdownInterval);
+      if (countdownEl) countdownEl.style.display = 'none';
+    }
+  }, 1000);
+
+  silenceTimer = setTimeout(() => {
+    clearInterval(silenceCountdownInterval);
+    if (countdownEl) countdownEl.style.display = 'none';
+    pauseForSilence();
+  }, SILENCE_TIMEOUT_MS);
+}
+
+function resetSilenceTimer() {
+  if (!sessionActive || sessionPaused) return;
+  lastUserSpeechTime = Date.now();
+  clearSilenceTimer();
+  // Only restart if session is in listening state (not while AURA is speaking)
+  if (orbState === 'listening' || orbState === 'idle') {
+    startSilenceTimer();
+  }
+}
+
+function clearSilenceTimer() {
+  if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+  if (silenceCountdownInterval) { clearInterval(silenceCountdownInterval); silenceCountdownInterval = null; }
+  const countdownEl = document.getElementById('silence-countdown');
+  if (countdownEl) countdownEl.style.display = 'none';
+}
+
+function pauseForSilence() {
+  if (!sessionActive || sessionPaused) return;
+  sessionPaused = true;
+  clearSilenceTimer();
+  // Pause the session timer too
+  clearInterval(sessionTimerInterval);
+  // Show the pause modal
+  document.getElementById('silence-modal').classList.add('visible');
+  setOrbState('idle');
+  const label = document.getElementById('orb-state-label');
+  if (label) label.textContent = 'session paused';
+}
+
+window.resumeSession = () => {
+  document.getElementById('silence-modal').classList.remove('visible');
+  sessionPaused = false;
+  // Restart the session countdown timer
+  sessionTimerInterval = setInterval(() => {
+    sessionSeconds--;
+    updateTimer();
+    if (sessionSeconds <= 0) endSession();
+  }, 1000);
+  // Tell AURA we're back
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    setOrbState('thinking');
+    ws.send(JSON.stringify({
+      clientContent: {
+        turns: [{ role: 'user', parts: [{ text: 'I am back. Please continue where we left off.' }] }],
+        turnComplete: true
+      }
+    }));
+  } else {
+    setOrbState('listening');
+    startSilenceTimer();
+  }
+  toast('Session resumed! 🎙');
+};
+
+window.toggleMic = () => {
+  micMuted = !micMuted;
+  // Orb state reflects mute
+  if (micMuted) {
+    setOrbState('idle');
+    clearSilenceTimer(); // muted = user is intentionally silent, don't count
+  } else {
+    setOrbState(orbState === 'speaking' ? 'speaking' : 'listening');
+    startSilenceTimer(); // unmuted = start watching for silence again
+  }
+  const stage = document.getElementById('orb-stage');
+  if (stage) stage.classList.toggle('muted', micMuted);
+};
+
+
+function updateTurnCountLegacy() { /* replaced by updateTurnCount */ }
+
+// ── SEND TEXT ──────────────────────────────────────────────────────────────
+window.sendTextMessage = () => {
+  const inp  = document.getElementById('text-input');
+  const text = inp.value.trim();
+  if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+  inp.value = '';
+  text.toLowerCase().split(/\s+/).forEach(w => { const c = w.replace(/[^a-zäöüß]/gi,''); if (c.length > 2) wordsUsed.add(c); });
+  conversationHistory.push({ role: 'user', content: text });
+  setOrbState('thinking');
+  resetSilenceTimer(); // user is active
+  ws.send(JSON.stringify({ clientContent: { turns: [{ role:'user', parts:[{ text }] }], turnComplete: true } }));
+};
+
+// ── TIMER & CONTROLS ───────────────────────────────────────────────────────
+function updateTimer() {
+  const m = Math.floor(sessionSeconds / 60).toString().padStart(2,'0');
+  const s = (sessionSeconds % 60).toString().padStart(2,'0');
+  const el = document.getElementById('session-timer');
+  el.textContent = `${m}:${s}`;
+  el.classList.toggle('warning', sessionSeconds < 120);
+}
+// updateMsgCount is replaced by updateTurnCount in the orb system
+
+window.addTime = () => {
+  if (addTimeUsed) { toast('You can only add time once.'); return; }
+  sessionSeconds += 10 * 60; addTimeUsed = true;
+  document.getElementById('add-time-btn').disabled = true;
+  toast('⏱️ +10 minutes added!');
+};
+
+window.changeScenario = async () => {
+  const all = [...document.getElementById('scenario-select').options];
+  const same = all.filter(o => o.dataset.level === selectedScenario.level && o.value !== selectedScenario.id);
+  if (!same.length) { toast('No more scenarios for this level!'); return; }
+  const pick = same[Math.floor(Math.random() * same.length)];
+  selectedScenario = { id: pick.value, title: pick.text.replace(/^[^\s]+ /,''), level: pick.dataset.level, role: pick.dataset.role, emoji: pick.dataset.emoji, desc: pick.dataset.desc };
+  conversationHistory = []; errorPatterns = {}; turnCount = 0;
+  document.getElementById('session-title').textContent = selectedScenario.title;
+  document.getElementById('session-subtitle').textContent = `${selectedScenario.level} · ${selectedScenario.role} · Live Voice`;
+  document.getElementById('role-avatar').textContent = selectedScenario.emoji;
+  document.getElementById('role-name').textContent = `The ${selectedScenario.role}`;
+  document.getElementById('role-description').textContent = selectedScenario.desc;
+  document.getElementById('transcript-scroll').innerHTML = '';
+  updateTurnCount();
+  toast(`🔄 New scenario: ${selectedScenario.title}`);
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    setOrbState('thinking');
+    ws.send(JSON.stringify({ clientContent: { turns: [{ role:'user', parts:[{ text: `New scenario! You are now: ${selectedScenario.role}. Scenario: ${selectedScenario.title} — ${selectedScenario.desc}. Level: ${selectedScenario.level}. Greet and restart.` }] }], turnComplete: true } }));
+  }
+};
+
+window.goBackToSetup = () => {
+  clearInterval(sessionTimerInterval);
+  cleanupLive();
+  document.getElementById('session-panel').style.display = 'none';
+  document.getElementById('score-panel').style.display = 'none';
+  document.getElementById('setup-panel').style.display = 'block';
+  updateTrialBadge();
+};
+
+function cleanupLive() {
+  sessionActive = false;
+  sessionPaused = false;
+  clearSilenceTimer();
+  if (silenceCountdownInterval) { clearInterval(silenceCountdownInterval); silenceCountdownInterval = null; }
+  if (window._keepAliveInterval) { clearInterval(window._keepAliveInterval); window._keepAliveInterval = null; }
+  if (ws)          { try { ws.close(); } catch(e) {}          ws = null; }
+  if (workletNode) { try { workletNode.disconnect(); } catch(e) {} workletNode = null; }
+  if (micStream)   { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (playbackNode){ try { playbackNode.disconnect(); } catch(e) {} playbackNode = null; }
+  if (audioCtx)    { try { audioCtx.close(); } catch(e) {}    audioCtx = null; }
+  if (micCtx)      { try { micCtx.close(); } catch(e) {}      micCtx = null; }
+  currentAiText = ''; currentAiEntryEl = null; micMuted = false;
+  if (orbAnim) { cancelAnimationFrame(orbAnim); orbAnim = null; }
+  setOrbState('idle');
+  dismissCorrection();
+}
+
+// ── END SESSION + EVALUATION ───────────────────────────────────────────────
+window.endSession = async () => {
+  clearInterval(sessionTimerInterval);
+  cleanupLive();
+  document.getElementById('silence-modal').classList.remove('visible');
+  document.getElementById('session-panel').style.display = 'none';
+
+  if (conversationHistory.length < 2) {
+    document.getElementById('score-panel').style.display = 'block';
+    document.getElementById('score-num').textContent = '—';
+    document.getElementById('overall-feedback-text').textContent = 'Session was too short to evaluate. Please have at least a few exchanges with AURA.';
+    return;
+  }
+
+  document.getElementById('score-panel').style.display = 'block';
+  document.getElementById('score-num').textContent = '…';
+  document.getElementById('overall-feedback-text').textContent = 'Evaluating your session...';
+
+  const evalPrompt = buildEvaluationPrompt();
+  try {
+    const tokenResp = await fetch(`${WORKER_URL}/token`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({}) });
+    const { token } = await tokenResp.json();
+    const evalResp  = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${token}`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ contents: [{ role:'user', parts:[{ text: evalPrompt.messages[0].content }] }], systemInstruction: { parts: [{ text: evalPrompt.system }] } })
+    });
+    const evalData = await evalResp.json();
+    const raw   = evalData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    renderScore(JSON.parse(clean));
+  } catch(err) {
+    document.getElementById('overall-feedback-text').textContent = 'Could not generate evaluation. Please try again.';
+  }
+};
+
+function buildEvaluationPrompt() {
+  const transcript = conversationHistory.map(m => `${m.role==='user'?'STUDENT':'AURA'}: ${m.content}`).join('\n');
+  const wordList   = [...wordsUsed].slice(0,30).join(', ');
+  return {
+    system: `You are an expert Goethe-Institut examiner evaluating a ${selectedScenario?.level||'A1'} German speaking practice session for a Gujarati speaker. Evaluate STRICTLY but FAIRLY. Respond ONLY with valid JSON, no text before or after:
+{"overall":<0-100>,"vocabulary":<0-100>,"grammar":<0-100>,"fluency":<0-100>,"taskCompletion":<0-100>,"vocabComment":"<1 sentence>","grammarComment":"<1 sentence>","fluencyComment":"<1 sentence>","taskComment":"<1 sentence>","overallFeedback":"<3-4 sentences>","topErrors":[{"original":"","corrected":"","note":""}],"pronunciationTips":[{"word":"","wrongWay":"","rightWay":"","gujaratiNote":""}],"whatWentWell":"<2 sentences>"}`,
+    messages: [{ role:'user', content:`Session transcript:\n\n${transcript}\n\nGerman words used: ${wordList}\n\nEvaluate this ${selectedScenario?.level||'A1'} German speaking performance.` }]
+  };
+}
+
+function renderScore(result) {
+  const pct = Math.min(100, result.overall || 0);
+  // Animate SVG ring
+  const circumference = 2 * Math.PI * 70; // r=70
+  const offset = circumference - (pct / 100) * circumference;
+  const ring = document.getElementById('score-ring-fill');
+  if (ring) {
+    ring.style.strokeDasharray = circumference;
+    ring.style.strokeDashoffset = circumference;
+    setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+  }
+  document.getElementById('score-num').textContent = result.overall || '—';
+  document.getElementById('score-scenario-label').textContent = `${selectedScenario?.title||''} · ${selectedScenario?.level||''} · Live Voice`;
+
+  [['vocab','vocabulary'],['grammar','grammar'],['fluency','fluency'],['task','taskCompletion']].forEach(([id,key]) => {
+    document.getElementById('bar-'+id).style.width = (result[key]||0) + '%';
+    document.getElementById('score-'+id).textContent = (result[key]||0) + '/100';
+    document.getElementById('comment-'+id).textContent = result[id+'Comment'] || result[key+'Comment'] || '';
+  });
+
+  document.getElementById('overall-feedback-text').textContent = result.overallFeedback || '';
+  const errorsList = document.getElementById('errors-list');
+  errorsList.innerHTML = '';
+  (result.topErrors||[]).filter(e => e.original).forEach(e => {
+    errorsList.innerHTML += `<li><span class="err-orig">${escHtml(e.original)}</span> → <span class="err-correct">${escHtml(e.corrected)}</span><br><small style="color:var(--text3)">${escHtml(e.note)}</small></li>`;
+  });
+  const pronList = document.getElementById('pronunciation-tips-list');
+  const pronSec  = document.getElementById('pronunciation-section');
+  if (result.pronunciationTips?.length) {
+    pronSec.style.display = 'block';
+    pronList.innerHTML = result.pronunciationTips.map(t =>
+      `<div class="pronunciation-tip"><span class="word">${escHtml(t.word)}</span><br>❌ ${escHtml(t.wrongWay)} → ✅ ${escHtml(t.rightWay)}<span class="gujarati-note">🇮🇳 ${escHtml(t.gujaratiNote)}</span></div>`
+    ).join('');
+  }
+}
+
+// ── UI HELPERS ─────────────────────────────────────────────────────────────
+function appendMessage(role, text) {
+  // For text mode: add to transcript scroll as a special user entry
+  const scroll = document.getElementById('transcript-scroll');
+  if (!scroll) return;
+  const div = document.createElement('div');
+  div.className = 't-entry';
+  div.innerHTML = `
+    <div class="t-avatar" style="background:rgba(123,97,255,0.12);border-color:rgba(123,97,255,0.25);">👤</div>
+    <div class="t-body">
+      <div class="t-name" style="color:rgba(123,97,255,0.6)">You (typed)</div>
+      <div class="t-text" style="color:#d4caff">${escHtml(text)}</div>
+    </div>`;
+  scroll.appendChild(div);
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+function setStatusBadge() {}  // no-op — kept for compat with changeScenario
+function setBoardGlow() {}    // no-op
+
+function escHtml(t) {
+  return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+function toast(msg, dur=3500) {
+  const t = document.createElement('div'); t.className = 'toast-el'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), dur);
+}
+
+window.practiceAgain = () => {
+  document.getElementById('score-panel').style.display = 'none';
+  document.getElementById('setup-panel').style.display = 'block';
+  updateTrialBadge();
+};
+window.goToDashboard = () => { window.location.href = '/dashboard.html'; };
+</script>
+
+<!-- ═══ AURA INTRO ANIMATION ═══ -->
+<script>
+(function initAuraIntro() {
+  const canvas = document.getElementById('aura-particles');
+  const ctx    = canvas.getContext('2d');
+  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  const particles = Array.from({ length: 120 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.6 + 0.2,
+    vy: -(Math.random() * 0.4 + 0.06),
+    vx: (Math.random() - 0.5) * 0.18,
+    opacity: Math.random() * 0.6 + 0.1,
+    color: ['0,245,255','123,97,255','232,184,75','255,107,157'][Math.floor(Math.random()*4)],
+  }));
+
+  let animId;
+  function drawParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${p.color},${p.opacity})`; ctx.fill();
+      p.y += p.vy; p.x += p.vx;
+      if (p.y < -5) { p.y = canvas.height + 5; p.x = Math.random() * canvas.width; }
+    });
+    animId = requestAnimationFrame(drawParticles);
+  }
+  animId = requestAnimationFrame(drawParticles);
+
+  function playIntroSound(ac) {
+    try {
+      const now = ac.currentTime;
+      [[55,0.04],[110,0.03],[165,0.02],[220,0.015],[329.63,0.01]].forEach(([freq,g],i) => {
+        const osc = ac.createOscillator(), gain = ac.createGain(), filt = ac.createBiquadFilter();
+        filt.type = 'lowpass'; filt.frequency.value = 800;
+        osc.connect(filt); filt.connect(gain); gain.connect(ac.destination);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(g, now + 0.5 + i*0.08);
+        gain.gain.linearRampToValueAtTime(g*0.55, now + 3.5);
+        gain.gain.linearRampToValueAtTime(0, now + 4.8);
+        osc.start(now); osc.stop(now+5);
+      });
+      const sw = ac.createOscillator(), swg = ac.createGain(), swf = ac.createBiquadFilter();
+      swf.type = 'bandpass'; swf.Q.value = 6;
+      swf.frequency.setValueAtTime(40, now+0.4); swf.frequency.linearRampToValueAtTime(900, now+1.9);
+      sw.connect(swf); swf.connect(swg); swg.connect(ac.destination);
+      sw.type = 'sawtooth';
+      sw.frequency.setValueAtTime(25, now+0.4); sw.frequency.linearRampToValueAtTime(280, now+1.9);
+      swg.gain.setValueAtTime(0, now+0.4); swg.gain.linearRampToValueAtTime(0.025, now+0.9); swg.gain.linearRampToValueAtTime(0, now+2.1);
+      sw.start(now+0.4); sw.stop(now+2.5);
+    } catch(e) {}
+  }
+
+  let soundPlayed = false, introAC = null;
+  function tryPlayIntroSound() {
+    if (soundPlayed) return;
+    try { if (!introAC) introAC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return; }
+    if (introAC.state === 'suspended') {
+      introAC.resume().then(() => { if (!soundPlayed) { soundPlayed = true; playIntroSound(introAC); } }).catch(() => {});
+    } else { soundPlayed = true; playIntroSound(introAC); }
+  }
+
+  const introEl = document.getElementById('aura-intro');
+  introEl.addEventListener('pointerdown', tryPlayIntroSound, { once: true, passive: true });
+  introEl.addEventListener('touchstart',  tryPlayIntroSound, { once: true, passive: true });
+  document.addEventListener('pointermove', tryPlayIntroSound, { once: true, passive: true });
+  document.addEventListener('keydown',     tryPlayIntroSound, { once: true });
+
+  function skipIntro() {
+    if (!introEl || introEl.classList.contains('fade-out')) return;
+    cancelAnimationFrame(animId);
+    introEl.classList.add('fade-out');
+    setTimeout(() => introEl.remove(), 700);
+  }
+  window.skipIntro = skipIntro;
+  setTimeout(skipIntro, 4600);
+  document.getElementById('aura-skip-btn').addEventListener('click', e => { e.stopPropagation(); tryPlayIntroSound(); skipIntro(); });
+  introEl.addEventListener('click', skipIntro);
+})();
+</script>
 </body>
 </html>

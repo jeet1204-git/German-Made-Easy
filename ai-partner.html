@@ -183,18 +183,7 @@ body {
   50%      { opacity: 1;   transform: scale(1.12); }
 }
 
-/* Custom cursor — a small orange dot that follows the mouse */
-.hero-cursor {
-  position: fixed; z-index: 9999; pointer-events: none;
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--orange);
-  transform: translate(-50%, -50%);
-  transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
-  mix-blend-mode: screen;
-  opacity: 0;
-}
-.hero-cursor.active { opacity: 1; }
-.hero-cursor.hover  { width: 40px; height: 40px; opacity: 0.3; }
+/* Custom cursor — removed (caused letters to be blocked) */
 
 .intro-inner {
   position: relative; z-index: 1;
@@ -225,51 +214,62 @@ body {
   text-shadow: 0 0 80px rgba(232,130,74,0);
 }
 /* Entry animation — each letter comes from a different vector */
-.hero-letter.A1 { animation: letterEntryA1 1.4s cubic-bezier(0.16,1,0.3,1) 0.1s forwards; }
-.hero-letter.U  { animation: letterEntryU  1.4s cubic-bezier(0.16,1,0.3,1) 0.28s forwards; }
-.hero-letter.R  { animation: letterEntryR  1.4s cubic-bezier(0.16,1,0.3,1) 0.18s forwards; }
-.hero-letter.A2 { animation: letterEntryA2 1.4s cubic-bezier(0.16,1,0.3,1) 0.35s forwards; }
+/* animation-fill-mode: both ensures opacity:1 is held after entry, then breathe chains */
+.hero-letter.A1 {
+  animation:
+    letterEntryA1 1.4s cubic-bezier(0.16,1,0.3,1) 0.1s both,
+    letterBreatheA 6s ease-in-out 1.6s infinite;
+}
+.hero-letter.U {
+  animation:
+    letterEntryU 1.4s cubic-bezier(0.16,1,0.3,1) 0.28s both,
+    letterBreatheU 7s ease-in-out 1.8s infinite;
+}
+.hero-letter.R {
+  animation:
+    letterEntryR 1.4s cubic-bezier(0.16,1,0.3,1) 0.18s both,
+    letterBreatheR 5.5s ease-in-out 1.7s infinite;
+}
+.hero-letter.A2 {
+  animation:
+    letterEntryA2 1.4s cubic-bezier(0.16,1,0.3,1) 0.35s both,
+    letterBreatheA2 6.5s ease-in-out 1.9s infinite;
+}
 
 @keyframes letterEntryA1 {
-  0%   { opacity:0; transform: translate(-120px, -80px) rotate(-15deg) scale(0.4); filter: blur(12px); }
+  0%   { opacity:0; transform: translate(-100px, -60px) rotate(-12deg) scale(0.5); filter: blur(10px); }
   70%  { opacity:1; filter: blur(0); }
   100% { opacity:1; transform: translate(0,0) rotate(0deg) scale(1); filter: blur(0); }
 }
 @keyframes letterEntryU {
-  0%   { opacity:0; transform: translate(0, 120px) rotate(8deg) scale(0.5); filter: blur(14px); }
+  0%   { opacity:0; transform: translate(0, 100px) rotate(6deg) scale(0.5); filter: blur(12px); }
   70%  { opacity:1; filter: blur(0); }
   100% { opacity:1; transform: translate(0,0) rotate(0deg) scale(1); filter: blur(0); }
 }
 @keyframes letterEntryR {
-  0%   { opacity:0; transform: translate(100px, -100px) rotate(20deg) scale(0.35); filter: blur(16px); }
+  0%   { opacity:0; transform: translate(80px, -80px) rotate(16deg) scale(0.4); filter: blur(14px); }
   70%  { opacity:1; filter: blur(0); }
   100% { opacity:1; transform: translate(0,0) rotate(0deg) scale(1); filter: blur(0); }
 }
 @keyframes letterEntryA2 {
-  0%   { opacity:0; transform: translate(-60px, 140px) rotate(-12deg) scale(0.45); filter: blur(10px); }
+  0%   { opacity:0; transform: translate(-50px, 120px) rotate(-10deg) scale(0.45); filter: blur(10px); }
   70%  { opacity:1; filter: blur(0); }
   100% { opacity:1; transform: translate(0,0) rotate(0deg) scale(1); filter: blur(0); }
 }
 
-/* After entry: letters breathe individually at different rates */
-.hero-letter.settled.A1 { animation: letterBreatheA 6s ease-in-out infinite; }
-.hero-letter.settled.U  { animation: letterBreatheU 7s ease-in-out 0.8s infinite; }
-.hero-letter.settled.R  { animation: letterBreatheR 5.5s ease-in-out 0.4s infinite; }
-.hero-letter.settled.A2 { animation: letterBreatheA2 6.5s ease-in-out 1.2s infinite; }
+/* Breathe animations — subtle, independent, staggered */
+@keyframes letterBreatheA  { 0%,100%{ transform:translateY(0); }    50%{ transform:translateY(-7px); } }
+@keyframes letterBreatheU  { 0%,100%{ transform:translateY(0); }    50%{ transform:translateY(9px); } }
+@keyframes letterBreatheR  { 0%,100%{ transform:translateY(0); }    50%{ transform:translateY(-5px); } }
+@keyframes letterBreatheA2 { 0%,100%{ transform:translateY(0); }    50%{ transform:translateY(7px); } }
 
-@keyframes letterBreatheA  { 0%,100%{transform:translateY(0) scale(1);}    50%{transform:translateY(-6px) scale(1.008);} }
-@keyframes letterBreatheU  { 0%,100%{transform:translateY(0) scale(1);}    50%{transform:translateY(8px) scale(0.994);} }
-@keyframes letterBreatheR  { 0%,100%{transform:translateY(0) scale(1);}    50%{transform:translateY(-4px) scale(1.005);} }
-@keyframes letterBreatheA2 { 0%,100%{transform:translateY(0) scale(1);}    50%{transform:translateY(6px) scale(0.998);} }
-
-/* Hover on individual letters — they glow orange and lift */
+/* Hover — glow orange, lift. Uses transition so it doesn't fight animation */
+.hero-letter {
+  transition: color 0.3s ease, text-shadow 0.35s ease;
+}
 .hero-letter:hover {
   color: var(--orange);
-  text-shadow: 0 0 60px rgba(232,130,74,0.5), 0 0 120px rgba(232,130,74,0.2);
-  transform: translateY(-12px) scale(1.04) !important;
-  animation-play-state: paused !important;
-  transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
-  z-index: 2; position: relative;
+  text-shadow: 0 0 50px rgba(232,130,74,0.55), 0 0 100px rgba(232,130,74,0.2);
 }
 
 /* Sound-wave bars — horizontal bars below the wordmark that pulse like audio */
@@ -1401,9 +1401,6 @@ button, .seg-pill, .ctrl-pill, .cta-btn, .speak-start-btn,
 ═══════════════════════════════════════════════ -->
 <div id="homepage">
 
-  <!-- Custom cursor — follows mouse on hero only -->
-  <div class="hero-cursor" id="hero-cursor"></div>
-
   <!-- SCENE 1: HERO — Kinetic Letters -->
   <section class="scene-intro">
     <div class="hero-glow"></div>
@@ -1974,86 +1971,11 @@ let sessionPaused=false, lastUserSpeechTime=null;
 // HOMEPAGE ANIMATION SYSTEMS
 // ═══════════════════════════════════════════════════════
 
-// ── SYSTEM 1: Hero letter magnetic cursor ────────────────
+// ── SYSTEM 1: Hero letters — pure CSS handles entry + breathe
+// No JS needed — chained CSS animations avoid all transform conflicts
 function initHeroLetters() {
-  const letters = document.querySelectorAll('.hero-letter');
-  const cursor  = document.getElementById('hero-cursor');
-  const hero    = document.querySelector('.scene-intro');
-  if (!hero || !cursor) return;
-
-  // After entry animations finish, switch to breathe mode
-  setTimeout(() => {
-    letters.forEach(l => {
-      l.classList.add('settled');
-      l.style.animation = ''; // remove the entry animation so breathe takes over
-    });
-    // Re-add breathe by toggling class
-    setTimeout(() => {
-      letters.forEach(l => l.classList.add('settled'));
-    }, 50);
-  }, 2000);
-
-  // Custom cursor follows mouse
-  let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
-  let cursorActive = false;
-
-  hero.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX; mouseY = e.clientY;
-    if (!cursorActive) { cursor.classList.add('active'); cursorActive = true; }
-  }, { passive: true });
-  hero.addEventListener('mouseleave', () => {
-    cursor.classList.remove('active', 'hover'); cursorActive = false;
-  });
-
-  // Smooth cursor follow
-  function animateCursor() {
-    cursorX += (mouseX - cursorX) * 0.12;
-    cursorY += (mouseY - cursorY) * 0.12;
-    cursor.style.left = cursorX + 'px';
-    cursor.style.top  = cursorY + 'px';
-    requestAnimationFrame(animateCursor);
-  }
-  animateCursor();
-
-  // Magnetic pull — letters move toward cursor when nearby
-  hero.addEventListener('mousemove', (e) => {
-    const rect = hero.getBoundingClientRect();
-    const cx = e.clientX - rect.left;
-    const cy = e.clientY - rect.top;
-    let onLetter = false;
-
-    letters.forEach(letter => {
-      const lr = letter.getBoundingClientRect();
-      const lx = lr.left + lr.width/2 - rect.left;
-      const ly = lr.top  + lr.height/2 - rect.top;
-      const dx = cx - lx, dy = cy - ly;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      const maxDist = 180;
-
-      if (dist < maxDist) {
-        onLetter = true;
-        const force = (1 - dist/maxDist) * 18;
-        const nx = (dx/dist) * force;
-        const ny = (dy/dist) * force;
-        // Only apply if not in hover state (letter:hover CSS handles the full hover)
-        if (!letter.matches(':hover')) {
-          letter.style.transform = `translate(${nx}px, ${ny}px)`;
-          letter.style.transition = 'transform 0.3s cubic-bezier(0.16,1,0.3,1)';
-        }
-      } else {
-        if (!letter.matches(':hover')) {
-          letter.style.transform = '';
-          letter.style.transition = 'transform 0.6s cubic-bezier(0.16,1,0.3,1)';
-        }
-      }
-    });
-    cursor.classList.toggle('hover', onLetter);
-  }, { passive: true });
-
-  // Reset on leave
-  hero.addEventListener('mouseleave', () => {
-    letters.forEach(l => { l.style.transform = ''; });
-  });
+  // Nothing to do — CSS animation chains handle entry → breathe automatically.
+  // Previously had magnetic cursor code here which was killing the animations.
 }
 
 // ── SYSTEM 2: Concept word-by-word illumination ──────────

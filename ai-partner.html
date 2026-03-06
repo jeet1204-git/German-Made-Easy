@@ -159,74 +159,152 @@ body {
   display: none;
 }
 
-/* ── SCENE 1: INTRO ──────────────────────────────
-   Full viewport, centred. AURA text massive.
-   On scroll: scales up slightly, floats upward,
-   concept copy fades in.
-─────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════
+   SCENE 1: HERO — Kinetic Letter System
+   Each letter of AURA is a living object.
+   They breathe, they move, they are alive.
+═══════════════════════════════════════════ */
 .scene-intro {
-  height: 100vh;
+  height: 100vh; height: 100svh;
   display: flex; align-items: center; justify-content: center;
   position: relative; overflow: hidden;
+  cursor: none; /* we use custom cursor */
 }
 
-/* Warm paper grain overlay */
-.scene-intro::before {
-  content: '';
-  position: absolute; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 0;
+/* Ambient heat glow — pulsing orange warmth behind the letters */
+.hero-glow {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%,
+    rgba(232,130,74,0.07) 0%, transparent 70%);
+  animation: glowBreathe 4s ease-in-out infinite;
 }
-/* Radial warm glow */
-.scene-intro::after {
-  content: '';
-  position: absolute;
-  width: 700px; height: 700px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(232,130,74,0.06) 0%, transparent 65%);
-  top: 50%; left: 50%; transform: translate(-50%, -50%);
-  pointer-events: none; z-index: 0;
+@keyframes glowBreathe {
+  0%,100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.12); }
 }
+
+/* Custom cursor — a small orange dot that follows the mouse */
+.hero-cursor {
+  position: fixed; z-index: 9999; pointer-events: none;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--orange);
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+.hero-cursor.active { opacity: 1; }
+.hero-cursor.hover  { width: 40px; height: 40px; opacity: 0.3; }
 
 .intro-inner {
   position: relative; z-index: 1;
   text-align: center;
-  will-change: transform, opacity;
+  user-select: none;
 }
 
-/* The massive AURA word */
+/* The wordmark is broken into 4 individual letter spans */
 .intro-wordmark {
   font-family: var(--font-display);
-  font-size: clamp(9rem, 24vw, 20rem);
+  font-size: clamp(8rem, 22vw, 19rem);
   font-weight: 300;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.12em;
   color: var(--cream);
   line-height: 1;
-  display: block;
+  display: flex; align-items: center; justify-content: center;
+  gap: 0;
+}
+
+/* Each letter animates in from a random direction */
+.hero-letter {
+  display: inline-block;
   opacity: 0;
-  transform: translateY(30px);
-  animation: introReveal 1.2s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+  will-change: transform, opacity, filter;
+  cursor: none;
+  transition: filter 0.6s ease;
+  /* Default state: letters have subtle text shadow */
+  text-shadow: 0 0 80px rgba(232,130,74,0);
 }
-@keyframes introReveal {
-  to { opacity: 1; transform: translateY(0); }
+/* Entry animation — each letter comes from a different vector */
+.hero-letter.A1 { animation: letterEntryA1 1.4s cubic-bezier(0.16,1,0.3,1) 0.1s forwards; }
+.hero-letter.U  { animation: letterEntryU  1.4s cubic-bezier(0.16,1,0.3,1) 0.28s forwards; }
+.hero-letter.R  { animation: letterEntryR  1.4s cubic-bezier(0.16,1,0.3,1) 0.18s forwards; }
+.hero-letter.A2 { animation: letterEntryA2 1.4s cubic-bezier(0.16,1,0.3,1) 0.35s forwards; }
+
+@keyframes letterEntryA1 {
+  0%   { opacity:0; transform: translate(-120px, -80px) rotate(-15deg) scale(0.4); filter: blur(12px); }
+  70%  { opacity:1; filter: blur(0); }
+  100% { opacity:1; transform: translate(0,0) rotate(0deg) scale(1); filter: blur(0); }
 }
+@keyframes letterEntryU {
+  0%   { opacity:0; transform: translate(0, 120px) rotate(8deg) scale(0.5); filter: blur(14px); }
+  70%  { opacity:1; filter: blur(0); }
+  100% { opacity:1; transform: translate(0,0) rotate(0deg) scale(1); filter: blur(0); }
+}
+@keyframes letterEntryR {
+  0%   { opacity:0; transform: translate(100px, -100px) rotate(20deg) scale(0.35); filter: blur(16px); }
+  70%  { opacity:1; filter: blur(0); }
+  100% { opacity:1; transform: translate(0,0) rotate(0deg) scale(1); filter: blur(0); }
+}
+@keyframes letterEntryA2 {
+  0%   { opacity:0; transform: translate(-60px, 140px) rotate(-12deg) scale(0.45); filter: blur(10px); }
+  70%  { opacity:1; filter: blur(0); }
+  100% { opacity:1; transform: translate(0,0) rotate(0deg) scale(1); filter: blur(0); }
+}
+
+/* After entry: letters breathe individually at different rates */
+.hero-letter.settled.A1 { animation: letterBreatheA 6s ease-in-out infinite; }
+.hero-letter.settled.U  { animation: letterBreatheU 7s ease-in-out 0.8s infinite; }
+.hero-letter.settled.R  { animation: letterBreatheR 5.5s ease-in-out 0.4s infinite; }
+.hero-letter.settled.A2 { animation: letterBreatheA2 6.5s ease-in-out 1.2s infinite; }
+
+@keyframes letterBreatheA  { 0%,100%{transform:translateY(0) scale(1);}    50%{transform:translateY(-6px) scale(1.008);} }
+@keyframes letterBreatheU  { 0%,100%{transform:translateY(0) scale(1);}    50%{transform:translateY(8px) scale(0.994);} }
+@keyframes letterBreatheR  { 0%,100%{transform:translateY(0) scale(1);}    50%{transform:translateY(-4px) scale(1.005);} }
+@keyframes letterBreatheA2 { 0%,100%{transform:translateY(0) scale(1);}    50%{transform:translateY(6px) scale(0.998);} }
+
+/* Hover on individual letters — they glow orange and lift */
+.hero-letter:hover {
+  color: var(--orange);
+  text-shadow: 0 0 60px rgba(232,130,74,0.5), 0 0 120px rgba(232,130,74,0.2);
+  transform: translateY(-12px) scale(1.04) !important;
+  animation-play-state: paused !important;
+  transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  z-index: 2; position: relative;
+}
+
+/* Sound-wave bars — horizontal bars below the wordmark that pulse like audio */
+.hero-wave {
+  display: flex; align-items: center; justify-content: center;
+  gap: 3px; height: 28px; margin: 1.8rem auto 0;
+  opacity: 0; animation: introReveal 0.8s ease 1.6s forwards;
+}
+.hero-wave-bar {
+  width: 2px; border-radius: 2px;
+  background: var(--orange);
+  opacity: 0.35;
+  animation: waveBar var(--dur) ease-in-out var(--delay) infinite;
+}
+@keyframes waveBar { 0%,100%{transform:scaleY(0.2);opacity:0.2;} 50%{transform:scaleY(1);opacity:0.55;} }
+
 .intro-line {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.6rem; letter-spacing: 0.45em; text-transform: uppercase;
-  color: var(--orange);
-  margin-top: 0.5rem;
+  font-size: 0.58rem; letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--cream3);
+  margin-top: 1.6rem;
   opacity: 0;
-  animation: introReveal 0.8s ease 1.1s forwards;
+  animation: introReveal 0.8s ease 1.2s forwards;
 }
+
+/* Scroll cue */
 .intro-scroll-cue {
   position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
   display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
-  opacity: 0; animation: introReveal 0.6s ease 1.8s forwards;
+  opacity: 0; animation: introReveal 0.6s ease 2s forwards;
 }
 .scroll-cue-text {
-  font-family: var(--font-mono); font-size: 0.52rem;
-  letter-spacing: 0.28em; text-transform: uppercase; color: var(--cream4);
+  font-family: var(--font-mono); font-size: 0.5rem;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--cream4);
 }
 .scroll-cue-line {
   width: 1px; height: 40px;
@@ -234,43 +312,94 @@ body {
   animation: scrollLine 2s ease infinite;
 }
 @keyframes scrollLine {
-  0%,100% { transform: scaleY(1); opacity: 0.4; }
-  50% { transform: scaleY(1.5); opacity: 0.8; }
+  0%,100% { transform: scaleY(1) translateY(0); opacity: 0.4; }
+  50%      { transform: scaleY(1.6) translateY(4px); opacity: 0.9; }
+}
+@keyframes introReveal {
+  from { opacity:0; transform: translateY(12px); }
+  to   { opacity:1; transform: translateY(0); }
 }
 
-/* ── SCENE 2: CONCEPT ───────────────────────────
-   Big serif statement. Scroll-revealed.
-─────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════
+   SCENE 2: CONCEPT — Word-by-word light sweep
+   "Speak German." appears word by word,
+   illuminated left to right like a spotlight
+   passing over each word.
+═══════════════════════════════════════════ */
 .scene-concept {
-  min-height: 80vh;
+  min-height: 100vh;
   display: flex; align-items: center; justify-content: center;
   padding: 6rem 2rem;
-  position: relative;
+  position: relative; overflow: hidden;
 }
-.concept-inner { text-align: center; max-width: 840px; }
+
+/* Horizontal light ray that sweeps across — CSS only */
+.scene-concept::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(232,130,74,0.03) 50%, transparent 100%);
+  pointer-events: none; z-index: 0;
+}
+.scene-concept.sweep-active::before {
+  animation: sweepLight 2s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes sweepLight {
+  from { left: -60%; }
+  to   { left: 160%; }
+}
+
+.concept-inner { text-align: center; max-width: 900px; position: relative; z-index: 1; }
+
 .concept-headline {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 8vw, 7.5rem);
+  font-size: clamp(2.8rem, 8vw, 7rem);
   font-weight: 400;
-  line-height: 1.05;
+  line-height: 1.08;
   letter-spacing: -0.01em;
   color: var(--cream);
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
-.concept-headline em {
-  font-style: italic; color: var(--orange);
-  font-weight: 300;
+.concept-headline em { font-style: italic; color: var(--orange); font-weight: 300; }
+
+/* Each WORD in the headline is a span — revealed with a light-wipe */
+.cw {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+  margin-right: 0.22em;
 }
+.cw.lit { opacity: 1; transform: translateY(0); }
+
+/* The period after "Speak German." types then pulses */
+.concept-period {
+  color: var(--orange);
+  display: inline-block;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.concept-period.lit {
+  opacity: 1;
+  animation: periodPulse 2s ease-in-out 0.3s infinite;
+}
+@keyframes periodPulse {
+  0%,100% { text-shadow: 0 0 0 rgba(232,130,74,0); }
+  50%     { text-shadow: 0 0 20px rgba(232,130,74,0.7), 0 0 40px rgba(232,130,74,0.3); }
+}
+
 .concept-sub {
   font-size: 1rem; font-weight: 300;
   color: var(--cream2); line-height: 1.8; letter-spacing: 0.01em;
   max-width: 420px; margin: 0 auto;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
+.concept-sub.lit { opacity: 1; transform: translateY(0); }
 
-/* ── SCROLL REVEAL utility ───────────────────── */
+/* ── SCROLL REVEAL utility ── */
 .reveal {
-  opacity: 0;
-  transform: translateY(40px);
+  opacity: 0; transform: translateY(40px);
   transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1);
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
@@ -279,89 +408,166 @@ body {
 .reveal-delay-3 { transition-delay: 0.35s; }
 .reveal-delay-4 { transition-delay: 0.5s; }
 
-/* ── SCENE 3: CONVERSATION DEMO ─────────────────
-   Animated chat exchange showing AURA in action
-─────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════
+   SCENE 3: LIVE DEMO — First-person immersion
+   The visitor doesn't read about AURA.
+   They see through the eyes of someone
+   already inside the product. Real-time feel.
+   
+   Layout: Full-bleed dark section. Left: the
+   scenario title + framing text. Right: a live
+   animated conversation that plays on scroll.
+   
+   The conversation types character by character.
+═══════════════════════════════════════════ */
 .scene-demo {
-  padding: 7rem 2rem;
-  display: flex; flex-direction: column; align-items: center;
+  padding: 8rem 2rem;
   background: var(--canvas2);
   border-top: 1px solid var(--border2);
   border-bottom: 1px solid var(--border2);
+  overflow: hidden;
 }
-.scene-label {
-  font-family: var(--font-mono);
-  font-size: 0.55rem; letter-spacing: 0.35em; text-transform: uppercase;
-  color: var(--orange); margin-bottom: 1.5rem; opacity: 0.8;
+.scene-demo-inner {
+  max-width: 1000px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1.1fr; gap: 6rem; align-items: center;
 }
-.demo-context {
-  font-family: var(--font-display);
-  font-size: clamp(1.6rem, 4vw, 2.8rem); font-weight: 300; font-style: italic;
-  color: var(--cream2); text-align: center; margin-bottom: 4rem;
+@media (max-width: 700px) {
+  .scene-demo-inner { grid-template-columns: 1fr; gap: 3rem; }
 }
-.demo-context strong { font-style: normal; font-weight: 500; color: var(--cream); }
 
-/* Chat bubbles */
-.chat-demo {
-  max-width: 520px; width: 100%;
-  display: flex; flex-direction: column; gap: 1.5rem;
-}
-.chat-msg {
-  display: flex; flex-direction: column; gap: 0.3rem;
-  opacity: 0; transform: translateY(16px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.chat-msg.shown { opacity: 1; transform: translateY(0); }
-
-.chat-who {
+.demo-left { }
+.demo-scene-tag {
   font-family: var(--font-mono); font-size: 0.52rem;
+  letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--orange); opacity: 0.8; margin-bottom: 1.5rem;
+}
+.demo-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 300; font-style: italic;
+  color: var(--cream); line-height: 1.2;
+  margin-bottom: 1.2rem;
+}
+.demo-heading strong { font-style: normal; font-weight: 500; color: var(--cream); }
+.demo-sub-note {
+  font-size: 0.84rem; font-weight: 300; color: var(--cream3); line-height: 1.7;
+  max-width: 300px;
+}
+
+/* Right: the live conversation terminal */
+.demo-terminal {
+  background: #0a0906;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(232,130,74,0.06);
+}
+.demo-terminal-bar {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--border2);
+  background: rgba(255,255,255,0.02);
+}
+.demo-terminal-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.dtd-r { background: #ff5f57; }
+.dtd-y { background: #febc2e; }
+.dtd-g { background: #28c840; }
+.demo-terminal-title {
+  font-family: var(--font-mono); font-size: 0.55rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--cream3); margin-left: auto;
+}
+
+.demo-msgs {
+  padding: 1.4rem 1.2rem;
+  min-height: 280px;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+
+.demo-msg {
+  display: flex; flex-direction: column; gap: 0.2rem;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.demo-msg.reveal-msg { opacity: 1; transform: translateY(0); }
+
+.demo-msg-who {
+  font-family: var(--font-mono); font-size: 0.48rem;
   letter-spacing: 0.2em; text-transform: uppercase;
 }
-.chat-who.aura  { color: var(--orange); }
-.chat-who.user  { color: var(--cream3); text-align: right; }
+.demo-msg-who.aura  { color: var(--orange); }
+.demo-msg-who.user  { color: var(--cream3); text-align: right; }
+.demo-msg-who.fix   { color: rgba(232,130,74,0.6); }
 
-.chat-bubble {
-  padding: 0.9rem 1.1rem;
-  border-radius: 4px 16px 16px 4px;
-  max-width: 85%; line-height: 1.65;
-  font-size: 0.95rem; font-weight: 300;
+.demo-msg-bubble {
+  font-size: 0.88rem; font-weight: 300; line-height: 1.6;
+  padding: 0.8rem 1rem; border-radius: 3px 12px 12px 3px;
+  max-width: 88%;
 }
-.chat-bubble.aura-bubble {
-  background: var(--canvas3);
-  border: 1px solid var(--border);
-  color: var(--cream);
+.demo-msg-bubble.aura-b {
+  background: var(--canvas3); border: 1px solid var(--border2); color: var(--cream);
   align-self: flex-start;
 }
-.chat-bubble.user-bubble {
-  background: rgba(232,130,74,0.1);
-  border: 1px solid rgba(232,130,74,0.2);
-  color: var(--cream);
-  align-self: flex-end;
-  border-radius: 16px 4px 4px 16px;
-  text-align: right;
+.demo-msg-bubble.user-b {
+  background: rgba(232,130,74,0.09); border: 1px solid rgba(232,130,74,0.18);
+  color: var(--cream); align-self: flex-end; border-radius: 12px 3px 3px 12px; text-align: right;
+  font-family: var(--font-display); font-style: italic;
 }
-.chat-bubble .de { /* German text */
-  font-family: var(--font-display);
-  font-size: 1.05rem; font-style: italic;
-  display: block; margin-bottom: 0.25rem;
-}
-.chat-correction {
-  display: inline-block; margin-top: 0.4rem;
-  font-size: 0.75rem; color: var(--orange);
+.demo-msg-bubble.fix-b {
+  background: rgba(232,130,74,0.05); border: 1px solid rgba(232,130,74,0.15);
+  color: var(--cream2); align-self: flex-start; font-size: 0.82rem;
   border-left: 2px solid var(--orange);
-  padding-left: 0.6rem; font-style: normal;
+  border-radius: 0 12px 12px 0;
+}
+.demo-de {
+  font-family: var(--font-display); font-style: italic; font-size: 1rem;
+  display: block; margin-bottom: 0.2rem;
 }
 
-/* ── SCENE 4: SCENARIOS ──────────────────────────
-   Cards showing real-life situations
-─────────────────────────────────────────────── */
-.scene-scenarios {
-  padding: 8rem 2rem;
+/* Listening indicator */
+.demo-listening {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-top: 0.5rem;
+  opacity: 0; transition: opacity 0.4s ease;
 }
-.scene-scenarios-inner { max-width: 1100px; margin: 0 auto; }
+.demo-listening.show { opacity: 1; }
+.demo-listening-bars {
+  display: flex; align-items: center; gap: 2px;
+}
+.dlb {
+  width: 2px; border-radius: 2px; background: var(--orange);
+  animation: dlbAnim 0.8s ease-in-out infinite;
+}
+.dlb:nth-child(1){height:6px;animation-delay:0s;}
+.dlb:nth-child(2){height:12px;animation-delay:0.1s;}
+.dlb:nth-child(3){height:8px;animation-delay:0.2s;}
+.dlb:nth-child(4){height:16px;animation-delay:0.05s;}
+.dlb:nth-child(5){height:10px;animation-delay:0.15s;}
+@keyframes dlbAnim{0%,100%{transform:scaleY(0.3);}50%{transform:scaleY(1);}}
+.demo-listening-text {
+  font-family: var(--font-mono); font-size: 0.48rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--orange);
+}
+
+/* ═══════════════════════════════════════════
+   SCENE 4: SCENARIOS — Horizontal marquee
+   Not a grid. A moving tape of worlds.
+   When you hover a card: the tape stops,
+   the card expands, German text appears inside.
+═══════════════════════════════════════════ */
+.scene-scenarios {
+  padding: 8rem 0;
+  overflow: hidden;
+}
+.scene-scenarios-inner { max-width: 100%; }
 .scenarios-header {
   display: flex; align-items: flex-end; justify-content: space-between;
-  margin-bottom: 3.5rem; flex-wrap: wrap; gap: 1.5rem;
+  margin-bottom: 3.5rem; padding: 0 4rem; flex-wrap: wrap; gap: 1.5rem;
+}
+@media (max-width: 640px) {
+  .scenarios-header { padding: 0 1.5rem; margin-bottom: 2.5rem; }
 }
 .scenarios-title {
   font-family: var(--font-display);
@@ -373,255 +579,181 @@ body {
   letter-spacing: 0.2em; text-transform: uppercase; color: var(--cream3);
 }
 
-.scenarios-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border2);
-  border: 1px solid var(--border2);
-  border-radius: 6px; overflow: hidden;
-}
-@media (max-width: 900px) { .scenarios-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 500px) { .scenarios-grid { grid-template-columns: 1fr; } }
-
-.scenario-card {
-  background: var(--canvas2);
-  padding: 1.8rem 1.5rem;
-  cursor: pointer;
-  transition: background 0.2s;
-  position: relative; overflow: hidden;
-}
-.scenario-card::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, var(--orange-faint) 0%, transparent 60%);
-  opacity: 0; transition: opacity 0.3s;
-}
-.scenario-card:hover { background: var(--canvas3); }
-.scenario-card:hover::before { opacity: 1; }
-
-.sc-emoji { font-size: 1.6rem; margin-bottom: 1rem; display: block; }
-.sc-title {
-  font-family: var(--font-display);
-  font-size: 1.25rem; font-weight: 400;
-  color: var(--cream); margin-bottom: 0.4rem; letter-spacing: -0.01em;
-}
-.sc-level {
-  font-family: var(--font-mono); font-size: 0.52rem;
-  letter-spacing: 0.15em; text-transform: uppercase;
-  color: var(--cream3); margin-bottom: 1rem;
-}
-.sc-sample {
-  font-family: var(--font-display);
-  font-size: 0.88rem; font-style: italic;
-  color: var(--cream3); line-height: 1.6;
-  border-left: 1.5px solid var(--border);
-  padding-left: 0.75rem;
-}
-
-/* ── SCENE 5: PRODUCT REVEAL ─────────────────────
-   Show what the interface actually looks like
-─────────────────────────────────────────────── */
-.scene-product {
-  padding: 8rem 2rem;
-  background: var(--canvas2);
-  border-top: 1px solid var(--border2);
-  border-bottom: 1px solid var(--border2);
-}
-.scene-product-inner { max-width: 860px; margin: 0 auto; text-align: center; }
-.product-eyebrow {
-  font-family: var(--font-mono); font-size: 0.55rem;
-  letter-spacing: 0.35em; text-transform: uppercase;
-  color: var(--orange); margin-bottom: 1.5rem; opacity: 0.8;
-}
-.product-title {
-  font-family: var(--font-display);
-  font-size: clamp(2.4rem, 6vw, 5rem);
-  font-weight: 400; color: var(--cream);
-  letter-spacing: -0.01em; margin-bottom: 1.5rem;
-}
-.product-sub {
-  font-size: 0.92rem; font-weight: 300; color: var(--cream2);
-  max-width: 400px; margin: 0 auto 3.5rem; line-height: 1.75;
-}
-
-/* Interface mockup */
-.interface-mockup {
-  background: var(--canvas3);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+/* The tape — continuous horizontal scroll */
+.scenarios-tape-wrap {
+  position: relative;
   overflow: hidden;
-  box-shadow: 0 40px 80px rgba(0,0,0,0.4);
 }
-.mockup-bar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0.85rem 1.25rem;
-  border-bottom: 1px solid var(--border2);
-  background: rgba(255,255,255,0.02);
-}
-.mockup-bar-left { display: flex; align-items: center; gap: 0.7rem; }
-.mockup-title { font-size: 0.8rem; font-weight: 400; color: var(--cream2); }
-.mockup-status { display: flex; align-items: center; gap: 0.4rem; }
-.mockup-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--orange); box-shadow: 0 0 6px var(--orange);
-  animation: pulseDot 2s ease infinite;
-}
-@keyframes pulseDot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-.mockup-status-text {
-  font-family: var(--font-mono); font-size: 0.52rem;
-  letter-spacing: 0.15em; text-transform: uppercase; color: var(--orange);
-}
-
-.mockup-body { padding: 2rem 1.5rem; min-height: 180px; }
-.mockup-sample-msg {
-  display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 1.2rem;
-}
-.mockup-aura-bubble {
-  align-self: flex-start; max-width: 75%;
-  padding: 0.75rem 1rem;
-  background: var(--canvas4); border-radius: 3px 12px 12px 3px;
-  border: 1px solid var(--border2);
-  font-size: 0.88rem; color: var(--cream); line-height: 1.55; font-weight: 300;
-}
-.mockup-aura-bubble .de-text {
-  font-family: var(--font-display); font-style: italic; font-size: 0.98rem;
-}
-.mockup-user-bubble {
-  align-self: flex-end; max-width: 75%;
-  padding: 0.75rem 1rem;
-  background: rgba(232,130,74,0.08); border-radius: 12px 3px 3px 12px;
-  border: 1px solid rgba(232,130,74,0.15);
-  font-size: 0.88rem; color: var(--cream); line-height: 1.55; font-weight: 300;
-  font-family: var(--font-display); font-style: italic;
-}
-.mockup-msgs { display: flex; flex-direction: column; gap: 0.5rem; }
-
-.mockup-footer {
-  padding: 1rem 1.25rem;
-  border-top: 1px solid var(--border2);
-  display: flex; align-items: center; gap: 0.75rem;
-}
-.mockup-mic-ring {
-  width: 42px; height: 42px;
-  border-radius: 50%;
-  background: var(--orange); border: none;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; cursor: pointer; flex-shrink: 0;
-  box-shadow: 0 0 0 4px rgba(232,130,74,0.12);
-}
-.mockup-input-fake {
-  flex: 1; height: 38px;
-  background: var(--canvas); border: 1px solid var(--border);
-  border-radius: 4px;
-}
-
-/* ── SCENE 6: BENEFITS ───────────────────────────
-   Minimal 2-column list
-─────────────────────────────────────────────── */
-.scene-benefits { padding: 8rem 2rem; }
-.scene-benefits-inner { max-width: 840px; margin: 0 auto; }
-.benefits-header {
-  margin-bottom: 4rem;
-}
-.benefits-title {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3.8rem);
-  font-weight: 400; color: var(--cream); letter-spacing: -0.01em;
-}
-.benefits-title em { font-style: italic; color: var(--orange); }
-
-.benefits-list {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 0; border: 1px solid var(--border2);
-  border-radius: 6px; overflow: hidden;
-}
-@media (max-width: 580px) { .benefits-list { grid-template-columns: 1fr; } }
-
-.benefit-row {
-  padding: 1.5rem 1.8rem;
-  border-bottom: 1px solid var(--border2);
-  display: flex; align-items: flex-start; gap: 1rem;
-  background: var(--canvas2);
-  transition: background 0.2s;
-}
-.benefit-row:hover { background: var(--canvas3); }
-.benefit-row:nth-child(even) { border-left: 1px solid var(--border2); }
-.benefit-row:nth-last-child(-n+2) { border-bottom: none; }
-@media (max-width: 580px) {
-  .benefit-row:nth-child(even) { border-left: none; }
-  .benefit-row:nth-last-child(-n+2) { border-bottom: 1px solid var(--border2); }
-  .benefit-row:last-child { border-bottom: none; }
-}
-.benefit-num {
-  font-family: var(--font-mono); font-size: 0.6rem;
-  color: var(--orange); opacity: 0.7; margin-top: 0.15rem; flex-shrink: 0;
-}
-.benefit-text {
-  font-size: 0.92rem; font-weight: 300;
-  color: var(--cream2); line-height: 1.65;
-}
-.benefit-text strong { color: var(--cream); font-weight: 500; }
-
-/* ── SCENE 7: CTA ────────────────────────────────
-   The invitation to start
-─────────────────────────────────────────────── */
-.scene-cta {
-  min-height: 80vh;
-  display: flex; align-items: center; justify-content: center;
-  padding: 6rem 2rem;
-  background: var(--canvas2);
-  border-top: 1px solid var(--border2);
-  position: relative; overflow: hidden;
-}
-.scene-cta::before {
-  content: '';
-  position: absolute;
-  width: 600px; height: 600px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(232,130,74,0.07) 0%, transparent 65%);
-  top: 50%; left: 50%; transform: translate(-50%, -50%);
+.scenarios-tape-wrap::before,
+.scenarios-tape-wrap::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2;
   pointer-events: none;
 }
-.cta-inner { text-align: center; position: relative; z-index: 1; }
-.cta-pretext {
-  font-family: var(--font-mono); font-size: 0.58rem;
-  letter-spacing: 0.35em; text-transform: uppercase;
-  color: var(--cream3); margin-bottom: 1.5rem;
+.scenarios-tape-wrap::before {
+  left: 0;
+  background: linear-gradient(to right, var(--canvas) 0%, transparent 100%);
 }
-.cta-headline {
+.scenarios-tape-wrap::after {
+  right: 0;
+  background: linear-gradient(to left, var(--canvas) 0%, transparent 100%);
+}
+
+.scenarios-tape {
+  display: flex; gap: 1px;
+  animation: tapeScroll 28s linear infinite;
+  width: max-content;
+}
+.scenarios-tape:hover { animation-play-state: paused; }
+@keyframes tapeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Each scenario card in the tape */
+.sc-card {
+  width: 260px; flex-shrink: 0;
+  background: var(--canvas2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 2rem 1.8rem;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: background 0.35s ease, border-color 0.35s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1), width 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.sc-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(232,130,74,0.06) 0%, transparent 65%);
+  opacity: 0; transition: opacity 0.35s ease;
+}
+.sc-card:hover {
+  background: var(--canvas3);
+  border-color: rgba(232,130,74,0.25);
+  transform: scale(1.02);
+}
+.sc-card:hover::before { opacity: 1; }
+
+.sc-card-emoji { font-size: 1.6rem; margin-bottom: 1rem; display: block; }
+.sc-card-title {
+  font-family: var(--font-display); font-size: 1.1rem; font-weight: 400;
+  color: var(--cream); margin-bottom: 0.3rem;
+}
+.sc-card-level {
+  font-family: var(--font-mono); font-size: 0.5rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--orange); opacity: 0.7; margin-bottom: 1rem;
+}
+.sc-card-sample {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.82rem; color: var(--cream3); line-height: 1.55;
+  border-left: 1px solid rgba(232,130,74,0.25); padding-left: 0.7rem;
+}
+
+/* ═══════════════════════════════════════════
+   SCENE 5: NUMBERS — Big truth section
+   Not features. Not bullets.
+   Three facts. Each one hits.
+   Numbers count up as you scroll into view.
+═══════════════════════════════════════════ */
+.scene-numbers {
+  padding: 8rem 2rem;
+  background: var(--canvas);
+}
+.scene-numbers-inner {
+  max-width: 1000px; margin: 0 auto;
+}
+.numbers-eyebrow {
+  font-family: var(--font-mono); font-size: 0.52rem;
+  letter-spacing: 0.38em; text-transform: uppercase;
+  color: var(--cream4); margin-bottom: 5rem; display: block;
+}
+.numbers-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 0; border: 1px solid var(--border2);
+  border-radius: 4px; overflow: hidden;
+}
+@media (max-width: 680px) { .numbers-grid { grid-template-columns: 1fr; } }
+
+.number-item {
+  padding: 3.5rem 2.8rem;
+  border-right: 1px solid var(--border2);
+  position: relative; overflow: hidden;
+  transition: background 0.3s ease;
+}
+.number-item:last-child { border-right: none; }
+.number-item:hover { background: var(--canvas2); }
+@media (max-width: 680px) {
+  .number-item { border-right: none; border-bottom: 1px solid var(--border2); }
+  .number-item:last-child { border-bottom: none; }
+}
+
+/* The huge number itself */
+.number-val {
   font-family: var(--font-display);
-  font-size: clamp(2.8rem, 8vw, 7rem);
-  font-weight: 300; color: var(--cream);
-  letter-spacing: -0.01em; line-height: 1.05;
-  margin-bottom: 1.2rem;
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  font-weight: 300; line-height: 1;
+  color: var(--cream);
+  margin-bottom: 0.5rem;
+  display: block;
 }
-.cta-headline em { font-style: italic; color: var(--orange); }
-.cta-sub {
-  font-size: 0.92rem; font-weight: 300; color: var(--cream2);
-  max-width: 380px; margin: 0 auto 3rem; line-height: 1.75;
+.number-val .num-suffix {
+  font-size: 0.55em; color: var(--orange);
+  vertical-align: super; margin-left: 0.1em;
 }
-.cta-btn {
-  display: inline-flex; align-items: center; gap: 0.7rem;
-  padding: 1rem 2.5rem;
-  background: var(--orange); color: #1a0e06;
-  font-family: var(--font-body); font-size: 0.9rem; font-weight: 500;
-  letter-spacing: 0.04em;
-  border: none; border-radius: 4px; cursor: pointer;
-  transition: opacity 0.18s, transform 0.18s;
-  text-decoration: none;
+.number-unit {
+  font-family: var(--font-mono); font-size: 0.52rem;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--orange); opacity: 0.7; margin-bottom: 1rem; display: block;
 }
-.cta-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-.cta-btn:active { transform: translateY(0); }
-.cta-small {
-  margin-top: 1.2rem; font-size: 0.72rem; color: var(--cream3);
-  font-weight: 300;
+.number-desc {
+  font-size: 0.88rem; font-weight: 300; color: var(--cream3); line-height: 1.65;
+  max-width: 200px;
 }
-#trial-counter-wrap { display: none; margin-top: 1rem; }
-.trial-text {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em;
-  color: rgba(232,130,74,0.65);
-  background: rgba(232,130,74,0.06); border: 1px solid rgba(232,130,74,0.15);
-  padding: 0.28rem 0.9rem; border-radius: 20px;
+
+/* Orange underline that slides in on scroll */
+.number-item::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; height: 2px; width: 0%;
+  background: var(--orange);
+  transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+.number-item.counted::after { width: 100%; }
+
+/* ═══════════════════════════════════════════
+   SCENE 6: TRUTH STATEMENT — One sentence.
+   The product philosophy stated as a
+   typographic monument. Huge. Centered.
+   No buttons. No CTAs. Just truth.
+   
+   Then: the footer.
+═══════════════════════════════════════════ */
+.scene-truth {
+  padding: 10rem 2rem;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 60vh;
+  background: var(--canvas2);
+  border-top: 1px solid var(--border2);
+  position: relative; overflow: hidden;
+}
+.scene-truth::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 50% 60% at 50% 50%,
+    rgba(232,130,74,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.truth-inner { text-align: center; position: relative; z-index: 1; max-width: 800px; }
+.truth-statement {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 5vw, 4rem);
+  font-weight: 300; font-style: italic;
+  color: var(--cream2);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+.truth-statement em { font-style: normal; color: var(--cream); }
+.truth-attribution {
+  margin-top: 2rem;
+  font-family: var(--font-mono); font-size: 0.52rem;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--cream4);
 }
 
 /* ── FOOTER ──────────────────────────────────── */
@@ -1048,7 +1180,7 @@ body {
 
 /* Touch targets: everything tappable ≥ 44px */
 button, .seg-pill, .ctrl-pill, .cta-btn, .speak-start-btn,
-.mic-btn, .send-btn, .nav-cta, .scenario-card {
+.mic-btn, .send-btn, .nav-cta, .sc-card {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -1075,47 +1207,35 @@ button, .seg-pill, .ctrl-pill, .cta-btn, .speak-start-btn,
 
   /* HOMEPAGE: reduce all section padding dramatically */
   .scene-intro { height: 100svh; } /* use svh to avoid mobile browser chrome issues */
-  .scene-concept { padding: 4rem 1.25rem; }
-  .scene-demo    { padding: 4rem 1.25rem; }
-  .scene-scenarios { padding: 4rem 1.25rem; }
-  .scene-product { padding: 4rem 1.25rem; }
-  .scene-benefits { padding: 4rem 1.25rem; }
-  .scene-cta     { padding: 4rem 1.25rem; min-height: 70vh; }
-  .site-footer   { padding: 2rem 1.25rem; flex-direction: column; gap: 0.75rem; }
+  .scene-concept  { padding: 4rem 1.25rem; }
+  .scene-demo     { padding: 4rem 1.25rem; }
+  .scene-scenarios { padding: 4rem 0; }
+  .scene-numbers  { padding: 4rem 1.25rem; }
+  .scene-truth    { padding: 5rem 1.25rem; }
+  .site-footer    { padding: 2rem 1.25rem; flex-direction: column; gap: 0.75rem; }
 
-  /* INTRO: AURA wordmark sizing */
-  .intro-wordmark { font-size: clamp(5.5rem, 28vw, 9rem); letter-spacing: 0.12em; }
-  .intro-line { font-size: 0.52rem; letter-spacing: 0.3em; }
+  /* INTRO: letter sizing on mobile */
+  .intro-wordmark { font-size: clamp(5rem, 28vw, 9rem); letter-spacing: 0.08em; gap: 0; }
+  .intro-line { font-size: 0.48rem; letter-spacing: 0.28em; }
 
   /* CONCEPT */
-  .concept-headline { font-size: clamp(2.4rem, 9vw, 3.5rem); }
+  .concept-headline { font-size: clamp(2.2rem, 9vw, 3.5rem); }
 
-  /* DEMO CHAT */
-  .chat-bubble { font-size: 0.88rem; padding: 0.75rem 0.9rem; }
-  .chat-bubble .de { font-size: 0.96rem; }
+  /* DEMO: stack on mobile */
+  .scene-demo-inner { gap: 2.5rem; }
+  .demo-terminal { font-size: 0.85em; }
 
-  /* SCENARIOS: 1 column, good touch targets */
-  .scenarios-grid { grid-template-columns: 1fr; }
-  .scenarios-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 2rem; }
+  /* SCENARIOS tape: smaller cards on mobile */
+  .scenarios-header { padding: 0 1.25rem; flex-direction: column; align-items: flex-start; gap: 0.5rem; margin-bottom: 2rem; }
   .scenarios-title { font-size: clamp(1.8rem, 7vw, 2.5rem); }
-  .scenario-card { padding: 1.25rem 1.1rem; min-height: 120px; }
-  .sc-emoji { font-size: 1.4rem; margin-bottom: 0.65rem; }
-  .sc-title { font-size: 1.1rem; }
+  .sc-card { width: 220px; padding: 1.5rem 1.25rem; }
 
-  /* PRODUCT MOCKUP */
-  .product-title { font-size: clamp(1.8rem, 7vw, 2.8rem); }
-  .mockup-aura-bubble, .mockup-user-bubble { font-size: 0.82rem; }
+  /* NUMBERS: stack to 1 column on very small */
+  .numbers-grid { grid-template-columns: 1fr; }
+  .number-item { padding: 2.5rem 1.5rem; }
 
-  /* BENEFITS */
-  .benefits-list { grid-template-columns: 1fr; }
-  .benefits-title { font-size: clamp(1.8rem, 7vw, 2.5rem); }
-  .benefit-row:nth-child(even) { border-left: none; }
-  .benefit-row:nth-last-child(-n+2) { border-bottom: 1px solid var(--border2); }
-  .benefit-row:last-child { border-bottom: none; }
-
-  /* CTA */
-  .cta-headline { font-size: clamp(2.4rem, 10vw, 4rem); }
-  .cta-btn { width: 100%; justify-content: center; padding: 1rem; font-size: 0.95rem; }
+  /* TRUTH */
+  .truth-statement { font-size: clamp(1.5rem, 5vw, 2.5rem); }
 
   /* ── SPEAKING INTERFACE — this is where mobile matters most ── */
   #speaking-interface { padding-top: 52px; }
@@ -1281,10 +1401,39 @@ button, .seg-pill, .ctrl-pill, .cta-btn, .speak-start-btn,
 ═══════════════════════════════════════════════ -->
 <div id="homepage">
 
-  <!-- SCENE 1: INTRO -->
+  <!-- Custom cursor — follows mouse on hero only -->
+  <div class="hero-cursor" id="hero-cursor"></div>
+
+  <!-- SCENE 1: HERO — Kinetic Letters -->
   <section class="scene-intro">
+    <div class="hero-glow"></div>
     <div class="intro-inner">
-      <span class="intro-wordmark">AURA</span>
+      <div class="intro-wordmark" id="aura-wordmark">
+        <span class="hero-letter A1" data-letter="A">A</span>
+        <span class="hero-letter U"  data-letter="U">U</span>
+        <span class="hero-letter R"  data-letter="R">R</span>
+        <span class="hero-letter A2" data-letter="A">A</span>
+      </div>
+
+      <!-- Sound-wave bars — breathe like audio levels -->
+      <div class="hero-wave" id="hero-wave">
+        <div class="hero-wave-bar" style="--dur:1.1s;--delay:0.0s;height:6px;"></div>
+        <div class="hero-wave-bar" style="--dur:0.9s;--delay:0.1s;height:14px;"></div>
+        <div class="hero-wave-bar" style="--dur:1.3s;--delay:0.05s;height:10px;"></div>
+        <div class="hero-wave-bar" style="--dur:0.8s;--delay:0.15s;height:20px;"></div>
+        <div class="hero-wave-bar" style="--dur:1.0s;--delay:0.08s;height:16px;"></div>
+        <div class="hero-wave-bar" style="--dur:1.2s;--delay:0.2s;height:10px;"></div>
+        <div class="hero-wave-bar" style="--dur:0.85s;--delay:0.12s;height:22px;"></div>
+        <div class="hero-wave-bar" style="--dur:1.1s;--delay:0.05s;height:18px;"></div>
+        <div class="hero-wave-bar" style="--dur:0.95s;--delay:0.18s;height:12px;"></div>
+        <div class="hero-wave-bar" style="--dur:1.3s;--delay:0.1s;height:8px;"></div>
+        <div class="hero-wave-bar" style="--dur:0.9s;--delay:0.0s;height:16px;"></div>
+        <div class="hero-wave-bar" style="--dur:1.0s;--delay:0.22s;height:20px;"></div>
+        <div class="hero-wave-bar" style="--dur:0.8s;--delay:0.08s;height:14px;"></div>
+        <div class="hero-wave-bar" style="--dur:1.2s;--delay:0.15s;height:8px;"></div>
+        <div class="hero-wave-bar" style="--dur:1.1s;--delay:0.05s;height:6px;"></div>
+      </div>
+
       <span class="intro-line">German Speaking Partner · AI-Powered</span>
     </div>
     <div class="intro-scroll-cue">
@@ -1293,186 +1442,225 @@ button, .seg-pill, .ctrl-pill, .cta-btn, .speak-start-btn,
     </div>
   </section>
 
-  <!-- SCENE 2: CONCEPT -->
+  <!-- SCENE 2: CONCEPT — Word-by-word illumination -->
   <section class="scene-concept" id="scene-concept">
     <div class="concept-inner">
-      <h2 class="concept-headline reveal">
-        Speak German.<br>
-        <em>Not just study it.</em>
+      <h2 class="concept-headline">
+        <span class="cw">Speak</span><span class="cw">German<span class="concept-period">.</span></span><br>
+        <em><span class="cw">Not</span> <span class="cw">just</span> <span class="cw">study</span> <span class="cw">it.</span></em>
       </h2>
-      <p class="concept-sub reveal reveal-delay-2">
+      <p class="concept-sub">
         Most German courses teach you rules. AURA gives you real conversations — job interviews, doctor visits, everyday situations — until speaking feels natural.
       </p>
     </div>
   </section>
 
-  <!-- SCENE 3: DEMO CONVERSATION -->
-  <section class="scene-demo">
-    <div class="scene-label">AURA in action</div>
-    <p class="demo-context reveal">
-      Imagine you're at a <strong>German job interview.</strong><br>
-      AURA is the interviewer. You practice live.
-    </p>
-    <div class="chat-demo" id="chat-demo">
-      <div class="chat-msg" id="dm1">
-        <span class="chat-who aura">AURA — Interviewer</span>
-        <div class="chat-bubble aura-bubble">
-          <span class="de">Guten Morgen! Erzählen Sie mir bitte etwas über sich.</span>
-          Good morning! Please tell me something about yourself.
-        </div>
+  <!-- SCENE 3: DEMO — First-person live conversation -->
+  <section class="scene-demo" id="scene-demo">
+    <div class="scene-demo-inner">
+      <div class="demo-left">
+        <div class="demo-scene-tag reveal">AURA in action</div>
+        <h2 class="demo-heading reveal reveal-delay-1">
+          <em>Imagine you're at a<br><strong>German job interview.</strong></em>
+        </h2>
+        <p class="demo-sub-note reveal reveal-delay-2">
+          AURA plays the interviewer. You speak. It listens, responds in real-time, and corrects you — in Gujarati or Hindi — without breaking character.
+        </p>
       </div>
-      <div class="chat-msg" id="dm2">
-        <span class="chat-who user">You</span>
-        <div class="chat-bubble user-bubble">
-          <span class="de">Ich bin... ich heiße Priya und ich komme aus Indien.</span>
+
+      <div class="demo-terminal reveal reveal-delay-1">
+        <div class="demo-terminal-bar">
+          <div class="demo-terminal-dot dtd-r"></div>
+          <div class="demo-terminal-dot dtd-y"></div>
+          <div class="demo-terminal-dot dtd-g"></div>
+          <div class="demo-terminal-title">Job Interview · A2</div>
         </div>
-      </div>
-      <div class="chat-msg" id="dm3">
-        <span class="chat-who aura">AURA — Correction</span>
-        <div class="chat-bubble aura-bubble">
-          Bahuj saras! Small tip:
-          <span class="chat-correction">
-            "Ich bin" and "Ich heiße" mean the same thing here — use one. Try: <em>"Ich heiße Priya und komme aus Indien."</em>
-          </span>
-        </div>
-      </div>
-      <div class="chat-msg" id="dm4">
-        <span class="chat-who user">You</span>
-        <div class="chat-bubble user-bubble">
-          <span class="de">Ich heiße Priya und komme aus Indien. Ich arbeite als Ingenieurin.</span>
-        </div>
-      </div>
-      <div class="chat-msg" id="dm5">
-        <span class="chat-who aura">AURA</span>
-        <div class="chat-bubble aura-bubble">
-          <span class="de">Ausgezeichnet! Das war perfekt.</span>
-          Excellent! That was perfect — see how quickly you improved?
+        <div class="demo-msgs" id="demo-msgs">
+          <div class="demo-msg" id="tm1">
+            <div class="demo-msg-who aura">AURA — Interviewer</div>
+            <div class="demo-msg-bubble aura-b">
+              <span class="demo-de">Guten Morgen! Erzählen Sie mir bitte etwas über sich.</span>
+              Good morning — tell me about yourself.
+            </div>
+          </div>
+          <div class="demo-msg" id="tm2">
+            <div class="demo-msg-who user">You</div>
+            <div class="demo-msg-bubble user-b">Ich bin... ich heiße Priya und ich komme aus Indien.</div>
+          </div>
+          <div class="demo-msg" id="tm3">
+            <div class="demo-msg-who fix">AURA — Correction</div>
+            <div class="demo-msg-bubble fix-b">
+              Bahuj saras! Small tip — "Ich bin" and "Ich heiße" mean the same thing. Use just one: <em>"Ich heiße Priya und komme aus Indien."</em>
+            </div>
+          </div>
+          <div class="demo-msg" id="tm4">
+            <div class="demo-msg-who user">You</div>
+            <div class="demo-msg-bubble user-b">Ich heiße Priya und komme aus Indien. Ich arbeite als Ingenieurin.</div>
+          </div>
+          <div class="demo-msg" id="tm5">
+            <div class="demo-msg-who aura">AURA</div>
+            <div class="demo-msg-bubble aura-b">
+              <span class="demo-de">Ausgezeichnet! Das war perfekt.</span>
+              See how fast you improved? That's what AURA does.
+            </div>
+          </div>
+
+          <!-- Listening indicator — shows after conversation completes -->
+          <div class="demo-listening" id="demo-listening">
+            <div class="demo-listening-bars">
+              <div class="dlb"></div><div class="dlb"></div><div class="dlb"></div>
+              <div class="dlb"></div><div class="dlb"></div>
+            </div>
+            <span class="demo-listening-text">AURA is listening</span>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SCENE 4: SCENARIOS -->
+  <!-- SCENE 4: SCENARIOS — Horizontal moving tape -->
   <section class="scene-scenarios" id="scene-scenarios">
-    <div class="scene-scenarios-inner">
-      <div class="scenarios-header reveal">
-        <h2 class="scenarios-title">Real situations.<br>Real German.</h2>
-        <span class="scenarios-count">16 scenarios · A1 & A2</span>
-      </div>
-      <div class="scenarios-grid">
-        <div class="scenario-card reveal" onclick="launchScenario('a1_shop')">
-          <span class="sc-emoji">🛒</span>
-          <div class="sc-title">At the Supermarket</div>
-          <div class="sc-level">A1 · Daily Life</div>
-          <div class="sc-sample">"Entschuldigung, wo finde ich die Milch?"</div>
+    <div class="scenarios-header reveal">
+      <h2 class="scenarios-title">Real situations.<br>Real German.</h2>
+      <span class="scenarios-count">16 scenarios · A1 & A2</span>
+    </div>
+    <div class="scenarios-tape-wrap">
+      <div class="scenarios-tape" id="scenarios-tape">
+        <!-- First set -->
+        <div class="sc-card" onclick="launchScenario('a1_shop')">
+          <span class="sc-card-emoji">🛒</span>
+          <div class="sc-card-title">At the Supermarket</div>
+          <div class="sc-card-level">A1 · Daily Life</div>
+          <div class="sc-card-sample">"Entschuldigung, wo finde ich die Milch?"</div>
         </div>
-        <div class="scenario-card reveal reveal-delay-1" onclick="launchScenario('a2_job')">
-          <span class="sc-emoji">💼</span>
-          <div class="sc-title">Job Interview</div>
-          <div class="sc-level">A2 · Work</div>
-          <div class="sc-sample">"Ich habe drei Jahre Erfahrung als..."</div>
+        <div class="sc-card" onclick="launchScenario('a2_job')">
+          <span class="sc-card-emoji">💼</span>
+          <div class="sc-card-title">Job Interview</div>
+          <div class="sc-card-level">A2 · Work</div>
+          <div class="sc-card-sample">"Ich habe drei Jahre Erfahrung als..."</div>
         </div>
-        <div class="scenario-card reveal reveal-delay-2" onclick="launchScenario('a1_doctor')">
-          <span class="sc-emoji">🏥</span>
-          <div class="sc-title">At the Doctor</div>
-          <div class="sc-level">A1 · Health</div>
-          <div class="sc-sample">"Ich habe seit zwei Tagen Kopfschmerzen."</div>
+        <div class="sc-card" onclick="launchScenario('a1_doctor')">
+          <span class="sc-card-emoji">🏥</span>
+          <div class="sc-card-title">At the Doctor</div>
+          <div class="sc-card-level">A1 · Health</div>
+          <div class="sc-card-sample">"Ich habe seit zwei Tagen Kopfschmerzen."</div>
         </div>
-        <div class="scenario-card reveal reveal-delay-3" onclick="launchScenario('a2_flat')">
-          <span class="sc-emoji">🏠</span>
-          <div class="sc-title">Renting a Flat</div>
-          <div class="sc-level">A2 · Housing</div>
-          <div class="sc-sample">"Wie hoch ist die Kaution für die Wohnung?"</div>
+        <div class="sc-card" onclick="launchScenario('a1_hotel')">
+          <span class="sc-card-emoji">🏨</span>
+          <div class="sc-card-title">Hotel Check-in</div>
+          <div class="sc-card-level">A1 · Travel</div>
+          <div class="sc-card-sample">"Haben Sie ein Zimmer für zwei Nächte?"</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a2_flat')">
+          <span class="sc-card-emoji">🏠</span>
+          <div class="sc-card-title">Renting a Flat</div>
+          <div class="sc-card-level">A2 · Housing</div>
+          <div class="sc-card-sample">"Wie hoch ist die Kaution für die Wohnung?"</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a1_cafe')">
+          <span class="sc-card-emoji">☕</span>
+          <div class="sc-card-title">At the Café</div>
+          <div class="sc-card-level">A1 · Daily Life</div>
+          <div class="sc-card-sample">"Ich möchte einen Kaffee und ein Stück Kuchen."</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a2_bank')">
+          <span class="sc-card-emoji">🏦</span>
+          <div class="sc-card-title">Opening a Bank Account</div>
+          <div class="sc-card-level">A2 · Finance</div>
+          <div class="sc-card-sample">"Ich möchte ein Konto eröffnen."</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a1_introduce')">
+          <span class="sc-card-emoji">👋</span>
+          <div class="sc-card-title">Introducing Yourself</div>
+          <div class="sc-card-level">A1 · Social</div>
+          <div class="sc-card-sample">"Ich komme aus Indien und lerne seit drei Monaten Deutsch."</div>
+        </div>
+        <!-- Mirror set for infinite scroll -->
+        <div class="sc-card" onclick="launchScenario('a1_shop')">
+          <span class="sc-card-emoji">🛒</span>
+          <div class="sc-card-title">At the Supermarket</div>
+          <div class="sc-card-level">A1 · Daily Life</div>
+          <div class="sc-card-sample">"Entschuldigung, wo finde ich die Milch?"</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a2_job')">
+          <span class="sc-card-emoji">💼</span>
+          <div class="sc-card-title">Job Interview</div>
+          <div class="sc-card-level">A2 · Work</div>
+          <div class="sc-card-sample">"Ich habe drei Jahre Erfahrung als..."</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a1_doctor')">
+          <span class="sc-card-emoji">🏥</span>
+          <div class="sc-card-title">At the Doctor</div>
+          <div class="sc-card-level">A1 · Health</div>
+          <div class="sc-card-sample">"Ich habe seit zwei Tagen Kopfschmerzen."</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a1_hotel')">
+          <span class="sc-card-emoji">🏨</span>
+          <div class="sc-card-title">Hotel Check-in</div>
+          <div class="sc-card-level">A1 · Travel</div>
+          <div class="sc-card-sample">"Haben Sie ein Zimmer für zwei Nächte?"</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a2_flat')">
+          <span class="sc-card-emoji">🏠</span>
+          <div class="sc-card-title">Renting a Flat</div>
+          <div class="sc-card-level">A2 · Housing</div>
+          <div class="sc-card-sample">"Wie hoch ist die Kaution für die Wohnung?"</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a1_cafe')">
+          <span class="sc-card-emoji">☕</span>
+          <div class="sc-card-title">At the Café</div>
+          <div class="sc-card-level">A1 · Daily Life</div>
+          <div class="sc-card-sample">"Ich möchte einen Kaffee und ein Stück Kuchen."</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a2_bank')">
+          <span class="sc-card-emoji">🏦</span>
+          <div class="sc-card-title">Opening a Bank Account</div>
+          <div class="sc-card-level">A2 · Finance</div>
+          <div class="sc-card-sample">"Ich möchte ein Konto eröffnen."</div>
+        </div>
+        <div class="sc-card" onclick="launchScenario('a1_introduce')">
+          <span class="sc-card-emoji">👋</span>
+          <div class="sc-card-title">Introducing Yourself</div>
+          <div class="sc-card-level">A1 · Social</div>
+          <div class="sc-card-sample">"Ich komme aus Indien und lerne seit drei Monaten Deutsch."</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SCENE 5: PRODUCT REVEAL -->
-  <section class="scene-product">
-    <div class="scene-product-inner">
-      <div class="product-eyebrow reveal">The Interface</div>
-      <h2 class="product-title reveal reveal-delay-1">Everything you need.<br>Nothing you don't.</h2>
-      <p class="product-sub reveal reveal-delay-2">Speak. Listen. Get corrected. Practice again. The interface disappears so language can be the focus.</p>
-      <div class="interface-mockup reveal reveal-delay-3">
-        <div class="mockup-bar">
-          <div class="mockup-bar-left">
-            <span class="mockup-title">Job Interview · A2</span>
-          </div>
-          <div class="mockup-status">
-            <div class="mockup-dot"></div>
-            <span class="mockup-status-text">Listening</span>
-          </div>
+  <!-- SCENE 5: NUMBERS — Big truth -->
+  <section class="scene-numbers" id="scene-numbers">
+    <div class="scene-numbers-inner">
+      <span class="numbers-eyebrow reveal">What AURA gives you</span>
+      <div class="numbers-grid">
+        <div class="number-item reveal" data-count="16" data-suffix="">
+          <span class="number-val"><span class="num-count">0</span></span>
+          <span class="number-unit">Scenarios</span>
+          <p class="number-desc">Real situations — supermarket, doctor, job interview, bank, hotel — at A1 and A2 level.</p>
         </div>
-        <div class="mockup-body">
-          <div class="mockup-msgs">
-            <div class="mockup-sample-msg">
-              <div class="mockup-aura-bubble">
-                <span class="de-text">Warum möchten Sie bei uns arbeiten?</span>
-              </div>
-            </div>
-            <div class="mockup-sample-msg">
-              <div class="mockup-user-bubble">Ich möchte meine Deutschkenntnisse verbessern und neue Erfahrungen sammeln.</div>
-            </div>
-          </div>
+        <div class="number-item reveal reveal-delay-1" data-count="3" data-suffix="s">
+          <span class="number-val"><span class="num-count">0</span><span class="num-suffix">s</span></span>
+          <span class="number-unit">Response time</span>
+          <p class="number-desc">AURA hears you and speaks back in under 3 seconds. Like a real conversation, not a quiz.</p>
         </div>
-        <div class="mockup-footer">
-          <div class="mockup-mic-ring">🎙</div>
-          <div class="mockup-input-fake"></div>
+        <div class="number-item reveal reveal-delay-2" data-count="2" data-suffix="">
+          <span class="number-val"><span class="num-count">0</span></span>
+          <span class="number-unit">Free to start</span>
+          <p class="number-desc">2 full conversations free for every account. No card. No install. Just open and speak.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SCENE 6: BENEFITS -->
-  <section class="scene-benefits">
-    <div class="scene-benefits-inner">
-      <div class="benefits-header reveal">
-        <h2 class="benefits-title">Practice, not<br><em>performance.</em></h2>
-      </div>
-      <div class="benefits-list">
-        <div class="benefit-row reveal">
-          <span class="benefit-num">01</span>
-          <span class="benefit-text"><strong>Real-time speaking practice</strong> — not reading, not writing. Actual conversation, live.</span>
-        </div>
-        <div class="benefit-row reveal reveal-delay-1">
-          <span class="benefit-num">02</span>
-          <span class="benefit-text"><strong>In your language</strong> — feedback in Gujarati, Hindi, or English. German, always German-sounding.</span>
-        </div>
-        <div class="benefit-row reveal reveal-delay-1">
-          <span class="benefit-num">03</span>
-          <span class="benefit-text"><strong>Instant corrections</strong> — grammar, articles, verb order. Corrected live, maximum 2 times per mistake.</span>
-        </div>
-        <div class="benefit-row reveal reveal-delay-2">
-          <span class="benefit-num">04</span>
-          <span class="benefit-text"><strong>Real-life scenarios</strong> — 16 situations from A1 to A2 covering daily, work, health, housing.</span>
-        </div>
-        <div class="benefit-row reveal reveal-delay-2">
-          <span class="benefit-num">05</span>
-          <span class="benefit-text"><strong>Goethe exam ready</strong> — scenarios designed around the A1 and A2 speaking tests.</span>
-        </div>
-        <div class="benefit-row reveal reveal-delay-3">
-          <span class="benefit-num">06</span>
-          <span class="benefit-text"><strong>Works in your browser</strong> — no app, no install. Just open and speak.</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SCENE 7: CTA -->
-  <section class="scene-cta" id="scene-cta">
-    <div class="cta-inner">
-      <p class="cta-pretext reveal">Begin today</p>
-      <h2 class="cta-headline reveal reveal-delay-1">Start speaking<br><em>German.</em></h2>
-      <p class="cta-sub reveal reveal-delay-2">2 free conversations on every account. No credit card. No download.</p>
-      <button class="cta-btn reveal reveal-delay-3" onclick="enterSpeakingInterface()">
-        Open AURA
-        <span>→</span>
-      </button>
-      <div id="trial-counter-wrap" class="reveal reveal-delay-4">
-        <span class="trial-text" id="trial-counter-text">✦ Loading...</span>
-      </div>
-      <p class="cta-small reveal reveal-delay-4">Already have German Made Easy? Your course includes AURA access.</p>
+  <!-- SCENE 6: TRUTH STATEMENT -->
+  <section class="scene-truth" id="scene-truth">
+    <div class="truth-inner">
+      <p class="truth-statement reveal">
+        <em>The gap between knowing German<br>and speaking German</em><br>
+        is not a knowledge gap.<br>
+        It's a <em>practice gap.</em>
+      </p>
+      <div class="truth-attribution reveal reveal-delay-2">— AURA closes it.</div>
     </div>
   </section>
 
@@ -1782,31 +1970,202 @@ let silenceTimer=null, silenceCountdownInterval=null;
 const SILENCE_MS=30000;
 let sessionPaused=false, lastUserSpeechTime=null;
 
-// ── HOMEPAGE SCROLL ANIMATION ─────────────────
-function initScrollReveal() {
-  const els = document.querySelectorAll('.reveal');
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
-  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-  els.forEach(el => obs.observe(el));
+// ═══════════════════════════════════════════════════════
+// HOMEPAGE ANIMATION SYSTEMS
+// ═══════════════════════════════════════════════════════
+
+// ── SYSTEM 1: Hero letter magnetic cursor ────────────────
+function initHeroLetters() {
+  const letters = document.querySelectorAll('.hero-letter');
+  const cursor  = document.getElementById('hero-cursor');
+  const hero    = document.querySelector('.scene-intro');
+  if (!hero || !cursor) return;
+
+  // After entry animations finish, switch to breathe mode
+  setTimeout(() => {
+    letters.forEach(l => {
+      l.classList.add('settled');
+      l.style.animation = ''; // remove the entry animation so breathe takes over
+    });
+    // Re-add breathe by toggling class
+    setTimeout(() => {
+      letters.forEach(l => l.classList.add('settled'));
+    }, 50);
+  }, 2000);
+
+  // Custom cursor follows mouse
+  let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+  let cursorActive = false;
+
+  hero.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX; mouseY = e.clientY;
+    if (!cursorActive) { cursor.classList.add('active'); cursorActive = true; }
+  }, { passive: true });
+  hero.addEventListener('mouseleave', () => {
+    cursor.classList.remove('active', 'hover'); cursorActive = false;
+  });
+
+  // Smooth cursor follow
+  function animateCursor() {
+    cursorX += (mouseX - cursorX) * 0.12;
+    cursorY += (mouseY - cursorY) * 0.12;
+    cursor.style.left = cursorX + 'px';
+    cursor.style.top  = cursorY + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // Magnetic pull — letters move toward cursor when nearby
+  hero.addEventListener('mousemove', (e) => {
+    const rect = hero.getBoundingClientRect();
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    let onLetter = false;
+
+    letters.forEach(letter => {
+      const lr = letter.getBoundingClientRect();
+      const lx = lr.left + lr.width/2 - rect.left;
+      const ly = lr.top  + lr.height/2 - rect.top;
+      const dx = cx - lx, dy = cy - ly;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const maxDist = 180;
+
+      if (dist < maxDist) {
+        onLetter = true;
+        const force = (1 - dist/maxDist) * 18;
+        const nx = (dx/dist) * force;
+        const ny = (dy/dist) * force;
+        // Only apply if not in hover state (letter:hover CSS handles the full hover)
+        if (!letter.matches(':hover')) {
+          letter.style.transform = `translate(${nx}px, ${ny}px)`;
+          letter.style.transition = 'transform 0.3s cubic-bezier(0.16,1,0.3,1)';
+        }
+      } else {
+        if (!letter.matches(':hover')) {
+          letter.style.transform = '';
+          letter.style.transition = 'transform 0.6s cubic-bezier(0.16,1,0.3,1)';
+        }
+      }
+    });
+    cursor.classList.toggle('hover', onLetter);
+  }, { passive: true });
+
+  // Reset on leave
+  hero.addEventListener('mouseleave', () => {
+    letters.forEach(l => { l.style.transform = ''; });
+  });
 }
 
-// ── DEMO CHAT ANIMATION ──────────────────────
-function initDemoChat() {
-  const msgs = ['dm1','dm2','dm3','dm4','dm5'];
-  const demoSection = document.querySelector('.scene-demo');
-  const obs = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) {
+// ── SYSTEM 2: Concept word-by-word illumination ──────────
+function initConceptSection() {
+  const section = document.querySelector('.scene-concept');
+  const words   = document.querySelectorAll('.cw');
+  const period  = document.querySelector('.concept-period');
+  const sub     = document.querySelector('.concept-sub');
+  if (!section) return;
+
+  let triggered = false;
+  const obs = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting && !triggered) {
+      triggered = true;
+      obs.unobserve(section);
+
+      // Add sweep light
+      section.classList.add('sweep-active');
+
+      // Light each word one by one
+      words.forEach((word, i) => {
+        setTimeout(() => {
+          word.classList.add('lit');
+          // On the period word, trigger the period pulse
+          if (word.textContent.includes('.') || (period && i === 1)) {
+            setTimeout(() => { if(period) period.classList.add('lit'); }, 200);
+          }
+        }, i * 200);
+      });
+
+      // Sub text after all words
+      setTimeout(() => {
+        if(sub) sub.classList.add('lit');
+      }, words.length * 200 + 400);
+    }
+  }, { threshold: 0.4 });
+  obs.observe(section);
+}
+
+// ── SYSTEM 3: Demo terminal typewriter messages ──────────
+function initDemoTerminal() {
+  const section = document.querySelector('.scene-demo');
+  const msgs    = ['tm1','tm2','tm3','tm4','tm5'];
+  const listeningEl = document.getElementById('demo-listening');
+  if (!section) return;
+
+  let triggered = false;
+  const obs = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting && !triggered) {
+      triggered = true;
+      obs.unobserve(section);
+
       msgs.forEach((id, i) => {
         setTimeout(() => {
           const el = document.getElementById(id);
-          if (el) el.classList.add('shown');
-        }, i * 900);
+          if (el) el.classList.add('reveal-msg');
+        }, i * 1100);
       });
-      obs.unobserve(demoSection);
+
+      // Show listening indicator at the end
+      setTimeout(() => {
+        if(listeningEl) listeningEl.classList.add('show');
+      }, msgs.length * 1100 + 200);
     }
   }, { threshold: 0.3 });
-  if (demoSection) obs.observe(demoSection);
+  obs.observe(section);
+}
+
+// ── SYSTEM 4: Number counting animation ─────────────────
+function initNumberCounters() {
+  const items = document.querySelectorAll('.number-item');
+  if (!items.length) return;
+
+  items.forEach(item => {
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        item.classList.add('counted');
+        obs.unobserve(item);
+
+        const target = parseInt(item.dataset.count || '0', 10);
+        const countEl = item.querySelector('.num-count');
+        if (!countEl) return;
+
+        let start = 0;
+        const duration = 1400;
+        const startTime = performance.now();
+
+        function tick(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // Easing: ease out cubic
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = Math.round(eased * target);
+          countEl.textContent = current;
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+    }, { threshold: 0.5 });
+    obs.observe(item);
+  });
+}
+
+// ── SYSTEM 5: Generic scroll reveal ────────────────────
+function initScrollReveal() {
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  els.forEach(el => obs.observe(el));
 }
 
 // ── FIREBASE AUTH ─────────────────────────────
@@ -1837,7 +2196,10 @@ function showApp() {
   updateTrialBadge();
   onScenarioChange();
   initScrollReveal();
-  initDemoChat();
+  initHeroLetters();
+  initConceptSection();
+  initDemoTerminal();
+  initNumberCounters();
 }
 
 function showTrialLimitPopup() { document.getElementById('trial-limit-modal').classList.add('open'); }
